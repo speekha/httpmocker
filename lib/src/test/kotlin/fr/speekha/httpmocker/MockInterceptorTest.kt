@@ -1,9 +1,6 @@
 package fr.speekha.httpmocker
 
-import okhttp3.Headers
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
@@ -30,7 +27,7 @@ class MockInterceptorTest {
     fun `should not interfere with requests when disabled`() {
         enqueueServerResponse(200, "body")
 
-        val response = testRequest(mockServerBaseUrl)
+        val response = getRequest(mockServerBaseUrl)
 
         assertResponseCode(response, 200, "OK")
         assertEquals("body", response.body()?.string())
@@ -40,7 +37,7 @@ class MockInterceptorTest {
     fun `should return a 404 error when response is not found`() {
         interceptor.enabled = true
 
-        val response = testRequest("$mockServerBaseUrl/unknown")
+        val response = getRequest("$mockServerBaseUrl/unknown")
 
         assertResponseCode(response, 404, "Not Found")
     }
@@ -49,7 +46,7 @@ class MockInterceptorTest {
     fun `should return a 200 when response is found`() {
         interceptor.enabled = true
 
-        val response = testRequest("$mockServerBaseUrl/request")
+        val response = getRequest("$mockServerBaseUrl/request")
 
         assertResponseCode(response, 200, "OK")
     }
@@ -58,7 +55,7 @@ class MockInterceptorTest {
     fun `should return a predefined response body from file`() {
         interceptor.enabled = true
 
-        val response = testRequest("$mockServerBaseUrl/request")
+        val response = getRequest("$mockServerBaseUrl/request")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("simple body", response.body()?.string())
@@ -68,7 +65,7 @@ class MockInterceptorTest {
     fun `should return proper headers`() {
         interceptor.enabled = true
 
-        val response = testRequest("$mockServerBaseUrl/request")
+        val response = getRequest("$mockServerBaseUrl/request")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("simple header", response.header("testHeader"))
@@ -78,7 +75,7 @@ class MockInterceptorTest {
     fun `should handle redirects`() {
         interceptor.enabled = true
 
-        val response = testRequest("$mockServerBaseUrl/redirect")
+        val response = getRequest("$mockServerBaseUrl/redirect")
 
         assertResponseCode(response, 302, "Found")
         assertEquals("http://www.google.com", response.header("Location"))
@@ -88,7 +85,7 @@ class MockInterceptorTest {
     fun `should handle media type`() {
         interceptor.enabled = true
 
-        val response = testRequest("$mockServerBaseUrl/mediatype")
+        val response = getRequest("$mockServerBaseUrl/mediatype")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("application", response.body()?.contentType()?.type())
@@ -99,8 +96,8 @@ class MockInterceptorTest {
     fun `should select response based on query params`() {
         interceptor.enabled = true
 
-        val param1 = testRequest("$mockServerBaseUrl/query_param?param=1").body()?.string()
-        val param2 = testRequest("$mockServerBaseUrl/query_param?param=2").body()?.string()
+        val param1 = getRequest("$mockServerBaseUrl/query_param?param=1").body()?.string()
+        val param2 = getRequest("$mockServerBaseUrl/query_param?param=2").body()?.string()
 
         assertEquals("param A", param1)
         assertEquals("param B", param2)
@@ -110,8 +107,8 @@ class MockInterceptorTest {
     fun `should select response based on headers`() {
         interceptor.enabled = true
 
-        val param1 = testRequest("$mockServerBaseUrl/headers").body()?.string()
-        val param2 = testRequest(
+        val param1 = getRequest("$mockServerBaseUrl/headers").body()?.string()
+        val param2 = getRequest(
             "$mockServerBaseUrl/headers",
             listOf(
                 "header1" to "1",
@@ -123,6 +120,25 @@ class MockInterceptorTest {
         assertEquals("no header", param1)
         assertEquals("with headers", param2)
     }
+
+    @Test
+    fun `should take http method into account`() {
+        interceptor.enabled = true
+
+        val get = getRequest("$mockServerBaseUrl/method").body()?.string()
+        val post = postRequest("$mockServerBaseUrl/method", "POST","").body()?.string()
+        val put = postRequest("$mockServerBaseUrl/method", "PUT","").body()?.string()
+        val delete = postRequest("$mockServerBaseUrl/method", "DELETE","").body()?.string()
+
+        assertEquals("get", get)
+        assertEquals("post", post)
+        assertEquals("put", put)
+        assertEquals("delete", delete)
+    }
+
+    // body-file
+
+    // filing policy
 
     private fun assertResponseCode(response: Response, code: Int, message: String) {
         assertEquals(code, response.code())
@@ -137,9 +153,18 @@ class MockInterceptorTest {
         server.enqueue(serverResponse)
     }
 
-    private fun testRequest(url: String, headers: List<Pair<String, String>> = emptyList()): Response {
+    private fun getRequest(url: String, headers: List<Pair<String, String>> = emptyList()): Response {
         val request = Request.Builder()
             .url(url)
+            .headers(Headers.of(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
+            .build()
+        return client.newCall(request).execute()
+    }
+
+    private fun postRequest(url: String, method:String, body:String,  headers: List<Pair<String, String>> = emptyList()): Response {
+        val request = Request.Builder()
+            .url(url)
+            .method(method, RequestBody.create(MediaType.parse("text/plain"), body))
             .headers(Headers.of(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
             .build()
         return client.newCall(request).execute()

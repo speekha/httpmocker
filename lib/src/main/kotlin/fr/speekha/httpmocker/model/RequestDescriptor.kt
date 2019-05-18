@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 data class RequestDescriptor
 @JsonCreator constructor(
 
+    @JsonProperty("method")
+    val method: String? = null,
+
     @JsonProperty("headers")
     @JsonDeserialize(using = HeadersDeserializer::class)
     val headers: List<Header> = emptyList(),
