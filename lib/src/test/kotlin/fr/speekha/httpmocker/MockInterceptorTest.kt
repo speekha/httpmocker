@@ -111,7 +111,14 @@ class MockInterceptorTest {
         interceptor.enabled = true
 
         val param1 = testRequest("$mockServerBaseUrl/headers").body()?.string()
-        val param2 = testRequest("$mockServerBaseUrl/headers", listOf("header1" to "1", "header2" to "2")).body()?.string()
+        val param2 = testRequest(
+            "$mockServerBaseUrl/headers",
+            listOf(
+                "header1" to "1",
+                "header1" to "2",
+                "header2" to "3"
+            )
+        ).body()?.string()
 
         assertEquals("no header", param1)
         assertEquals("with headers", param2)

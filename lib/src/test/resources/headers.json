@@ -3,7 +3,8 @@
     "request": {
       "headers": {
         "header1": "1",
-        "header2": "2"
+        "header1": "2",
+        "header2": "3"
       }
     },
     "response": {
