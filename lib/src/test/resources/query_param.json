@@ -1,0 +1,22 @@
+[
+  {
+    "request": {
+      "params": {
+        "param": "1"
+      }
+    },
+    "response": {
+      "body": "param A"
+    }
+  },
+  {
+    "request": {
+      "params": {
+        "param": "2"
+      }
+    },
+    "response": {
+      "body": "param B"
+    }
+  }
+]
