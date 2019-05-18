@@ -10,7 +10,10 @@ import okhttp3.*
 import java.io.InputStream
 
 class MockResponseInterceptor(
-    val openFile: (String) -> InputStream? = { javaClass.classLoader.getResourceAsStream(it) }
+    val openFile: (String) -> InputStream? = {
+        @Suppress("JAVA_CLASS_ON_COMPANION")
+        javaClass.classLoader.getResourceAsStream(it)
+    }
 ) : Interceptor {
 
     var enabled: Boolean = false
@@ -55,6 +58,7 @@ class MockResponseInterceptor(
         list.firstOrNull { it.request.match(request) }?.response
 
     private fun RequestDescriptor.match(request: Request): Boolean =
+        (method?.let { it.toUpperCase() == request.method()} ?: true) &&
         headers.all { request.headers(it.name).contains(it.value) } &&
         params.all { request.url().queryParameter(it.key) == it.value }
 
