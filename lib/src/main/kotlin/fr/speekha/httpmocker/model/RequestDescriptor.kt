@@ -16,6 +16,9 @@ data class RequestDescriptor
     val headers: List<Header> = emptyList(),
 
     @JsonProperty("params")
-    val params: Map<String, String> = emptyMap()
+    val params: Map<String, String> = emptyMap(),
+
+    @JsonProperty("body")
+    val body: String? = null
 
 )
