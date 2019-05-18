@@ -55,7 +55,7 @@ class MockResponseInterceptor(
         list.firstOrNull { it.request.match(request) }?.response
 
     private fun RequestDescriptor.match(request: Request): Boolean =
-        headers.all { request.header(it.name) == it.value } &&
+        headers.all { request.headers(it.name).contains(it.value) } &&
         params.all { request.url().queryParameter(it.key) == it.value }
 
     private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: error("Unknown error code")
