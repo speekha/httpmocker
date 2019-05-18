@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 data class ResponseDescriptor
 @JsonCreator constructor(
 
+    @JsonProperty("delay")
+    val delay: Long = 0,
+
     @JsonProperty("code")
     val code: Int = 200,
 
@@ -18,5 +21,8 @@ data class ResponseDescriptor
     val headers: List<Header> = emptyList(),
 
     @JsonProperty("body")
-    val body: String = ""
+    val body: String = "",
+
+    @JsonProperty("body-file")
+    val bodyFile: String? = null
 )

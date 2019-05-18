@@ -7,14 +7,15 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.*
+import okio.Buffer
 import java.io.InputStream
+import java.nio.charset.Charset
 
 class MockResponseInterceptor(
-    val openFile: (String) -> InputStream? = {
-        @Suppress("JAVA_CLASS_ON_COMPANION")
-        javaClass.classLoader.getResourceAsStream(it)
-    }
+    val openFile: (String) -> InputStream?
 ) : Interceptor {
+
+    var delay: Long = 0
 
     var enabled: Boolean = false
 
@@ -22,7 +23,12 @@ class MockResponseInterceptor(
 
     override fun intercept(chain: Interceptor.Chain): Response = if (enabled) {
         val request = chain.request()
-        buildResponse(request, loadResponse(request))
+        val response = loadResponse(request)
+        when {
+            response.delay > 0 -> Thread.sleep(response.delay)
+            delay > 0 -> Thread.sleep(delay)
+        }
+        buildResponse(request, response)
     } else {
         chain.proceed(chain.request())
     }
@@ -32,7 +38,7 @@ class MockResponseInterceptor(
         .protocol(Protocol.HTTP_1_1)
         .code(response.code)
         .message(messageForHttpCode(response.code))
-        .body(ResponseBody.create(MediaType.parse(response.mediaType), response.body))
+        .body(loadBody(response))
         .apply {
             response.headers.forEach {
                 header(it.name, it.value)
@@ -40,13 +46,20 @@ class MockResponseInterceptor(
         }
         .build()
 
-    private fun loadResponse(request: Request): ResponseDescriptor {
+    private fun loadBody(response: ResponseDescriptor) =
+        ResponseBody.create(MediaType.parse(response.mediaType), response.bodyFile?.let {
+            openFile(it)?.readBytes()
+        } ?: response.body.toByteArray(Charset.forName("UTF-8")))
+
+    private fun loadResponse(request: Request): ResponseDescriptor = try {
         val url = request.url()
         val path = url.encodedPath() + ".json"
-        return openFile(path.drop(1))?.let { stream ->
+        openFile(path.drop(1))?.let { stream ->
             val list = mapper.readValue<List<Matcher>>(stream, jacksonTypeRef<List<Matcher>>())
             matchRequest(request, list)
         } ?: responseNotFound()
+    } catch (e: Throwable) {
+        responseNotFound()
     }
 
     private fun responseNotFound() = ResponseDescriptor(
@@ -58,9 +71,19 @@ class MockResponseInterceptor(
         list.firstOrNull { it.request.match(request) }?.response
 
     private fun RequestDescriptor.match(request: Request): Boolean =
-        (method?.let { it.toUpperCase() == request.method()} ?: true) &&
-        headers.all { request.headers(it.name).contains(it.value) } &&
-        params.all { request.url().queryParameter(it.key) == it.value }
+        (method?.let { it.toUpperCase() == request.method() } ?: true) &&
+                headers.all { request.headers(it.name).contains(it.value) } &&
+                params.all { request.url().queryParameter(it.key) == it.value } &&
+                matchRequestBody(request)
+
+    private fun RequestDescriptor.matchRequestBody(request: Request): Boolean {
+        return body?.let { bodyPattern ->
+            val sink = Buffer()
+            request.body()?.writeTo(sink)
+            val requestBody = sink.inputStream().bufferedReader().use { reader -> reader.readText() }
+            Regex(bodyPattern).matches(requestBody)
+        } ?: true
+    }
 
     private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: error("Unknown error code")
 

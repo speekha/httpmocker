@@ -1,0 +1,10 @@
+[
+  {
+    "response": {
+      "headers": {
+        "testHeader": "simple header"
+      },
+      "body-file": "body_content.txt"
+    }
+  }
+]
