@@ -2,7 +2,6 @@ package fr.speekha.httpmocker.demo.ui
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,19 +23,22 @@ class RepoAdapter(
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int = repos?.let { it.size } ?: 1
+    override fun getItemCount(): Int = repos?.size ?: 1
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) = with(viewHolder) {
         val list = repos
         if (list != null) {
-            textView.text = list[position].name
+            val repo = list[position]
+            repoName.text = repo.name
+            topContributor.text = repo.topContributor ?: "Error retrieving contributor"
         } else {
-            textView.text = errorMessage ?: "No result to display"
+            repoName.text = errorMessage ?: "No result to display"
         }
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textView: TextView = itemView.findViewById(R.id.text)
+        val repoName: TextView = itemView.findViewById(R.id.repoName)
+        val topContributor: TextView = itemView.findViewById(R.id.topContributor)
     }
 
 }

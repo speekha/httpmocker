@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         radioState.setOnCheckedChangeListener { _, checkedId ->
             presenter.setMode(when(checkedId) {
                 R.id.stateEnabled -> 1
+                R.id.stateMixed -> 2
                 else -> 0
             })
         }

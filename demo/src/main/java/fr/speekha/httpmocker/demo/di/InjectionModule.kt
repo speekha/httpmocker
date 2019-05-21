@@ -6,6 +6,7 @@ import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainContract
 import fr.speekha.httpmocker.demo.ui.MainPresenter
+import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -15,7 +16,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor {
+        MockResponseInterceptor(MirrorPathPolicy()) {
             get<Context>().assets.open(it)
         }
     }
