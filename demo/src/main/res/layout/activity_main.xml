@@ -33,6 +33,10 @@
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:text="Enabled"/>
+        <RadioButton android:id="@+id/stateMixed"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Mixed"/>
     </RadioGroup>
 
     <Button android:id="@+id/btnCall"

@@ -1,7 +1,7 @@
 package fr.speekha.httpmocker.demo.ui
 
+import android.util.Log
 import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import kotlinx.coroutines.*
 
@@ -16,23 +16,35 @@ class MainPresenter(
     override fun callService() {
         launch {
             try {
-                val repos = loadReposAsync()
-                view.setResult(repos.await())
+                val org = "kotlin"
+                val repos = loadReposAsync(org)
+                    .await()
+                    .map {
+                        val contributor = loadTopContributor(org, it.name)?.firstOrNull()
+                        it.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
+                    }
+                view.setResult(repos)
             } catch (e: Throwable) {
                 view.setError(e.message)
             }
         }
     }
 
-    private suspend fun loadReposAsync(): Deferred<List<Repo>> = withContext(Dispatchers.IO) {
-        apiService.listOrgRepos("kotlin")
+    private suspend fun loadReposAsync(org: String) = withContext(Dispatchers.IO) {
+        apiService.listRepositoriesForOrganisation(org)
+    }
+
+    private suspend fun loadTopContributor(org: String, repo: String) = withContext(Dispatchers.IO) {
+        try {
+            apiService.listContributorsForRepository(org, repo).await()
+        } catch (e: Throwable) {
+            Log.e("Presenter", e.message, e)
+            null
+        }
     }
 
     override fun setMode(mode: Int) {
-        when(mode) {
-            1 -> mocker.enabled = true
-            else -> mocker.enabled = false
-        }
+        mocker.mode = MockResponseInterceptor.MODE.values()[mode]
     }
 
     override fun stop() {

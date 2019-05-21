@@ -1,10 +1,12 @@
 package fr.speekha.httpmocker
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
-import okhttp3.*
+import com.nhaarman.mockitokotlin2.*
+import fr.speekha.httpmocker.MockResponseInterceptor.MODE.ENABLED
+import fr.speekha.httpmocker.MockResponseInterceptor.MODE.MIXED
+import fr.speekha.httpmocker.policies.FilingPolicy
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
@@ -22,10 +24,14 @@ class MockInterceptorTest {
         get() = "http://127.0.0.1:${server.port}"
 
     private val loadingLambda: (String) -> InputStream? = mock {
-        on { invoke(any()) } doAnswer {  javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
+        on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
     }
 
-    private val interceptor = MockResponseInterceptor {
+    private val filingPolicy: FilingPolicy = mock {
+        on { getPath(any()) } doAnswer { (it.getArgument<Request>(0).url().encodedPath() + ".json").drop(1) }
+    }
+
+    private val interceptor = MockResponseInterceptor(filingPolicy) {
         loadingLambda(it)
     }
 
@@ -40,7 +46,7 @@ class MockInterceptorTest {
     fun `should not interfere with requests when disabled`() {
         enqueueServerResponse(200, "body")
 
-        val response = getRequest("")
+        val response = executeGetRequest("")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("body", response.body()?.string())
@@ -48,40 +54,51 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a 404 error when response is not found`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/unknown")
+        val response = executeGetRequest("/unknown")
 
         assertResponseCode(response, 404, "Not Found")
     }
 
     @Test
     fun `should return a 404 error when an exception occurs`() {
-
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/unknown")
+        val response = executeGetRequest("/unknown")
+
+        assertResponseCode(response, 404, "Not Found")
+    }
+
+    @Test
+    fun `should return a 404 error when no response matches the criteria`() {
+        whenever(loadingLambda.invoke(any())) doAnswer {
+            error("Loading error")
+        }
+        interceptor.mode = ENABLED
+
+        val response = executeGetRequest("/no_match")
 
         assertResponseCode(response, 404, "Not Found")
     }
 
     @Test
     fun `should return a 200 when response is found`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/request")
+        val response = executeGetRequest("/request")
 
         assertResponseCode(response, 200, "OK")
     }
 
     @Test
     fun `should return a predefined response body from json descriptor`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/request")
+        val response = executeGetRequest("/request")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("simple body", response.body()?.string())
@@ -89,9 +106,19 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a predefined response body from separate file`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/body_file")
+        val response = executeGetRequest("/body_file")
+
+        assertResponseCode(response, 200, "OK")
+        assertEquals("separate body file", response.body()?.string())
+    }
+
+    @Test
+    fun `should return a predefined response body from separate file in the same folder`() {
+        interceptor.mode = ENABLED
+
+        val response = executeGetRequest("/folder/request_in_folder")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("separate body file", response.body()?.string())
@@ -99,9 +126,9 @@ class MockInterceptorTest {
 
     @Test
     fun `should return proper headers`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/request")
+        val response = executeGetRequest("/request")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("simple header", response.header("testHeader"))
@@ -109,9 +136,9 @@ class MockInterceptorTest {
 
     @Test
     fun `should handle redirects`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/redirect")
+        val response = executeGetRequest("/redirect")
 
         assertResponseCode(response, 302, "Found")
         assertEquals("http://www.google.com", response.header("Location"))
@@ -119,9 +146,9 @@ class MockInterceptorTest {
 
     @Test
     fun `should handle media type`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val response = getRequest("/mediatype")
+        val response = executeGetRequest("/mediatype")
 
         assertResponseCode(response, 200, "OK")
         assertEquals("application", response.body()?.contentType()?.type())
@@ -130,10 +157,10 @@ class MockInterceptorTest {
 
     @Test
     fun `should select response based on query params`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val param1 = getRequest("/query_param?param=1").body()?.string()
-        val param2 = getRequest("/query_param?param=2").body()?.string()
+        val param1 = executeGetRequest("/query_param?param=1").body()?.string()
+        val param2 = executeGetRequest("/query_param?param=2").body()?.string()
 
         assertEquals("param A", param1)
         assertEquals("param B", param2)
@@ -141,10 +168,10 @@ class MockInterceptorTest {
 
     @Test
     fun `should select response based on headers`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val param1 = getRequest("/headers").body()?.string()
-        val param2 = getRequest(
+        val param1 = executeGetRequest("/headers").body()?.string()
+        val param2 = executeGetRequest(
             "/headers",
             listOf(
                 "header1" to "1",
@@ -159,9 +186,9 @@ class MockInterceptorTest {
 
     @Test
     fun `should take http method into account`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
-        val get = getRequest("/method").body()?.string()
+        val get = executeGetRequest("/method").body()?.string()
         val post = executeRequest("/method", "POST", "").body()?.string()
         val put = executeRequest("/method", "PUT", "").body()?.string()
         val delete = executeRequest("/method", "DELETE", "").body()?.string()
@@ -175,7 +202,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should select response based on request body`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
         val match = executeRequest("/body_matching", "POST", "azer1zere").body()?.string()
         val noMatch = executeRequest("/body_matching", "POST", "azerzere").body()?.string()
@@ -186,11 +213,11 @@ class MockInterceptorTest {
 
     @Test
     fun `should allow to delay all responses`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
         interceptor.delay = 50
 
         val delay = measureTimeMillis {
-            getRequest("/request").body()?.string()
+            executeGetRequest("/request").body()?.string()
         }
 
         val threshold = 50
@@ -199,14 +226,14 @@ class MockInterceptorTest {
 
     @Test
     fun `should allow to delay responses based on configuration`() {
-        interceptor.enabled = true
+        interceptor.mode = ENABLED
 
         val delay = measureTimeMillis {
-            getRequest("/delay").body()?.string()
+            executeGetRequest("/delay").body()?.string()
         }
 
         val noDelay = measureTimeMillis {
-            getRequest("/request").body()?.string()
+            executeGetRequest("/request").body()?.string()
         }
 
         val threshold = 50
@@ -214,7 +241,32 @@ class MockInterceptorTest {
         assertTrue(noDelay < threshold, "Time without delay was $noDelay (> $threshold ms)")
     }
 
-    // TODO filing policy
+    @Test
+    fun `should delegate path resolutions`() {
+        interceptor.mode = ENABLED
+
+        val request = initRequest("/request")
+        client.newCall(request).execute()
+
+        verify(filingPolicy).getPath(request)
+    }
+
+    @Test
+    fun `should support mixed mode to execute request when no response is found locally`() {
+        enqueueServerResponse(200, "body")
+        interceptor.mode = MIXED
+
+        val serverResponse = executeGetRequest("")
+        val localResponse = executeGetRequest("/request")
+
+        assertResponseCode(serverResponse, 200, "OK")
+        assertEquals("body", serverResponse.body()?.string())
+        assertResponseCode(localResponse, 200, "OK")
+        assertEquals("simple body", localResponse.body()?.string())
+
+    }
+
+    // TODO recording requests
 
     private fun assertResponseCode(response: Response, code: Int, message: String) {
         assertEquals(code, response.code())
@@ -229,7 +281,7 @@ class MockInterceptorTest {
         server.enqueue(serverResponse)
     }
 
-    private fun getRequest(url: String, headers: List<Pair<String, String>> = emptyList()): Response =
+    private fun executeGetRequest(url: String, headers: List<Pair<String, String>> = emptyList()): Response =
         executeRequest(url, "GET", null, headers)
 
     private fun executeRequest(
@@ -238,13 +290,17 @@ class MockInterceptorTest {
         body: String?,
         headers: List<Pair<String, String>> = emptyList()
     ): Response {
-        val path = if (url.startsWith("/")) url.drop(1) else url
-        val request = Request.Builder()
-            .url("$mockServerBaseUrl/$path")
-            .headers(Headers.of(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
-            .method(method, body?.let { RequestBody.create(MediaType.parse("text/plain"), it) })
-            .build()
+        val request = initRequest(url, headers, method, body)
         return client.newCall(request).execute()
     }
 
+    private fun initRequest(
+        url: String,
+        headers: List<Pair<String, String>> = emptyList(),
+        method: String = "GET",
+        body: String? = null
+    ): Request {
+        val path = if (url.startsWith("/")) url.drop(1) else url
+        return buildRequest("$mockServerBaseUrl/$path", headers, method, body)
+    }
 }
