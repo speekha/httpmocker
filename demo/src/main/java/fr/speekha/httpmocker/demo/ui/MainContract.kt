@@ -7,6 +7,8 @@ interface MainContract {
     interface View {
         fun setResult(result: List<Repo>)
         fun setError(message: String?)
+        fun checkPermission()
+        fun updateStorageLabel(enabled: Boolean)
     }
 
     interface Presenter {

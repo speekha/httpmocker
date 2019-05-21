@@ -1,6 +1,7 @@
 package fr.speekha.httpmocker.demo.di
 
 import android.content.Context
+import android.os.Environment
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
@@ -18,7 +19,7 @@ val injectionModule: Module = module {
     single {
         MockResponseInterceptor(MirrorPathPolicy(), {
             get<Context>().assets.open(it)
-        }, null)
+        }, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
     }
 
     single<OkHttpClient> {

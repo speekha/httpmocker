@@ -3,10 +3,12 @@ package fr.speekha.httpmocker
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import fr.speekha.httpmocker.model.*
+import fr.speekha.httpmocker.model.Extensions
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.*
-import okio.Buffer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -79,7 +81,7 @@ class MockResponseInterceptor(
         .protocol(Protocol.HTTP_1_1)
         .code(response.code)
         .message(messageForHttpCode(response.code))
-        .body(loadBody(request, response))
+        .body(loadResponseBody(request, response))
         .apply {
             response.headers.forEach {
                 header(it.name, it.value)
@@ -89,12 +91,16 @@ class MockResponseInterceptor(
 
     private fun responseNotFound() = ResponseDescriptor(code = 404, body = "Page not found")
 
-    private fun loadBody(request: Request, response: ResponseDescriptor) =
-        ResponseBody.create(MediaType.parse(response.mediaType), response.bodyFile?.let {
-            val responsePath = filingPolicy.getPath(request)
-            val bodyPath = responsePath.substring(0, responsePath.lastIndexOf('/') + 1) + it
-            openFile(bodyPath)?.readBytes()
+    private fun loadResponseBody(request: Request, response: ResponseDescriptor) = ResponseBody.create(
+        MediaType.parse(response.mediaType), response.bodyFile?.let {
+            loadResponseBodyFromFile(request, it)
         } ?: response.body.toByteArray(Charset.forName("UTF-8")))
+
+    private fun loadResponseBodyFromFile(request: Request, it: String): ByteArray? {
+        val responsePath = filingPolicy.getPath(request)
+        val bodyPath = responsePath.substring(0, responsePath.lastIndexOf('/') + 1) + it
+        return openFile(bodyPath)?.readBytes()
+    }
 
     private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
         list.firstOrNull { it.request.match(request) }?.response
@@ -103,14 +109,7 @@ class MockResponseInterceptor(
         (method?.let { it.toUpperCase() == request.method() } ?: true) &&
                 headers.all { request.headers(it.name).contains(it.value) } &&
                 params.all { request.url().queryParameter(it.key) == it.value } &&
-                matchRequestBody(request)
-
-    private fun RequestDescriptor.matchRequestBody(request: Request): Boolean {
-        return body?.let { bodyPattern ->
-            val requestBody = request.readBody()
-            requestBody != null && Regex(bodyPattern).matches(requestBody)
-        } ?: true
-    }
+                request.matchBody(this)
 
     private fun recordCall(chain: Interceptor.Chain): Response {
         val response = proceedWithRequest(chain)
@@ -130,6 +129,7 @@ class MockResponseInterceptor(
             saveResponseBody(File(requestFile.parentFile, responseFile), body)
         }
     } catch (e: Throwable) {
+        e.printStackTrace()
     }
 
     private fun saveResponseBody(storeFile: File, body: ByteArray?) = openFile(storeFile).use {
@@ -141,7 +141,10 @@ class MockResponseInterceptor(
         val previousRecords: List<Matcher> = if (requestFile.exists())
             mapper.readValue<List<Matcher>>(requestFile, jacksonTypeRef<List<Matcher>>()).toMutableList()
         else emptyList()
-        return previousRecords + Matcher(request.toDescriptor(), response.toDescriptor(previousRecords.size))
+        return previousRecords + Matcher(
+            request.toDescriptor(),
+            response.toDescriptor(previousRecords.size, getExtension(response.body()?.contentType()))
+        )
     }
 
     private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) {
@@ -163,29 +166,6 @@ class MockResponseInterceptor(
             file.mkdir()
         }
     }
-
-    private fun Request.readBody(): String? = body()?.let {
-        val sink = Buffer()
-        it.writeTo(sink)
-        return sink.inputStream().bufferedReader().use { reader -> reader.readText() }
-    }
-
-    private fun Request.toDescriptor() = RequestDescriptor(
-        method = method(),
-        body = readBody(),
-        params = url().queryParameterNames().associate { it to (url().queryParameter(it) ?: "") },
-        headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
-    )
-
-    private fun Response.toDescriptor(duplicates: Int) = ResponseDescriptor(
-        code = code(),
-        bodyFile = request().url().pathSegments().last() + "_body_$duplicates${getExtension(body()?.contentType())}",
-        headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
-    )
-
-    private fun Response.copyResponse(body: ByteArray?): Response = newBuilder()
-        .body(ResponseBody.create(body()?.contentType(), body ?: byteArrayOf()))
-        .build()
 
     private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: error("Unknown error code")
 
