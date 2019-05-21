@@ -23,7 +23,7 @@
             app:layout_constraintLeft_toRightOf="@id/tvState"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
         <RadioButton android:id="@+id/stateDisabled"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
@@ -37,12 +37,27 @@
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:text="Mixed"/>
+        <RadioButton android:id="@+id/stateRecord"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Record"/>
     </RadioGroup>
+
+    <TextView
+            android:id="@+id/tvDirectory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Saving in device's Download directory"
+            app:layout_constraintLeft_toLeftOf="@id/radioState"
+            app:layout_constraintTop_toBottomOf="@+id/radioState"
+            android:enabled="false"
+            android:layout_margin="8dp"
+    />
 
     <Button android:id="@+id/btnCall"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/tvState"
+            app:layout_constraintTop_toBottomOf="@+id/tvDirectory"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginEnd="8dp"

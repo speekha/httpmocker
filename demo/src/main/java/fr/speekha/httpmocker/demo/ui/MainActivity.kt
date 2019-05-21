@@ -1,6 +1,10 @@
 package fr.speekha.httpmocker.demo.ui
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import fr.speekha.httpmocker.demo.R
@@ -8,8 +12,8 @@ import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
 
-class MainActivity : AppCompatActivity(), MainContract.View {
 
+class MainActivity : AppCompatActivity(), MainContract.View {
     private val presenter: MainContract.Presenter by inject()
 
     var adapter = RepoAdapter(this)
@@ -21,9 +25,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         presenter.view = this
 
         radioState.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setMode(when(checkedId) {
+            presenter.setMode(when (checkedId) {
                 R.id.stateEnabled -> 1
                 R.id.stateMixed -> 2
+                R.id.stateRecord -> 3
                 else -> 0
             })
         }
@@ -50,5 +55,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         adapter.repos = null
         adapter.errorMessage = message
         adapter.notifyDataSetChanged()
+    }
+
+    override fun checkPermission() {
+        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
+        }
+    }
+
+    override fun updateStorageLabel(enabled: Boolean) {
+        tvDirectory.isEnabled = enabled
     }
 }

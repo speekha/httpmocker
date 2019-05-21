@@ -45,6 +45,10 @@ class MainPresenter(
 
     override fun setMode(mode: Int) {
         mocker.mode = MockResponseInterceptor.MODE.values()[mode]
+        if (mocker.mode == MockResponseInterceptor.MODE.RECORD) {
+            view.checkPermission()
+        }
+        view.updateStorageLabel(mocker.mode == MockResponseInterceptor.MODE.RECORD)
     }
 
     override fun stop() {
