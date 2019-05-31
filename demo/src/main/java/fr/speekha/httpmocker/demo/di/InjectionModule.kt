@@ -16,9 +16,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor(MirrorPathPolicy()) {
+        MockResponseInterceptor(MirrorPathPolicy(), {
             get<Context>().assets.open(it)
-        }
+        }, null)
     }
 
     single<OkHttpClient> {
