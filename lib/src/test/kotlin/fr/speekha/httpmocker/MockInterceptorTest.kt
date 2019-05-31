@@ -1,8 +1,13 @@
 package fr.speekha.httpmocker
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import com.nhaarman.mockitokotlin2.*
-import fr.speekha.httpmocker.MockResponseInterceptor.MODE.ENABLED
-import fr.speekha.httpmocker.MockResponseInterceptor.MODE.MIXED
+import fr.speekha.httpmocker.MockResponseInterceptor.MODE.*
+import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,10 +15,16 @@ import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 class MockInterceptorTest {
@@ -31,11 +42,9 @@ class MockInterceptorTest {
         on { getPath(any()) } doAnswer { (it.getArgument<Request>(0).url().encodedPath() + ".json").drop(1) }
     }
 
-    private val interceptor = MockResponseInterceptor(filingPolicy) {
-        loadingLambda(it)
-    }
+    private lateinit var interceptor: MockResponseInterceptor
 
-    private val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    private lateinit var client: OkHttpClient
 
     @Before
     fun setUp() {
@@ -44,6 +53,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should not interfere with requests when disabled`() {
+        setUpInterceptor(DISABLED)
         enqueueServerResponse(200, "body")
 
         val response = executeGetRequest("")
@@ -54,7 +64,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a 404 error when response is not found`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/unknown")
 
@@ -66,7 +76,7 @@ class MockInterceptorTest {
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/unknown")
 
@@ -78,7 +88,7 @@ class MockInterceptorTest {
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/no_match")
 
@@ -87,7 +97,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a 200 when response is found`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/request")
 
@@ -96,7 +106,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a predefined response body from json descriptor`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/request")
 
@@ -106,7 +116,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a predefined response body from separate file`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/body_file")
 
@@ -116,7 +126,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should return a predefined response body from separate file in the same folder`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/folder/request_in_folder")
 
@@ -126,7 +136,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should return proper headers`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/request")
 
@@ -136,7 +146,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should handle redirects`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/redirect")
 
@@ -146,7 +156,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should handle media type`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val response = executeGetRequest("/mediatype")
 
@@ -157,7 +167,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should select response based on query params`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val param1 = executeGetRequest("/query_param?param=1").body()?.string()
         val param2 = executeGetRequest("/query_param?param=2").body()?.string()
@@ -168,7 +178,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should select response based on headers`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val param1 = executeGetRequest("/headers").body()?.string()
         val param2 = executeGetRequest(
@@ -186,7 +196,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should take http method into account`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val get = executeGetRequest("/method").body()?.string()
         val post = executeRequest("/method", "POST", "").body()?.string()
@@ -202,7 +212,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should select response based on request body`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val match = executeRequest("/body_matching", "POST", "azer1zere").body()?.string()
         val noMatch = executeRequest("/body_matching", "POST", "azerzere").body()?.string()
@@ -213,7 +223,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should allow to delay all responses`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
         interceptor.delay = 50
 
         val delay = measureTimeMillis {
@@ -226,7 +236,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should allow to delay responses based on configuration`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val delay = measureTimeMillis {
             executeGetRequest("/delay").body()?.string()
@@ -243,7 +253,7 @@ class MockInterceptorTest {
 
     @Test
     fun `should delegate path resolutions`() {
-        interceptor.mode = ENABLED
+        setUpInterceptor(ENABLED)
 
         val request = initRequest("/request")
         client.newCall(request).execute()
@@ -254,7 +264,7 @@ class MockInterceptorTest {
     @Test
     fun `should support mixed mode to execute request when no response is found locally`() {
         enqueueServerResponse(200, "body")
-        interceptor.mode = MIXED
+        setUpInterceptor(MIXED)
 
         val serverResponse = executeGetRequest("")
         val localResponse = executeGetRequest("/request")
@@ -263,20 +273,172 @@ class MockInterceptorTest {
         assertEquals("body", serverResponse.body()?.string())
         assertResponseCode(localResponse, 200, "OK")
         assertEquals("simple body", localResponse.body()?.string())
-
     }
 
-    // TODO recording requests
+    @Test
+    fun `should let requests through when recording`() {
+        enqueueServerResponse(200, "body")
+        setUpInterceptor(RECORD, SAVE_FOLDER)
+
+        val response = executeGetRequest("record/request")
+
+        assertResponseCode(response, 200, "OK")
+        assertEquals("body", response.body()?.string())
+    }
+
+    @Test
+    fun `should let requests through when recording even if saving fails`() {
+        enqueueServerResponse(200, "body")
+        setUpInterceptor(RECORD, "")
+
+        val response = executeGetRequest("record/request")
+
+        assertResponseCode(response, 200, "OK")
+        assertEquals("body", response.body()?.string())
+    }
+
+    @Test
+    fun `should store requests and responses in the proper locations when recording`() {
+        enqueueServerResponse(200, "body")
+        setUpInterceptor(RECORD, SAVE_FOLDER)
+
+        executeGetRequest("record/request")
+
+        assertFileExists("$SAVE_FOLDER/record/request.json")
+        assertFileExists("$SAVE_FOLDER/record/request_body_0")
+    }
+
+    @Test
+    fun `should store requests and responses when recording`() {
+        enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
+        setUpInterceptor(RECORD, SAVE_FOLDER)
+
+        executeRequest("request?param1=value1", "POST", "requestBody", listOf("someHeader" to "someValue"))
+
+        withFile("$SAVE_FOLDER/request.json") {
+            val result: List<Matcher> =
+                jacksonObjectMapper().readValue(it, jacksonTypeRef<List<Matcher>>())
+            val expectedResult = Matcher(
+                RequestDescriptor(
+                    method = "POST",
+                    body = "requestBody",
+                    params = mapOf("param1" to "value1"),
+                    headers = listOf(Header("someHeader", "someValue"))
+                ),
+                ResponseDescriptor(
+                    code = 200,
+                    bodyFile = "request_body_0",
+                    mediaType = "text/plain",
+                    headers = listOf(Header("Content-Length", "4"), Header("someKey", "someValue"))
+                )
+            )
+            assertEquals(listOf(expectedResult), result)
+        }
+
+        withFile("$SAVE_FOLDER/request_body_0") {
+            assertEquals("body", it.readAsString())
+        }
+    }
+
+    @Test
+    fun `should update existing descriptors when recording`() {
+        enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
+        enqueueServerResponse(200, "second body")
+        setUpInterceptor(RECORD, SAVE_FOLDER)
+
+        executeRequest("request?param1=value1", "POST", "requestBody", listOf("someHeader" to "someValue"))
+        executeGetRequest("request")
+
+        withFile("$SAVE_FOLDER/request.json") {
+            val result: List<Matcher> =
+                jacksonObjectMapper().readValue(it, jacksonTypeRef<List<Matcher>>())
+            val expectedResult = listOf(
+                Matcher(
+                    RequestDescriptor(
+                        method = "POST",
+                        body = "requestBody",
+                        params = mapOf("param1" to "value1"),
+                        headers = listOf(Header("someHeader", "someValue"))
+                    ),
+                    ResponseDescriptor(
+                        code = 200,
+                        bodyFile = "request_body_0",
+                        mediaType = "text/plain",
+                        headers = listOf(Header("Content-Length", "4"), Header("someKey", "someValue"))
+                    )
+                ),
+                Matcher(
+                    RequestDescriptor(method = "GET"),
+                    ResponseDescriptor(
+                        code = 200,
+                        bodyFile = "request_body_1",
+                        mediaType = "text/plain",
+                        headers = listOf(Header("Content-Length", "11"))
+                    )
+                )
+            )
+            assertEquals(expectedResult, result)
+        }
+
+        withFile("$SAVE_FOLDER/request_body_0") {
+            assertEquals("body", it.readAsString())
+        }
+        withFile("$SAVE_FOLDER/request_body_1") {
+            assertEquals("second body", it.readAsString())
+        }
+    }
+
+    // TODO handle file extensions?
+    // TODO null response body?
+
+
+    private fun File.readAsString() = FileInputStream(this).readAsString()
+
+    private fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }
+
+    private fun assertFileExists(path: String) = withFile(path) {
+        assertTrue(it.exists())
+    }
+
+    private fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
+
+    @AfterEach
+    fun clearFolder() {
+        val folder = File(SAVE_FOLDER)
+        if (folder.exists()) {
+            Files.walk(folder.toPath())
+                .sorted(Collections.reverseOrder<Any>())
+                .map(Path::toFile)
+                .forEach {
+                    it.delete()
+                }
+        }
+    }
+
+    private fun setUpInterceptor(
+        mode: MockResponseInterceptor.MODE,
+        rootFolder: String? = null
+    ) {
+        interceptor = MockResponseInterceptor(filingPolicy, loadingLambda, rootFolder?.let { File(it) })
+        interceptor.mode = mode
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    }
+
 
     private fun assertResponseCode(response: Response, code: Int, message: String) {
         assertEquals(code, response.code())
         assertEquals(message, response.message())
     }
 
-    private fun enqueueServerResponse(responseCode: Int, responseBody: String) {
+    private fun enqueueServerResponse(
+        responseCode: Int,
+        responseBody: String,
+        headers: List<Pair<String, String>> = listOf()
+    ) {
         val serverResponse = MockResponse().apply {
             setResponseCode(responseCode)
             setBody(responseBody)
+            headers.forEach { addHeader(it.first, it.second) }
         }
         server.enqueue(serverResponse)
     }
@@ -302,5 +464,12 @@ class MockInterceptorTest {
     ): Request {
         val path = if (url.startsWith("/")) url.drop(1) else url
         return buildRequest("$mockServerBaseUrl/$path", headers, method, body)
+    }
+
+
+    companion object {
+
+        private const val SAVE_FOLDER = "testFolder"
+
     }
 }
