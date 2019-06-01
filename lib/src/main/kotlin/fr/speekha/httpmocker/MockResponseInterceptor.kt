@@ -3,10 +3,7 @@ package fr.speekha.httpmocker
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.RequestDescriptor
-import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.model.*
 import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.*
 import okio.Buffer
@@ -44,82 +41,19 @@ class MockResponseInterceptor(
 
     private val mapper: ObjectMapper = jacksonObjectMapper()
 
+    private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
+
+    private fun loadExtensionMap(): Map<String, String> = mapper.readValue<List<Extensions>>(
+        javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes.json"),
+        jacksonTypeRef<List<Extensions>>()
+    ).associate { it.mimeType to it.extension }
+
     override fun intercept(chain: Interceptor.Chain): Response = when (mode) {
         MODE.DISABLED -> proceedWithRequest(chain)
         MODE.ENABLED -> mockResponse(chain.request()) ?: buildResponse(chain.request(), responseNotFound())
         MODE.MIXED -> mockResponse(chain.request()) ?: proceedWithRequest(chain)
-        MODE.RECORD -> recordCalls(chain)
+        MODE.RECORD -> recordCall(chain)
     }
-
-    private fun recordCalls(chain: Interceptor.Chain): Response {
-        val request = chain.request()
-        val response = proceedWithRequest(chain)
-        val body = response.body()?.bytes()
-
-        val storeFile = filingPolicy.getPath(request)
-        try {
-            saveResponseBody(storeFile, body)
-            saveRequestFile(storeFile, request, response)
-        } catch (e: Throwable) {
-        }
-
-        return response.copyResponse(body)
-    }
-
-    private fun Response.copyResponse(body: ByteArray?): Response {
-        return newBuilder()
-            .body(ResponseBody.create(body()?.contentType(), body ?: byteArrayOf()))
-            .build()
-    }
-
-    private fun saveResponseBody(storeFile: String, body: ByteArray?) {
-        val baseName = storeFile.replace(".json", "_body")
-        val responseFile: File = generateSequence(0) { it + 1 }
-            .map { File(rootFolder, "${baseName}_$it") }
-            .first { !it.exists() }
-        openFile(responseFile).use {
-            it.write(body)
-        }
-    }
-
-    private fun saveRequestFile(storeFile: String, request: Request, response: Response) {
-        val requestFile = File(rootFolder, storeFile)
-        val list: List<Matcher> = if (requestFile.exists())
-            mapper.readValue<List<Matcher>>(requestFile, jacksonTypeRef<List<Matcher>>()).toMutableList()
-        else emptyList()
-        val matcher = Matcher(request.toDescriptor(), response.toDescriptor(list.size))
-
-        openFile(requestFile).use {
-            mapper.writeValue(it, list + matcher)
-        }
-    }
-
-    private fun openFile(file: File): FileOutputStream {
-        createParent(file.parentFile)
-        return FileOutputStream(file)
-    }
-
-    private fun createParent(file: File?) {
-        if (file?.parentFile?.exists() == false) {
-            createParent(file.parentFile)
-            file.mkdir()
-        } else if (file?.exists() == false) {
-            file.mkdir()
-        }
-    }
-
-    private fun Request.toDescriptor() = RequestDescriptor(
-        method = method(),
-        body = readBody(),
-        params = url().queryParameterNames().associate { it to (url().queryParameter(it) ?: "") },
-        headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
-    )
-
-    private fun Response.toDescriptor(duplicates: Int) = ResponseDescriptor(
-        code = code(),
-        bodyFile = request().url().pathSegments().last() + "_body_$duplicates",
-        headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
-    )
 
     private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
@@ -178,13 +112,84 @@ class MockResponseInterceptor(
         } ?: true
     }
 
+    private fun recordCall(chain: Interceptor.Chain): Response {
+        val response = proceedWithRequest(chain)
+        val body = response.body()?.bytes()
+        saveFiles(chain.request(), response, body)
+        return response.copyResponse(body)
+    }
+
+    private fun saveFiles(request: Request, response: Response, body: ByteArray?) = try {
+        val storeFile = filingPolicy.getPath(request)
+        val matchers = createMatcher(storeFile, request, response)
+        val requestFile = File(rootFolder, storeFile)
+
+        saveRequestFile(requestFile, matchers)
+
+        matchers.last().response.bodyFile?.let { responseFile ->
+            saveResponseBody(File(requestFile.parentFile, responseFile), body)
+        }
+    } catch (e: Throwable) {
+    }
+
+    private fun saveResponseBody(storeFile: File, body: ByteArray?) = openFile(storeFile).use {
+        it.write(body)
+    }
+
+    private fun createMatcher(storeFile: String, request: Request, response: Response): List<Matcher> {
+        val requestFile = File(rootFolder, storeFile)
+        val previousRecords: List<Matcher> = if (requestFile.exists())
+            mapper.readValue<List<Matcher>>(requestFile, jacksonTypeRef<List<Matcher>>()).toMutableList()
+        else emptyList()
+        return previousRecords + Matcher(request.toDescriptor(), response.toDescriptor(previousRecords.size))
+    }
+
+    private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) {
+        openFile(requestFile).use {
+            mapper.writeValue(it, matchers)
+        }
+    }
+
+    private fun openFile(file: File): FileOutputStream {
+        createParent(file.parentFile)
+        return FileOutputStream(file)
+    }
+
+    private fun createParent(file: File?) {
+        if (file?.parentFile?.exists() == false) {
+            createParent(file.parentFile)
+            file.mkdir()
+        } else if (file?.exists() == false) {
+            file.mkdir()
+        }
+    }
+
     private fun Request.readBody(): String? = body()?.let {
         val sink = Buffer()
         it.writeTo(sink)
         return sink.inputStream().bufferedReader().use { reader -> reader.readText() }
     }
 
+    private fun Request.toDescriptor() = RequestDescriptor(
+        method = method(),
+        body = readBody(),
+        params = url().queryParameterNames().associate { it to (url().queryParameter(it) ?: "") },
+        headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
+    )
+
+    private fun Response.toDescriptor(duplicates: Int) = ResponseDescriptor(
+        code = code(),
+        bodyFile = request().url().pathSegments().last() + "_body_$duplicates${getExtension(body()?.contentType())}",
+        headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
+    )
+
+    private fun Response.copyResponse(body: ByteArray?): Response = newBuilder()
+        .body(ResponseBody.create(body()?.contentType(), body ?: byteArrayOf()))
+        .build()
+
     private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: error("Unknown error code")
+
+    private fun getExtension(contentType: MediaType?) = extensionMappings[contentType.toString()] ?: ".txt"
 
     companion object {
         val HTTP_RESPONSES_CODE = mapOf(
@@ -204,7 +209,6 @@ class MockResponseInterceptor(
     enum class MODE {
         DISABLED, ENABLED, MIXED, RECORD
     }
-
 }
 
 /**

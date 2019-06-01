@@ -305,7 +305,7 @@ class MockInterceptorTest {
         executeGetRequest("record/request")
 
         assertFileExists("$SAVE_FOLDER/record/request.json")
-        assertFileExists("$SAVE_FOLDER/record/request_body_0")
+        assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
     }
 
     @Test
@@ -327,15 +327,15 @@ class MockInterceptorTest {
                 ),
                 ResponseDescriptor(
                     code = 200,
-                    bodyFile = "request_body_0",
+                    bodyFile = "request_body_0.txt",
                     mediaType = "text/plain",
-                    headers = listOf(Header("Content-Length", "4"), Header("someKey", "someValue"))
+                    headers = listOf(Header("Content-Length", "4"), Header("Content-Type", "text/plain"), Header("someKey", "someValue"))
                 )
             )
             assertEquals(listOf(expectedResult), result)
         }
 
-        withFile("$SAVE_FOLDER/request_body_0") {
+        withFile("$SAVE_FOLDER/request_body_0.txt") {
             assertEquals("body", it.readAsString())
         }
     }
@@ -362,33 +362,58 @@ class MockInterceptorTest {
                     ),
                     ResponseDescriptor(
                         code = 200,
-                        bodyFile = "request_body_0",
+                        bodyFile = "request_body_0.txt",
                         mediaType = "text/plain",
-                        headers = listOf(Header("Content-Length", "4"), Header("someKey", "someValue"))
+                        headers = listOf(Header("Content-Length", "4"), Header("Content-Type", "text/plain"), Header("someKey", "someValue"))
                     )
                 ),
                 Matcher(
                     RequestDescriptor(method = "GET"),
                     ResponseDescriptor(
                         code = 200,
-                        bodyFile = "request_body_1",
+                        bodyFile = "request_body_1.txt",
                         mediaType = "text/plain",
-                        headers = listOf(Header("Content-Length", "11"))
+                        headers = listOf(Header("Content-Length", "11"), Header("Content-Type", "text/plain"))
                     )
                 )
             )
             assertEquals(expectedResult, result)
         }
 
-        withFile("$SAVE_FOLDER/request_body_0") {
+        withFile("$SAVE_FOLDER/request_body_0.txt") {
             assertEquals("body", it.readAsString())
         }
-        withFile("$SAVE_FOLDER/request_body_1") {
+        withFile("$SAVE_FOLDER/request_body_1.txt") {
             assertEquals("second body", it.readAsString())
         }
     }
 
-    // TODO handle file extensions?
+    @Test
+    fun `should add proper extension to response files`() {
+        enqueueServerResponse(200, "body", contentType = "image/png")
+        enqueueServerResponse(200, "body", contentType = "application/json")
+        setUpInterceptor(RECORD, SAVE_FOLDER)
+
+        executeGetRequest("record/request1")
+        executeGetRequest("record/request2")
+
+        assertFileExists("$SAVE_FOLDER/record/request1_body_0.png")
+        assertFileExists("$SAVE_FOLDER/record/request2_body_0.json")
+    }
+
+    @Test
+    fun `should match indexes in descriptor file and actual response file name`() {
+        enqueueServerResponse(200, "body", contentType = "image/png")
+        enqueueServerResponse(200, "body", contentType = "application/json")
+        setUpInterceptor(RECORD, SAVE_FOLDER)
+
+        executeGetRequest("record/request")
+        executeGetRequest("record/request")
+
+        assertFileExists("$SAVE_FOLDER/record/request_body_0.png")
+        assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
+    }
+
     // TODO null response body?
 
 
@@ -433,11 +458,13 @@ class MockInterceptorTest {
     private fun enqueueServerResponse(
         responseCode: Int,
         responseBody: String,
-        headers: List<Pair<String, String>> = listOf()
+        headers: List<Pair<String, String>> = listOf(),
+        contentType: String? = null
     ) {
         val serverResponse = MockResponse().apply {
             setResponseCode(responseCode)
             setBody(responseBody)
+            addHeader("Content-Type", contentType?:"text/plain")
             headers.forEach { addHeader(it.first, it.second) }
         }
         server.enqueue(serverResponse)
