@@ -9,6 +9,7 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.policies.InMemoryPolicy
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -329,7 +331,11 @@ class MockInterceptorTest {
                     code = 200,
                     bodyFile = "request_body_0.txt",
                     mediaType = "text/plain",
-                    headers = listOf(Header("Content-Length", "4"), Header("Content-Type", "text/plain"), Header("someKey", "someValue"))
+                    headers = listOf(
+                        Header("Content-Length", "4"),
+                        Header("Content-Type", "text/plain"),
+                        Header("someKey", "someValue")
+                    )
                 )
             )
             assertEquals(listOf(expectedResult), result)
@@ -364,7 +370,11 @@ class MockInterceptorTest {
                         code = 200,
                         bodyFile = "request_body_0.txt",
                         mediaType = "text/plain",
-                        headers = listOf(Header("Content-Length", "4"), Header("Content-Type", "text/plain"), Header("someKey", "someValue"))
+                        headers = listOf(
+                            Header("Content-Length", "4"),
+                            Header("Content-Type", "text/plain"),
+                            Header("someKey", "someValue")
+                        )
                     )
                 ),
                 Matcher(
@@ -414,8 +424,49 @@ class MockInterceptorTest {
         assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
     }
 
-    // TODO null response body?
+    @Test
+    fun `should not allow to record requests if root folder is not set`() {
 
+        try {
+            setUpInterceptor(RECORD)
+            fail("Should not allow to record if root folder was not provided")
+        } catch (e: IllegalStateException) {
+            assertEquals(DISABLED, interceptor.mode)
+        }
+    }
+
+    @Test
+    fun `should allow to stack several interceptors thanks to mixed mode`() {
+        enqueueServerResponse(200, "server response")
+
+        val policy = InMemoryPolicy()
+        policy.addMatcher(
+            "$mockServerBaseUrl/inMemory", Matcher(
+                RequestDescriptor(method = "GET"),
+                ResponseDescriptor(
+                    code = 200,
+                    body = "in memory response",
+                    mediaType = "text/plain"
+                )
+            )
+        )
+        val inMemoryInterceptor = MockResponseInterceptor(policy, policy::matchRequest)
+        inMemoryInterceptor.mode = MIXED
+
+        val fileBasedInterceptor = MockResponseInterceptor(filingPolicy, loadingLambda)
+        fileBasedInterceptor.mode = MIXED
+
+        client = OkHttpClient.Builder()
+            .addInterceptor(inMemoryInterceptor)
+            .addInterceptor(fileBasedInterceptor)
+            .build()
+
+        assertEquals("in memory response", executeGetRequest("inMemory").body()?.string())
+        assertEquals("file response", executeGetRequest("fileMatch").body()?.string())
+        assertEquals("server response", executeGetRequest("serverMatch").body()?.string())
+    }
+
+    // TODO null response body?
 
     private fun File.readAsString() = FileInputStream(this).readAsString()
 
@@ -464,7 +515,7 @@ class MockInterceptorTest {
         val serverResponse = MockResponse().apply {
             setResponseCode(responseCode)
             setBody(responseBody)
-            addHeader("Content-Type", contentType?:"text/plain")
+            addHeader("Content-Type", contentType ?: "text/plain")
             headers.forEach { addHeader(it.first, it.second) }
         }
         server.enqueue(serverResponse)

@@ -38,8 +38,15 @@ class MockResponseInterceptor(
      * DISABLED lets every request through without interception.
      * ENABLED intercepts all requests and return responses found in a predefined configuration
      * MIXED allows to look for responses locally, but execute the request if no response is found
+     * RECORD allows to record actual requests and responses for future use as mock scenarios
      */
     var mode: MODE = MODE.DISABLED
+        set(value) {
+            if (value == MODE.RECORD && rootFolder == null) {
+                throw IllegalStateException("Interceptor can not record requests without a folder where to save files")
+            }
+            field = value
+        }
 
     private val mapper: ObjectMapper = jacksonObjectMapper()
 
