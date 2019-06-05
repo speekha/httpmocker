@@ -1,6 +1,7 @@
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.jfrog.artifactory'
 
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -12,20 +13,82 @@ artifacts {
     archives sourcesJar, dokkaJar
 }
 
-if (hasProperty('bintray_user') && hasProperty('bintray_apikey')) {
-    bintray {
-        user = bintray_user
-        key = bintray_apikey
-
-        configurations = ['archives']
-
-        publish = true
-        override = true
-        pkg {
-            repo = 'httpmocker'
-            name = archivesBaseName
-            licenses = ['Apache-2.0']
-            vcsUrl = 'https://github.com/speekha/httpmocker.git'
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
         }
     }
+    developers {
+        developer {
+            id "speekha"
+            name "David Blanc"
+            email "david.e.blanc@gmail.com"
+        }
+    }
+
+    scm {
+        url "https://github.com/speekha/httpmocker.git"
+    }
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact dokkaJar
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'A simple mocking lib for OkHttp')
+                root.appendNode('name', 'HTTP Mocker')
+                root.appendNode('url', 'https://github.com/speekha/httpmocker.git')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    publications = ['mavenPublication']
+
+    configurations = ['archives']
+
+//        publish = true
+    override = true
+    pkg {
+        repo = 'httpmocker'
+        name = archivesBaseName
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/speekha/httpmocker.git'
+        version {
+            name = "$httpmock_version"
+            desc = "$httpmock_version"
+            released = new Date()
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://oss.jfrog.org'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = System.getProperty('bintray.user')
+            password = System.getProperty('bintray.key')
+        }
+        defaults {
+            publications('mavenPublication')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+    resolve {
+        repoKey = 'jcenter'
+    }
+    clientConfig.info.setBuildNumber(System.getProperty('build.number'))
 }

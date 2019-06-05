@@ -27,5 +27,9 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
 }
 
+ext {
+    pom_name = "mocker"
+}
+
 apply from: '../gradle/dokka.gradle'
 apply from: '../gradle/publish.gradle'
