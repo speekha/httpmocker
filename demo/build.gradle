@@ -51,5 +51,5 @@ dependencies {
 
     implementation 'org.koin:koin-android:2.0.0-GA4'
 
-    implementation project(':lib')
+    implementation project(':mocker')
 }

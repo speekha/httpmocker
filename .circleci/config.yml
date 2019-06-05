@@ -19,7 +19,7 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "lib/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
 
       #      - run:
       #         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
@@ -30,18 +30,18 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "lib/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
       - run:
           name: Run Tests
-          command: ./gradlew clean lib:assemble lib:test lib:sourcesJar lib:dokkaJar
+          command: ./gradlew clean mocker:assemble mocker:test mocker:sourcesJar mocker:dokkaJar
       - store_artifacts:
-          path: lib/build/libs
+          path: mocker/build/libs
           destination: libs
       - store_artifacts:
-          path: lib/build/reports
+          path: mocker/build/reports
           destination: reports
       - store_test_results:
-          path: lib/build/test-results
+          path: mocker/build/test-results
 
 workflows:
   version: 2
