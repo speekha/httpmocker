@@ -7,6 +7,13 @@ repositories {
     mavenCentral()
 }
 
+test {
+    options {
+        useJUnitPlatform()
+    }
+
+}
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.31"
     implementation "com.squareup.okhttp3:okhttp:3.14.2"
