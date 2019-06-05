@@ -1,0 +1,10 @@
+apply plugin: 'org.jetbrains.dokka'
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+    reportUndocumented = true
+}
+task dokkaJar(type: Jar) {
+    classifier = 'javadoc'
+    from dokka
+}

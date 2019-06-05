@@ -1,8 +1,5 @@
 apply plugin: 'kotlin'
 
-group 'fr.speekha.httpmocker'
-version '1.0-SNAPSHOT'
-
 repositories {
     mavenCentral()
 }
@@ -30,4 +27,5 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
 }
 
-apply from: '../publish.gradle'
+apply from: '../gradle/dokka.gradle'
+apply from: '../gradle/publish.gradle'
