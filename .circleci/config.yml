@@ -33,11 +33,14 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "lib/build.gradle" }}
       - run:
           name: Run Tests
-          command: ./gradlew lib:test
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          command: ./gradlew clean lib:assemble lib:test lib:sourcesJar lib:dokkaJar
+      - store_artifacts:
+          path: lib/build/libs
+          destination: libs
+      - store_artifacts:
           path: lib/build/reports
           destination: reports
-      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+      - store_test_results:
           path: lib/build/test-results
 
 workflows:
