@@ -84,7 +84,7 @@ jobs:
           key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build and Tests
-          command: ./publishLocal.sh
+          command: ./gradlew mocker:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
 
 workflows:
   version: 2
@@ -97,12 +97,9 @@ workflows:
       - store_artifacts:
           requires:
             - build_and_test
+      - publish:
+          requires:
+            - build_and_test
           filters:
             branches:
               only: develop
-#      - publish:
-#          requires:
-#            - build_and_test
-#          filters:
-#            branches:
-#              only: develop
