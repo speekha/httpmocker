@@ -1,47 +1,108 @@
 version: 2
 jobs:
-  build:
+  prepare_dependencies:
     docker:
-      # specify the version you desire here
       - image: circleci/android:api-28-alpha
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
     environment:
-      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       #TERM: dumb
 
     steps:
-      - checkout
-
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "lib/build.gradle" }}
-
-      #      - run:
-      #         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
-      #         command: sudo chmod +x ./gradlew
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "lib/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
       - run:
-          name: Run Tests
-          command: ./gradlew lib:test
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-          path: lib/build/reports
+          name: Clean git
+          command: git gc
+      - save_cache:
+          key: source-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ".git"
+  build_and_test:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - restore_cache:
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+      - run:
+          name: Build
+          command: ./gradlew clean mocker:assemble mocker:sourcesJar mocker:dokkaJar
+      - run:
+          name: Tests
+          command: ./gradlew mocker:test
+      - save_cache:
+          paths:
+            - mocker/build
+          key: artifacts-{{ .Branch }}-{{ .Revision }}
+  store_artifacts:
+    docker:
+      - image: circleci/android:api-28-alpha
+    steps:
+      - restore_cache:
+          key:  artifacts-{{ .Branch }}-{{ .Revision }}
+      - store_artifacts:
+          path: mocker/build/libs
+          destination: libs
+      - store_artifacts:
+          path: mocker/build/reports
           destination: reports
-      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-          path: lib/build/test-results
+      - store_test_results:
+          path: mocker/build/test-results
+  publish:
+    docker:
+      - image: circleci/android:api-28-alpha
+    steps:
+      - restore_cache:
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+      - restore_cache:
+          key:  artifacts-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Build and Tests
+          command: ./publishLocal.sh
 
 workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build
+      - prepare_dependencies
+      - build_and_test:
+          requires:
+            - prepare_dependencies
+      - store_artifacts:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only: develop
+#      - publish:
+#          requires:
+#            - build_and_test
+#          filters:
+#            branches:
+#              only: develop
