@@ -48,7 +48,7 @@ jobs:
           name: Build
           command: ./gradlew clean mocker:assemble mocker:sourcesJar mocker:dokkaJar
       - run:
-          name: Build and Tests
+          name: Tests
           command: ./gradlew mocker:test
       - save_cache:
           paths:
