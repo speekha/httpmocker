@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  prepare_dependencies:
     docker:
       - image: circleci/android:api-28-alpha
     environment:
@@ -22,7 +22,7 @@ jobs:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
-  test:
+  build_and_test:
     docker:
       - image: circleci/android:api-28-alpha
     environment:
@@ -32,14 +32,23 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
       - run:
-          name: Run Tests
-          command: ./gradlew clean mocker:assemble mocker:test mocker:sourcesJar mocker:dokkaJar
-  store:
+          name: Build
+          command: ./gradlew clean mocker:assemble mocker:sourcesJar mocker:dokkaJar
+      - run:
+          name: Build and Tests
+          command: ./gradlew mocker:test
+      - save_cache:
+          paths:
+            - mocker/build
+          key: artifacts-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+  store_artifacts:
     docker:
       - image: circleci/android:api-28-alpha
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
+      - restore_cache:
+          key: artifacts-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
       - store_artifacts:
           path: mocker/build/libs
           destination: libs
@@ -53,10 +62,10 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build
-      - test:
+      - prepare_dependencies
+      - build_and_test:
           requires:
-            - build
-      - store:
+            - prepare_dependencies
+      - store_artifacts:
           requires:
-            - test
+            - build_and_test
