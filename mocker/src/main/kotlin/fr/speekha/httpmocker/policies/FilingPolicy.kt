@@ -2,6 +2,9 @@ package fr.speekha.httpmocker.policies
 
 import okhttp3.Request
 
+/**
+ * Allows to specify path and naming conventions for configuration files.
+ */
 interface FilingPolicy {
 
     /**

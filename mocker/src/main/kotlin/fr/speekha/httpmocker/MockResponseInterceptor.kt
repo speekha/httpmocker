@@ -8,11 +8,17 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
-import okhttp3.*
+import okhttp3.Interceptor
+import okhttp3.MediaType
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.charset.Charset
+import java.util.Locale
 
 /**
  * A OkHTTP interceptor that can let requests through or block them and answer them with predefined responses.
@@ -34,11 +40,7 @@ class MockResponseInterceptor(
     var delay: Long = 0
 
     /**
-     * Enables to set the interception mode:
-     * DISABLED lets every request through without interception.
-     * ENABLED intercepts all requests and return responses found in a predefined configuration
-     * MIXED allows to look for responses locally, but execute the request if no response is found
-     * RECORD allows to record actual requests and responses for future use as mock scenarios
+     * Enables to set the interception mode. @see fr.speekha.httpmocker.MockResponseInterceptor.MODE
      */
     var mode: MODE = MODE.DISABLED
         set(value) {
@@ -113,7 +115,7 @@ class MockResponseInterceptor(
         list.firstOrNull { it.request.match(request) }?.response
 
     private fun RequestDescriptor.match(request: Request): Boolean =
-        (method?.let { it.toUpperCase() == request.method() } ?: true) &&
+        (method?.let { it.toUpperCase(Locale.ROOT) == request.method() } ?: true) &&
                 headers.all { request.headers(it.name).contains(it.value) } &&
                 params.all { request.url().queryParameter(it.key) == it.value } &&
                 request.matchBody(this)
@@ -193,8 +195,18 @@ class MockResponseInterceptor(
         )
     }
 
+    /**
+     * Defines the interceptor's state and how it is supposed to respond to requests (intercept them, let them through or record them)
+     */
     enum class MODE {
-        DISABLED, ENABLED, MIXED, RECORD
+        /** lets every request through without interception. */
+        DISABLED,
+        /** intercepts all requests and return responses found in a predefined configuration */
+        ENABLED,
+        /** allows to look for responses locally, but execute the request if no response is found */
+        MIXED,
+        /** allows to record actual requests and responses for future use as mock scenarios */
+        RECORD
     }
 }
 

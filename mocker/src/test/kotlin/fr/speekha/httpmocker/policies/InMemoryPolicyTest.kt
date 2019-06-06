@@ -1,13 +1,13 @@
 package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.MODE.ENABLED
+import fr.speekha.httpmocker.MockResponseInterceptor.MODE.*
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.OkHttpClient
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class InMemoryPolicyTest {
