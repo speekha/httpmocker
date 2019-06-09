@@ -2,7 +2,6 @@ package fr.speekha.httpmocker.demo.di
 
 import android.content.Context
 import android.os.Environment
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainContract
@@ -32,7 +31,6 @@ val injectionModule: Module = module {
         Retrofit.Builder()
             .baseUrl("https://api.github.com")
             .client(get())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .addConverterFactory(JacksonConverterFactory.create())
             .build()
     }

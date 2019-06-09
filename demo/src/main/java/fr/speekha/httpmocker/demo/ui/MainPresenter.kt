@@ -3,7 +3,11 @@ package fr.speekha.httpmocker.demo.ui
 import android.util.Log
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainPresenter(
@@ -18,7 +22,6 @@ class MainPresenter(
             try {
                 val org = "kotlin"
                 val repos = loadReposAsync(org)
-                    .await()
                     .map {
                         val contributor = loadTopContributor(org, it.name)?.firstOrNull()
                         it.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
@@ -36,7 +39,7 @@ class MainPresenter(
 
     private suspend fun loadTopContributor(org: String, repo: String) = withContext(Dispatchers.IO) {
         try {
-            apiService.listContributorsForRepository(org, repo).await()
+            apiService.listContributorsForRepository(org, repo)
         } catch (e: Throwable) {
             Log.e("Presenter", e.message, e)
             null
