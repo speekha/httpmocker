@@ -11,11 +11,10 @@ import kotlinx.coroutines.withContext
 
 
 class MainPresenter(
+    private val view: MainContract.View,
     private val apiService: GithubApiEndpoints,
     private val mocker: MockResponseInterceptor
 ) : MainContract.Presenter, CoroutineScope by MainScope() {
-
-    override lateinit var view: MainContract.View
 
     override fun callService() {
         launch {

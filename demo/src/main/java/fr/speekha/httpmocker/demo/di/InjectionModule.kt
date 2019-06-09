@@ -16,9 +16,11 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor(MirrorPathPolicy(), {
-            get<Context>().assets.open(it)
-        }, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
+        MockResponseInterceptor(
+            MirrorPathPolicy(),
+            { get<Context>().assets.open(it) },
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        )
     }
 
     single<OkHttpClient> {
@@ -39,5 +41,5 @@ val injectionModule: Module = module {
         get<Retrofit>().create(GithubApiEndpoints::class.java)
     }
 
-    factory<MainContract.Presenter> { MainPresenter(get(), get()) }
+    factory<MainContract.Presenter> { (view: MainContract.View) -> MainPresenter(view, get(), get()) }
 }
