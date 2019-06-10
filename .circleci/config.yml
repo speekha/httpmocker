@@ -68,7 +68,7 @@ jobs:
           destination: reports
       - store_test_results:
           path: mocker/build/test-results
-  publish:
+  publish_snapshot:
     docker:
       - image: circleci/android:api-28-alpha
     steps:
@@ -83,8 +83,25 @@ jobs:
       - restore_cache:
           key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
-          name: Build and Tests
+          name: Publish
           command: ./gradlew mocker:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+  publish_release:
+    docker:
+      - image: circleci/android:api-28-alpha
+    steps:
+      - restore_cache:
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+      - restore_cache:
+          key:  artifacts-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Publish
+          command: ./gradlew mocker:bintrayUpload -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
 
 workflows:
   version: 2
@@ -97,9 +114,15 @@ workflows:
       - store_artifacts:
           requires:
             - build_and_test
-      - publish:
+      - publish_snapshot:
           requires:
             - build_and_test
           filters:
             branches:
               only: develop
+      - publish_release:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only: master

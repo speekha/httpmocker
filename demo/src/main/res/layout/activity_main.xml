@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2019 David Blanc
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -11,7 +27,7 @@
             android:id="@+id/tvState"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mocking state: "
+            android:text="@string/mocking_state"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_margin="8dp"
@@ -28,26 +44,26 @@
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:checked="true"
-                     android:text="Disabled"/>
+                     android:text="@string/state_disabled"/>
         <RadioButton android:id="@+id/stateEnabled"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
-                     android:text="Enabled"/>
+                     android:text="@string/state_enabled"/>
         <RadioButton android:id="@+id/stateMixed"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
-                     android:text="Mixed"/>
+                     android:text="@string/state_mixed"/>
         <RadioButton android:id="@+id/stateRecord"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
-                     android:text="Record"/>
+                     android:text="@string/state_record"/>
     </RadioGroup>
 
     <TextView
             android:id="@+id/tvDirectory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Saving in device's Download directory"
+            android:text="@string/download_directory_info"
             app:layout_constraintLeft_toLeftOf="@id/radioState"
             app:layout_constraintTop_toBottomOf="@+id/radioState"
             android:enabled="false"
@@ -62,7 +78,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:text="Call service"
+            android:text="@string/call_service_button"
     />
 
     <android.support.v7.widget.RecyclerView
