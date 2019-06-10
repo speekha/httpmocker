@@ -1,0 +1,15 @@
+[
+  {
+    "request": {
+      "body": ".*1.*"
+    },
+    "response": {
+      "body": "matched"
+    }
+  },
+  {
+    "response": {
+      "body": "no match"
+    }
+  }
+]

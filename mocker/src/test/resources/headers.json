@@ -1,0 +1,19 @@
+[
+  {
+    "request": {
+      "headers": {
+        "header1": "1",
+        "header1": "2",
+        "header2": "3"
+      }
+    },
+    "response": {
+      "body": "with headers"
+    }
+  },
+  {
+    "response": {
+      "body": "no header"
+    }
+  }
+]

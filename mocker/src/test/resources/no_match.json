@@ -1,0 +1,12 @@
+[
+  {
+    "request": {
+      "params": {
+        "param1": "a param"
+      }
+    },
+    "response": {
+      "body": "matched"
+    }
+  }
+]
