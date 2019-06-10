@@ -2,7 +2,6 @@ package fr.speekha.httpmocker.demo.di
 
 import android.content.Context
 import android.os.Environment
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainContract
@@ -17,9 +16,11 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor(MirrorPathPolicy(), {
-            get<Context>().assets.open(it)
-        }, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
+        MockResponseInterceptor(
+            MirrorPathPolicy(),
+            { get<Context>().assets.open(it) },
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        )
     }
 
     single<OkHttpClient> {
@@ -32,7 +33,6 @@ val injectionModule: Module = module {
         Retrofit.Builder()
             .baseUrl("https://api.github.com")
             .client(get())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .addConverterFactory(JacksonConverterFactory.create())
             .build()
     }
@@ -41,5 +41,5 @@ val injectionModule: Module = module {
         get<Retrofit>().create(GithubApiEndpoints::class.java)
     }
 
-    factory<MainContract.Presenter> { MainPresenter(get(), get()) }
+    factory<MainContract.Presenter> { (view: MainContract.View) -> MainPresenter(view, get(), get()) }
 }

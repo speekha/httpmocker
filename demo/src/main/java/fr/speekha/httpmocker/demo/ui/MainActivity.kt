@@ -1,6 +1,6 @@
 package fr.speekha.httpmocker.demo.ui
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.Manifest.permission.*
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -11,26 +11,27 @@ import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
-    private val presenter: MainContract.Presenter by inject()
+    private val presenter: MainContract.Presenter by inject { parametersOf(this) }
 
-    var adapter = RepoAdapter(this)
+    private val adapter = RepoAdapter(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        presenter.view = this
-
         radioState.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setMode(when (checkedId) {
-                R.id.stateEnabled -> 1
-                R.id.stateMixed -> 2
-                R.id.stateRecord -> 3
-                else -> 0
-            })
+            presenter.setMode(
+                when (checkedId) {
+                    R.id.stateEnabled -> 1
+                    R.id.stateMixed -> 2
+                    R.id.stateRecord -> 3
+                    else -> 0
+                }
+            )
         }
 
         btnCall.setOnClickListener {

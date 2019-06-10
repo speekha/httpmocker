@@ -12,8 +12,6 @@ interface MainContract {
     }
 
     interface Presenter {
-        var view: View
-
         fun stop()
         fun callService()
         fun setMode(mode: Int)
