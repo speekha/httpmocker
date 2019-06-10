@@ -1,0 +1,10 @@
+[
+  {
+    "response": {
+      "code": 302,
+      "headers": {
+        "Location": "http://www.google.com"
+      }
+    }
+  }
+]

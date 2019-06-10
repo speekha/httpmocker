@@ -1,0 +1,39 @@
+[
+  {
+    "request": {
+      "method": "get"
+    },
+    "response": {
+      "body": "get"
+    }
+  },
+  {
+    "request": {
+      "method": "post"
+    },
+    "response": {
+      "body": "post"
+    }
+  },
+  {
+    "request": {
+      "method": "put"
+    },
+    "response": {
+      "body": "put"
+    }
+  },
+  {
+    "request": {
+      "method": "delete"
+    },
+    "response": {
+      "body": "delete"
+    }
+  },
+  {
+    "response": {
+      "body": "default"
+    }
+  }
+]
