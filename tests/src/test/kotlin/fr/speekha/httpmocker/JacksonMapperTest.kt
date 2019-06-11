@@ -16,18 +16,10 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.model.Matcher
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.io.OutputStream
+import fr.speekha.httpmocker.jackson.JacksonMapper
 
-interface Mapper {
+class JacksonMapperTest : AbstractJsonMapperTest() {
 
-    fun readMatches(stream: InputStream): List<Matcher>
-
-    fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
-
-    fun writeValue(file: OutputStream, matchers: List<Matcher>)
-
+    override val mapper = JacksonMapper()
+    
 }

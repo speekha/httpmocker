@@ -1,0 +1,28 @@
+[
+  {
+    "request":{
+      "method":"post",
+      "headers":{
+        "reqHeader1":"1",
+        "reqHeader1":"2",
+        "reqHeader2":"3"
+      },
+      "params":{
+        "param":"1"
+      },
+      "body":".*1.*"
+    },
+    "response":{
+      "delay":50,
+      "code":201,
+      "media-type":"application/json",
+      "headers":{
+        "resHeader1":"4",
+        "resHeader1":"5",
+        "resHeader2":"6"
+      },
+      "body":"simple body",
+      "body-file":"body_content.txt"
+    }
+  }
+]

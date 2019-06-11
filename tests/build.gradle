@@ -36,6 +36,7 @@ dependencies {
 
     testImplementation project(':mocker')
     testImplementation project(':jackson-adapter')
+    testImplementation project(':moshi-adapter')
 
     testImplementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"

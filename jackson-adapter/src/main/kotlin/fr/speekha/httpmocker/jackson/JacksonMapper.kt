@@ -24,8 +24,6 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
 import fr.speekha.httpmocker.jackson.Header as JsonHeader
@@ -41,8 +39,6 @@ class JacksonMapper(private val mapper: ObjectMapper = jacksonObjectMapper()) : 
     override fun readMatches(stream: InputStream): List<Matcher> =
         mapper.readValue<List<JsonMatcher>>(stream, jacksonTypeRef<List<JsonMatcher>>())
             .map { it.toModel() }
-
-    override fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
 
     override fun writeValue(file: OutputStream, matchers: List<Matcher>) =
         mapper.writeValue(file, matchers.map { it.fromModel() })

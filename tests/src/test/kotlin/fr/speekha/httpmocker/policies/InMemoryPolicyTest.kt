@@ -16,7 +16,6 @@
 
 package fr.speekha.httpmocker.policies
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.MockResponseInterceptor.MODE.ENABLED
 import fr.speekha.httpmocker.buildRequest
@@ -30,7 +29,7 @@ import org.junit.jupiter.api.Test
 
 class InMemoryPolicyTest {
 
-    private val mapper = JacksonMapper(jacksonObjectMapper())
+    private val mapper = JacksonMapper()
 
     private val policy = InMemoryPolicy(mapper)
 

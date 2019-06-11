@@ -16,18 +16,24 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.model.Matcher
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.io.OutputStream
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
-interface Mapper {
+abstract class AbstractJsonMapperTest {
 
-    fun readMatches(stream: InputStream): List<Matcher>
+    abstract val mapper: Mapper
 
-    fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
+    @Test
+    fun `should parse a JSON file`() {
+        val result = mapper.readMatches(getInput())
+        assertEquals(data, result)
+    }
 
-    fun writeValue(file: OutputStream, matchers: List<Matcher>)
-
+    @Test
+    fun `should write a proper JSON file`() {
+        val expected = getExpectedOutput()
+        testStream(expected) {
+            mapper.writeValue(it, listOf(data[0]))
+        }
+    }
 }

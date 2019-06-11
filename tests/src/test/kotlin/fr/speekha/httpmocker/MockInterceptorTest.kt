@@ -16,7 +16,6 @@
 
 package fr.speekha.httpmocker
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.*
 import fr.speekha.httpmocker.MockResponseInterceptor.MODE.*
 import fr.speekha.httpmocker.jackson.JacksonMapper
@@ -604,6 +603,6 @@ class MockInterceptorTest {
         private const val SAVE_FOLDER = "testFolder"
 
         @JvmStatic
-        fun data(): Stream<Arguments> = Stream.of(Arguments.of(JacksonMapper(jacksonObjectMapper())))
+        fun data(): Stream<Arguments> = Stream.of(Arguments.of(JacksonMapper()))
     }
 }

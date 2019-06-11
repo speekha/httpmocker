@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.moshi
 
-import fr.speekha.httpmocker.model.Matcher
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.io.OutputStream
+data class RequestDescriptor(
 
-interface Mapper {
+    val method: String? = null,
 
-    fun readMatches(stream: InputStream): List<Matcher>
+    val headers: List<Header> = emptyList(),
 
-    fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
+    val params: Map<String, String> = emptyMap(),
 
-    fun writeValue(file: OutputStream, matchers: List<Matcher>)
+    val body: String? = null
 
-}
+)

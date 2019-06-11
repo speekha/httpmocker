@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.moshi
 
-import fr.speekha.httpmocker.model.Matcher
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.io.OutputStream
+import com.squareup.moshi.Json
 
-interface Mapper {
+data class ResponseDescriptor(
 
-    fun readMatches(stream: InputStream): List<Matcher>
+    val delay: Long = 0,
 
-    fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
+    val code: Int = 200,
 
-    fun writeValue(file: OutputStream, matchers: List<Matcher>)
+    @field:Json(name = "media-type")
+    val mediaType: String = "text/plain",
 
-}
+    val headers: List<Header> = emptyList(),
+
+    val body: String = "",
+
+    @field:Json(name = "body-file")
+    val bodyFile: String? = null
+)
