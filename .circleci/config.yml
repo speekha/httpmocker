@@ -18,7 +18,7 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - run:
           name: Download Dependencies
-          command: ./gradlew androidDependencies
+          command: ./gradlew androidDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
@@ -46,10 +46,10 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - run:
           name: Build
-          command: ./gradlew clean assemble sourcesJar dokkaJar
+          command: ./gradlew clean assemble sourcesJar dokkaJar --stacktrace
       - run:
           name: Tests
-          command: ./gradlew tests:test
+          command: ./gradlew tests:test --stacktrace
       - save_cache:
           paths:
             - mocker/build
@@ -72,14 +72,17 @@ jobs:
           key:  artifacts-jackson-{{ .Branch }}-{{ .Revision }}
       - restore_cache:
           key:  artifacts-tests-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Gather libs
+          command: ./prepareArtifacts.sh
       - store_artifacts:
-          path: mocker/build/libs
+          path: build/libs
           destination: libs
       - store_artifacts:
-          path: mocker/build/reports
+          path: build/reports
           destination: reports
       - store_test_results:
-          path: mocker/build/test-results
+          path: build/test-results
   publish_snapshot:
     docker:
       - image: circleci/android:api-28-alpha
@@ -93,7 +96,11 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - restore_cache:
-          key:  artifacts-{{ .Branch }}-{{ .Revision }}
+          key:  artifacts-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          key:  artifacts-jackson-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          key:  artifacts-tests-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
           command: ./gradlew mocker:artifactoryPublish jackson-adapter:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
