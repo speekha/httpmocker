@@ -27,7 +27,6 @@ import fr.speekha.httpmocker.moshi.Matcher as JsonMatcher
 import fr.speekha.httpmocker.moshi.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
 
-
 class MatcherAdapter {
     @FromJson
     fun matcherFromJson(matcher: JsonMatcher): Matcher {
@@ -39,14 +38,14 @@ class MatcherAdapter {
         return JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
     }
 
-    fun requestFromJson(request: JsonRequestDescriptor?) = request?.run {
+    private fun requestFromJson(request: JsonRequestDescriptor?) = request?.run {
         RequestDescriptor(method, headers.map { headerFromJson(it) }, params, body)
     } ?: RequestDescriptor()
 
-    fun requestToJson(request: RequestDescriptor) =
+    private fun requestToJson(request: RequestDescriptor) =
         JsonRequestDescriptor(request.method, request.headers.map { headerToJson(it) }, request.params, request.body)
 
-    fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
+    private fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
         response.delay,
         response.code,
         response.mediaType,
@@ -55,18 +54,17 @@ class MatcherAdapter {
         response.bodyFile
     )
 
-    fun responseToJson(response: ResponseDescriptor) =
-        JsonResponseDescriptor(
-            response.delay,
-            response.code,
-            response.mediaType,
-            response.headers.map { headerToJson(it) },
-            response.body,
-            response.bodyFile
-        )
+    private fun responseToJson(response: ResponseDescriptor) = JsonResponseDescriptor(
+        response.delay,
+        response.code,
+        response.mediaType,
+        response.headers.map { headerToJson(it) },
+        response.body,
+        response.bodyFile
+    )
 
 
-    fun headerFromJson(header: JsonHeader): Header = Header(header.name, header.value)
+    private fun headerFromJson(header: JsonHeader): Header = Header(header.name, header.value)
 
-    fun headerToJson(header: Header) = JsonHeader(header.name, header.value)
+    private fun headerToJson(header: Header) = JsonHeader(header.name, header.value)
 }

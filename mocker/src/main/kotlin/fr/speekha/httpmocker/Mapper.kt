@@ -28,6 +28,6 @@ interface Mapper {
 
     fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
 
-    fun writeValue(file: OutputStream, matchers: List<Matcher>)
+    fun writeValue(outputStream: OutputStream, matchers: List<Matcher>)
 
 }

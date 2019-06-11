@@ -36,9 +36,9 @@ val injectionModule: Module = module {
     single {
         MockResponseInterceptor(
             MirrorPathPolicy(),
-            { get<Context>().assets.open(it) },
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            JacksonMapper(jacksonObjectMapper())
+            get<Context>().assets::open,
+            JacksonMapper(jacksonObjectMapper()),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         )
     }
 

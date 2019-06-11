@@ -40,8 +40,8 @@ class JacksonMapper(private val mapper: ObjectMapper = jacksonObjectMapper()) : 
         mapper.readValue<List<JsonMatcher>>(stream, jacksonTypeRef<List<JsonMatcher>>())
             .map { it.toModel() }
 
-    override fun writeValue(file: OutputStream, matchers: List<Matcher>) =
-        mapper.writeValue(file, matchers.map { it.fromModel() })
+    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) =
+        mapper.writeValue(outputStream, matchers.map { it.fromModel() })
 }
 
 private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.fromModel())

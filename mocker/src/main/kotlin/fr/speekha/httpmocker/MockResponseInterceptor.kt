@@ -37,8 +37,8 @@ import java.util.*
 class MockResponseInterceptor(
     private val filingPolicy: FilingPolicy,
     private val openFile: LoadFile,
-    private val rootFolder: File? = null,
-    private val mapper: Mapper
+    private val mapper: Mapper,
+    private val rootFolder: File? = null
 ) : Interceptor {
 
     /**

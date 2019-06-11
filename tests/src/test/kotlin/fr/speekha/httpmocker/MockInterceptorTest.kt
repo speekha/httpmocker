@@ -23,6 +23,7 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.InMemoryPolicy
 import okhttp3.OkHttpClient
@@ -496,16 +497,10 @@ class MockInterceptorTest {
                 )
             )
         )
-        val inMemoryInterceptor = MockResponseInterceptor(
-            policy, policy::matchRequest,
-            mapper = mapper
-        )
+        val inMemoryInterceptor = MockResponseInterceptor(policy, policy::matchRequest, mapper)
         inMemoryInterceptor.mode = MIXED
 
-        val fileBasedInterceptor = MockResponseInterceptor(
-            filingPolicy, loadingLambda,
-            mapper = mapper
-        )
+        val fileBasedInterceptor = MockResponseInterceptor(filingPolicy, loadingLambda, mapper)
         fileBasedInterceptor.mode = MIXED
 
         client = OkHttpClient.Builder()
@@ -547,8 +542,9 @@ class MockInterceptorTest {
         rootFolder: String? = null
     ) {
         interceptor = MockResponseInterceptor(
-            filingPolicy, loadingLambda, rootFolder?.let { File(it) },
-            mapper = mapper
+            filingPolicy, loadingLambda,
+            mapper,
+            rootFolder?.let { File(it) }
         )
         interceptor.mode = mode
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
@@ -603,6 +599,9 @@ class MockInterceptorTest {
         private const val SAVE_FOLDER = "testFolder"
 
         @JvmStatic
-        fun data(): Stream<Arguments> = Stream.of(Arguments.of(JacksonMapper()))
+        fun data(): Stream<Arguments> = Stream.of(
+            Arguments.of(JacksonMapper()),
+            Arguments.of(MoshiMapper())
+        )
     }
 }

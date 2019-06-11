@@ -47,6 +47,7 @@ class MoshiMapper : Mapper {
     override fun readMatches(stream: InputStream): List<Matcher> =
         adapter.fromJson(stream.readAsString()) ?: emptyList()
 
-    override fun writeValue(file: OutputStream, matchers: List<Matcher>) =
-        file.write(adapter.toJson(matchers).toByteArray(Charset.forName("UTF-8")))
+    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
+        it.write(adapter.toJson(matchers).toByteArray(Charset.forName("UTF-8")))
+    }
 }
