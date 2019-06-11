@@ -16,10 +16,6 @@
 
 package fr.speekha.httpmocker
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import fr.speekha.httpmocker.model.Extensions
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
@@ -41,7 +37,8 @@ import java.util.*
 class MockResponseInterceptor(
     private val filingPolicy: FilingPolicy,
     private val openFile: LoadFile,
-    private val rootFolder: File? = null
+    private val rootFolder: File? = null,
+    private val mapper: Mapper
 ) : Interceptor {
 
     /**
@@ -61,14 +58,15 @@ class MockResponseInterceptor(
             field = value
         }
 
-    private val mapper: ObjectMapper = jacksonObjectMapper()
-
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
-    private fun loadExtensionMap(): Map<String, String> = mapper.readValue<List<Extensions>>(
-        javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes.json"),
-        jacksonTypeRef<List<Extensions>>()
-    ).associate { it.mimeType to it.extension }
+    private fun loadExtensionMap(): Map<String, String> =
+        javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes")
+            .readAsStringList()
+            .associate {
+                val (extension, mimeType) = it.split("=")
+                mimeType to extension
+            }
 
     override fun intercept(chain: Interceptor.Chain): Response = when (mode) {
         MODE.DISABLED -> proceedWithRequest(chain)
@@ -89,7 +87,7 @@ class MockResponseInterceptor(
 
     private fun loadResponse(request: Request): ResponseDescriptor? = try {
         openFile(filingPolicy.getPath(request))?.let { stream ->
-            val list = mapper.readValue<List<Matcher>>(stream, jacksonTypeRef<List<Matcher>>())
+            val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
     } catch (e: Throwable) {
@@ -159,7 +157,7 @@ class MockResponseInterceptor(
     private fun createMatcher(storeFile: String, request: Request, response: Response): List<Matcher> {
         val requestFile = File(rootFolder, storeFile)
         val previousRecords: List<Matcher> = if (requestFile.exists())
-            mapper.readValue<List<Matcher>>(requestFile, jacksonTypeRef<List<Matcher>>()).toMutableList()
+            mapper.readMatches(requestFile).toMutableList()
         else emptyList()
         return previousRecords + Matcher(
             request.toDescriptor(),

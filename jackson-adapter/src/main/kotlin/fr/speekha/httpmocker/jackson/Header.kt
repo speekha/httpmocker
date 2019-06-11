@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.jackson
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
-
-data class Extensions
+data class Header
 @JsonCreator constructor(
+    @JsonProperty("name")
+    val name: String = "",
 
-    @JsonProperty("mime_type")
-    val mimeType: String,
-
-    @JsonProperty("extension")
-    val extension: String
+    @JsonProperty("value")
+    var value: String = ""
 )

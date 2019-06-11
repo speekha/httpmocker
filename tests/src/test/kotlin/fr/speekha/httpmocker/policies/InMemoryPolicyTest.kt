@@ -1,19 +1,41 @@
+/*
+ * Copyright 2019 David Blanc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package fr.speekha.httpmocker.policies
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.MODE.*
+import fr.speekha.httpmocker.MockResponseInterceptor.MODE.ENABLED
 import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.OkHttpClient
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InMemoryPolicyTest {
+
+    private val mapper = JacksonMapper(jacksonObjectMapper())
+
+    private val policy = InMemoryPolicy(mapper)
+
     @Test
     fun `should return URL as path`() {
-        val policy = InMemoryPolicy()
         val url = "http://www.test.fr/path?param=1"
         assertEquals(url, policy.getPath(buildRequest(url)))
     }
@@ -21,7 +43,6 @@ class InMemoryPolicyTest {
     @Test
     fun `should allow to retrieve a scenario based on a URL`() {
         val url = "http://www.test.fr/path1?param=1"
-        val policy = InMemoryPolicy()
         policy.addMatcher(
             url, Matcher(
                 RequestDescriptor(method = "GET"),
@@ -33,7 +54,10 @@ class InMemoryPolicyTest {
             )
         )
 
-        val interceptor = MockResponseInterceptor(policy, policy::matchRequest)
+        val interceptor = MockResponseInterceptor(
+            policy, policy::matchRequest,
+            mapper = mapper
+        )
         interceptor.mode = ENABLED
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         val getResponse = client.newCall(buildRequest(url, listOf(), "GET")).execute()
@@ -45,7 +69,6 @@ class InMemoryPolicyTest {
     @Test
     fun `should allow to add several matchers for the same URL`() {
         val url = "http://www.test.fr/path1?param=1"
-        val policy = InMemoryPolicy()
         policy.addMatcher(
             url, Matcher(
                 RequestDescriptor(method = "GET"),
@@ -67,7 +90,8 @@ class InMemoryPolicyTest {
             )
         )
 
-        val interceptor = MockResponseInterceptor(policy, policy::matchRequest)
+        val interceptor =
+            MockResponseInterceptor(policy, policy::matchRequest, mapper = mapper)
         interceptor.mode = ENABLED
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         val getResponse = client.newCall(buildRequest(url, listOf(), "GET")).execute()
@@ -81,7 +105,6 @@ class InMemoryPolicyTest {
     fun `should allow to add matchers for different URLs`() {
         val url1 = "http://www.test.fr/path1?param=1"
         val url2 = "http://www.test.fr/path2?param=1"
-        val policy = InMemoryPolicy()
         policy.addMatcher(
             url1, Matcher(
                 RequestDescriptor(method = "GET"),
@@ -103,7 +126,7 @@ class InMemoryPolicyTest {
             )
         )
 
-        val interceptor = MockResponseInterceptor(policy, policy::matchRequest)
+        val interceptor = MockResponseInterceptor(policy, policy::matchRequest, mapper = mapper)
         interceptor.mode = ENABLED
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         val response1 = client.newCall(buildRequest(url1, listOf(), "GET")).execute()

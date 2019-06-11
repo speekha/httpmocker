@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.jackson
 
-data class ResponseDescriptor(
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 
-    val delay: Long = 0,
 
-    val code: Int = 200,
+data class Matcher
+@JsonCreator constructor(
 
-    val mediaType: String = "text/plain",
+    @JsonProperty("request")
+    val request: RequestDescriptor = RequestDescriptor(),
 
-    val headers: List<Header> = emptyList(),
-
-    val body: String = "",
-
-    val bodyFile: String? = null
+    @JsonProperty("response")
+    val response: ResponseDescriptor
 )

@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker
 
-data class ResponseDescriptor(
+import okhttp3.Headers
+import okhttp3.MediaType
+import okhttp3.Request
+import okhttp3.RequestBody
 
-    val delay: Long = 0,
-
-    val code: Int = 200,
-
-    val mediaType: String = "text/plain",
-
-    val headers: List<Header> = emptyList(),
-
-    val body: String = "",
-
-    val bodyFile: String? = null
-)
+fun buildRequest(
+    url: String,
+    headers: List<Pair<String, String>> = emptyList(),
+    method: String = "GET",
+    body: String? = null
+): Request {
+    return Request.Builder()
+        .url(url)
+        .headers(Headers.of(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
+        .method(method, body?.let { RequestBody.create(MediaType.parse("text/plain"), it) })
+        .build()
+}

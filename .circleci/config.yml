@@ -15,14 +15,14 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - run:
           name: Clean git
           command: git gc
@@ -43,23 +43,35 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - run:
           name: Build
-          command: ./gradlew clean mocker:assemble mocker:sourcesJar mocker:dokkaJar
+          command: ./gradlew clean assemble sourcesJar dokkaJar
       - run:
           name: Tests
-          command: ./gradlew mocker:test
+          command: ./gradlew tests:test
       - save_cache:
           paths:
             - mocker/build
-          key: artifacts-{{ .Branch }}-{{ .Revision }}
+          key: artifacts-mocker-{{ .Branch }}-{{ .Revision }}
+      - save_cache:
+          paths:
+            - jackson-adapter/build
+          key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
+      - save_cache:
+          paths:
+            - tests/build
+          key: artifacts-tests-{{ .Branch }}-{{ .Revision }}
   store_artifacts:
     docker:
       - image: circleci/android:api-28-alpha
     steps:
       - restore_cache:
-          key:  artifacts-{{ .Branch }}-{{ .Revision }}
+          key:  artifacts-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          key:  artifacts-jackson-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          key:  artifacts-tests-{{ .Branch }}-{{ .Revision }}
       - store_artifacts:
           path: mocker/build/libs
           destination: libs
@@ -79,12 +91,12 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - restore_cache:
           key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
-          command: ./gradlew mocker:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+          command: ./gradlew mocker:artifactoryPublish jackson-adapter:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
   publish_release:
     docker:
       - image: circleci/android:api-28-alpha
@@ -96,12 +108,12 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
       - restore_cache:
           key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
-          command: ./gradlew mocker:bintrayUpload -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+          command: ./gradlew mocker:bintrayUpload jackson-adapter:bintrayUpload -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
 
 workflows:
   version: 2

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker
 
-data class ResponseDescriptor(
+import fr.speekha.httpmocker.model.Matcher
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 
-    val delay: Long = 0,
+interface Mapper {
 
-    val code: Int = 200,
+    fun readMatches(stream: InputStream): List<Matcher>
 
-    val mediaType: String = "text/plain",
+    fun readMatches(file: File): List<Matcher>
 
-    val headers: List<Header> = emptyList(),
+    fun writeValue(file: OutputStream, matchers: List<Matcher>)
 
-    val body: String = "",
-
-    val bodyFile: String? = null
-)
+}

@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker
 
-data class ResponseDescriptor(
+import java.io.InputStream
 
-    val delay: Long = 0,
+fun InputStream.readAsStringList(): List<String> = bufferedReader().use { reader -> reader.readLines() }
 
-    val code: Int = 200,
-
-    val mediaType: String = "text/plain",
-
-    val headers: List<Header> = emptyList(),
-
-    val body: String = "",
-
-    val bodyFile: String? = null
-)
+fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }

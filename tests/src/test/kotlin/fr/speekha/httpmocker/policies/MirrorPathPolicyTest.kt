@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.policies
 
-data class ResponseDescriptor(
+import fr.speekha.httpmocker.buildRequest
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
-    val delay: Long = 0,
+class MirrorPathPolicyTest {
 
-    val code: Int = 200,
+    val policy: FilingPolicy = MirrorPathPolicy()
 
-    val mediaType: String = "text/plain",
-
-    val headers: List<Header> = emptyList(),
-
-    val body: String = "",
-
-    val bodyFile: String? = null
-)
+    @Test
+    fun `should keep the same path as the URL`() {
+        val request = buildRequest(
+            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
+        )
+        Assertions.assertEquals("test/with/path.json", policy.getPath(request))
+    }
+}

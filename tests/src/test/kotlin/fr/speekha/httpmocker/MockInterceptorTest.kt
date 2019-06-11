@@ -1,13 +1,25 @@
+/*
+ * Copyright 2019 David Blanc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package fr.speekha.httpmocker
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import fr.speekha.httpmocker.MockResponseInterceptor.MODE.*
+import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
@@ -21,15 +33,19 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.fail
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.Collections
+import java.util.*
+import java.util.stream.Stream
 import kotlin.system.measureTimeMillis
 
 class MockInterceptorTest {
@@ -56,9 +72,10 @@ class MockInterceptorTest {
         server.start()
     }
 
-    @Test
-    fun `should not interfere with requests when disabled`() {
-        setUpInterceptor(DISABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should not interfere with requests when disabled`(mapper: Mapper) {
+        setUpInterceptor(DISABLED, mapper)
         enqueueServerResponse(200, "body")
 
         val response = executeGetRequest("")
@@ -67,51 +84,56 @@ class MockInterceptorTest {
         assertEquals("body", response.body()?.string())
     }
 
-    @Test
-    fun `should return a 404 error when response is not found`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a 404 error when response is not found`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/unknown")
 
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @Test
-    fun `should return a 404 error when an exception occurs`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a 404 error when an exception occurs`(mapper: Mapper) {
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
-        setUpInterceptor(ENABLED)
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/unknown")
 
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @Test
-    fun `should return a 404 error when no response matches the criteria`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a 404 error when no response matches the criteria`(mapper: Mapper) {
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
-        setUpInterceptor(ENABLED)
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/no_match")
 
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @Test
-    fun `should return a 200 when response is found`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a 200 when response is found`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request")
 
         assertResponseCode(response, 200, "OK")
     }
 
-    @Test
-    fun `should return a predefined response body from json descriptor`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a predefined response body from json descriptor`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request")
 
@@ -119,9 +141,10 @@ class MockInterceptorTest {
         assertEquals("simple body", response.body()?.string())
     }
 
-    @Test
-    fun `should return a predefined response body from separate file`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a predefined response body from separate file`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/body_file")
 
@@ -129,9 +152,10 @@ class MockInterceptorTest {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @Test
-    fun `should return a predefined response body from separate file in the same folder`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a predefined response body from separate file in the same folder`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/folder/request_in_folder")
 
@@ -139,9 +163,10 @@ class MockInterceptorTest {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @Test
-    fun `should return proper headers`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return proper headers`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request")
 
@@ -149,9 +174,10 @@ class MockInterceptorTest {
         assertEquals("simple header", response.header("testHeader"))
     }
 
-    @Test
-    fun `should handle redirects`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should handle redirects`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/redirect")
 
@@ -159,9 +185,10 @@ class MockInterceptorTest {
         assertEquals("http://www.google.com", response.header("Location"))
     }
 
-    @Test
-    fun `should handle media type`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should handle media type`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/mediatype")
 
@@ -170,9 +197,10 @@ class MockInterceptorTest {
         assertEquals("json", response.body()?.contentType()?.subtype())
     }
 
-    @Test
-    fun `should select response based on query params`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should select response based on query params`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val param1 = executeGetRequest("/query_param?param=1").body()?.string()
         val param2 = executeGetRequest("/query_param?param=2").body()?.string()
@@ -181,9 +209,10 @@ class MockInterceptorTest {
         assertEquals("param B", param2)
     }
 
-    @Test
-    fun `should select response based on headers`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should select response based on headers`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val param1 = executeGetRequest("/headers").body()?.string()
         val param2 = executeGetRequest(
@@ -199,9 +228,10 @@ class MockInterceptorTest {
         assertEquals("with headers", param2)
     }
 
-    @Test
-    fun `should take http method into account`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should take http method into account`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val get = executeGetRequest("/method").body()?.string()
         val post = executeRequest("/method", "POST", "").body()?.string()
@@ -215,9 +245,10 @@ class MockInterceptorTest {
     }
 
 
-    @Test
-    fun `should select response based on request body`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should select response based on request body`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val match = executeRequest("/body_matching", "POST", "azer1zere").body()?.string()
         val noMatch = executeRequest("/body_matching", "POST", "azerzere").body()?.string()
@@ -226,9 +257,10 @@ class MockInterceptorTest {
         assertEquals("no match", noMatch)
     }
 
-    @Test
-    fun `should allow to delay all responses`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should allow to delay all responses`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
         interceptor.delay = 50
 
         val delay = measureTimeMillis {
@@ -239,9 +271,10 @@ class MockInterceptorTest {
         assertTrue(delay > threshold, "Time was $delay (< $threshold ms)")
     }
 
-    @Test
-    fun `should allow to delay responses based on configuration`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should allow to delay responses based on configuration`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val delay = measureTimeMillis {
             executeGetRequest("/delay").body()?.string()
@@ -256,9 +289,10 @@ class MockInterceptorTest {
         assertTrue(noDelay < threshold, "Time without delay was $noDelay (> $threshold ms)")
     }
 
-    @Test
-    fun `should delegate path resolutions`() {
-        setUpInterceptor(ENABLED)
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should delegate path resolutions`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
 
         val request = initRequest("/request")
         client.newCall(request).execute()
@@ -266,10 +300,11 @@ class MockInterceptorTest {
         verify(filingPolicy).getPath(request)
     }
 
-    @Test
-    fun `should support mixed mode to execute request when no response is found locally`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should support mixed mode to execute request when no response is found locally`(mapper: Mapper) {
         enqueueServerResponse(200, "body")
-        setUpInterceptor(MIXED)
+        setUpInterceptor(MIXED, mapper)
 
         val serverResponse = executeGetRequest("")
         val localResponse = executeGetRequest("/request")
@@ -280,10 +315,11 @@ class MockInterceptorTest {
         assertEquals("simple body", localResponse.body()?.string())
     }
 
-    @Test
-    fun `should let requests through when recording`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should let requests through when recording`(mapper: Mapper) {
         enqueueServerResponse(200, "body")
-        setUpInterceptor(RECORD, SAVE_FOLDER)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
         val response = executeGetRequest("record/request")
 
@@ -291,10 +327,11 @@ class MockInterceptorTest {
         assertEquals("body", response.body()?.string())
     }
 
-    @Test
-    fun `should let requests through when recording even if saving fails`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should let requests through when recording even if saving fails`(mapper: Mapper) {
         enqueueServerResponse(200, "body")
-        setUpInterceptor(RECORD, "")
+        setUpInterceptor(RECORD, mapper, "")
 
         val response = executeGetRequest("record/request")
 
@@ -302,10 +339,11 @@ class MockInterceptorTest {
         assertEquals("body", response.body()?.string())
     }
 
-    @Test
-    fun `should store requests and responses in the proper locations when recording`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should store requests and responses in the proper locations when recording`(mapper: Mapper) {
         enqueueServerResponse(200, "body")
-        setUpInterceptor(RECORD, SAVE_FOLDER)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
         executeGetRequest("record/request")
 
@@ -313,16 +351,17 @@ class MockInterceptorTest {
         assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
     }
 
-    @Test
-    fun `should store requests and responses when recording`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should store requests and responses when recording`(mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
-        setUpInterceptor(RECORD, SAVE_FOLDER)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
         executeRequest("request?param1=value1", "POST", "requestBody", listOf("someHeader" to "someValue"))
 
         withFile("$SAVE_FOLDER/request.json") {
             val result: List<Matcher> =
-                jacksonObjectMapper().readValue(it, jacksonTypeRef<List<Matcher>>())
+                mapper.readMatches(it)
             val expectedResult = Matcher(
                 RequestDescriptor(
                     method = "POST",
@@ -349,18 +388,19 @@ class MockInterceptorTest {
         }
     }
 
-    @Test
-    fun `should update existing descriptors when recording`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should update existing descriptors when recording`(mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         enqueueServerResponse(200, "second body")
-        setUpInterceptor(RECORD, SAVE_FOLDER)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
         executeRequest("request?param1=value1", "POST", "requestBody", listOf("someHeader" to "someValue"))
         executeGetRequest("request")
 
         withFile("$SAVE_FOLDER/request.json") {
             val result: List<Matcher> =
-                jacksonObjectMapper().readValue(it, jacksonTypeRef<List<Matcher>>())
+                mapper.readMatches(it)
             val expectedResult = listOf(
                 Matcher(
                     RequestDescriptor(
@@ -401,11 +441,12 @@ class MockInterceptorTest {
         }
     }
 
-    @Test
-    fun `should add proper extension to response files`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should add proper extension to response files`(mapper: Mapper) {
         enqueueServerResponse(200, "body", contentType = "image/png")
         enqueueServerResponse(200, "body", contentType = "application/json")
-        setUpInterceptor(RECORD, SAVE_FOLDER)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
         executeGetRequest("record/request1")
         executeGetRequest("record/request2")
@@ -414,11 +455,12 @@ class MockInterceptorTest {
         assertFileExists("$SAVE_FOLDER/record/request2_body_0.json")
     }
 
-    @Test
-    fun `should match indexes in descriptor file and actual response file name`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should match indexes in descriptor file and actual response file name`(mapper: Mapper) {
         enqueueServerResponse(200, "body", contentType = "image/png")
         enqueueServerResponse(200, "body", contentType = "application/json")
-        setUpInterceptor(RECORD, SAVE_FOLDER)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
         executeGetRequest("record/request")
         executeGetRequest("record/request")
@@ -427,22 +469,24 @@ class MockInterceptorTest {
         assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
     }
 
-    @Test
-    fun `should not allow to record requests if root folder is not set`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should not allow to record requests if root folder is not set`(mapper: Mapper) {
 
         try {
-            setUpInterceptor(RECORD)
+            setUpInterceptor(RECORD, mapper)
             fail("Should not allow to record if root folder was not provided")
         } catch (e: IllegalStateException) {
             assertEquals(DISABLED, interceptor.mode)
         }
     }
 
-    @Test
-    fun `should allow to stack several interceptors thanks to mixed mode`() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should allow to stack several interceptors thanks to mixed mode`(mapper: Mapper) {
         enqueueServerResponse(200, "server response")
 
-        val policy = InMemoryPolicy()
+        val policy = InMemoryPolicy(mapper)
         policy.addMatcher(
             "$mockServerBaseUrl/inMemory", Matcher(
                 RequestDescriptor(method = "GET"),
@@ -453,10 +497,16 @@ class MockInterceptorTest {
                 )
             )
         )
-        val inMemoryInterceptor = MockResponseInterceptor(policy, policy::matchRequest)
+        val inMemoryInterceptor = MockResponseInterceptor(
+            policy, policy::matchRequest,
+            mapper = mapper
+        )
         inMemoryInterceptor.mode = MIXED
 
-        val fileBasedInterceptor = MockResponseInterceptor(filingPolicy, loadingLambda)
+        val fileBasedInterceptor = MockResponseInterceptor(
+            filingPolicy, loadingLambda,
+            mapper = mapper
+        )
         fileBasedInterceptor.mode = MIXED
 
         client = OkHttpClient.Builder()
@@ -472,8 +522,6 @@ class MockInterceptorTest {
     // TODO null response body?
 
     private fun File.readAsString() = FileInputStream(this).readAsString()
-
-    private fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }
 
     private fun assertFileExists(path: String) = withFile(path) {
         assertTrue(it.exists())
@@ -496,9 +544,13 @@ class MockInterceptorTest {
 
     private fun setUpInterceptor(
         mode: MockResponseInterceptor.MODE,
+        mapper: Mapper,
         rootFolder: String? = null
     ) {
-        interceptor = MockResponseInterceptor(filingPolicy, loadingLambda, rootFolder?.let { File(it) })
+        interceptor = MockResponseInterceptor(
+            filingPolicy, loadingLambda, rootFolder?.let { File(it) },
+            mapper = mapper
+        )
         interceptor.mode = mode
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
@@ -549,8 +601,9 @@ class MockInterceptorTest {
 
 
     companion object {
-
         private const val SAVE_FOLDER = "testFolder"
 
+        @JvmStatic
+        fun data(): Stream<Arguments> = Stream.of(Arguments.of(JacksonMapper(jacksonObjectMapper())))
     }
 }
