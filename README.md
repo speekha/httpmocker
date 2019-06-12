@@ -35,7 +35,7 @@ repositories {
 For Snapshot versions, check that you have the `OJO` snapshot repository. 
 
 ```gradle
-// Add Jcenter to your repositories if needed
+// Add oss.jfrog.org to your repositories if needed
 repositories {
     maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
 }
@@ -72,7 +72,7 @@ policy defines which file to check to find a match for a request. A few policies
 you can also define your own.
 
 If your interceptor is disabled, it will not interfere with actual network calls. If you choose the mixed mode, 
-requests that can be answered by a predefined scenrio will actually be executed. Hence the mixed mode: response 
+requests that can be answered by a predefined scenario will actually be executed. Hence the mixed mode: response 
 can come from a scenario file or from an actual HTTP call.
 
 Finally, the interceptor also has a recording mode. This mode allows you to record scenarios without interfering 
