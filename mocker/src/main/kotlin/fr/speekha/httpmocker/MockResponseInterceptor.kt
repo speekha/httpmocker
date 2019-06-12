@@ -229,9 +229,9 @@ private constructor(
         }
 
         /**
-         * Defines the mapper to use to decode the scenario files (Jackson, Moshi, GSON...)
+         * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
          */
-        fun decodeScenariosWith(objectMapper: Mapper) = apply {
+        fun parseScenariosWith(objectMapper: Mapper) = apply {
             mapper = objectMapper
         }
 

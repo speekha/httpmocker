@@ -36,7 +36,7 @@ class InMemoryPolicyTest {
     private val interceptor = MockResponseInterceptor.Builder()
         .decodeScenarioPathWith(policy)
         .loadFileWith(policy::matchRequest)
-        .decodeScenariosWith(mapper)
+        .parseScenariosWith(mapper)
         .setInterceptorStatus(ENABLED)
         .build()
 

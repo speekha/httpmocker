@@ -35,7 +35,7 @@ import fr.speekha.httpmocker.gson.ResponseDescriptor as JsonResponseDescriptor
 
 
 /**
- * An adapter using Jackson to serialize/deserialize scenarios.
+ * An adapter using Gson to serialize/deserialize scenarios.
  */
 class GsonMapper : Mapper {
 

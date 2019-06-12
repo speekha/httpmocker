@@ -50,19 +50,30 @@ implementation "fr.speekha.httpmocker:mocker:1.0.0"
 # Quickstart
 
 Mocking http calls relies on a simple Interceptor : MockResponseInterceptor. All you need to set it up
-is to add it to your OkHttp client. Here's an example for an Android app:
+is to add it to your OkHttp client. Here's an example for an Android app with minimal configuration:
 
 ```kotlin
-    val interceptor = MockResponseInterceptor(MirrorPathPolicy()) { 
-            context.assets.open(it) 
-        }
+    val interceptor = MockResponseInterceptor.Builder()
+        .parseScenariosWith(mapper)
+        .decodeScenarioPathWith(filingPolicy)
+        .loadFileWith(loadingLambda)
+        .setInterceptorStatus(ENABLED)
+        .build()
     val client = OkHttpClient.Builder()
-                             .addInterceptor(interceptor)
-                             .build()
+        .addInterceptor(interceptor)
+        .build()
 ```
-Once your interceptor is set up, you can decide to enable it or disable it by changing its state:
+The interceptor's builder offer a few more options:
 ```kotlin
-    interceptor.mode = ENABLED
+    val interceptor = MockResponseInterceptor.Builder()
+        .parseScenariosWith(mapper)
+        .decodeScenarioPathWith(filingPolicy)
+        .loadFileWith(loadingLambda)
+        .setInterceptorStatus(ENABLED)
+        .saveScenariosIn(File(rootFolder))
+        .setInterceptorStatus(mode)
+        .addFakeNetworkDelay(50L)
+        .build()
 ```
 If your interceptor is enabled, it will need to find scenarios to mock the http calls. In the previous example,
 we decided to store the scenarios in the assets folder of the app (but you could also have them as resources in 

@@ -512,14 +512,14 @@ class MockInterceptorTest {
         val inMemoryInterceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(inMemoryPolicy)
             .loadFileWith(inMemoryPolicy::matchRequest)
-            .decodeScenariosWith(mapper)
+            .parseScenariosWith(mapper)
             .setInterceptorStatus(MIXED)
             .build()
 
         val fileBasedInterceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(filingPolicy)
             .loadFileWith(loadingLambda)
-            .decodeScenariosWith(mapper)
+            .parseScenariosWith(mapper)
             .setInterceptorStatus(MIXED)
             .build()
 
@@ -564,8 +564,7 @@ class MockInterceptorTest {
         interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(filingPolicy)
             .loadFileWith(loadingLambda)
-            .decodeScenariosWith(mapper)
-            .setInterceptorStatus(MIXED)
+            .parseScenariosWith(mapper)
             .apply {
                 if (rootFolder != null) {
                     saveScenariosIn(File(rootFolder))

@@ -103,7 +103,7 @@ jobs:
           key:  artifacts-tests-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
-          command: ./gradlew mocker:artifactoryPublish jackson-adapter:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+          command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
   publish_release:
     docker:
       - image: circleci/android:api-28-alpha
@@ -120,7 +120,7 @@ jobs:
           key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
-          command: ./gradlew mocker:bintrayUpload jackson-adapter:bintrayUpload -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+          command: ./publish.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
 
 workflows:
   version: 2

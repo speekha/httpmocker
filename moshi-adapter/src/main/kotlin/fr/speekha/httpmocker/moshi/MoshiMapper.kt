@@ -28,7 +28,7 @@ import java.nio.charset.Charset
 
 
 /**
- * An adapter using Jackson to serialize/deserialize scenarios.
+ * An adapter using Moshi to serialize/deserialize scenarios.
  */
 class MoshiMapper : Mapper {
 
