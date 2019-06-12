@@ -16,6 +16,6 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.moshi.MoshiMapper
+import fr.speekha.httpmocker.gson.GsonMapper
 
-class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())
+class GsonMapperTest : AbstractJsonMapperTest(GsonMapper())

@@ -20,13 +20,13 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
 
-internal val data = listOf(
+internal val completeData = listOf(
     Matcher(
         RequestDescriptor(
             method = "post",
@@ -50,27 +50,40 @@ internal val data = listOf(
             body = "simple body",
             bodyFile = "body_content.txt"
         )
-    ),
-    Matcher(
-        RequestDescriptor(),
-        ResponseDescriptor(body = "second response")
     )
 )
 
-internal fun getInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("full_example_input.json")
+internal val partialData = listOf(
+    Matcher(RequestDescriptor(), ResponseDescriptor()),
+    Matcher(RequestDescriptor(), ResponseDescriptor())
+)
 
-internal fun getExpectedOutput(): String =
-    ClassLoader.getSystemClassLoader()
-        .getResourceAsStream("full_example_output.json")
-        .readAsStringList()
-        .joinToString("") { it.trim() }
+internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("complete_input.json")
 
-internal fun testStream(expectedResult: String, writeBlock: (OutputStream) -> Unit) {
+internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_input.json")
+
+internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
+    .map {
+        it.trim()
+            .replace(": ", ":")
+            .replace(",", "")
+    }
+
+internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream) -> Unit) {
     val stream = ByteArrayOutputStream()
     stream.use {
         writeBlock(it)
     }
-    val result = stream.toByteArray().toString(Charset.forName("UTF-8"))
-    Assertions.assertEquals(expectedResult, result)
+    val result = stream.toByteArray()
+        .toString(Charset.forName("UTF-8"))
+        .split('\n')
+        .joinToString("") {
+            it.trim().replace(": ", ":").replace(",", "")
+        }
+    assertEquals(expectedResult.sumBy { it.length }, result.length)
+    assertEquals("", expectedResult.fold(result) { acc, token ->
+        acc.replaceFirst(token, "")
+    })
 }

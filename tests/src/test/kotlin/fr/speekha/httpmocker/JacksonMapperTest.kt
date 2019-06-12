@@ -18,8 +18,4 @@ package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.jackson.JacksonMapper
 
-class JacksonMapperTest : AbstractJsonMapperTest() {
-
-    override val mapper = JacksonMapper()
-    
-}
+class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper())

@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.gson
 
-import fr.speekha.httpmocker.moshi.MoshiMapper
+import com.google.gson.annotations.SerializedName
 
-class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())
+data class ResponseDescriptor(
+
+    val delay: Long = 0,
+
+    val code: Int = 200,
+
+    @SerializedName("media-type")
+    val mediaType: String = "text/plain",
+
+    val headers: HeaderAdapter.HeaderList? = HeaderAdapter.HeaderList(),
+
+    val body: String = "",
+
+    @SerializedName("body-file")
+    val bodyFile: String? = null
+)

@@ -19,21 +19,25 @@ package fr.speekha.httpmocker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-abstract class AbstractJsonMapperTest {
-
-    abstract val mapper: Mapper
+abstract class AbstractJsonMapperTest(private val mapper: Mapper) {
 
     @Test
     fun `should parse a JSON file`() {
-        val result = mapper.readMatches(getInput())
-        assertEquals(data, result)
+        val result = mapper.readMatches(getCompleteInput())
+        assertEquals(completeData, result)
+    }
+
+    @Test
+    fun `should populate default values properly`() {
+        val result = mapper.readMatches(getPartialInput())
+        assertEquals(partialData, result)
     }
 
     @Test
     fun `should write a proper JSON file`() {
         val expected = getExpectedOutput()
         testStream(expected) {
-            mapper.writeValue(it, listOf(data[0]))
+            mapper.writeValue(it, listOf(completeData[0]))
         }
     }
 }

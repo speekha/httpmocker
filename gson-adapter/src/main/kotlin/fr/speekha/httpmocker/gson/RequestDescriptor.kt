@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.gson
 
-import fr.speekha.httpmocker.moshi.MoshiMapper
+data class RequestDescriptor(
 
-class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())
+    val method: String? = null,
+
+    val headers: HeaderAdapter.HeaderList? = HeaderAdapter.HeaderList(),
+
+    val params: Map<String, String> = emptyMap(),
+
+    val body: String? = null
+
+)

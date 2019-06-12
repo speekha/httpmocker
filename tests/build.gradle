@@ -36,6 +36,7 @@ dependencies {
 
     testImplementation project(':mocker')
     testImplementation project(':jackson-adapter')
+    testImplementation project(':gson-adapter')
     testImplementation project(':moshi-adapter')
 
     testImplementation "com.squareup.okhttp3:okhttp:$okhttp_version"
@@ -46,9 +47,9 @@ dependencies {
     testImplementation "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:2.27.0"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
 }
