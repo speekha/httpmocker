@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.MODE.ENABLED
+import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.Matcher
@@ -32,6 +32,13 @@ class InMemoryPolicyTest {
     private val mapper = JacksonMapper()
 
     private val policy = InMemoryPolicy(mapper)
+
+    private val interceptor = MockResponseInterceptor.Builder()
+        .decodeScenarioPathWith(policy)
+        .loadFileWith(policy::matchRequest)
+        .decodeScenariosWith(mapper)
+        .setInterceptorStatus(ENABLED)
+        .build()
 
     @Test
     fun `should return URL as path`() {
@@ -53,11 +60,6 @@ class InMemoryPolicyTest {
             )
         )
 
-        val interceptor = MockResponseInterceptor(
-            policy, policy::matchRequest,
-            mapper = mapper
-        )
-        interceptor.mode = ENABLED
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         val getResponse = client.newCall(buildRequest(url, listOf(), "GET")).execute()
 
@@ -89,9 +91,6 @@ class InMemoryPolicyTest {
             )
         )
 
-        val interceptor =
-            MockResponseInterceptor(policy, policy::matchRequest, mapper = mapper)
-        interceptor.mode = ENABLED
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         val getResponse = client.newCall(buildRequest(url, listOf(), "GET")).execute()
         val postResponse = client.newCall(buildRequest(url, listOf(), "POST", "body")).execute()
@@ -125,8 +124,6 @@ class InMemoryPolicyTest {
             )
         )
 
-        val interceptor = MockResponseInterceptor(policy, policy::matchRequest, mapper = mapper)
-        interceptor.mode = ENABLED
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         val response1 = client.newCall(buildRequest(url1, listOf(), "GET")).execute()
         val response2 = client.newCall(buildRequest(url2, listOf(), "GET")).execute()

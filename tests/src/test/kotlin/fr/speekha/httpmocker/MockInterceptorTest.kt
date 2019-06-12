@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker
 
 import com.nhaarman.mockitokotlin2.*
-import fr.speekha.httpmocker.MockResponseInterceptor.MODE.*
+import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
@@ -33,8 +33,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.fail
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -471,10 +470,23 @@ class MockInterceptorTest {
 
     @ParameterizedTest
     @MethodSource("data")
-    fun `should not allow to record requests if root folder is not set`(mapper: Mapper) {
+    fun `should not allow init an interceptor in record mode with no root folder`(mapper: Mapper) {
 
         try {
             setUpInterceptor(RECORD, mapper)
+            fail("Should not allow to record if root folder was not provided")
+        } catch (e: IllegalStateException) {
+            assertFalse(::interceptor.isInitialized)
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should not allow to record requests if root folder is not set`(mapper: Mapper) {
+
+        try {
+            setUpInterceptor(DISABLED, mapper)
+            interceptor.mode = RECORD
             fail("Should not allow to record if root folder was not provided")
         } catch (e: IllegalStateException) {
             assertEquals(DISABLED, interceptor.mode)
@@ -486,8 +498,8 @@ class MockInterceptorTest {
     fun `should allow to stack several interceptors thanks to mixed mode`(mapper: Mapper) {
         enqueueServerResponse(200, "server response")
 
-        val policy = InMemoryPolicy(mapper)
-        policy.addMatcher(
+        val inMemoryPolicy = InMemoryPolicy(mapper)
+        inMemoryPolicy.addMatcher(
             "$mockServerBaseUrl/inMemory", Matcher(
                 RequestDescriptor(method = "GET"),
                 ResponseDescriptor(
@@ -497,11 +509,19 @@ class MockInterceptorTest {
                 )
             )
         )
-        val inMemoryInterceptor = MockResponseInterceptor(policy, policy::matchRequest, mapper)
-        inMemoryInterceptor.mode = MIXED
+        val inMemoryInterceptor = MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(inMemoryPolicy)
+            .loadFileWith(inMemoryPolicy::matchRequest)
+            .decodeScenariosWith(mapper)
+            .setInterceptorStatus(MIXED)
+            .build()
 
-        val fileBasedInterceptor = MockResponseInterceptor(filingPolicy, loadingLambda, mapper)
-        fileBasedInterceptor.mode = MIXED
+        val fileBasedInterceptor = MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(filingPolicy)
+            .loadFileWith(loadingLambda)
+            .decodeScenariosWith(mapper)
+            .setInterceptorStatus(MIXED)
+            .build()
 
         client = OkHttpClient.Builder()
             .addInterceptor(inMemoryInterceptor)
@@ -537,16 +557,23 @@ class MockInterceptorTest {
     }
 
     private fun setUpInterceptor(
-        mode: MockResponseInterceptor.MODE,
+        mode: MockResponseInterceptor.Mode,
         mapper: Mapper,
         rootFolder: String? = null
     ) {
-        interceptor = MockResponseInterceptor(
-            filingPolicy, loadingLambda,
-            mapper,
-            rootFolder?.let { File(it) }
-        )
-        interceptor.mode = mode
+        interceptor = MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(filingPolicy)
+            .loadFileWith(loadingLambda)
+            .decodeScenariosWith(mapper)
+            .setInterceptorStatus(MIXED)
+            .apply {
+                if (rootFolder != null) {
+                    saveScenariosIn(File(rootFolder))
+                }
+            }
+            .setInterceptorStatus(mode)
+            .build()
+
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
