@@ -44,7 +44,7 @@ repositories {
 ### Dependencies
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.0.0-SNAPSHOT"
+implementation "fr.speekha.httpmocker:mocker:1.0.0"
 ```
 
 # Quickstart
