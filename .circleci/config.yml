@@ -42,9 +42,15 @@ jobs:
             - source-{{ .Branch }}-
             - source-
       - checkout
+      - restore_cache:
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Build
           command: ./gradlew clean assemble sourcesJar dokkaJar --stacktrace
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Tests
           command: ./gradlew tests:test --stacktrace
@@ -55,10 +61,10 @@ jobs:
           path: build/libs
           destination: libs
       - store_artifacts:
-          path: build/reports
+          path: tests/build/reports
           destination: reports
       - store_test_results:
-          path: build/test-results
+          path: tests/build/test-results
   publish_snapshot:
     docker:
       - image: circleci/android:api-28-alpha
