@@ -34,12 +34,14 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor(
-            MirrorPathPolicy(),
-            get<Context>().assets::open,
-            JacksonMapper(jacksonObjectMapper()),
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        )
+        MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(MirrorPathPolicy())
+            .loadFileWith(get<Context>().assets::open)
+            .parseScenariosWith(JacksonMapper(jacksonObjectMapper()))
+            .saveScenariosIn(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            )
+            .build()
     }
 
     single<OkHttpClient> {

@@ -15,14 +15,14 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - run:
           name: Clean git
           command: git gc
@@ -43,7 +43,7 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - run:
           name: Build
           command: ./gradlew clean assemble sourcesJar dokkaJar --stacktrace
@@ -57,6 +57,14 @@ jobs:
       - save_cache:
           paths:
             - jackson-adapter/build
+          key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
+      - save_cache:
+          paths:
+            - gson-adapter/build
+          key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
+      - save_cache:
+          paths:
+            - moshi-adapter/build
           key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
       - save_cache:
           paths:
@@ -94,7 +102,7 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - restore_cache:
           key:  artifacts-mocker-{{ .Branch }}-{{ .Revision }}
       - restore_cache:
@@ -115,7 +123,7 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - restore_cache:
           key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
