@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-data class ResponseDescriptor
+internal data class ResponseDescriptor
 @JsonCreator constructor(
 
     @JsonProperty("delay")

@@ -48,16 +48,6 @@ jobs:
       - run:
           name: Tests
           command: ./gradlew tests:test --stacktrace
-      - save_cache:
-          key: build-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - "."
-  store_artifacts:
-    docker:
-      - image: circleci/android:api-28-alpha
-    steps:
-      - restore_cache:
-          key:  build-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
@@ -98,9 +88,6 @@ workflows:
       - build_and_test:
           requires:
             - prepare_dependencies
-      - store_artifacts:
-          requires:
-            - build_and_test
       - publish_snapshot:
           requires:
             - build_and_test

@@ -20,7 +20,7 @@ import com.squareup.moshi.JsonClass
 import fr.speekha.httpmocker.moshikotlin.Header
 
 @JsonClass(generateAdapter = true)
-data class RequestDescriptor(
+internal data class RequestDescriptor(
 
     val method: String? = null,
 

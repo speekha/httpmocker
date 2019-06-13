@@ -22,7 +22,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
 
-class HeaderAdapter {
+internal class HeaderAdapter {
 
     @FromJson
     fun headerFromJson(reader: JsonReader): List<JsonHeader> {

@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.gson
 
-data class Matcher(
+internal data class Matcher(
 
     val request: RequestDescriptor? = null,
 

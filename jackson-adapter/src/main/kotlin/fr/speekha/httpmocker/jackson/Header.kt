@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.jackson
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class Header
+internal data class Header
 @JsonCreator constructor(
     @JsonProperty("name")
     val name: String = "",

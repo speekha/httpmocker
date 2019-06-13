@@ -25,7 +25,7 @@ import java.io.IOException
 /**
  * Special deserializer allowing to have the same header several times (e.g. Set-Cookie)
  */
-class HeadersDeserializer : JsonDeserializer<List<Header>>() {
+internal class HeadersDeserializer : JsonDeserializer<List<Header>>() {
 
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(

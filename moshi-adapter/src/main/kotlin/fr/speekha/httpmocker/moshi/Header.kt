@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.moshikotlin
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class Header(
+internal data class Header(
     val name: String = "",
 
     var value: String = ""

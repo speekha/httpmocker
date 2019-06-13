@@ -21,7 +21,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import fr.speekha.httpmocker.gson.Header as JsonHeader
 
-class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
+internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
 
     class HeaderList : ArrayList<JsonHeader>()
 

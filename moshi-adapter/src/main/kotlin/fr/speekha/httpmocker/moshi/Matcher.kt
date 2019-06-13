@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.moshi
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class Matcher(
+internal data class Matcher(
 
     val request: RequestDescriptor = RequestDescriptor(),
 

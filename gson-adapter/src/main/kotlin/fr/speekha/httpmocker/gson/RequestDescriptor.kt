@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.gson
 
-data class RequestDescriptor(
+internal data class RequestDescriptor(
 
     val method: String? = null,
 

@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.gson
 
 import com.google.gson.annotations.SerializedName
 
-data class ResponseDescriptor(
+internal data class ResponseDescriptor(
 
     val delay: Long = 0,
 

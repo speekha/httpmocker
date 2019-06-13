@@ -21,8 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-
-data class RequestDescriptor
+internal data class RequestDescriptor
 @JsonCreator constructor(
 
     @JsonProperty("method")

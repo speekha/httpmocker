@@ -27,7 +27,7 @@ import fr.speekha.httpmocker.moshi.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
 import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
 
-class MatcherAdapter {
+internal class MatcherAdapter {
     @FromJson
     fun matcherFromJson(matcher: JsonMatcher): Matcher {
         return Matcher(requestFromJson(matcher.request), responseFromJson(matcher.response))

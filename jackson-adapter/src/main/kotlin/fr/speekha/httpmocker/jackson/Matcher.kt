@@ -19,8 +19,7 @@ package fr.speekha.httpmocker.jackson
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
-
-data class Matcher
+internal data class Matcher
 @JsonCreator constructor(
 
     @JsonProperty("request")
