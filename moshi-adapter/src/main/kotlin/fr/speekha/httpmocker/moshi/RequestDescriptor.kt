@@ -16,6 +16,10 @@
 
 package fr.speekha.httpmocker.moshi
 
+import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.moshikotlin.Header
+
+@JsonClass(generateAdapter = true)
 data class RequestDescriptor(
 
     val method: String? = null,

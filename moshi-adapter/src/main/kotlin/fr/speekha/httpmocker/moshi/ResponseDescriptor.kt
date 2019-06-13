@@ -17,7 +17,10 @@
 package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.moshikotlin.Header
 
+@JsonClass(generateAdapter = true)
 data class ResponseDescriptor(
 
     val delay: Long = 0,

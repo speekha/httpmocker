@@ -20,7 +20,7 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import fr.speekha.httpmocker.moshi.Header as JsonHeader
+import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
 
 class HeaderAdapter {
 

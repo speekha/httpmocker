@@ -22,10 +22,10 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.moshi.Header as JsonHeader
 import fr.speekha.httpmocker.moshi.Matcher as JsonMatcher
 import fr.speekha.httpmocker.moshi.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
+import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
 
 class MatcherAdapter {
     @FromJson
@@ -38,9 +38,8 @@ class MatcherAdapter {
         return JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
     }
 
-    private fun requestFromJson(request: JsonRequestDescriptor?) = request?.run {
-        RequestDescriptor(method, headers.map { headerFromJson(it) }, params, body)
-    } ?: RequestDescriptor()
+    private fun requestFromJson(request: JsonRequestDescriptor) =
+        RequestDescriptor(request.method, request.headers.map { headerFromJson(it) }, request.params, request.body)
 
     private fun requestToJson(request: RequestDescriptor) =
         JsonRequestDescriptor(request.method, request.headers.map { headerToJson(it) }, request.params, request.body)
