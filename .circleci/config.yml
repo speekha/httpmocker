@@ -15,21 +15,21 @@ jobs:
             - source-
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - run:
           name: Download Dependencies
-          command: ./gradlew androidDependencies
+          command: ./gradlew androidDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - run:
           name: Clean git
           command: git gc
       - save_cache:
           key: source-{{ .Branch }}-{{ .Revision }}
           paths:
-            - ".git"
+            - "."
   build_and_test:
     docker:
       - image: circleci/android:api-28-alpha
@@ -42,66 +42,43 @@ jobs:
             - source-{{ .Branch }}-
             - source-
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
       - run:
           name: Build
-          command: ./gradlew clean mocker:assemble mocker:sourcesJar mocker:dokkaJar
+          command: ./gradlew clean assemble sourcesJar dokkaJar --stacktrace
       - run:
           name: Tests
-          command: ./gradlew mocker:test
-      - save_cache:
-          paths:
-            - mocker/build
-          key: artifacts-{{ .Branch }}-{{ .Revision }}
-  store_artifacts:
-    docker:
-      - image: circleci/android:api-28-alpha
-    steps:
-      - restore_cache:
-          key:  artifacts-{{ .Branch }}-{{ .Revision }}
+          command: ./gradlew tests:test --stacktrace
+      - run:
+          name: Gather libs
+          command: ./prepareArtifacts.sh
       - store_artifacts:
-          path: mocker/build/libs
+          path: build/libs
           destination: libs
       - store_artifacts:
-          path: mocker/build/reports
+          path: build/reports
           destination: reports
       - store_test_results:
-          path: mocker/build/test-results
+          path: build/test-results
   publish_snapshot:
     docker:
       - image: circleci/android:api-28-alpha
     steps:
       - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
+          key: build-{{ .Branch }}-{{ .Revision }}
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
-      - restore_cache:
-          key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
-          command: ./gradlew mocker:artifactoryPublish -Dsnapshot=true -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+          command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
   publish_release:
     docker:
       - image: circleci/android:api-28-alpha
     steps:
       - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
+          key: build-{{ .Branch }}-{{ .Revision }}
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}
-      - restore_cache:
-          key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
-          command: ./gradlew mocker:bintrayUpload -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_APIKEY} --stacktrace
+          command: ./publish.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
 
 workflows:
   version: 2
@@ -111,9 +88,6 @@ workflows:
       - build_and_test:
           requires:
             - prepare_dependencies
-      - store_artifacts:
-          requires:
-            - build_and_test
       - publish_snapshot:
           requires:
             - build_and_test

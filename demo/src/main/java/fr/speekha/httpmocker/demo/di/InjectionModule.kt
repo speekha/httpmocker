@@ -18,10 +18,12 @@ package fr.speekha.httpmocker.demo.di
 
 import android.content.Context
 import android.os.Environment
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainContract
 import fr.speekha.httpmocker.demo.ui.MainPresenter
+import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
@@ -32,11 +34,14 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor(
-            MirrorPathPolicy(),
-            { get<Context>().assets.open(it) },
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        )
+        MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(MirrorPathPolicy())
+            .loadFileWith(get<Context>().assets::open)
+            .parseScenariosWith(JacksonMapper(jacksonObjectMapper()))
+            .saveScenariosIn(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            )
+            .build()
     }
 
     single<OkHttpClient> {
