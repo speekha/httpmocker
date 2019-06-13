@@ -29,7 +29,7 @@ jobs:
       - save_cache:
           key: source-{{ .Branch }}-{{ .Revision }}
           paths:
-            - ".git"
+            - "."
   build_and_test:
     docker:
       - image: circleci/android:api-28-alpha
@@ -42,8 +42,6 @@ jobs:
             - source-{{ .Branch }}-
             - source-
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
       - run:
           name: Build
           command: ./gradlew clean assemble sourcesJar dokkaJar --stacktrace
@@ -51,35 +49,15 @@ jobs:
           name: Tests
           command: ./gradlew tests:test --stacktrace
       - save_cache:
+          key: build-{{ .Branch }}-{{ .Revision }}
           paths:
-            - mocker/build
-          key: artifacts-mocker-{{ .Branch }}-{{ .Revision }}
-      - save_cache:
-          paths:
-            - jackson-adapter/build
-          key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
-      - save_cache:
-          paths:
-            - gson-adapter/build
-          key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
-      - save_cache:
-          paths:
-            - moshi-adapter/build
-          key: artifacts-jackson-{{ .Branch }}-{{ .Revision }}
-      - save_cache:
-          paths:
-            - tests/build
-          key: artifacts-tests-{{ .Branch }}-{{ .Revision }}
+            - "."
   store_artifacts:
     docker:
       - image: circleci/android:api-28-alpha
     steps:
       - restore_cache:
-          key:  artifacts-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          key:  artifacts-jackson-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          key:  artifacts-tests-{{ .Branch }}-{{ .Revision }}
+          key:  build-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
@@ -96,19 +74,8 @@ jobs:
       - image: circleci/android:api-28-alpha
     steps:
       - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
+          key: build-{{ .Branch }}-{{ .Revision }}
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
-      - restore_cache:
-          key:  artifacts-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          key:  artifacts-jackson-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          key:  artifacts-tests-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
           command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
@@ -117,15 +84,8 @@ jobs:
       - image: circleci/android:api-28-alpha
     steps:
       - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
+          key: build-{{ .Branch }}-{{ .Revision }}
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}
-      - restore_cache:
-          key:  artifacts-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Publish
           command: ./publish.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
