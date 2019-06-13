@@ -18,6 +18,7 @@ package fr.speekha.httpmocker
 
 import com.nhaarman.mockitokotlin2.*
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
+import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
@@ -47,7 +48,7 @@ import java.util.*
 import java.util.stream.Stream
 import kotlin.system.measureTimeMillis
 
-class MockInterceptorTest {
+class MockResponseInterceptorTest {
 
     private val server = MockWebServer()
 
@@ -627,6 +628,7 @@ class MockInterceptorTest {
         @JvmStatic
         fun data(): Stream<Arguments> = Stream.of(
             Arguments.of(JacksonMapper()),
+            Arguments.of(GsonMapper()),
             Arguments.of(MoshiMapper())
         )
     }
