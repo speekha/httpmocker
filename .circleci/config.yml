@@ -30,7 +30,7 @@ jobs:
           key: source-{{ .Branch }}-{{ .Revision }}
           paths:
             - "."
-  build_and_test:
+  build:
     docker:
       - image: circleci/android:api-28-alpha
     environment:
@@ -51,15 +51,33 @@ jobs:
           paths:
             - ~/.gradle/wrapper
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - run:
-          name: Tests
-          command: ./gradlew tests:test --stacktrace
+      - save_cache:
+          key: build-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - "."
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
       - store_artifacts:
           path: build/libs
           destination: libs
+  test:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - restore_cache:
+          keys:
+            - build-{{ .Branch }}-{{ .Revision }}
+            - build-{{ .Branch }}-
+            - build-
+      - checkout
+      - restore_cache:
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - run:
+          name: Tests
+          command: ./gradlew tests:test --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
@@ -91,18 +109,21 @@ workflows:
   build_and_publish:
     jobs:
       - prepare_dependencies
-      - build_and_test:
+      - build:
           requires:
             - prepare_dependencies
+      - test:
+          requires:
+            - build
       - publish_snapshot:
           requires:
-            - build_and_test
+            - test
           filters:
             branches:
               only: develop
       - publish_release:
           requires:
-            - build_and_test
+            - test
           filters:
             branches:
               only: master
