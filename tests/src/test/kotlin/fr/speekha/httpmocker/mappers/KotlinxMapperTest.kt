@@ -14,5 +14,10 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter'
+package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+import fr.speekha.httpmocker.kotlinx.KotlinxMapper
+
+class KotlinxMapperTest :
+    AbstractJsonMapperTest(KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export))

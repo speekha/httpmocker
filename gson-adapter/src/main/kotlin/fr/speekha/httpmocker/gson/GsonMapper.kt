@@ -24,9 +24,6 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.readAsString
-import java.io.InputStream
-import java.io.OutputStream
 import fr.speekha.httpmocker.gson.Header as JsonHeader
 import fr.speekha.httpmocker.gson.Matcher as JsonMatcher
 import fr.speekha.httpmocker.gson.RequestDescriptor as JsonRequestDescriptor
@@ -34,55 +31,52 @@ import fr.speekha.httpmocker.gson.ResponseDescriptor as JsonResponseDescriptor
 
 
 /**
- * An adapter using Gson to serialize/deserialize scenarios.
+ * A mapper using Gson to serialize/deserialize scenarios.
  */
 class GsonMapper : Mapper {
 
-    val adapter: Gson = GsonBuilder()
+    private val adapter: Gson = GsonBuilder()
         .setPrettyPrinting()
         .registerTypeAdapter(HeaderAdapter.HeaderList::class.java, HeaderAdapter())
         .create()
 
-    override fun readMatches(stream: InputStream): List<Matcher> {
-        val dataType = MatcherType().type
-        val json = adapter.fromJson<List<JsonMatcher>>(stream.readAsString(), dataType) ?: emptyList()
-        return json.map {
+    private val dataType = MatcherType().type
+
+    override fun fromJson(json: String): List<Matcher> =
+        adapter.parse(json).map {
             it.toModel()
         }
-    }
 
-    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use { stream ->
-        stream.write(adapter.toJson(matchers.map { it.fromModel() }).toByteArray(Charsets.UTF_8))
-    }
+    private fun Gson.parse(json: String) =
+        fromJson<List<JsonMatcher>>(json, dataType) ?: emptyList()
+
+    override fun toJson(matchers: List<Matcher>): String =
+        adapter.toJson(matchers.map { it.fromModel() })
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()
 
     private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.fromModel())
 
-    private fun JsonMatcher.toModel() = Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel())
+    private fun JsonMatcher.toModel() =
+        Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel())
 
     private fun JsonRequestDescriptor.toModel() =
-        RequestDescriptor(method, host, port, path, headers?.map { it.toModel() }?: emptyList(), params, body)
+        RequestDescriptor(method, host, port, path, headers.toModel(), params, body)
 
     private fun RequestDescriptor.fromModel() =
-        JsonRequestDescriptor(
-            method,
-            host,
-            port,
-            path,
-            HeaderAdapter.HeaderList().apply {
-                addAll(headers.map { it.fromModel() })
-            },
-            params,
-            body
-        )
+        JsonRequestDescriptor(method, host, port, path, getHeaders(), params, body)
+
+    private fun RequestDescriptor.getHeaders() =
+        HeaderAdapter.HeaderList(headers.map { it.fromModel() })
 
     private fun JsonHeader.toModel() = Header(name, value)
 
     private fun Header.fromModel() = JsonHeader(name, value)
 
     private fun JsonResponseDescriptor.toModel() =
-        ResponseDescriptor(delay, code, mediaType, headers?.map { it.toModel() } ?: emptyList(), body, bodyFile)
+        ResponseDescriptor(delay, code, mediaType, headers.toModel(), body, bodyFile)
+
+    private fun HeaderAdapter.HeaderList?.toModel() = this?.map { it.toModel() } ?: emptyList()
 
     private fun ResponseDescriptor.fromModel() =
         JsonResponseDescriptor(
@@ -95,5 +89,5 @@ class GsonMapper : Mapper {
             body,
             bodyFile
         )
-
 }
+

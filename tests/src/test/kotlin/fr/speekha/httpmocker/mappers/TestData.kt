@@ -70,9 +70,18 @@ internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
 internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     .map {
         it.trim()
-            .replace(": ", ":")
-            .replace(",", "")
+            .replace(Regex(":[ ]+"), ":")
     }
+
+internal fun getMinimalOutput() = listOf(
+    ("[{" +
+            "\"request\":{" +
+            "\"headers\":{},\"params\":{}" +
+            "}," +
+            "\"response\":{" +
+            "\"delay\":0,\"code\":200,\"media-type\":\"text/plain\",\"headers\":{},\"body\":\"\"" +
+            "}}]")
+)
 
 internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream) -> Unit) {
     val stream = ByteArrayOutputStream()
@@ -83,16 +92,8 @@ internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream)
         .toString(Charsets.UTF_8)
         .split('\n')
         .joinToString("") {
-            it.trim().replace(": ", ":").replace(",", "")
+            it.trim().replace(Regex(":[ ]+"), ":")
         }
-    assertEquals(
-        expectedResult.sumBy { it.length },
-        result.length,
-        """Length of generated JSON differs:
-            Expected: ${getCompleteInput().readAsStringList().joinToString("") {it.trim()}}
-            Actual:   ${stream.toByteArray().toString(Charsets.UTF_8)}""".trimIndent()
-    )
-    assertEquals("", expectedResult.fold(result) { acc, token ->
-        acc.replaceFirst(token, "")
-    })
+    val expected = expectedResult.joinToString("") { it.trim() }
+    assertEquals(expected, result)
 }
