@@ -16,6 +16,48 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.custom.compactJson
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.ResponseDescriptor
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
-class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper())
+class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper()) {
+    @Test
+    fun `should handle json`() {
+        val matcher = Matcher(
+            RequestDescriptor(method = "GET"),
+            ResponseDescriptor(
+                code = 200,
+                body = "in memory response",
+                mediaType = "text/plain"
+            )
+        )
+
+        val str = """[
+  {
+    "request":  {
+      "method":  "GET",
+      "headers":  {
+      },
+      "params":  {
+      }
+    },
+    "response":  {
+      "delay":  0,
+      "code":  200,
+      "media-type":  "text/plain",
+      "headers":  {
+      },
+      "body":  "in memory response"
+    }
+  }
+]"""
+        val json = mapper.toJson(listOf(matcher)).also { println("Json: $it") }
+        mapper.fromJson(str)
+        mapper.fromJson(json)
+        Assertions.assertEquals(compactJson(str).replace (":  ", ":"), compactJson(json))
+    }
+}

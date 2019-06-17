@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter'
+package fr.speekha.httpmocker.kotlinx
 
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.Matcher as Model
+
+@Serializable
+internal data class Matcher(
+
+    val request: RequestDescriptor? = null,
+
+    val response: ResponseDescriptor
+) {
+    constructor(model: Model) : this(
+        RequestDescriptor(model.request),
+        ResponseDescriptor(model.response)
+    )
+}

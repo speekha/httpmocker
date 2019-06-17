@@ -311,8 +311,6 @@ class JsonStringReaderTest {
     }
 
     companion object {
-        private const val SAVE_FOLDER = "testFolder"
-
         val simpleObject = """
             {
               "field1": "1",
