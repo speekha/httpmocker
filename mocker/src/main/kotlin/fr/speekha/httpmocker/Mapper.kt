@@ -22,12 +22,19 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
 
-interface Mapper {
+interface Mapper : Parser {
 
-    fun readMatches(stream: InputStream): List<Matcher>
+    fun readMatches(stream: InputStream): List<Matcher> = fromJson(stream.readAsString())
 
     fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
 
-    fun writeValue(outputStream: OutputStream, matchers: List<Matcher>)
+    fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
+        it.write(toJson(matchers).toByteArray())
+    }
 
+}
+
+interface Parser {
+    fun fromJson(json: String): List<Matcher>
+    fun toJson(matchers: List<Matcher>): String
 }

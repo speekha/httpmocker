@@ -14,5 +14,15 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter'
+package fr.speekha.httpmocker.kotlinx
 
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.Header as Model
+
+@Serializable
+internal data class Header(
+    val name: String?,
+    var value: String?
+) {
+    constructor(model: Model) : this(model.name, model.value)
+}
