@@ -68,7 +68,7 @@ implementation "fr.speekha.httpmocker:mocker-moshi-adapter:1.1.0"
 
 Since most JSON parsers use some type of introspection to parse JSON sreams, it is recommended to keep the mapping 
 classes unobfuscated. Depending on the adapter you choose to use, it will be fr.speekha.httpmocker.<adapter package>
-where <adapter package> can be jackson, gson, moshi or moshikotlin. For instance, if you choose the Jackson parser:
+where <adapter package> can be jackson, gson or moshi. For instance, if you choose the Jackson parser:
 
 ```
 -keep class fr.speekha.httpmocker.jackson.** { *; }
@@ -98,7 +98,6 @@ The interceptor's builder offer a few more options:
         .loadFileWith { context.assets.open(it) }
         .setInterceptorStatus(ENABLED)
         .saveScenariosIn(File(rootFolder))
-        .setInterceptorStatus(mode)
         .addFakeNetworkDelay(50L)
         .build()
 ```
