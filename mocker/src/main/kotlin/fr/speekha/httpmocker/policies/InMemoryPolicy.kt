@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
 import okhttp3.Request
 import java.io.InputStream
@@ -31,11 +31,11 @@ import java.io.PipedOutputStream
  * val interceptor = MockResponseInterceptor(policy, policy::matchRequest)
  * }</pre>
  */
-class InMemoryPolicy : FilingPolicy {
+class InMemoryPolicy(
+    private val mapper: Mapper
+) : FilingPolicy {
 
     private val matchers = mutableMapOf<String, List<Matcher>>()
-
-    private val mapper = jacksonObjectMapper()
 
     override fun getPath(request: Request): String = request.url().toString()
 
