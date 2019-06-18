@@ -35,7 +35,7 @@ buildscript {
 allprojects {
 
     ext {
-        httpmock_version = '1.0.0'
+        httpmock_version = '1.1.0'
     }
 
     group 'fr.speekha.httpmocker'
