@@ -67,9 +67,7 @@ dependencies {
 
     implementation 'org.koin:koin-android:2.0.1'
 
-    //implementation "fr.speekha.httpmocker:mocker:$httpmock_version"
     //implementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
-    implementation project(':mocker')
     implementation project(':jackson-adapter')
 
 }

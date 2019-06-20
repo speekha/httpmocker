@@ -43,25 +43,28 @@ repositories {
 
 ### Dependencies
 
-The main dependency to add to your project is the core library:
+This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
+files. Currently, there are three possible options that are provided for parsing, based on three of the most commonly 
+used libraries for JSON parsing, so you can choose the one matching what you already use in your application (this 
+will help you prevent duplicate libraries in your classpath, like Jackson and GSON). If choose of of these options, 
+all you need to add is the corresponding `implementation` line in your gradle file:
+
+```gradle
+// Parses JSON scenarios using Jackson
+implementation "fr.speekha.httpmocker:jackson-adapter:1.1.0"
+
+// Parses JSON scenarios using Gson
+implementation "fr.speekha.httpmocker:gson-adapter:1.1.0"
+
+// Parses JSON scenarios using Moshi
+implementation "fr.speekha.httpmocker:moshi-adapter:1.1.0"
+```
+
+If none of those options suit your needs, you can also provide your own implementation of the `Mapper` class and add 
+the main dependency to your project:
 
 ```gradle
 implementation "fr.speekha.httpmocker:mocker:1.1.0"
-```
-
-On top of that library, you will need to provide an adapter to parse the scenario files. Currently, there are three
-possible options, so you can use one of the following modules based on a lib already present in your application 
-(this will help you prevent duplicate libraries in your classpath, like Jackson and GSON). You can also provide 
-your own implementation of the Mapper class if none of those options suit your needs.
-```gradle
-// Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:mocker-jackson-adapter:1.1.0"
-
-// Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:mocker-gson-adapter:1.1.0"
-
-// Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:mocker-moshi-adapter:1.1.0"
 ```
 
 ### Proguard rules
