@@ -82,7 +82,13 @@ internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream)
         .joinToString("") {
             it.trim().replace(": ", ":").replace(",", "")
         }
-    assertEquals(expectedResult.sumBy { it.length }, result.length)
+    assertEquals(
+        expectedResult.sumBy { it.length },
+        result.length,
+        """Length of generated JSON differs:
+            Expected: ${getCompleteInput().readAsStringList().joinToString("") {it.trim()}}
+            Actual:   ${stream.toByteArray().toString(Charset.forName("UTF-8"))}""".trimIndent()
+    )
     assertEquals("", expectedResult.fold(result) { acc, token ->
         acc.replaceFirst(token, "")
     })

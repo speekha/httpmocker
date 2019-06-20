@@ -14,5 +14,26 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter'
+package fr.speekha.httpmocker
 
+import fr.speekha.httpmocker.custom.CustomAdapter
+import org.junit.jupiter.api.Test
+
+class CustomAdapterTest {
+
+        val mapper = CustomAdapter()
+
+//    @Test
+//    fun `should parse empty stream`() {
+//    }
+
+
+
+    @Test
+    fun `should write a proper JSON file`() {
+        val expected = getExpectedOutput()
+        testStream(expected) {
+            mapper.writeValue(it, listOf(completeData[0]))
+        }
+    }
+}
