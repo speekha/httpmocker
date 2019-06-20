@@ -14,5 +14,24 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter'
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
 
+test {
+    options {
+        useJUnitPlatform()
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    api project(':mocker')
+}
+
+ext {
+    pom_name = "custom-adapter"
+}
+
+apply from: '../gradle/dokka.gradle'
+apply from: '../gradle/publish.gradle'

@@ -38,6 +38,7 @@ dependencies {
     testImplementation project(':jackson-adapter')
     testImplementation project(':gson-adapter')
     testImplementation project(':moshi-adapter')
+    testImplementation project(':custom-adapter')
 
     testImplementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
