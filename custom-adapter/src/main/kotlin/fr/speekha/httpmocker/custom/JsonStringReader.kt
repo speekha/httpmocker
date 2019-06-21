@@ -19,10 +19,8 @@ package fr.speekha.httpmocker.custom
 import java.util.regex.Pattern
 
 class JsonStringReader(
-    input: String
+    private val json: String
 ) {
-
-    private val json: String = compactJson(input)
 
     private var index = 0
 
@@ -38,10 +36,11 @@ class JsonStringReader(
     }
 
     fun beginObject() {
-        when {
-            index >= json.length -> error(END_OF_STRING_ERROR)
-            json[index] != '{' -> parseError(WRONG_START_OF_OBJECT_ERROR)
-            else -> index++
+        val start = json.indexOf("{", index)
+        if (start < index || !isBlank(index, start)) {
+            parseError(WRONG_START_OF_OBJECT_ERROR)
+        } else {
+            index = start + 1
         }
     }
 
@@ -54,10 +53,11 @@ class JsonStringReader(
     }
 
     fun beginList() {
-        when {
-            index >= json.length -> error(END_OF_STRING_ERROR)
-            json[index] != '[' -> parseError(WRONG_START_OF_LIST_ERROR)
-            else -> index++
+        val start = json.indexOf("[", index)
+        if (start < index || !isBlank(index, start)) {
+            parseError(WRONG_START_OF_LIST_ERROR)
+        } else {
+            index = start + 1
         }
     }
 
