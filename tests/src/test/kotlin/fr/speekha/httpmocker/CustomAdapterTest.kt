@@ -17,23 +17,31 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.custom.CustomAdapter
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.ResponseDescriptor
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.nio.charset.Charset
 
-class CustomAdapterTest {
-
-        val mapper = CustomAdapter()
-
-//    @Test
-//    fun `should parse empty stream`() {
-//    }
-
-
-
+class CustomAdapterTest : AbstractJsonMapperTest(CustomAdapter()) {
     @Test
-    fun `should write a proper JSON file`() {
-        val expected = getExpectedOutput()
-        testStream(expected) {
-            mapper.writeValue(it, listOf(completeData[0]))
-        }
+    fun `step by step`() {
+        val json = """[
+  {
+    "request": {},
+    "response": {}
+  },
+  {
+    "response": {}
+  }
+]"""
+        val mapper = CustomAdapter()
+        assertEquals(
+            listOf(
+                Matcher(response = ResponseDescriptor()),
+                Matcher(RequestDescriptor(), ResponseDescriptor())
+            ), mapper.readMatches(json.byteInputStream(Charset.forName("UTF-8")))
+        )
     }
 }
