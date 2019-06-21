@@ -21,28 +21,42 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
+fun compactJson(json: String): String =
+    json.split("\n").joinToString("") { it.trim() }
+
 fun List<Matcher>.toJson() = joinToString(separator = ", ", prefix = "[", postfix = "]") { it.toJson() }
 
-fun Matcher.toJson(): String = "{\"request\": ${request.toJson()},\"response\": ${response.toJson()}}"
+fun Matcher.toJson(): String = """{
+    "request": ${request.toJson()},
+    "response": ${response.toJson()}
+  }"""
 
-private fun RequestDescriptor.toJson(): String = "{" +
-        "\"method\": \"$method\"," +
-        "\"headers\": {${headers.joinToString(separator = ",") { it.toJson() }}}," +
-        "\"params\": ${params.toJson()}," +
-        "\"body\": \"$body\"" +
-        "}"
+fun RequestDescriptor.toJson(): String = """{
+    "method": "$method",
+    "headers": {${headers.joinToString(separator = ",") { it.toJson() }}},
+    "params": ${params.toJson()},
+    "body": "$body"
+  }"""
 
-private fun <K, V> Map<K, V>.toJson(): String =
+fun <K, V> Map<K, V>.toJson(): String =
     entries.joinToString(separator = ", ", prefix = "{", postfix = "}") { "\"${it.key}\": \"${it.value}\"" }
 
 fun Header.toJson(): String = "\"$name\": \"$value\""
 
+fun ResponseDescriptor.toJson(): String = """{
+    "delay": $delay,
+    "code": $code,
+    "media-type": "$mediaType",
+    "headers": {${headers.joinToString(separator = ",") { it.toJson() }}},
+    "body": "$body",
+    "body-file": "$bodyFile"
+  }"""
 
-private fun ResponseDescriptor.toJson(): String = "{" +
-        "\"delay\": $delay," +
-        "\"code\": $code," +
-        "\"media-type\": \"$mediaType\"," +
-        "\"headers\": {${headers.joinToString(separator = ",") { it.toJson() }}}," +
-        "\"body\": \"$body\"," +
-        "\"body-file\": \"$bodyFile\"" +
-        "}"
+
+fun String.truncate(limit: Int): String {
+    return if (length > limit) {
+        substring(0, limit-3) + "..."
+    } else {
+        this
+    }
+}
