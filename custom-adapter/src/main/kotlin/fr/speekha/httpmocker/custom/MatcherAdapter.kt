@@ -16,34 +16,24 @@
 
 package fr.speekha.httpmocker.custom
 
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.readAsString
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.charset.Charset
+import fr.speekha.httpmocker.model.ResponseDescriptor
 
-class CustomAdapter : Mapper {
+class MatcherAdapter : ObjectAdapter<Matcher> {
 
-    override fun readMatches(stream: InputStream): List<Matcher> {
-        val matcherMapper = MatcherAdapter()
-
-        val list = mutableListOf<Matcher>()
-
-        val json = stream.readAsString()
-        val reader = JsonStringReader(json)
-        reader.beginList()
+    override fun fromJson(reader: JsonStringReader): Matcher {
+        var matcher = Matcher(response = ResponseDescriptor())
+        reader.beginObject()
         while (reader.hasNext()) {
-            list += matcherMapper.fromJson(reader)
+            matcher = when (val field = reader.readFieldName()) {
+                "request" -> matcher.copy(request = reader.readObject(RequestAdapter()))
+                "response" -> matcher.copy(response = reader.readObject(ResponseAdapter()))
+                else -> error("Unknown field $field")
+            }
             reader.next()
         }
-        reader.endList()
-
-        return list
-    }
-
-    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(compactJson(matchers.toJson()).toByteArray(Charset.forName("UTF-8")))
+        reader.endObject()
+        return matcher
     }
 
 }
