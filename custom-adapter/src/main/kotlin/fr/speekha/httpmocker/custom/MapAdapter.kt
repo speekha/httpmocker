@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
+package fr.speekha.httpmocker.custom
 
-test {
-    options {
-        useJUnitPlatform()
+class MapAdapter : ObjectAdapter<Map<String, String>> {
+
+    override fun fromJson(reader: JsonStringReader): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+        reader.beginObject()
+        while (reader.hasNext()) {
+            val field = reader.readFieldName()
+            val value = reader.readString()
+            reader.next()
+            map += field to value
+        }
+        reader.endObject()
+        return map
     }
+
 }
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    api project(':mocker')
-
-    api "com.squareup.moshi:moshi:1.8.0"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.8.0"
-}
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
