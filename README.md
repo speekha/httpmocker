@@ -44,10 +44,11 @@ repositories {
 ### Dependencies
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
-files. Currently, there are three possible options that are provided for parsing, based on three of the most commonly 
-used libraries for JSON parsing, so you can choose the one matching what you already use in your application (this 
-will help you prevent duplicate libraries in your classpath, like Jackson and GSON). If choose of of these options, 
-all you need to add is the corresponding `implementation` line in your gradle file:
+files. Currently, there are four possible options that are provided for parsing, based on three of the most commonly 
+used libraries for JSON parsing (Jackson, Gson, Moshi) and a custom implementation (no third party dependency), so you 
+can choose the one matching what you already use in your application (this will help you prevent duplicate libraries in 
+your classpath, like Jackson and GSON). If choose one of these options, all you need to add is the corresponding 
+`implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
@@ -58,9 +59,12 @@ implementation "fr.speekha.httpmocker:gson-adapter:1.1.0"
 
 // Parses JSON scenarios using Moshi
 implementation "fr.speekha.httpmocker:moshi-adapter:1.1.0"
+
+// Parses JSON scenarios using a custom JSON parser
+implementation "fr.speekha.httpmocker:custom-adapter:1.1.0"
 ```
 
-If none of those options suit your needs, you can also provide your own implementation of the `Mapper` class and add 
+If none of those options suits your needs, you can also provide your own implementation of the `Mapper` class and add 
 the main dependency to your project:
 
 ```gradle
@@ -69,13 +73,14 @@ implementation "fr.speekha.httpmocker:mocker:1.1.0"
 
 ### Proguard rules
 
-Since most JSON parsers use some type of introspection to parse JSON sreams, it is recommended to keep the mapping 
+Since most JSON parsers use some type of introspection to parse JSON streams, it is recommended to keep the mapping 
 classes unobfuscated. Depending on the adapter you choose to use, it will be fr.speekha.httpmocker.<adapter package>
 where <adapter package> can be jackson, gson or moshi. For instance, if you choose the Jackson parser:
 
 ```
 -keep class fr.speekha.httpmocker.jackson.** { *; }
 ```
+The custom parser is immune to obfuscation because it does not use any introspection.
 
 # Quickstart
 
