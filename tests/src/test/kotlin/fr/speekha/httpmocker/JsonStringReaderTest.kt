@@ -44,14 +44,14 @@ class JsonStringReaderTest {
     fun `should handle end of string instead of object`() {
         val reader = JsonStringReader("")
         val exception = assertThrows<IllegalStateException> { reader.beginObject() }
-        assertEquals(END_OF_STRING_ERROR, exception.message)
+        assertEquals(WRONG_START_OF_OBJECT_ERROR, exception.message)
     }
 
     @Test
     fun `should handle end of string instead of list`() {
         val reader = JsonStringReader("")
         val exception = assertThrows<IllegalStateException> { reader.beginList() }
-        assertEquals(END_OF_STRING_ERROR, exception.message)
+        assertEquals(WRONG_START_OF_LIST_ERROR, exception.message)
     }
 
     @Test
@@ -156,7 +156,8 @@ class JsonStringReaderTest {
             readString()
             next()
             val exception = assertThrows<IllegalStateException> { endObject() }
-            assertEquals("$WRONG_END_OF_OBJECT_ERROR\"field2...", exception.message)
+            assertEquals("$WRONG_END_OF_OBJECT_ERROR\n" +
+                    "  \"fie...", exception.message)
         }
     }
 
@@ -227,7 +228,9 @@ class JsonStringReaderTest {
             }
             endObject()
             val exception = assertThrows<IllegalStateException> { endList() }
-            assertEquals("$WRONG_END_OF_LIST_ERROR,{\"fiel...", exception.message)
+            assertEquals("$WRONG_END_OF_LIST_ERROR,\n" +
+                    "  {\n" +
+                    " ...", exception.message)
         }
     }
 
@@ -273,7 +276,8 @@ class JsonStringReaderTest {
             val exception = assertThrows<IllegalStateException> {
                 readObject(mapAdapter)
             }
-            assertEquals("$WRONG_START_OF_OBJECT_ERROR \"0\"\"ob...", exception.message)
+            assertEquals("$WRONG_START_OF_OBJECT_ERROR \"0\"\n" +
+                    "  ...", exception.message)
         }
     }
 
