@@ -32,9 +32,5 @@ dependencies {
     kapt "com.squareup.moshi:moshi-kotlin-codegen:1.8.0"
 }
 
-ext {
-    pom_name = "mocker-moshi-adapter"
-}
-
 apply from: '../gradle/dokka.gradle'
 apply from: '../gradle/publish.gradle'
