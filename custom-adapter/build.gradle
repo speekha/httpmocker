@@ -29,9 +29,5 @@ dependencies {
     api project(':mocker')
 }
 
-ext {
-    pom_name = "custom-adapter"
-}
-
 apply from: '../gradle/dokka.gradle'
 apply from: '../gradle/publish.gradle'

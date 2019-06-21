@@ -33,9 +33,5 @@ dependencies {
     api "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
 }
 
-ext {
-    pom_name = "mocker-jackson-adapter"
-}
-
 apply from: '../gradle/dokka.gradle'
 apply from: '../gradle/publish.gradle'

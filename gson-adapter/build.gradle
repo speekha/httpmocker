@@ -30,9 +30,5 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.5'
 }
 
-ext {
-    pom_name = "mocker-gson-adapter"
-}
-
 apply from: '../gradle/dokka.gradle'
 apply from: '../gradle/publish.gradle'
