@@ -285,7 +285,7 @@ class MockResponseInterceptorTest {
         }
 
         val threshold = 50
-        assertTrue(delay > threshold, "Time was $delay (< $threshold ms)")
+        assertTrue(delay >= threshold, "Time was $delay (< $threshold ms)")
         assertTrue(noDelay < threshold, "Time without delay was $noDelay (> $threshold ms)")
     }
 
