@@ -1,2 +1,2 @@
 #!/bin/sh
-./gradlew clean mocker:publishToMavenLocal jackson-adapter:publishToMavenLocal gson-adapter:publishToMavenLocal moshi-adapter:publishToMavenLocal
+./gradlew clean mocker:publishToMavenLocal jackson-adapter:publishToMavenLocal gson-adapter:publishToMavenLocal moshi-adapter:publishToMavenLocal custom-adapter:publishToMavenLocal
