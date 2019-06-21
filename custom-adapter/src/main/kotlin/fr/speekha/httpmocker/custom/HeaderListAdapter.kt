@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
+package fr.speekha.httpmocker.custom
 
-test {
-    options {
-        useJUnitPlatform()
+import fr.speekha.httpmocker.model.Header
+
+class HeaderListAdapter : ObjectAdapter<List<Header>> {
+
+    override fun fromJson(reader: JsonStringReader): List<Header> {
+        val list = mutableListOf<Header>()
+        reader.beginObject()
+        while (reader.hasNext()) {
+            val field = reader.readFieldName()
+            val value = reader.readString()
+            reader.next()
+            list += Header(field, value)
+        }
+        reader.endObject()
+        return list
     }
+
 }
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    api project(':mocker')
-
-    api "com.squareup.moshi:moshi:1.8.0"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.8.0"
-}
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'

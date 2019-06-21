@@ -27,9 +27,5 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
 }
 
-ext {
-    pom_name = "mocker"
-}
-
 apply from: '../gradle/dokka.gradle'
 apply from: '../gradle/publish.gradle'
