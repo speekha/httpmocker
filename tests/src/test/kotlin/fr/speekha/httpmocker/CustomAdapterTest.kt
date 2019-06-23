@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.custom.CustomAdapter
+import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.charset.Charset
 
-class CustomAdapterTest : AbstractJsonMapperTest(CustomAdapter()) {
+class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper()) {
     @Test
     fun `step by step`() {
         val json = """[
@@ -36,7 +36,7 @@ class CustomAdapterTest : AbstractJsonMapperTest(CustomAdapter()) {
     "response": {}
   }
 ]"""
-        val mapper = CustomAdapter()
+        val mapper = CustomMapper()
         assertEquals(
             listOf(
                 Matcher(response = ResponseDescriptor()),
