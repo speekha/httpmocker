@@ -24,39 +24,52 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 fun compactJson(json: String): String =
     json.split("\n").joinToString("") { it.trim() }
 
-fun List<Matcher>.toJson() = joinToString(separator = ", ", prefix = "[", postfix = "]") { it.toJson() }
+fun List<Matcher>.toJson() =
+    joinToString(separator = ", ", prefix = "[\n", postfix = "]") { it.toJson() }
 
-fun Matcher.toJson(): String = """{
+fun Matcher.toJson(): String = """  {
     "request": ${request.toJson()},
     "response": ${response.toJson()}
-  }"""
+  }
+"""
 
-fun RequestDescriptor.toJson(): String = """{
-    "method": "$method",
-    "headers": {${headers.joinToString(separator = ",") { it.toJson() }}},
-    "params": ${params.toJson()},
-    "body": "$body"
-  }"""
+fun RequestDescriptor.toJson(): String = listOf(
+    "method" to method.wrap(),
+    "headers" to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
+    "params" to params.toJson(),
+    "body" to body.wrap()
+)
+    .filter { it.second != null }
+    .joinToString(
+        separator = ",\n",
+        prefix = "{\n",
+        postfix = "\n    }"
+    ) { (key, value) -> "      \"$key\": $value" }
 
 fun <K, V> Map<K, V>.toJson(): String =
-    entries.joinToString(separator = ", ", prefix = "{", postfix = "}") { "\"${it.key}\": \"${it.value}\"" }
+    entries.joinToString(
+        separator = ", ",
+        prefix = "{\n",
+        postfix = "\n      }"
+    ) { "        \"${it.key}\": \"${it.value}\"" }
 
 fun Header.toJson(): String = "\"$name\": \"$value\""
 
-fun ResponseDescriptor.toJson(): String = """{
-    "delay": $delay,
-    "code": $code,
-    "media-type": "$mediaType",
-    "headers": {${headers.joinToString(separator = ",") { it.toJson() }}},
-    "body": "$body",
-    "body-file": "$bodyFile"
-  }"""
+fun ResponseDescriptor.toJson(): String = listOf(
+    "delay" to delay.toString(),
+    "code" to code.toString(),
+    "media-type" to mediaType.wrap(),
+    "headers" to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
+    "body" to body.wrap(),
+    "body-file" to bodyFile.wrap()
+)
+    .filter { it.second != null }
+    .joinToString(
+        separator = ",\n",
+        prefix = "{\n",
+        postfix = "\n    }"
+    ) { (key, value) -> "      \"$key\": $value" }
 
+private fun String?.wrap() = this?.let { "\"$it\"" }
 
-fun String.truncate(limit: Int): String {
-    return if (length > limit) {
-        substring(0, limit-3) + "..."
-    } else {
-        this
-    }
-}
+fun String.truncate(limit: Int): String = takeIf { length <= limit } ?: substring(0, limit - 3) + "..."

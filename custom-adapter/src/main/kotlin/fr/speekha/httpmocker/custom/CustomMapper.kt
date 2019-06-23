@@ -23,7 +23,10 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
 
-class CustomAdapter : Mapper {
+/**
+ * An adapter using custom JSON parsing to serialize/deserialize scenarios.
+ */
+class CustomMapper : Mapper {
 
     override fun readMatches(stream: InputStream): List<Matcher> {
         val matcherMapper = MatcherAdapter()
