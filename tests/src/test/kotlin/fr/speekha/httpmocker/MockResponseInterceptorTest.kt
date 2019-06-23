@@ -18,6 +18,7 @@ package fr.speekha.httpmocker
 
 import com.nhaarman.mockitokotlin2.*
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
+import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.Header
@@ -629,7 +630,8 @@ class MockResponseInterceptorTest {
         fun data(): Stream<Arguments> = Stream.of(
             Arguments.of(JacksonMapper()),
             Arguments.of(GsonMapper()),
-            Arguments.of(MoshiMapper())
+            Arguments.of(MoshiMapper()),
+            Arguments.of(CustomMapper())
         )
     }
 }

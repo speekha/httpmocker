@@ -75,7 +75,7 @@ bintray {
     configurations = ['archives']
 
     publish = true
-    override = false
+    override = true
     pkg {
         repo = 'httpmocker'
         name = archivesBaseName
