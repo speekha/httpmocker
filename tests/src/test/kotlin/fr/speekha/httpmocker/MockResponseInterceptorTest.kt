@@ -16,7 +16,11 @@
 
 package fr.speekha.httpmocker
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
@@ -46,7 +50,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
+import java.util.Collections
 import java.util.stream.Stream
 import kotlin.system.measureTimeMillis
 
