@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.policies
 
-data class RequestDescriptor(
+import okhttp3.Request
 
-    val method: String? = null,
-
-    val host: String? = null,
-
-    val port: Int? = null,
-
-    val path: String? = null,
-
-    val headers: List<Header> = emptyList(),
-
-    val params: Map<String, String> = emptyMap(),
-
-    val body: String? = null
-
-)
+class SingleFilePolicy(private val file: String) : FilingPolicy {
+    override fun getPath(request: Request): String = file
+}

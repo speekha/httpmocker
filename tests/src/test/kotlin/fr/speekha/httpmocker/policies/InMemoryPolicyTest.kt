@@ -61,7 +61,7 @@ class InMemoryPolicyTest {
         )
 
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        val getResponse = client.newCall(buildRequest(url, listOf(), "GET")).execute()
+        val getResponse = client.newCall(buildRequest(url, method = "GET")).execute()
 
         assertEquals(200, getResponse.code())
         assertEquals("get some body", getResponse.body()?.string())

@@ -24,7 +24,6 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.readAsString
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.charset.Charset
 
 
 /**
@@ -48,6 +47,6 @@ class MoshiMapper : Mapper {
         adapter.fromJson(stream.readAsString()) ?: emptyList()
 
     override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(adapter.toJson(matchers).toByteArray(Charset.forName("UTF-8")))
+        it.write(adapter.toJson(matchers).toByteArray(Charsets.UTF_8))
     }
 }

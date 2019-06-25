@@ -49,10 +49,10 @@ private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.from
 private fun JsonMatcher.toModel() = Matcher(request.toModel(), response.toModel())
 
 private fun JsonRequestDescriptor.toModel() =
-    RequestDescriptor(method, headers.map { it.toModel() }, params, body)
+    RequestDescriptor(method, host, port, path, headers.map { it.toModel() }, params, body)
 
 private fun RequestDescriptor.fromModel() =
-    JsonRequestDescriptor(method, headers.map { it.fromModel() }, params, body)
+    JsonRequestDescriptor(method, host, port, path, headers.map { it.fromModel() }, params, body)
 
 private fun JsonHeader.toModel() = Header(name, value)
 
