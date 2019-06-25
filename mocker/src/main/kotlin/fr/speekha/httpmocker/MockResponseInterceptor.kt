@@ -16,16 +16,21 @@
 
 package fr.speekha.httpmocker
 
+import fr.speekha.httpmocker.RequestRecorder.CallRecord
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.policies.DynamicPolicy
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
-import okhttp3.*
+import okhttp3.Interceptor
+import okhttp3.MediaType
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
-import java.util.*
 
 /**
  * A OkHTTP interceptor that can let requests through or block them and answer them with predefined responses.
@@ -58,15 +63,7 @@ private constructor(
             }
         }
 
-    private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
-
-    private fun loadExtensionMap(): Map<String, String> =
-        javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes")
-            .readAsStringList()
-            .associate {
-                val (extension, mimeType) = it.split("=")
-                mimeType to extension
-            }
+    private val requestRecorder = RequestRecorder(mapper)
 
     override fun intercept(chain: Interceptor.Chain): Response = when (mode) {
         Mode.DISABLED -> proceedWithRequest(chain)
@@ -112,7 +109,7 @@ private constructor(
     private fun loadResponseBody(request: Request, response: ResponseDescriptor) = ResponseBody.create(
         MediaType.parse(response.mediaType), response.bodyFile?.let {
             loadResponseBodyFromFile(request, it)
-        } ?: response.body.toByteArray(Charsets.UTF_8))
+        } ?: response.body.toByteArray())
 
     private fun loadResponseBodyFromFile(request: Request, it: String): ByteArray? {
         val responsePath = filingPolicy.getPath(request)
@@ -124,7 +121,10 @@ private constructor(
         list.firstOrNull { it.request.match(request) }?.response
 
     private fun RequestDescriptor.match(request: Request): Boolean =
-        (method?.let { it.toUpperCase(Locale.ROOT) == request.method() } ?: true) &&
+        (method?.let { it.equals(request.method(), true) } ?: true) &&
+                (host?.let { it.equals(request.url().host(), true) } ?: true) &&
+                (port?.let { it == request.url().port() } ?: true) &&
+                (path?.let { it == request.url().encodedPath() } ?: true) &&
                 (host?.let { it.toLowerCase() == request.url().host() } ?: true) &&
                 (port?.let { it == request.url().port() } ?: true) &&
                 (path?.let { it == request.url().encodedPath() } ?: true) &&
@@ -135,62 +135,13 @@ private constructor(
     private fun recordCall(chain: Interceptor.Chain): Response {
         val response = proceedWithRequest(chain)
         val body = response.body()?.bytes()
-        saveFiles(chain.request(), response, body)
+        val record =
+            CallRecord(chain.request(), response, body, File(rootFolder, filingPolicy.getPath(chain.request())))
+        requestRecorder.saveFiles(record)
         return response.copyResponse(body)
     }
 
-    private fun saveFiles(request: Request, response: Response, body: ByteArray?) = try {
-        val storeFile = filingPolicy.getPath(request)
-        val matchers = createMatcher(storeFile, request, response)
-        val requestFile = File(rootFolder, storeFile)
-
-        saveRequestFile(requestFile, matchers)
-
-        matchers.last().response.bodyFile?.let { responseFile ->
-            saveResponseBody(File(requestFile.parentFile, responseFile), body)
-        }
-    } catch (e: Throwable) {
-        e.printStackTrace()
-    }
-
-    private fun saveResponseBody(storeFile: File, body: ByteArray?) = openFile(storeFile).use {
-        it.write(body)
-    }
-
-    private fun createMatcher(storeFile: String, request: Request, response: Response): List<Matcher> {
-        val requestFile = File(rootFolder, storeFile)
-        val previousRecords: List<Matcher> = if (requestFile.exists())
-            mapper.readMatches(requestFile).toMutableList()
-        else emptyList()
-        return previousRecords + Matcher(
-            request.toDescriptor(),
-            response.toDescriptor(previousRecords.size, getExtension(response.body()?.contentType()))
-        )
-    }
-
-    private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) {
-        openFile(requestFile).use {
-            mapper.writeValue(it, matchers)
-        }
-    }
-
-    private fun openFile(file: File): FileOutputStream {
-        createParent(file.parentFile)
-        return FileOutputStream(file)
-    }
-
-    private fun createParent(file: File?) {
-        if (file?.parentFile?.exists() == false) {
-            createParent(file.parentFile)
-            file.mkdir()
-        } else if (file?.exists() == false) {
-            file.mkdir()
-        }
-    }
-
-    private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: error("Unknown error code")
-
-    private fun getExtension(contentType: MediaType?) = extensionMappings[contentType.toString()] ?: ".txt"
+    private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
 
     /**
      * Defines the interceptor's state and how it is supposed to respond to requests (intercept them, let them through or record them)
@@ -230,6 +181,14 @@ private constructor(
          */
         fun loadFileWith(loading: LoadFile) = apply {
             openFile = loading
+        }
+
+        /**
+         * Uses a dynamic loader instead of a file policy and loading function
+         */
+        fun useDynamicLoader(policy: DynamicPolicy) = apply {
+            filingPolicy = policy
+            openFile = policy::loadScenario
         }
 
         /**
@@ -299,15 +258,84 @@ private const val NO_MAPPER_ERROR =
 private const val NO_FOLDER_ERROR =
     "Network calls can not be recorded without a folder where to save files. Please add a root folder."
 
-private val HTTP_RESPONSES_CODE = mapOf(
+private val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     200 to "OK",
     201 to "Created",
+    202 to "Accepted",
+    203 to "Non-Authoritative Information",
     204 to "No Content",
+    205 to "Reset Content",
+    206 to "Partial Content",
+    207 to "Multi-Status",
+    208 to "Already Reported",
+    210 to "Content Different",
+    226 to "IM Used",
+    300 to "Multiple Choices",
+    301 to "Moved Permanently",
     302 to "Found",
+    303 to "See Other",
+    304 to "Not Modified",
+    305 to "Use Proxy",
+    306 to "Switch Proxy",
+    307 to "Temporary Redirect",
+    308 to "Permanent Redirect",
+    310 to "Too many Redirects",
     400 to "Bad Request",
+    401 to "Unauthorized",
+    402 to "Payment Required",
     403 to "Forbidden",
     404 to "Not Found",
+    405 to "Method Not Allowed",
+    406 to "Not Acceptable",
+    407 to "Proxy Authentication Required",
+    408 to "Request Time-out",
+    409 to "Conflict",
+    410 to "Gone",
+    411 to "Length Required",
+    412 to "Precondition Failed",
+    413 to "Request Entity Too Large",
+    414 to "Request-URI Too Long",
+    415 to "Unsupported Media Type",
+    416 to "Requested range unsatisfiable",
+    417 to "Expectation failed",
+    418 to "I’m a teapot",
+    421 to "Bad mapping / Misdirected Request",
+    422 to "Unprocessable entity",
+    423 to "Locked",
+    424 to "Method failure",
+    425 to "Unordered Collection",
+    426 to "Upgrade Required",
+    428 to "Precondition Required",
+    429 to "Too Many Requests",
+    431 to "Request Header Fields Too Large",
+    444 to "No Response",
+    449 to "Retry With",
+    450 to "Blocked by Windows Parental Controls",
+    451 to "Unavailable For Legal Reasons",
+    456 to "Unrecoverable Error",
+    495 to "SSL Certificate Error",
+    496 to "SSL Certificate Required",
+    497 to "HTTP Request Sent to HTTPS Port",
+    498 to "Token expired/invalid",
+    499 to "Client Closed Request",
     500 to "Internal Server Error",
+    501 to "Not Implemented",
     502 to "Bad Gateway",
-    503 to "Service unavailable"
+    503 to "Service unavailable",
+    504 to "Gateway Time-out",
+    505 to "HTTP Version not supported",
+    506 to "Variant Also Negotiates",
+    507 to "Insufficient storage",
+    508 to "Loop detected",
+    509 to "Bandwidth Limit Exceeded",
+    510 to "Not extended",
+    511 to "Network authentication required",
+    520 to "Unknown Error",
+    521 to "Web Server Is Down",
+    522 to "Connection Timed Out",
+    523 to "Origin Is Unreachable",
+    524 to "A Timeout Occurred",
+    525 to "SSL Handshake Failed",
+    526 to "Invalid SSL Certificate",
+    527 to "Railgun Error"
 )
