@@ -20,11 +20,11 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.nio.charset.Charset
 import java.util.*
 
 /**
@@ -34,7 +34,7 @@ import java.util.*
 class MockResponseInterceptor
 private constructor(
     private val filingPolicy: FilingPolicy,
-    private val openFile: LoadFile,
+    private val loadFileContent: LoadFile,
     private val mapper: Mapper
 ) : Interceptor {
 
@@ -86,7 +86,7 @@ private constructor(
     }
 
     private fun loadResponse(request: Request): ResponseDescriptor? = try {
-        openFile(filingPolicy.getPath(request))?.let { stream ->
+        loadFileContent(filingPolicy.getPath(request))?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
@@ -112,12 +112,12 @@ private constructor(
     private fun loadResponseBody(request: Request, response: ResponseDescriptor) = ResponseBody.create(
         MediaType.parse(response.mediaType), response.bodyFile?.let {
             loadResponseBodyFromFile(request, it)
-        } ?: response.body.toByteArray(Charset.forName("UTF-8")))
+        } ?: response.body.toByteArray(Charsets.UTF_8))
 
     private fun loadResponseBodyFromFile(request: Request, it: String): ByteArray? {
         val responsePath = filingPolicy.getPath(request)
         val bodyPath = responsePath.substring(0, responsePath.lastIndexOf('/') + 1) + it
-        return openFile(bodyPath)?.readBytes()
+        return loadFileContent(bodyPath)?.readBytes()
     }
 
     private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
@@ -125,6 +125,9 @@ private constructor(
 
     private fun RequestDescriptor.match(request: Request): Boolean =
         (method?.let { it.toUpperCase(Locale.ROOT) == request.method() } ?: true) &&
+                (host?.let { it.toLowerCase() == request.url().host() } ?: true) &&
+                (port?.let { it == request.url().port() } ?: true) &&
+                (path?.let { it == request.url().encodedPath() } ?: true) &&
                 headers.all { request.headers(it.name).contains(it.value) } &&
                 params.all { request.url().queryParameter(it.key) == it.value } &&
                 request.matchBody(this)
@@ -207,7 +210,8 @@ private constructor(
      * Builder to instantiate an interceptor.
      */
     class Builder {
-        private var filingPolicy: FilingPolicy? = null
+
+        private var filingPolicy: FilingPolicy? = MirrorPathPolicy()
         private var openFile: LoadFile? = null
         private var mapper: Mapper? = null
         private var root: File? = null

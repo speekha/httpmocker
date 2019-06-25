@@ -27,6 +27,15 @@ internal data class RequestDescriptor
     @JsonProperty("method")
     val method: String? = null,
 
+    @JsonProperty("host")
+    val host: String? = null,
+
+    @JsonProperty("port")
+    val port: Int? = null,
+
+    @JsonProperty("path")
+    val path: String? = null,
+
     @JsonProperty("headers")
     @JsonDeserialize(using = HeadersDeserializer::class)
     @JsonSerialize(using = HeadersSerializer::class)

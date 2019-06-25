@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.policies
 
-data class RequestDescriptor(
+import fr.speekha.httpmocker.buildRequest
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
-    val method: String? = null,
+class SingleFilePolicyTest {
 
-    val host: String? = null,
-
-    val port: Int? = null,
-
-    val path: String? = null,
-
-    val headers: List<Header> = emptyList(),
-
-    val params: Map<String, String> = emptyMap(),
-
-    val body: String? = null
-
-)
+    @Test
+    fun `should always return the same file`() {
+        val file = "folder/singleFile.json"
+        val policy: FilingPolicy = SingleFilePolicy(file)
+        val request = buildRequest(
+            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
+        )
+        Assertions.assertEquals(file, policy.getPath(request))
+    }
+}

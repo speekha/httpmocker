@@ -22,7 +22,6 @@ import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.nio.charset.Charset
 
 class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper()) {
     @Test
@@ -41,7 +40,7 @@ class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper()) {
             listOf(
                 Matcher(response = ResponseDescriptor()),
                 Matcher(RequestDescriptor(), ResponseDescriptor())
-            ), mapper.readMatches(json.byteInputStream(Charset.forName("UTF-8")))
+            ), mapper.readMatches(json.byteInputStream())
         )
     }
 }

@@ -28,6 +28,7 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.InMemoryPolicy
+import fr.speekha.httpmocker.policies.SingleFilePolicy
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -208,6 +209,63 @@ class MockResponseInterceptorTest {
 
         assertEquals("param A", param1)
         assertEquals("param B", param2)
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should select response based on URL path`(mapper: Mapper) {
+        val policy = SingleFilePolicy("single_file.json")
+        val interceptor = MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(policy)
+            .loadFileWith(loadingLambda)
+            .parseScenariosWith(mapper)
+            .setInterceptorStatus(ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        val request = buildRequest("http://someHost.com:12345/aTestUrl")
+        assertEquals("based on URL", client.newCall(request).execute().body()?.string())
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should select response based on host`(mapper: Mapper) {
+        val policy = SingleFilePolicy("single_file.json")
+        val interceptor = MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(policy)
+            .loadFileWith(loadingLambda)
+            .parseScenariosWith(mapper)
+            .setInterceptorStatus(ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        val request = buildRequest("http://hostTest.com:12345/anyUrl")
+        assertEquals("based on host", client.newCall(request).execute().body()?.string())
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should select response based on port`(mapper: Mapper) {
+        val policy = SingleFilePolicy("single_file.json")
+        val interceptor = MockResponseInterceptor.Builder()
+            .decodeScenarioPathWith(policy)
+            .loadFileWith(loadingLambda)
+            .parseScenariosWith(mapper)
+            .setInterceptorStatus(ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        val request = buildRequest("http://someHost.com:45612/anyUrl")
+        assertEquals("based on port", client.newCall(request).execute().body()?.string())
     }
 
     @ParameterizedTest

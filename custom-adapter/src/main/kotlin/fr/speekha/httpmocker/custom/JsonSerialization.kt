@@ -35,6 +35,9 @@ fun Matcher.toJson(): String = """  {
 
 fun RequestDescriptor.toJson(): String = listOf(
     "method" to method.wrap(),
+    "host" to host.wrap(),
+    "port" to port.wrap(),
+    "path" to path.wrap(),
     "headers" to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
     "params" to params.toJson(),
     "body" to body.wrap()
@@ -71,5 +74,7 @@ fun ResponseDescriptor.toJson(): String = listOf(
     ) { (key, value) -> "      \"$key\": $value" }
 
 private fun String?.wrap() = this?.let { "\"$it\"" }
+
+private fun Int?.wrap() = this?.toString()
 
 fun String.truncate(limit: Int): String = takeIf { length <= limit } ?: substring(0, limit - 3) + "..."

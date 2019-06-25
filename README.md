@@ -109,13 +109,15 @@ The interceptor's builder offer a few more options:
         .addFakeNetworkDelay(50L)
         .build()
 ```
-If your interceptor is enabled, it will need to find scenarios to mock the http calls. In the previous example,
+If your interceptor is enabled, it will need to find scenarios to mock the HTTP calls. In the previous example,
 we decided to store the scenarios in the assets folder of the app (but you could also have them as resources in 
 your classpath and use the classloader to access them or even store them in a certain folder and access that 
 folder with any File API you're comfortable with). You also need to provide the FilePolicy you want to use: that 
 policy defines which file to check to find a match for a request. A few policies are provided in the library, but
 you can also define your own. An InMemoryPolicy allows to configure your scenarios entirely through code and keep
-them in memory instead of reading them from an actual file on the disc.
+them in memory instead of reading them from an actual file on the disc. Finally, you need to provide a Mapper to parse 
+the JSON scenario files. A few mappers are available out of the box based on Jackson, Gson or Moshi in the specific
+dependencies, or even one based on a custom JSON parser that does not use any dependencies.
 
 If your interceptor is disabled, it will not interfere with actual network calls. If you choose the mixed mode, 
 requests that can not be answered by a predefined scenario will actually be executed. Hence the mixed mode: responses 

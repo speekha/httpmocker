@@ -24,12 +24,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.charset.Charset
 
 internal val completeData = listOf(
     Matcher(
         RequestDescriptor(
             method = "post",
+            host = "test.com",
+            port = 15926,
+            path = "/path",
             headers = listOf(
                 Header("reqHeader1", "1"),
                 Header("reqHeader1", "2"),
@@ -77,7 +79,7 @@ internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream)
         writeBlock(it)
     }
     val result = stream.toByteArray()
-        .toString(Charset.forName("UTF-8"))
+        .toString(Charsets.UTF_8)
         .split('\n')
         .joinToString("") {
             it.trim().replace(": ", ":").replace(",", "")
@@ -87,7 +89,7 @@ internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream)
         result.length,
         """Length of generated JSON differs:
             Expected: ${getCompleteInput().readAsStringList().joinToString("") {it.trim()}}
-            Actual:   ${stream.toByteArray().toString(Charset.forName("UTF-8"))}""".trimIndent()
+            Actual:   ${stream.toByteArray().toString(Charsets.UTF_8)}""".trimIndent()
     )
     assertEquals("", expectedResult.fold(result) { acc, token ->
         acc.replaceFirst(token, "")

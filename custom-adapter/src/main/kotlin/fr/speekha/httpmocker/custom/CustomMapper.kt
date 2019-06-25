@@ -21,7 +21,6 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.readAsString
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.charset.Charset
 
 /**
  * An adapter using custom JSON parsing to serialize/deserialize scenarios.
@@ -46,7 +45,7 @@ class CustomMapper : Mapper {
     }
 
     override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(compactJson(matchers.toJson()).toByteArray(Charset.forName("UTF-8")))
+        it.write(compactJson(matchers.toJson()).toByteArray(Charsets.UTF_8))
     }
 
 }
