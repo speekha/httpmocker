@@ -16,6 +16,9 @@ commands:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+      - restore_cache:
+          keys:
+            - build-mocker-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
           command: ./gradlew << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
