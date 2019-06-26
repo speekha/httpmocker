@@ -1,6 +1,6 @@
-version: 2
+version: 2.1
 commands:
-  build_module:
+  build-module:
     description: "Builds a specific module"
     parameters:
       module:
@@ -63,7 +63,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build_module:
+      - build-module:
           module: "mocker"
   build_jackson:
     docker:
@@ -71,7 +71,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build_module:
+      - build-module:
           module: "jackson-adapter"
   build_gson:
     docker:
@@ -79,7 +79,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build_module:
+      - build-module:
           module: "gson-adapter"
   build_moshi:
     docker:
@@ -87,7 +87,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build_module:
+      - build-module:
           module: "moshi-adapter"
   build_custom:
     docker:
@@ -95,7 +95,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build_module:
+      - build-module:
           module: "custom-adapter"
   store_artifacts:
     docker:
