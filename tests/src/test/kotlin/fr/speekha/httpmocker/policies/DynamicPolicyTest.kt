@@ -21,34 +21,64 @@ import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class DynamicPolicyTest {
+
     private val mapper = JacksonMapper()
 
-    private val policy = DynamicPolicy(mapper) {
-        ResponseDescriptor(
-            code = 202,
-            body = "get some body"
-        )
-    }
+    private lateinit var policy: DynamicPolicy
 
-    private val interceptor = MockResponseInterceptor.Builder()
-        .useDynamicLoader(policy)
-        .parseScenariosWith(mapper)
-        .setInterceptorStatus(MockResponseInterceptor.Mode.ENABLED)
-        .build()
+    private lateinit var interceptor: MockResponseInterceptor
+
+    private lateinit var client: OkHttpClient
+
+    fun setupPolicy(aPolicy: DynamicPolicy) {
+        policy = aPolicy
+
+        interceptor = MockResponseInterceptor.Builder()
+            .useDynamicLoader(policy)
+            .parseScenariosWith(mapper)
+            .setInterceptorStatus(MockResponseInterceptor.Mode.ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    }
 
     @Test
     fun `should reply with a dynamically generated response`() {
-        val url = "http://www.test.fr/path1?param=1"
-
-        val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+        setupPolicy(DynamicPolicy(mapper) {
+            ResponseDescriptor(
+                code = 202,
+                body = "some random body"
+            )
+        })
         val response = client.newCall(buildRequest(url, method = "GET")).execute()
 
         Assertions.assertEquals(202, response.code())
-        Assertions.assertEquals("get some body", response.body()?.string())
+        Assertions.assertEquals("some random body", response.body()?.string())
     }
 
+    @Test
+    fun `should reply with a stateful callback`() {
+        val body = "Time: ${System.currentTimeMillis()}"
+        val callback = object : DynamicPolicy.RequestCallback {
+            override fun onRequest(request: Request) = ResponseDescriptor(
+                code = 202,
+                body = body
+            )
+        }
+        setupPolicy(DynamicPolicy(mapper, callback))
+
+        val response = client.newCall(buildRequest(url, method = "GET")).execute()
+
+        Assertions.assertEquals(202, response.code())
+        Assertions.assertEquals(body, response.body()?.string())
+    }
+
+    companion object {
+        const val url = "http://www.test.fr/path1?param=1"
+    }
 }

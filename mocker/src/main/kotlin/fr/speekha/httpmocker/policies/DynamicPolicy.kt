@@ -27,34 +27,47 @@ import java.io.PipedOutputStream
 
 class DynamicPolicy(
     private val mapper: Mapper,
-    private val computeResponse: (Request) -> ResponseDescriptor
+    private val callback: RequestCallback
 ) : FilingPolicy {
+
+    constructor(
+        mapper: Mapper,
+        computeResponse: (Request) -> ResponseDescriptor
+    ) : this(mapper, object : RequestCallback {
+        override fun onRequest(request: Request): ResponseDescriptor = computeResponse(request)
+    })
 
     private val responses: MutableMap<String, ResponseDescriptor> = mutableMapOf()
 
     private val body: MutableMap<String, ByteArray> = mutableMapOf()
 
     override fun getPath(request: Request): String = computeKey(request).also { key ->
-            val result = computeResponse(request)
-            responses[key] = result.copy(body = "", bodyFile = "$key-body")
-            body[key] = result.body.toByteArray()
-        }
+        val result = callback.onRequest(request)
+        responses[key] = result.copy(body = "", bodyFile = "$key-body")
+        body[key] = result.body.toByteArray()
+    }
 
-    private fun computeKey(request: Request): String = request.url()
-            .toString()
-            .replace('/', '_')
+    private fun computeKey(request: Request): String = request.hashCode().toString()
 
     fun loadScenario(key: String): InputStream? = if (key.endsWith("-body")) {
-        body[key.dropLast(5)]?.let {
-            ByteArrayInputStream(it)
-        }
+        loadBody(key)
     } else {
-        responses[key]?.let {
-            PipedInputStream().apply {
-                val pipeOut = PipedOutputStream()
-                pipeOut.connect(this)
-                mapper.writeValue(pipeOut, listOf(Matcher(response = it)))
-            }
+        loadResponse(key)
+    }
+
+    private fun loadResponse(key: String) = responses[key]?.let {
+        PipedInputStream().apply {
+            val pipeOut = PipedOutputStream()
+            pipeOut.connect(this)
+            mapper.writeValue(pipeOut, listOf(Matcher(response = it)))
         }
+    }
+
+    private fun loadBody(key: String) = body[key.dropLast(5)]?.let {
+        ByteArrayInputStream(it)
+    }
+
+    interface RequestCallback {
+        fun onRequest(request: Request): ResponseDescriptor
     }
 }
