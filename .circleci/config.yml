@@ -195,7 +195,7 @@ workflows:
   build_and_publish:
     jobs:
       - prepare_dependencies
-      - build_mocker:
+      - build_core:
           requires:
             - prepare_dependencies
       - build_jackson:
