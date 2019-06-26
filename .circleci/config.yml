@@ -200,16 +200,16 @@ workflows:
             - prepare_dependencies
       - build_jackson:
           requires:
-            - build_mocker
+            - build_core
       - build_gson:
           requires:
-            - build_mocker
+            - build_core
       - build_moshi:
           requires:
-            - build_mocker
+            - build_core
       - build_custom:
           requires:
-            - build_mocker
+            - build_core
       - store_artifacts:
           requires:
             - build_jackson
