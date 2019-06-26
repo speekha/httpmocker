@@ -1,4 +1,29 @@
 version: 2
+commands:
+  build_module:
+    description: "Builds a specific module"
+    parameters:
+      module:
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+      - run:
+          name: Build
+          command: ./gradlew << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
+      - save_cache:
+          key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - << parameters.module >>/build
+
 jobs:
   prepare_dependencies:
     docker:
@@ -11,8 +36,6 @@ jobs:
       - restore_cache:
           keys:
             - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
       - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
@@ -23,6 +46,10 @@ jobs:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Clean git
           command: git gc
@@ -30,7 +57,47 @@ jobs:
           key: source-{{ .Branch }}-{{ .Revision }}
           paths:
             - "."
-  build:
+  build_core:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - build_module:
+          module: "mocker"
+  build_jackson:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - build_module:
+          module: "jackson-adapter"
+  build_gson:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - build_module:
+          module: "gson-adapter"
+  build_moshi:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - build_module:
+          module: "moshi-adapter"
+  build_custom:
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - build_module:
+          module: "custom-adapter"
+  store_artifacts:
     docker:
       - image: circleci/android:api-28-alpha
     environment:
@@ -41,20 +108,24 @@ jobs:
             - source-{{ .Branch }}-{{ .Revision }}
             - source-{{ .Branch }}-
             - source-
-      - checkout
       - restore_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - run:
-          name: Build
-          command: ./gradlew clean assemble sourcesJar dokkaJar --stacktrace
-      - save_cache:
-          paths:
-            - ~/.gradle/wrapper
-          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - save_cache:
-          key: build-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - "."
+      - checkout
+      - restore_cache:
+          keys:
+            - build-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
@@ -69,12 +140,27 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - build-{{ .Branch }}-{{ .Revision }}
-            - build-{{ .Branch }}-
-            - build-
-      - checkout
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
       - restore_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - checkout
+      - restore_cache:
+          keys:
+            - build-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Tests
           command: ./gradlew tests:test --stacktrace
@@ -109,12 +195,33 @@ workflows:
   build_and_publish:
     jobs:
       - prepare_dependencies
-      - build:
+      - build_mocker:
           requires:
             - prepare_dependencies
+      - build_jackson:
+          requires:
+            - build_mocker
+      - build_gson:
+          requires:
+            - build_mocker
+      - build_moshi:
+          requires:
+            - build_mocker
+      - build_custom:
+          requires:
+            - build_mocker
+      - store_artifacts:
+          requires:
+            - build_jackson
+            - build_gson
+            - build_moshi
+            - build_custom
       - test:
           requires:
-            - build
+            - build_jackson
+            - build_gson
+            - build_moshi
+            - build_custom
       - publish_snapshot:
           requires:
             - test
