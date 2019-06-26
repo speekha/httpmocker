@@ -1,5 +1,5 @@
 #!/bin/sh
-ls -l mocker/build
+mkdir build
 cp -r mocker/build/* build
 cp -r jackson-adapter/build/* build
 cp -r gson-adapter/build/* build
