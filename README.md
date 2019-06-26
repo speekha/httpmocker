@@ -14,7 +14,7 @@ configuration files instead. The interceptor will also allow to record scenarios
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.0'
+httpmocker_version = '1.1.2'
 ```
 
 ## Gradle 
@@ -52,23 +52,23 @@ your classpath, like Jackson and GSON). If choose one of these options, all you 
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.1.2"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:gson-adapter:1.1.2"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.1.2"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:custom-adapter:1.1.2"
 ```
 
 If none of those options suits your needs, you can also provide your own implementation of the `Mapper` class and add 
 the main dependency to your project:
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.0"
+implementation "fr.speekha.httpmocker:mocker:1.1.2"
 ```
 
 ### Proguard rules
