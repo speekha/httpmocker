@@ -30,7 +30,7 @@ commands:
 jobs:
   prepare_dependencies:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28-alpha
     environment:
       JVM_OPTS: -Xmx3200m
       #TERM: dumb
