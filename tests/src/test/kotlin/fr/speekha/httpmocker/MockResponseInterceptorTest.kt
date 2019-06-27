@@ -200,6 +200,7 @@ class MockResponseInterceptorTest {
 
         assertResponseCode(response, 200, "OK")
         assertEquals("application", response.body()?.contentType()?.type())
+        assertEquals("application/json", response.header("Content-type"))
         assertEquals("json", response.body()?.contentType()?.subtype())
     }
 

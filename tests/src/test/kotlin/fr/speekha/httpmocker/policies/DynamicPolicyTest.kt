@@ -39,7 +39,7 @@ class DynamicPolicyTest {
         policy = aPolicy
 
         interceptor = MockResponseInterceptor.Builder()
-            .useDynamicLoader(policy)
+            .useDynamicMocks(policy)
             .parseScenariosWith(mapper)
             .setInterceptorStatus(MockResponseInterceptor.Mode.ENABLED)
             .build()

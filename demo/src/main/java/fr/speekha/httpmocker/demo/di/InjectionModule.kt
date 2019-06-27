@@ -41,6 +41,7 @@ val injectionModule: Module = module {
             .saveScenariosIn(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             )
+            .addFakeNetworkDelay(500)
             .build()
     }
 
