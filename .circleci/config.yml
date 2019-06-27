@@ -124,15 +124,6 @@ jobs:
       - restore_cache:
           keys:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
           command: ./gradlew demo:clean demo:assemble --stacktrace
@@ -169,6 +160,9 @@ jobs:
       - restore_cache:
           keys:
             - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-demo-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
@@ -176,8 +170,8 @@ jobs:
           path: build/libs
           destination: libs
       - store_artifacts:
-          path: demo/build/outputs/apk/**/*.apk
-          destination: libs
+          path: demo/build/outputs/apk/
+          destination: apks
   test:
     docker:
       - image: circleci/android:api-28
@@ -256,6 +250,9 @@ workflows:
       - build_custom:
           requires:
             - build_core
+      - build_demo:
+          requires:
+            - build_jackson
       - store_artifacts:
           requires:
             - build_jackson
