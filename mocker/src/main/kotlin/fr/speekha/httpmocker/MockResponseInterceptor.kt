@@ -31,6 +31,7 @@ import okhttp3.Response
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.InputStream
+import java.util.Locale
 
 /**
  * A OkHTTP interceptor that can let requests through or block them and answer them with predefined responses.
@@ -98,6 +99,7 @@ private constructor(
         .message(messageForHttpCode(response.code))
         .body(loadResponseBody(request, response))
         .apply {
+            header("Content-type", response.mediaType)
             response.headers.forEach {
                 header(it.name, it.value)
             }
@@ -121,11 +123,11 @@ private constructor(
         list.firstOrNull { it.request.match(request) }?.response
 
     private fun RequestDescriptor.match(request: Request): Boolean =
-        (method?.let { it.equals(request.method(), true) } ?: true) &&
-                (host?.let { it.equals(request.url().host(), true) } ?: true) &&
+        (method?.equals(request.method(), true) ?: true) &&
+                (host?.equals(request.url().host(), true) ?: true) &&
                 (port?.let { it == request.url().port() } ?: true) &&
                 (path?.let { it == request.url().encodedPath() } ?: true) &&
-                (host?.let { it.toLowerCase() == request.url().host() } ?: true) &&
+                (host?.let { it.toLowerCase(Locale.ROOT) == request.url().host() } ?: true) &&
                 (port?.let { it == request.url().port() } ?: true) &&
                 (path?.let { it == request.url().encodedPath() } ?: true) &&
                 headers.all { request.headers(it.name).contains(it.value) } &&
@@ -184,9 +186,9 @@ private constructor(
         }
 
         /**
-         * Uses a dynamic loader instead of a file policy and loading function
+         * Uses a dynamic policy to answer network requests instead of file scenarios
          */
-        fun useDynamicLoader(policy: DynamicPolicy) = apply {
+        fun useDynamicMocks(policy: DynamicPolicy) = apply {
             filingPolicy = policy
             openFile = policy::loadScenario
         }
