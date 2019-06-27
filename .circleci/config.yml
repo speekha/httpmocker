@@ -30,7 +30,7 @@ commands:
 jobs:
   prepare_dependencies:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
       #TERM: dumb
@@ -64,7 +64,7 @@ jobs:
             - "."
   build_core:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -72,7 +72,7 @@ jobs:
           module: "mocker"
   build_jackson:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -80,7 +80,7 @@ jobs:
           module: "jackson-adapter"
   build_gson:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -88,7 +88,7 @@ jobs:
           module: "gson-adapter"
   build_moshi:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -96,15 +96,53 @@ jobs:
           module: "moshi-adapter"
   build_custom:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
       - build-module:
           module: "custom-adapter"
-  store_artifacts:
+  build_demo:
     docker:
       - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - restore_cache:
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+      - restore_cache:
+          keys:
+            - build-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Build
+          command: ./gradlew demo:clean demo:assemble --stacktrace
+      - save_cache:
+          key: build-demo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - demo/build
+  store_artifacts:
+    docker:
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -137,9 +175,12 @@ jobs:
       - store_artifacts:
           path: build/libs
           destination: libs
+      - store_artifacts:
+          path: demo/build/outputs/apk/**/*.apk
+          destination: libs
   test:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -176,7 +217,7 @@ jobs:
           path: tests/build/test-results
   publish_snapshot:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -186,7 +227,7 @@ jobs:
           command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
   publish_release:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/openjdk:9.0.4-jdk
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
