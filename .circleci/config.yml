@@ -259,6 +259,7 @@ workflows:
             - build_gson
             - build_moshi
             - build_custom
+            - build_demo
       - test:
           requires:
             - build_jackson
