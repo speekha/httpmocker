@@ -42,9 +42,9 @@ fun Request.toDescriptor() = RequestDescriptor(
     headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
 )
 
-fun Response.toDescriptor(duplicates: Int, extension: String) = ResponseDescriptor(
+fun Response.toDescriptor(duplicates: Int, extension: String?) = ResponseDescriptor(
     code = code(),
-    bodyFile = request().url().pathSegments().last() + "_body_$duplicates$extension",
+    bodyFile = extension?.let { request().url().pathSegments().last() + "_body_$duplicates$it" },
     headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
 )
 
