@@ -68,7 +68,10 @@ private constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response = when (mode) {
         Mode.DISABLED -> proceedWithRequest(chain)
-        Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(chain.request(), responseNotFound())
+        Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(
+            chain.request(),
+            responseNotFound()
+        )
         Mode.MIXED -> mockResponse(chain.request()) ?: proceedWithRequest(chain)
         Mode.RECORD -> recordCall(chain)
     }
@@ -92,31 +95,41 @@ private constructor(
         null
     }
 
-    private fun buildResponse(request: Request, response: ResponseDescriptor): Response = Response.Builder()
-        .request(request)
-        .protocol(Protocol.HTTP_1_1)
-        .code(response.code)
-        .message(messageForHttpCode(response.code))
-        .body(loadResponseBody(request, response))
-        .apply {
-            header("Content-type", response.mediaType)
-            response.headers.forEach {
-                header(it.name, it.value)
+    private fun buildResponse(request: Request, response: ResponseDescriptor): Response =
+        Response.Builder()
+            .request(request)
+            .protocol(Protocol.HTTP_1_1)
+            .code(response.code)
+            .message(messageForHttpCode(response.code))
+            .body(loadResponseBody(request, response))
+            .apply {
+                header("Content-type", response.mediaType)
+                response.headers.forEach {
+                    header(it.name, it.value)
+                }
             }
-        }
-        .build()
+            .build()
 
     private fun responseNotFound() = ResponseDescriptor(code = 404, body = "Page not found")
 
-    private fun loadResponseBody(request: Request, response: ResponseDescriptor) = ResponseBody.create(
-        MediaType.parse(response.mediaType), response.bodyFile?.let {
-            loadResponseBodyFromFile(request, it)
-        } ?: response.body.toByteArray())
+    private fun loadResponseBody(request: Request, response: ResponseDescriptor) =
+        ResponseBody.create(
+            MediaType.parse(response.mediaType), response.bodyFile?.let {
+                loadResponseBodyFromFile(request, it)
+            } ?: response.body.toByteArray())
 
     private fun loadResponseBodyFromFile(request: Request, it: String): ByteArray? {
         val responsePath = filingPolicy.getPath(request)
-        val bodyPath = responsePath.substring(0, responsePath.lastIndexOf('/') + 1) + it
-        return loadFileContent(bodyPath)?.readBytes()
+        return loadFileContent(getPath(responsePath, it))?.readBytes()
+    }
+
+    private fun getPath(base: String, child: String): String {
+        val segments = base.split("/").dropLast(1) + child.split("/")
+        return segments
+            .filterIndexed { index, segment ->
+                segment != ".." && (index == segments.size-1 || segments[index + 1] != "..")
+            }
+            .joinToString("/")
     }
 
     private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
@@ -138,12 +151,18 @@ private constructor(
         val response = proceedWithRequest(chain)
         val body = response.body()?.bytes()
         val record =
-            CallRecord(chain.request(), response, body, File(rootFolder, filingPolicy.getPath(chain.request())))
+            CallRecord(
+                chain.request(),
+                response,
+                body,
+                File(rootFolder, filingPolicy.getPath(chain.request()))
+            )
         requestRecorder.saveFiles(record)
         return response.copyResponse(body)
     }
 
-    private fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
+    private fun messageForHttpCode(httpCode: Int) =
+        HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
 
     /**
      * Defines the interceptor's state and how it is supposed to respond to requests (intercept them, let them through or record them)

@@ -171,6 +171,28 @@ class MockResponseInterceptorTest {
 
     @ParameterizedTest
     @MethodSource("data")
+    fun `should return a predefined response body from separate file in a different folder`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val response = executeGetRequest("/request_in_other_folder")
+
+        assertResponseCode(response, 200, "OK")
+        assertEquals("separate body file", response.body()?.string())
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should return a predefined response body from separate file in a parent folder`(mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val response = executeGetRequest("/folder2/request_in_other_folder")
+
+        assertResponseCode(response, 200, "OK")
+        assertEquals("separate body file", response.body()?.string())
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
     fun `should return proper headers`(mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
