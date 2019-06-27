@@ -17,12 +17,13 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.RequestRecorder.CallRecord
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.policies.DynamicPolicy
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
+import fr.speekha.httpmocker.scenario.DynamicMockProvider
+import fr.speekha.httpmocker.scenario.RequestCallback
+import fr.speekha.httpmocker.scenario.ScenarioProvider
+import fr.speekha.httpmocker.scenario.StaticMockProvider
 import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.Protocol
@@ -31,7 +32,6 @@ import okhttp3.Response
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.InputStream
-import java.util.Locale
 
 /**
  * A OkHTTP interceptor that can let requests through or block them and answer them with predefined responses.
@@ -39,12 +39,9 @@ import java.util.Locale
  */
 class MockResponseInterceptor
 private constructor(
-    private val filingPolicy: FilingPolicy,
-    private val loadFileContent: LoadFile,
-    private val mapper: Mapper
+    private var provider: ScenarioProvider,
+    private var requestRecorder: RequestRecorder?
 ) : Interceptor {
-
-    private var rootFolder: File? = null
 
     /**
      * An arbitrary delay to include when answering requests in order to have a realistic behavior (GUI can display
@@ -57,14 +54,12 @@ private constructor(
      */
     var mode: Mode = Mode.DISABLED
         set(value) {
-            if (value == Mode.RECORD && rootFolder == null) {
-                error(NO_FOLDER_ERROR)
+            if (value == Mode.RECORD && requestRecorder == null) {
+                error(NO_RECORDER_ERROR)
             } else {
                 field = value
             }
         }
-
-    private val requestRecorder = RequestRecorder(mapper)
 
     override fun intercept(chain: Interceptor.Chain): Response = when (mode) {
         Mode.DISABLED -> proceedWithRequest(chain)
@@ -86,14 +81,7 @@ private constructor(
         buildResponse(request, response)
     }
 
-    private fun loadResponse(request: Request): ResponseDescriptor? = try {
-        loadFileContent(filingPolicy.getPath(request))?.let { stream ->
-            val list = mapper.readMatches(stream)
-            matchRequest(request, list)
-        }
-    } catch (e: Throwable) {
-        null
-    }
+    private fun loadResponse(request: Request): ResponseDescriptor? = provider.onRequest(request)
 
     private fun buildResponse(request: Request, response: ResponseDescriptor): Response =
         Response.Builder()
@@ -115,51 +103,17 @@ private constructor(
     private fun loadResponseBody(request: Request, response: ResponseDescriptor) =
         ResponseBody.create(
             MediaType.parse(response.mediaType), response.bodyFile?.let {
-                loadResponseBodyFromFile(request, it)
-            } ?: response.body.toByteArray())
+                provider.loadResponseBody(request, it)
+            } ?: response.body.toByteArray()
+        )
 
-    private fun loadResponseBodyFromFile(request: Request, it: String): ByteArray? {
-        val responsePath = filingPolicy.getPath(request)
-        return loadFileContent(getPath(responsePath, it))?.readBytes()
-    }
-
-    private fun getPath(base: String, child: String): String {
-        val segments = base.split("/").dropLast(1) + child.split("/")
-        return segments
-            .filterIndexed { index, segment ->
-                segment != ".." && (index == segments.size-1 || segments[index + 1] != "..")
-            }
-            .joinToString("/")
-    }
-
-    private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
-        list.firstOrNull { it.request.match(request) }?.response
-
-    private fun RequestDescriptor.match(request: Request): Boolean =
-        (method?.equals(request.method(), true) ?: true) &&
-                (host?.equals(request.url().host(), true) ?: true) &&
-                (port?.let { it == request.url().port() } ?: true) &&
-                (path?.let { it == request.url().encodedPath() } ?: true) &&
-                (host?.let { it.toLowerCase(Locale.ROOT) == request.url().host() } ?: true) &&
-                (port?.let { it == request.url().port() } ?: true) &&
-                (path?.let { it == request.url().encodedPath() } ?: true) &&
-                headers.all { request.headers(it.name).contains(it.value) } &&
-                params.all { request.url().queryParameter(it.key) == it.value } &&
-                request.matchBody(this)
-
-    private fun recordCall(chain: Interceptor.Chain): Response {
+    private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
         val response = proceedWithRequest(chain)
         val body = response.body()?.bytes()
-        val record =
-            CallRecord(
-                chain.request(),
-                response,
-                body,
-                File(rootFolder, filingPolicy.getPath(chain.request()))
-            )
-        requestRecorder.saveFiles(record)
-        return response.copyResponse(body)
-    }
+        val record = CallRecord(chain.request(), response, body)
+        saveFiles(record)
+        response.copyResponse(body)
+    } ?: error(RECORD_NOT_SUPPORTED_ERROR)
 
     private fun messageForHttpCode(httpCode: Int) =
         HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
@@ -183,37 +137,64 @@ private constructor(
      */
     class Builder {
 
-        private var filingPolicy: FilingPolicy? = MirrorPathPolicy()
+        private var filingPolicy: FilingPolicy? = null
         private var openFile: LoadFile? = null
+        private var dynamicMockProvider: DynamicMockProvider? = null
         private var mapper: Mapper? = null
         private var root: File? = null
         private var simulatedDelay: Long = 0
         private var interceptorMode: Mode = Mode.DISABLED
 
         /**
-         * Defines the policy used to retrieve the configuration files based on the request being intercepted
+         * For static mocks: Defines the policy used to retrieve the configuration files based
+         * on the request being intercepted
+         * @param policy the naming policy to use for scenario files
          */
         fun decodeScenarioPathWith(policy: FilingPolicy) = apply {
+            if (dynamicMockProvider != null) {
+                error("Overload error")
+            }
             filingPolicy = policy
         }
 
         /**
-         * Defines a loading function to retrieve the scenario files as a stream
+         * For static mocks: Defines a loading function to retrieve the scenario files as a stream
+         * @param loading a function to load files by name and path as a stream (could use
+         * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
         fun loadFileWith(loading: LoadFile) = apply {
+            if (dynamicMockProvider != null) {
+                error("Overload error")
+            }
             openFile = loading
         }
 
         /**
-         * Uses a dynamic policy to answer network requests instead of file scenarios
+         * Uses dynamic mocks to answer network requests instead of file scenarios
+         * @param callback A callback to invoke when a request in intercepted
          */
-        fun useDynamicMocks(policy: DynamicPolicy) = apply {
-            filingPolicy = policy
-            openFile = policy::loadScenario
+        fun useDynamicMocks(callback: RequestCallback) = apply {
+            if (openFile != null || filingPolicy != null) {
+                error("Overload error")
+            }
+            dynamicMockProvider = DynamicMockProvider(callback)
         }
 
         /**
+         * Uses dynamic mocks to answer network requests instead of file scenarios
+         * @param callback A callback to invoke when a request in intercepted: must return a
+         * ResponseDescriptor for the current Request or null if not suitable Response could be
+         * computed
+         */
+        fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?) =
+            useDynamicMocks(object : RequestCallback {
+                override fun onRequest(request: Request): ResponseDescriptor? =
+                    callback(request)
+            })
+
+        /**
          * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
+         * @param objectMapper A Mapper to parse scenario files.
          */
         fun parseScenariosWith(objectMapper: Mapper) = apply {
             mapper = objectMapper
@@ -221,40 +202,47 @@ private constructor(
 
         /**
          * Defines the folder where scenarios should be stored when recording
+         * @param folder the root folder where saved scenarios should be saved
          */
         fun saveScenariosIn(folder: File) = apply {
             root = folder
         }
 
         /**
-         * Allows to set a fake delay for every requests (can be overridden in a scenario) to achieve a more realistic
-         * behavior (probably necessary if you want to display loading animations during your network calls).
+         * Allows to set a fake delay for every requests (can be overridden in a scenario) to
+         * achieve a more realistic behavior (probably necessary if you want to display loading
+         * animations during your network calls).
+         * @param delay default pause delay for network responses in ms
          */
         fun addFakeNetworkDelay(delay: Long) = apply {
             simulatedDelay = delay
         }
 
         /**
-         * Defines how the interceptor should initially behave (can be enabled, disable, record requests...)
+         * Defines how the interceptor should initially behave (can be enabled, disable, record
+         * requests...)
+         * @param status The interceptor mode
          */
         fun setInterceptorStatus(status: Mode) = apply {
             interceptorMode = status
         }
 
         /**
-         * Build the interceptor.
+         * Builds the interceptor.
          */
         fun build(): MockResponseInterceptor {
-            val policy = filingPolicy
-                ?: error(NO_POLICY_ERROR)
-            val open = openFile ?: error(NO_LOADER_ERROR)
-            val objectMapper = mapper
-                ?: error(NO_MAPPER_ERROR)
-            return MockResponseInterceptor(policy, open, objectMapper).apply {
+            val policy = filingPolicy ?: MirrorPathPolicy()
+            return MockResponseInterceptor(
+                dynamicMockProvider ?: StaticMockProvider(
+                    policy,
+                    openFile ?: error(NO_LOADER_ERROR),
+                    mapper ?: error(NO_MAPPER_ERROR)
+                ),
+                mapper?.let { RequestRecorder(it, policy, root) }
+            ).apply {
                 if (interceptorMode == Mode.RECORD && root == null) {
-                    error(NO_FOLDER_ERROR)
+                    error(NO_RECORDER_ERROR)
                 }
-                rootFolder = root
                 delay = simulatedDelay
                 mode = interceptorMode
             }
@@ -268,15 +256,15 @@ private constructor(
  */
 typealias LoadFile = (String) -> InputStream?
 
-private const val NO_POLICY_ERROR =
-    "No filing policy available. Please specify a FilingPolicy to use to access scenario files."
+const val RECORD_NOT_SUPPORTED_ERROR =
+    "Recording is not supported with the current parameters."
 
-private const val NO_LOADER_ERROR = "No method has been provided to load the scenarios."
+const val NO_LOADER_ERROR = "No method has been provided to load the scenarios."
 
-private const val NO_MAPPER_ERROR =
+const val NO_MAPPER_ERROR =
     "No mapper has been provided to deserialize scenarios. Please specify a Mapper to decode the scenario files."
 
-private const val NO_FOLDER_ERROR =
+const val NO_RECORDER_ERROR =
     "Network calls can not be recorded without a folder where to save files. Please add a root folder."
 
 private val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(

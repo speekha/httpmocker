@@ -41,7 +41,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.fail
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -66,7 +66,11 @@ class MockResponseInterceptorTest {
     }
 
     private val filingPolicy: FilingPolicy = mock {
-        on { getPath(any()) } doAnswer { (it.getArgument<Request>(0).url().encodedPath() + ".json").drop(1) }
+        on { getPath(any()) } doAnswer {
+            (it.getArgument<Request>(0).url().encodedPath() + ".json").drop(
+                1
+            )
+        }
     }
 
     private lateinit var interceptor: MockResponseInterceptor
@@ -443,7 +447,12 @@ class MockResponseInterceptorTest {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
-        executeRequest("request?param1=value1", "POST", "requestBody", listOf("someHeader" to "someValue"))
+        executeRequest(
+            "request?param1=value1",
+            "POST",
+            "requestBody",
+            listOf("someHeader" to "someValue")
+        )
 
         withFile("$SAVE_FOLDER/request.json") {
             val result: List<Matcher> =
@@ -481,7 +490,12 @@ class MockResponseInterceptorTest {
         enqueueServerResponse(200, "second body")
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
-        executeRequest("request?param1=value1", "POST", "requestBody", listOf("someHeader" to "someValue"))
+        executeRequest(
+            "request?param1=value1",
+            "POST",
+            "requestBody",
+            listOf("someHeader" to "someValue")
+        )
         executeGetRequest("request")
 
         withFile("$SAVE_FOLDER/request.json") {
@@ -512,7 +526,10 @@ class MockResponseInterceptorTest {
                         code = 200,
                         bodyFile = "request_body_1.txt",
                         mediaType = "text/plain",
-                        headers = listOf(Header("Content-Length", "11"), Header("Content-Type", "text/plain"))
+                        headers = listOf(
+                            Header("Content-Length", "11"),
+                            Header("Content-Type", "text/plain")
+                        )
                     )
                 )
             )
@@ -557,27 +574,18 @@ class MockResponseInterceptorTest {
 
     @ParameterizedTest
     @MethodSource("data")
-    fun `should not allow init an interceptor in record mode with no root folder`(mapper: Mapper) {
-
-        try {
-            setUpInterceptor(RECORD, mapper)
-            fail("Should not allow to record if root folder was not provided")
-        } catch (e: IllegalStateException) {
-            assertFalse(::interceptor.isInitialized)
-        }
+    fun `should not allow init an interceptor in record mode with no recorder`(mapper: Mapper) {
+        val exception = assertThrows<IllegalStateException> { setUpDynamicInterceptor(RECORD) { null } }
+        assertEquals(NO_RECORDER_ERROR, exception.message)
+        assertFalse(::interceptor.isInitialized)
     }
 
     @ParameterizedTest
     @MethodSource("data")
-    fun `should not allow to record requests if root folder is not set`(mapper: Mapper) {
-
-        try {
-            setUpInterceptor(DISABLED, mapper)
-            interceptor.mode = RECORD
-            fail("Should not allow to record if root folder was not provided")
-        } catch (e: IllegalStateException) {
-            assertEquals(DISABLED, interceptor.mode)
-        }
+    fun `should not allow to record requests if recorder is not set`(mapper: Mapper) {
+        setUpDynamicInterceptor(DISABLED) { null }
+        val exception = assertThrows<IllegalStateException> { interceptor.mode = RECORD }
+        assertEquals(NO_RECORDER_ERROR, exception.message)
     }
 
     @ParameterizedTest
@@ -645,18 +653,31 @@ class MockResponseInterceptorTest {
 
     private fun setUpInterceptor(
         mode: MockResponseInterceptor.Mode,
-        mapper: Mapper,
+        mapper: Mapper? = null,
         rootFolder: String? = null
     ) {
         interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(filingPolicy)
             .loadFileWith(loadingLambda)
-            .parseScenariosWith(mapper)
             .apply {
+                if (mapper != null) {
+                    parseScenariosWith(mapper)
+                }
                 if (rootFolder != null) {
                     saveScenariosIn(File(rootFolder))
                 }
             }
+            .setInterceptorStatus(mode)
+            .build()
+
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    }
+    private fun setUpDynamicInterceptor(
+        mode: MockResponseInterceptor.Mode,
+        provider: (Request) -> ResponseDescriptor?
+    ) {
+        interceptor = MockResponseInterceptor.Builder()
+            .useDynamicMocks(provider)
             .setInterceptorStatus(mode)
             .build()
 
@@ -684,7 +705,10 @@ class MockResponseInterceptorTest {
         server.enqueue(serverResponse)
     }
 
-    private fun executeGetRequest(url: String, headers: List<Pair<String, String>> = emptyList()): Response =
+    private fun executeGetRequest(
+        url: String,
+        headers: List<Pair<String, String>> = emptyList()
+    ): Response =
         executeRequest(url, "GET", null, headers)
 
     private fun executeRequest(

@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.Response
@@ -24,38 +25,47 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-class RequestRecorder(
-    private val mapper: Mapper
+internal class RequestRecorder(
+    private val mapper: Mapper,
+    private val filingPolicy: FilingPolicy,
+    private val rootFolder: File?
 ) {
 
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
     fun saveFiles(record: CallRecord) = try {
-        val matchers = createMatcher(record)
-        saveRequestFile(record.requestFile, matchers)
+        val requestFile = File(rootFolder, filingPolicy.getPath(record.request))
+        val matchers = createMatcher(record, requestFile)
+        saveRequestFile(requestFile, matchers)
         matchers.last().response.bodyFile?.let { responseFile ->
-            saveResponseBody(File(record.requestFile.parentFile, responseFile), record.body)
+            saveResponseBody(File(requestFile.parentFile, responseFile), record.body)
         }
     } catch (e: Throwable) {
         e.printStackTrace()
     }
 
-    private fun createMatcher(record: CallRecord): List<Matcher> = with(record) {
+    private fun createMatcher(record: CallRecord, requestFile: File): List<Matcher> = with(record) {
         val previousRecords: List<Matcher> = if (requestFile.exists())
             mapper.readMatches(requestFile).toMutableList()
         else emptyList()
         return previousRecords + Matcher(
             request.toDescriptor(),
-            response.toDescriptor(previousRecords.size, getExtension(response.body()?.contentType()))
+            response.toDescriptor(
+                previousRecords.size,
+                record.body?.let { getExtension(response.body()?.contentType()) }
+            )
         )
     }
 
-    private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) = writeFile(requestFile) {
-        mapper.writeValue(it, matchers)
-    }
+    private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) =
+        writeFile(requestFile) {
+            mapper.writeValue(it, matchers)
+        }
 
-    private fun saveResponseBody(storeFile: File, body: ByteArray?) = writeFile(storeFile) {
-        it.write(body)
+    private fun saveResponseBody(storeFile: File, body: ByteArray?) = body?.let { array ->
+        writeFile(storeFile) {
+            it.write(array)
+        }
     }
 
     private fun writeFile(file: File, block: (OutputStream) -> Unit) {
@@ -77,19 +87,19 @@ class RequestRecorder(
 
     private fun loadExtensionMap(): Map<String, String> =
         javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes")
-            .readAsStringList()
-            .associate {
+            ?.readAsStringList()
+            ?.associate {
                 val (extension, mimeType) = it.split("=")
                 mimeType to extension
-            }
+            } ?: mapOf()
 
-    private fun getExtension(contentType: MediaType?) = extensionMappings[contentType.toString()] ?: ".txt"
+    private fun getExtension(contentType: MediaType?) =
+        extensionMappings[contentType.toString()] ?: ".txt"
 
     class CallRecord(
         val request: Request,
         val response: Response,
-        val body: ByteArray?,
-        val requestFile: File
+        val body: ByteArray?
     )
 }
 
