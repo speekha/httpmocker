@@ -18,43 +18,24 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.buildRequest
-import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class DynamicPolicyTest {
-
-    private val mapper = JacksonMapper()
-
-    private lateinit var policy: DynamicPolicy
+class DynamicMockProviderTest {
 
     private lateinit var interceptor: MockResponseInterceptor
 
     private lateinit var client: OkHttpClient
 
-    fun setupPolicy(aPolicy: DynamicPolicy) {
-        policy = aPolicy
-
-        interceptor = MockResponseInterceptor.Builder()
-            .useDynamicMocks(policy)
-            .parseScenariosWith(mapper)
-            .setInterceptorStatus(MockResponseInterceptor.Mode.ENABLED)
-            .build()
-
-        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-    }
-
     @Test
     fun `should reply with a dynamically generated response`() {
-        setupPolicy(DynamicPolicy(mapper) {
-            ResponseDescriptor(
-                code = 202,
-                body = "some random body"
-            )
-        })
+        setupProvider {
+            ResponseDescriptor(code = 202, body = "some random body")
+        }
         val response = client.newCall(buildRequest(url, method = "GET")).execute()
 
         Assertions.assertEquals(202, response.code())
@@ -64,18 +45,34 @@ class DynamicPolicyTest {
     @Test
     fun `should reply with a stateful callback`() {
         val body = "Time: ${System.currentTimeMillis()}"
-        val callback = object : DynamicPolicy.RequestCallback {
-            override fun onRequest(request: Request) = ResponseDescriptor(
-                code = 202,
-                body = body
-            )
+        val callback = object : RequestCallback {
+            override fun onRequest(request: Request) = ResponseDescriptor(code = 202, body = body)
         }
-        setupPolicy(DynamicPolicy(mapper, callback))
+        setupProvider(callback)
 
         val response = client.newCall(buildRequest(url, method = "GET")).execute()
 
         Assertions.assertEquals(202, response.code())
         Assertions.assertEquals(body, response.body()?.string())
+    }
+
+    private fun setupProvider(callback: RequestCallback) {
+        interceptor = MockResponseInterceptor.Builder()
+            .useDynamicMocks(callback)
+            .setInterceptorStatus(MockResponseInterceptor.Mode.ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+
+    }
+
+    private fun setupProvider(callback: (Request) -> ResponseDescriptor) {
+        interceptor = MockResponseInterceptor.Builder()
+            .useDynamicMocks(callback)
+            .setInterceptorStatus(MockResponseInterceptor.Mode.ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
     companion object {
