@@ -30,7 +30,7 @@ commands:
 jobs:
   prepare_dependencies:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
       #TERM: dumb
@@ -64,7 +64,7 @@ jobs:
             - "."
   build_core:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -72,7 +72,7 @@ jobs:
           module: "mocker"
   build_jackson:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -80,7 +80,7 @@ jobs:
           module: "jackson-adapter"
   build_gson:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -88,7 +88,7 @@ jobs:
           module: "gson-adapter"
   build_moshi:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -96,7 +96,7 @@ jobs:
           module: "moshi-adapter"
   build_custom:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -104,7 +104,7 @@ jobs:
           module: "custom-adapter"
   build_demo:
     docker:
-      - image: circleci/android:api-28-alpha
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -142,7 +142,7 @@ jobs:
             - demo/build
   store_artifacts:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -180,7 +180,7 @@ jobs:
           destination: libs
   test:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -217,7 +217,7 @@ jobs:
           path: tests/build/test-results
   publish_snapshot:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -227,7 +227,7 @@ jobs:
           command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
   publish_release:
     docker:
-      - image: circleci/openjdk:9.0.4-jdk
+      - image: circleci/android:api-28
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
