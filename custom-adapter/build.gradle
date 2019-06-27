@@ -15,7 +15,6 @@
  */
 
 apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
 
 test {
     options {
