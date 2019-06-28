@@ -74,14 +74,11 @@ implementation "fr.speekha.httpmocker:mocker:1.1.2"
 
 ### Proguard rules
 
-Since most JSON parsers use some type of introspection to parse JSON streams, it is recommended to keep the mapping 
-classes unobfuscated. Depending on the adapter you choose to use, it will be fr.speekha.httpmocker.<adapter package>
-where <adapter package> can be jackson, gson or moshi. For instance, if you choose the Jackson parser:
+Since Jackson and Gson use some type of introspection or annotation processing to parse JSON streams, it 
+is recommended to keep the mapping classes unobfuscated. You can refer to the 
+[proguard-rules.pro](demo/proguard-rules.pro) file included in the demo app for an example of required rules.
 
-```
--keep class fr.speekha.httpmocker.jackson.** { *; }
-```
-The custom parser is immune to obfuscation because it does not use any introspection.
+The custom and moshi parsers are immune to obfuscation because they do not use any introspection.
 
 # Quickstart
 

@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.jackson
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
@@ -34,7 +35,10 @@ import fr.speekha.httpmocker.jackson.ResponseDescriptor as JsonResponseDescripto
 /**
  * An adapter using Jackson to serialize/deserialize scenarios.
  */
-class JacksonMapper(private val mapper: ObjectMapper = jacksonObjectMapper()) : Mapper {
+class JacksonMapper : Mapper {
+
+    private val mapper: ObjectMapper =
+        jacksonObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
 
     override fun readMatches(stream: InputStream): List<Matcher> =
         mapper.readValue<List<JsonMatcher>>(stream, jacksonTypeRef<List<JsonMatcher>>())
