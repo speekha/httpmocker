@@ -216,6 +216,8 @@ jobs:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
       - checkout
+      - restore_cache:
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Publish
           command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
@@ -226,6 +228,8 @@ jobs:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
       - checkout
+      - restore_cache:
+          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Publish
           command: ./publish.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
