@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.readAsStringList
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -61,10 +62,10 @@ internal val partialData = listOf(
 )
 
 internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.json")
+    .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
 
 internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.json")
+    .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
 
 internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     .map {

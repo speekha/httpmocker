@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.gson.GsonMapper
 
-class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper())
+class GsonMapperTest : AbstractJsonMapperTest(GsonMapper())

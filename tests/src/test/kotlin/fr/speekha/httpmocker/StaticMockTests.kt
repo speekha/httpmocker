@@ -54,7 +54,7 @@ import java.util.Collections
 import java.util.stream.Stream
 import kotlin.system.measureTimeMillis
 
-class MockResponseInterceptorTest {
+class StaticMockTests {
 
     private val server = MockWebServer()
 

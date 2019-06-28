@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.custom.CustomMapper
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.RequestDescriptor
-import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.Mapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper()) {
+abstract class AbstractJsonMapperTest(private val mapper: Mapper) {
+
     @Test
-    fun `step by step`() {
-        val json = """[
-  {
-    "request": {},
-    "response": {}
-  },
-  {
-    "response": {}
-  }
-]"""
-        val mapper = CustomMapper()
-        assertEquals(
-            listOf(
-                Matcher(response = ResponseDescriptor()),
-                Matcher(RequestDescriptor(), ResponseDescriptor())
-            ), mapper.readMatches(json.byteInputStream())
-        )
+    fun `should parse a JSON file`() {
+        val result = mapper.readMatches(getCompleteInput())
+        assertEquals(completeData, result)
+    }
+
+    @Test
+    fun `should populate default values properly`() {
+        val result = mapper.readMatches(getPartialInput())
+        assertEquals(partialData, result)
+    }
+
+    @Test
+    fun `should write a proper JSON file`() {
+        val expected = getExpectedOutput()
+        testStream(expected) {
+            mapper.writeValue(it, listOf(completeData[0]))
+        }
     }
 }
