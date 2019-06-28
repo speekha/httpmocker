@@ -35,8 +35,12 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -47,10 +51,10 @@ android {
     buildToolsVersion '28.0.3'
 }
 
-repositories {
-    // For snapshots versions
-    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
-}
+//repositories {
+//    // For snapshots versions
+//    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
+//}
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -66,8 +70,8 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
 
     implementation 'org.koin:koin-android:2.0.1'
+    implementation "org.slf4j:slf4j-android:$slf4j_version"
 
     //implementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
     implementation project(':jackson-adapter')
-
 }

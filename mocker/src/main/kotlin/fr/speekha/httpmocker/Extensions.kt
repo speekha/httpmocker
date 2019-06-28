@@ -16,8 +16,12 @@
 
 package fr.speekha.httpmocker
 
+import org.slf4j.LoggerFactory
 import java.io.InputStream
 
-fun InputStream.readAsStringList(): List<String> = bufferedReader().use { reader -> reader.readLines() }
+fun InputStream.readAsStringList(): List<String> =
+    bufferedReader().use { reader -> reader.readLines() }
 
 fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }
+
+inline fun <reified T : Any> T.getLogger() = LoggerFactory.getLogger(javaClass)

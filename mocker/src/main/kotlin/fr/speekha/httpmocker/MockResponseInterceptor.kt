@@ -61,26 +61,34 @@ private constructor(
             }
         }
 
-    override fun intercept(chain: Interceptor.Chain): Response = when (mode) {
-        Mode.DISABLED -> proceedWithRequest(chain)
-        Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(
-            chain.request(),
-            responseNotFound()
-        )
-        Mode.MIXED -> mockResponse(chain.request()) ?: proceedWithRequest(chain)
-        Mode.RECORD -> recordCall(chain)
+    private val logger = getLogger()
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        logger.info("Intercepted request ${chain.request()}")
+        return when (mode) {
+            Mode.DISABLED -> proceedWithRequest(chain)
+            Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(
+                chain.request(),
+                responseNotFound()
+            )
+            Mode.MIXED -> mockResponse(chain.request()) ?: proceedWithRequest(chain)
+            Mode.RECORD -> recordCall(chain)
+        }
     }
 
     private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
-    private fun mockResponse(request: Request): Response? =
-        provider.loadResponse(request)?.let { response ->
+    private fun mockResponse(request: Request): Response? {
+        logger.info("Looking up mock scenario for $request")
+        return provider.loadResponse(request)?.let { response ->
+            logger.info("Response was found: $response")
             when {
                 response.delay > 0 -> Thread.sleep(response.delay)
                 delay > 0 -> Thread.sleep(delay)
             }
             buildResponse(request, response)
         }
+    }
 
     private fun buildResponse(request: Request, response: ResponseDescriptor): Response =
         Response.Builder()
@@ -102,6 +110,7 @@ private constructor(
     private fun loadResponseBody(request: Request, response: ResponseDescriptor) =
         ResponseBody.create(
             MediaType.parse(response.mediaType), response.bodyFile?.let {
+                logger.info("Loading response body from file: $it")
                 provider.loadResponseBody(request, it)
             } ?: response.body.toByteArray()
         )
