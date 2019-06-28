@@ -1,0 +1,31 @@
+[
+  {
+    "request": {
+      "path": "/aTestUrl"
+    },
+    "response": {
+      "body": "based on URL"
+    }
+  },
+  {
+    "request": {
+      "host": "hostTest.com"
+    },
+    "response": {
+      "body": "based on host"
+    }
+  },
+  {
+    "request": {
+      "port": 45612
+    },
+    "response": {
+      "body": "based on port"
+    }
+  },
+  {
+    "response": {
+      "body": "Default case"
+    }
+  }
+]

@@ -2,6 +2,9 @@
   {
     "request": {
       "method": "post",
+      "host": "test.com",
+      "port": 15926,
+      "path": "/path",
       "headers": {
         "reqHeader1": "1",
         "reqHeader1": "2",

@@ -24,6 +24,12 @@ internal data class RequestDescriptor(
 
     val method: String? = null,
 
+    val host: String? = null,
+
+    val port: Int? = null,
+
+    val path: String? = null,
+
     val headers: List<Header> = emptyList(),
 
     val params: Map<String, String> = emptyMap(),

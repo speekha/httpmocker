@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.moshi.MoshiMapper
+import fr.speekha.httpmocker.buildRequest
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
-class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())
+class SingleFilePolicyTest {
+
+    @Test
+    fun `should always return the same file`() {
+        val file = "folder/singleFile.json"
+        val policy: FilingPolicy = SingleFilePolicy(file)
+        val request = buildRequest(
+            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
+        )
+        Assertions.assertEquals(file, policy.getPath(request))
+    }
+}

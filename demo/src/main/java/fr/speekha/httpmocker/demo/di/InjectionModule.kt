@@ -18,7 +18,6 @@ package fr.speekha.httpmocker.demo.di
 
 import android.content.Context
 import android.os.Environment
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainContract
@@ -37,10 +36,11 @@ val injectionModule: Module = module {
         MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(MirrorPathPolicy())
             .loadFileWith(get<Context>().assets::open)
-            .parseScenariosWith(JacksonMapper(jacksonObjectMapper()))
+            .parseScenariosWith(JacksonMapper())
             .saveScenariosIn(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             )
+            .addFakeNetworkDelay(500)
             .build()
     }
 
