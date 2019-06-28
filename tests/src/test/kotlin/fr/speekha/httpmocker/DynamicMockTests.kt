@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.policies
+package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
@@ -25,7 +23,7 @@ import okhttp3.Request
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class DynamicMockProviderTest {
+class DynamicMockTests {
 
     private lateinit var interceptor: MockResponseInterceptor
 
