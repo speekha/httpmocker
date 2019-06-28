@@ -32,7 +32,7 @@ internal class StaticMockProvider(
     private val mapper: Mapper
 ) : ScenarioProvider {
 
-    override fun onRequest(request: Request): ResponseDescriptor? = try {
+    override fun loadResponse(request: Request): ResponseDescriptor? = try {
         loadFileContent(filingPolicy.getPath(request))?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)

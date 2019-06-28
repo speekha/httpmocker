@@ -40,8 +40,8 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -574,22 +574,6 @@ class StaticMockTests {
 
     @ParameterizedTest
     @MethodSource("data")
-    fun `should not allow init an interceptor in record mode with no recorder`(mapper: Mapper) {
-        val exception = assertThrows<IllegalStateException> { setUpDynamicInterceptor(RECORD) { null } }
-        assertEquals(NO_RECORDER_ERROR, exception.message)
-        assertFalse(::interceptor.isInitialized)
-    }
-
-    @ParameterizedTest
-    @MethodSource("data")
-    fun `should not allow to record requests if recorder is not set`(mapper: Mapper) {
-        setUpDynamicInterceptor(DISABLED) { null }
-        val exception = assertThrows<IllegalStateException> { interceptor.mode = RECORD }
-        assertEquals(NO_RECORDER_ERROR, exception.message)
-    }
-
-    @ParameterizedTest
-    @MethodSource("data")
     fun `should allow to stack several interceptors thanks to mixed mode`(mapper: Mapper) {
         enqueueServerResponse(200, "server response")
 
@@ -628,8 +612,6 @@ class StaticMockTests {
         assertEquals("server response", executeGetRequest("serverMatch").body()?.string())
     }
 
-    // TODO null response body?
-
     private fun File.readAsString() = FileInputStream(this).readAsString()
 
     private fun assertFileExists(path: String) = withFile(path) {
@@ -645,9 +627,7 @@ class StaticMockTests {
             Files.walk(folder.toPath())
                 .sorted(Collections.reverseOrder<Any>())
                 .map(Path::toFile)
-                .forEach {
-                    it.delete()
-                }
+                .forEach { it.delete() }
         }
     }
 
@@ -672,18 +652,6 @@ class StaticMockTests {
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
-    private fun setUpDynamicInterceptor(
-        mode: MockResponseInterceptor.Mode,
-        provider: (Request) -> ResponseDescriptor?
-    ) {
-        interceptor = MockResponseInterceptor.Builder()
-            .useDynamicMocks(provider)
-            .setInterceptorStatus(mode)
-            .build()
-
-        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-    }
-
 
     private fun assertResponseCode(response: Response, code: Int, message: String) {
         assertEquals(code, response.code())

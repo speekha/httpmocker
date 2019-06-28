@@ -73,15 +73,14 @@ private constructor(
 
     private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
-    private fun mockResponse(request: Request): Response? = loadResponse(request)?.let { response ->
-        when {
-            response.delay > 0 -> Thread.sleep(response.delay)
-            delay > 0 -> Thread.sleep(delay)
+    private fun mockResponse(request: Request): Response? =
+        provider.loadResponse(request)?.let { response ->
+            when {
+                response.delay > 0 -> Thread.sleep(response.delay)
+                delay > 0 -> Thread.sleep(delay)
+            }
+            buildResponse(request, response)
         }
-        buildResponse(request, response)
-    }
-
-    private fun loadResponse(request: Request): ResponseDescriptor? = provider.onRequest(request)
 
     private fun buildResponse(request: Request, response: ResponseDescriptor): Response =
         Response.Builder()
@@ -139,11 +138,11 @@ private constructor(
 
         private var filingPolicy: FilingPolicy? = null
         private var openFile: LoadFile? = null
-        private var dynamicMockProvider: DynamicMockProvider? = null
         private var mapper: Mapper? = null
         private var root: File? = null
         private var simulatedDelay: Long = 0
         private var interceptorMode: Mode = Mode.DISABLED
+        private val dynamicCallbacks = mutableListOf<RequestCallback>()
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
@@ -151,8 +150,8 @@ private constructor(
          * @param policy the naming policy to use for scenario files
          */
         fun decodeScenarioPathWith(policy: FilingPolicy) = apply {
-            if (dynamicMockProvider != null) {
-                error("Overload error")
+            if (dynamicCallbacks.isNotEmpty()) {
+                error(MOCK_PROVIDER_OVERLOAD)
             }
             filingPolicy = policy
         }
@@ -163,8 +162,8 @@ private constructor(
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
         fun loadFileWith(loading: LoadFile) = apply {
-            if (dynamicMockProvider != null) {
-                error("Overload error")
+            if (dynamicCallbacks.isNotEmpty()) {
+                error(MOCK_PROVIDER_OVERLOAD)
             }
             openFile = loading
         }
@@ -175,9 +174,9 @@ private constructor(
          */
         fun useDynamicMocks(callback: RequestCallback) = apply {
             if (openFile != null || filingPolicy != null) {
-                error("Overload error")
+                error(MOCK_PROVIDER_OVERLOAD)
             }
-            dynamicMockProvider = DynamicMockProvider(callback)
+            dynamicCallbacks += callback
         }
 
         /**
@@ -188,7 +187,7 @@ private constructor(
          */
         fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?) =
             useDynamicMocks(object : RequestCallback {
-                override fun onRequest(request: Request): ResponseDescriptor? =
+                override fun loadResponse(request: Request): ResponseDescriptor? =
                     callback(request)
             })
 
@@ -232,6 +231,8 @@ private constructor(
          */
         fun build(): MockResponseInterceptor {
             val policy = filingPolicy ?: MirrorPathPolicy()
+            val dynamicMockProvider =
+                dynamicCallbacks.takeIf { it.isNotEmpty() }?.let { DynamicMockProvider(it) }
             return MockResponseInterceptor(
                 dynamicMockProvider ?: StaticMockProvider(
                     policy,
@@ -266,6 +267,9 @@ const val NO_MAPPER_ERROR =
 
 const val NO_RECORDER_ERROR =
     "Network calls can not be recorded without a folder where to save files. Please add a root folder."
+
+const val MOCK_PROVIDER_OVERLOAD =
+    "You can only have either static or dynamic mocks."
 
 private val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     200 to "OK",
