@@ -20,16 +20,19 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Request
 
 internal class DynamicMockProvider(
-    private val callback: RequestCallback
+    private val callbacks: List<RequestCallback>
 ) : ScenarioProvider {
 
     private val body: MutableMap<Request, ByteArray> = mutableMapOf()
 
-    override fun onRequest(request: Request): ResponseDescriptor? =
-        callback.onRequest(request)?.let { result ->
-            body[request] = result.body.toByteArray()
-            result.copy(body = "", bodyFile = computeKey(request))
-        }
+    override fun loadResponse(request: Request): ResponseDescriptor? =
+        callbacks.asSequence()
+            .mapNotNull {
+                it.loadResponse(request)?.let { result ->
+                    body[request] = result.body.toByteArray()
+                    result.copy(body = "", bodyFile = computeKey(request))
+                }
+            }.firstOrNull()
 
     override fun loadResponseBody(request: Request, path: String): ByteArray? = body[request]
 

@@ -102,9 +102,10 @@ is to add it to your OkHttp client. Here's an example with minimal configuration
 If your interceptor is disabled, it will not interfere with actual network calls. If it is enabled, 
 it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that you have to 
 provide the response for each request programmatically, which allows you to define stateful 
-responses (identical calls could lead to different answers based on 
-what the user did in between these calls). You can compute the response by implementing the 
-`RequestCallback` interface or simply provide a lambda function to do the computation.
+responses (identical calls could lead to different answers based on what the user did in between 
+these calls). The response can be provided by implementing the `RequestCallback` interface or 
+simply provide a lambda function to do the computation. Several callbacks can be added to the 
+interceptor.
 
 Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
 an example for an Android app using static mocks, with a few more options:

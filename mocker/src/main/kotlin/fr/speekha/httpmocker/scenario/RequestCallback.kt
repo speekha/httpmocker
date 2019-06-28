@@ -21,6 +21,6 @@ import okhttp3.Request
 
 interface RequestCallback {
 
-    fun onRequest(request: Request): ResponseDescriptor?
+    fun loadResponse(request: Request): ResponseDescriptor?
 
 }
