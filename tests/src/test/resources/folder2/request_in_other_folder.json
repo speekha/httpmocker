@@ -1,0 +1,10 @@
+[
+  {
+    "response": {
+      "headers": {
+        "testHeader": "simple header"
+      },
+      "body-file": "../folder/request_in_folder.txt"
+    }
+  }
+]

@@ -14,7 +14,7 @@ configuration files instead. The interceptor will also allow to record scenarios
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.0'
+httpmocker_version = '1.1.2'
 ```
 
 ## Gradle 
@@ -44,61 +44,68 @@ repositories {
 ### Dependencies
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
-files. Currently, there are four possible options that are provided for parsing, based on three of the most commonly 
-used libraries for JSON parsing (Jackson, Gson, Moshi) and a custom implementation (no third party dependency), so you 
-can choose the one matching what you already use in your application (this will help you prevent duplicate libraries in 
-your classpath, like Jackson and GSON). If choose one of these options, all you need to add is the corresponding 
+files for static mocks. Currently, there are four possible options that are provided for parsing, based on three of the 
+most commonly used libraries for JSON parsing (Jackson, Gson, Moshi) and a custom implementation (no third party dependency), 
+so you can choose the one matching what you already use in your application (this will help you prevent duplicate libraries in 
+your classpath, like Jackson and GSON). If you choose one of these options, all you need to add is the corresponding 
 `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.1.2"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:gson-adapter:1.1.2"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.1.2"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.0"
+implementation "fr.speekha.httpmocker:custom-adapter:1.1.2"
 ```
 
-If none of those options suits your needs, you can also provide your own implementation of the `Mapper` class and add 
-the main dependency to your project:
+If none of those options suits your needs or if you would prefer to only use dynamic mocks, you can add 
+the main dependency to your project (using static mocks will require that you provide your own implementation 
+of the `Mapper` class):
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.0"
+implementation "fr.speekha.httpmocker:mocker:1.1.2"
 ```
 
 ### Proguard rules
 
-Since most JSON parsers use some type of introspection to parse JSON streams, it is recommended to keep the mapping 
-classes unobfuscated. Depending on the adapter you choose to use, it will be fr.speekha.httpmocker.<adapter package>
-where <adapter package> can be jackson, gson or moshi. For instance, if you choose the Jackson parser:
+Since Jackson and Gson use some type of introspection or annotation processing to parse JSON streams, it 
+is recommended to keep the mapping classes unobfuscated. You can refer to the 
+[proguard-rules.pro](demo/proguard-rules.pro) file included in the demo app for an example of required rules.
 
-```
--keep class fr.speekha.httpmocker.jackson.** { *; }
-```
-The custom parser is immune to obfuscation because it does not use any introspection.
+The custom and moshi parsers are immune to obfuscation because they do not use any introspection.
 
 # Quickstart
 
-Mocking http calls relies on a simple Interceptor : MockResponseInterceptor. All you need to set it up
-is to add it to your OkHttp client. Here's an example for an Android app with minimal configuration:
+Mocking http calls relies on a simple Interceptor: MockResponseInterceptor. All you need to set it up
+is to add it to your OkHttp client. Here's an example with minimal configuration using dynamic mocks:
 
 ```kotlin
     val interceptor = MockResponseInterceptor.Builder()
-        .parseScenariosWith(mapper)
-        .decodeScenarioPathWith(filingPolicy)
-        .loadFileWith(context.assets::open)
+        .useDynamicMocks{
+            ResponseDescriptor(code = 200, body = "Fake response body")
+        }
         .setInterceptorStatus(ENABLED)
         .build()
     val client = OkHttpClient.Builder()
         .addInterceptor(interceptor)
         .build()
 ```
-The interceptor's builder offer a few more options:
+If your interceptor is disabled, it will not interfere with actual network calls. If it is enabled, 
+it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that you have to 
+provide the response for each request programmatically, which allows you to define stateful 
+responses (identical calls could lead to different answers based on what the user did in between 
+these calls). The response can be provided by implementing the `RequestCallback` interface or 
+simply provide a lambda function to do the computation. Several callbacks can be added to the 
+interceptor.
+
+Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
+an example for an Android app using static mocks, with a few more options:
 ```kotlin
     val interceptor = MockResponseInterceptor.Builder()
         .parseScenariosWith(mapper)
@@ -109,31 +116,41 @@ The interceptor's builder offer a few more options:
         .addFakeNetworkDelay(50L)
         .build()
 ```
-If your interceptor is enabled, it will need to find scenarios to mock the http calls. In the previous example,
-we decided to store the scenarios in the assets folder of the app (but you could also have them as resources in 
-your classpath and use the classloader to access them or even store them in a certain folder and access that 
-folder with any File API you're comfortable with). You also need to provide the FilePolicy you want to use: that 
-policy defines which file to check to find a match for a request. A few policies are provided in the library, but
-you can also define your own. An InMemoryPolicy allows to configure your scenarios entirely through code and keep
-them in memory instead of reading them from an actual file on the disc.
+In this example, we decided to store the scenarios in the assets folder of the app (but you 
+could also have them as resources in your classpath and use the `Classloader` to access them or 
+even store them in a certain folder and access that folder with any File API you're comfortable 
+with). You also need to provide the FilePolicy you want to use: that policy defines which file to 
+check to find a match for a request. A few policies are provided in the library, but you can also 
+define your own. An `InMemoryPolicy` allows to configure your static scenarios entirely through code 
+and keep them in memory instead of reading them from an actual file on the disc. 
 
-If your interceptor is disabled, it will not interfere with actual network calls. If you choose the mixed mode, 
-requests that can not be answered by a predefined scenario will actually be executed. Hence the mixed mode: responses 
-can come from a scenario file or from an actual HTTP call.
+Additionally, you need to provide a Mapper to parse the JSON scenario files. In theory, 
+scenarios do not have to be stored as JSON: you could use XML if you prefer, or any other format, 
+as long as you provide your own Mapper class to serialize and deserialize the business objects. As 
+far as this lib is concerned though, a  few mappers are available out of the box, but they only 
+handle JSON format for the moment and are based on Jackson, Gson or Moshi. They are provided in 
+specific modules so you can choose one based on the JSON library you already use, thus limiting
+the risk for duplicate libraries serving the same purpose in your app. An implementation based on 
+a custom JSON parser that does not use any dependencies is also available. 
 
-Finally, the interceptor also has a recording mode. This mode allows you to record scenarios without interfering 
-with your request. If you choose this mode to produce your scenarios, you will have to provide a root folder where 
-the scenarios should be stored. Also, you should realize that all request and responses attributes will be recorded.
-Generally, you will want to review the resulting scenarios and clean them up a bit manually. For instance, each 
-request will be recorded with its HTTP method, its path, each header or parameter, its body. But all those details 
-might not be very important to you. Maybe all you care about is the URL and method, in which case, you can delete 
-all the superfluous criteria manually.
+If you choose the mixed mode, requests that can not be answered by a predefined scenario will 
+actually be executed. Hence the mixed mode: responses can come from a scenario file (or dynamic 
+mock) or from an actual HTTP call.
 
-## Building scenarios
+Finally, the interceptor also has a recording mode. This mode allows you to record scenarios 
+without interfering with your request. If you choose this mode to produce your static scenarios, 
+you will have to provide a root folder where the scenarios should be stored. Also, you should 
+realize that all request and responses attributes will be recorded. Generally, you will want to 
+review the resulting scenarios and clean them up a bit manually. For instance, each request will be 
+recorded with its HTTP method, its path, each header or parameter, its body. But all those details 
+might not be very important to you. Maybe all you care about is the URL and method, in which case, 
+you can delete all the superfluous criteria manually.
 
-Answering a request is done in two steps:
+## Building static scenarios
+
+Answering a request with a static mock is done in two steps:
 - First, if the interceptor is enabled (or in mixed mode), it will try to compute a file name were the appropriate 
-scenario should be stored. Based on the filing policy you choose, those files can be organized in a lot of different 
+scenario should be stored. Based on the filing policy you chose, those files can be organized in a lot of different 
 ways: all in the same folder, in separate folders matching the URL path, ignoring or not the server hostname.
 - Second, once the file is found, its content will be loaded, and a more exact match will have to be found. Scenario 
 files contain a list of "Matchers", that is a list of request patterns and corresponding responses. Based on the 
@@ -146,8 +163,8 @@ be omitted altogether (in this case, all requests match):
  * When specifying a method, matching request have to use the same HTTP method.
  * When specifying query parameters, matching requests must have at least all these parameters (but can have more).
  * When specifying headers, matching request must have all the same headers (but can have more).
- 
- Here is an example of scenario in JSON form:
+
+Here is an example of scenario in JSON form:
  
  ```json
  [

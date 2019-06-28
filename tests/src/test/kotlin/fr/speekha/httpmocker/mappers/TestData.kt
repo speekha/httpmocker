@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.readAsStringList
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.charset.Charset
 
 internal val completeData = listOf(
     Matcher(
         RequestDescriptor(
             method = "post",
+            host = "test.com",
+            port = 15926,
+            path = "/path",
             headers = listOf(
                 Header("reqHeader1", "1"),
                 Header("reqHeader1", "2"),
@@ -59,10 +62,10 @@ internal val partialData = listOf(
 )
 
 internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.json")
+    .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
 
 internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.json")
+    .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
 
 internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     .map {
@@ -77,7 +80,7 @@ internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream)
         writeBlock(it)
     }
     val result = stream.toByteArray()
-        .toString(Charset.forName("UTF-8"))
+        .toString(Charsets.UTF_8)
         .split('\n')
         .joinToString("") {
             it.trim().replace(": ", ":").replace(",", "")
@@ -87,7 +90,7 @@ internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream)
         result.length,
         """Length of generated JSON differs:
             Expected: ${getCompleteInput().readAsStringList().joinToString("") {it.trim()}}
-            Actual:   ${stream.toByteArray().toString(Charset.forName("UTF-8"))}""".trimIndent()
+            Actual:   ${stream.toByteArray().toString(Charsets.UTF_8)}""".trimIndent()
     )
     assertEquals("", expectedResult.fold(result) { acc, token ->
         acc.replaceFirst(token, "")

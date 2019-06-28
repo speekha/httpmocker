@@ -135,7 +135,6 @@ class JsonStringReader(
     private fun extractAfterCurrentPosition() = json.substring(index).truncate(10)
 }
 
-const val END_OF_STRING_ERROR = "Reached end of object"
 const val WRONG_START_OF_OBJECT_ERROR = "No object starts here: "
 const val NO_FIELD_ID_ERROR = "No field starts here: "
 const val WRONG_END_OF_OBJECT_ERROR = "Object is not entirely processed: "

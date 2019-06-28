@@ -14,22 +14,8 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.mappers
 
-data class RequestDescriptor(
+import fr.speekha.httpmocker.moshi.MoshiMapper
 
-    val method: String? = null,
-
-    val host: String? = null,
-
-    val port: Int? = null,
-
-    val path: String? = null,
-
-    val headers: List<Header> = emptyList(),
-
-    val params: Map<String, String> = emptyMap(),
-
-    val body: String? = null
-
-)
+class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())

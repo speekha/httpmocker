@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.jackson.JacksonMapper
+import okhttp3.Request
 
-class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper())
+class SingleFilePolicy(private val file: String) : FilingPolicy {
+    override fun getPath(request: Request): String = file
+}

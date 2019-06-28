@@ -27,7 +27,6 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readAsString
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.charset.Charset
 import fr.speekha.httpmocker.gson.Header as JsonHeader
 import fr.speekha.httpmocker.gson.Matcher as JsonMatcher
 import fr.speekha.httpmocker.gson.RequestDescriptor as JsonRequestDescriptor
@@ -53,7 +52,7 @@ class GsonMapper : Mapper {
     }
 
     override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use { stream ->
-        stream.write(adapter.toJson(matchers.map { it.fromModel() }).toByteArray(Charset.forName("UTF-8")))
+        stream.write(adapter.toJson(matchers.map { it.fromModel() }).toByteArray(Charsets.UTF_8))
     }
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()
@@ -63,11 +62,14 @@ class GsonMapper : Mapper {
     private fun JsonMatcher.toModel() = Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel())
 
     private fun JsonRequestDescriptor.toModel() =
-        RequestDescriptor(method, headers?.map { it.toModel() }?: emptyList(), params, body)
+        RequestDescriptor(method, host, port, path, headers?.map { it.toModel() }?: emptyList(), params, body)
 
     private fun RequestDescriptor.fromModel() =
         JsonRequestDescriptor(
             method,
+            host,
+            port,
+            path,
             HeaderAdapter.HeaderList().apply {
                 addAll(headers.map { it.fromModel() })
             },

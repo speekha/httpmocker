@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.Mapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

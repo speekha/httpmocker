@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.gson.GsonMapper
+import fr.speekha.httpmocker.model.ResponseDescriptor
+import okhttp3.Request
 
-class GsonMapperTest : AbstractJsonMapperTest(GsonMapper())
+interface RequestCallback {
+
+    fun loadResponse(request: Request): ResponseDescriptor?
+
+}

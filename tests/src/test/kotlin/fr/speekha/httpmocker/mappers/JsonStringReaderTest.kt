@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.custom.*
+import fr.speekha.httpmocker.custom.INVALID_NUMBER_ERROR
+import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.ObjectAdapter
+import fr.speekha.httpmocker.custom.WRONG_END_OF_LIST_ERROR
+import fr.speekha.httpmocker.custom.WRONG_END_OF_OBJECT_ERROR
+import fr.speekha.httpmocker.custom.WRONG_START_OF_LIST_ERROR
+import fr.speekha.httpmocker.custom.WRONG_START_OF_OBJECT_ERROR
+import fr.speekha.httpmocker.custom.WRONG_START_OF_STRING_FIELD_ERROR
+import fr.speekha.httpmocker.custom.truncate
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

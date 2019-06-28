@@ -26,6 +26,9 @@ class RequestAdapter : ObjectAdapter<RequestDescriptor>{
         while (reader.hasNext()) {
             request = when (val field = reader.readFieldName()) {
                 "method" -> request.copy(method = reader.readString())
+                "port" -> request.copy(port = reader.readInt())
+                "host" -> request.copy(host = reader.readString())
+                "path" -> request.copy(path = reader.readString())
                 "headers" -> request.copy(headers = reader.readObject(HeaderListAdapter()))
                 "params" -> request.copy(params = reader.readObject(MapAdapter()))
                 "body" -> request.copy(body = reader.readString())

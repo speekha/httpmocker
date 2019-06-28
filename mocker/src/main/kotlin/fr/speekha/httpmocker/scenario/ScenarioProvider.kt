@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.scenario
 
-data class RequestDescriptor(
+import okhttp3.Request
 
-    val method: String? = null,
+internal interface ScenarioProvider : RequestCallback {
 
-    val host: String? = null,
+    fun loadResponseBody(request: Request, path: String): ByteArray?
 
-    val port: Int? = null,
-
-    val path: String? = null,
-
-    val headers: List<Header> = emptyList(),
-
-    val params: Map<String, String> = emptyMap(),
-
-    val body: String? = null
-
-)
+}
