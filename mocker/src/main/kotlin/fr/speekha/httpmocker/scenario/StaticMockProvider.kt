@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.scenario
 
 import fr.speekha.httpmocker.LoadFile
 import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.matchBody
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
@@ -32,12 +33,19 @@ internal class StaticMockProvider(
     private val mapper: Mapper
 ) : ScenarioProvider {
 
+    private val logger = getLogger()
+
     override fun loadResponse(request: Request): ResponseDescriptor? = try {
-        loadFileContent(filingPolicy.getPath(request))?.let { stream ->
+        val path = filingPolicy.getPath(request)
+        logger.info("Loading scenarios from $path")
+        loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
-            matchRequest(request, list)
+            matchRequest(request, list).also {
+                logger.info(if (it != null) "Match found" else "No match for request")
+            }
         }
     } catch (e: Throwable) {
+        logger.error("Scenario file could not be loaded", e)
         null
     }
 

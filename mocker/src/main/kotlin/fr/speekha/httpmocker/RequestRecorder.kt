@@ -31,17 +31,20 @@ internal class RequestRecorder(
     private val rootFolder: File?
 ) {
 
+    private val logger = getLogger()
+
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
     fun saveFiles(record: CallRecord) = try {
         val requestFile = File(rootFolder, filingPolicy.getPath(record.request))
+        logger.debug("Saving scenario file $requestFile")
         val matchers = createMatcher(record, requestFile)
         saveRequestFile(requestFile, matchers)
         matchers.last().response.bodyFile?.let { responseFile ->
             saveResponseBody(File(requestFile.parentFile, responseFile), record.body)
         }
     } catch (e: Throwable) {
-        e.printStackTrace()
+        logger.error("Error while writing scenario", e)
     }
 
     private fun createMatcher(record: CallRecord, requestFile: File): List<Matcher> = with(record) {
@@ -63,6 +66,7 @@ internal class RequestRecorder(
         }
 
     private fun saveResponseBody(storeFile: File, body: ByteArray?) = body?.let { array ->
+        logger.debug("Saving response body file ${storeFile.name}")
         writeFile(storeFile) {
             it.write(array)
         }

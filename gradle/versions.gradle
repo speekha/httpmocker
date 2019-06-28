@@ -24,6 +24,6 @@ ext {
     dokka_version = '0.9.18'
     bintray_version = '1.8.4'
     artifactory_version = '4.9.6'
-    timber_version = '4.7.1'
+    slf4j_version = '1.7.26'
     junit_version = '5.4.2'
 }
