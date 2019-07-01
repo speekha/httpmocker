@@ -40,9 +40,7 @@ internal class StaticMockProvider(
         logger.info("Loading scenarios from $path")
         loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
-            matchRequest(request, list).also {
-                logger.info(if (it != null) "Match found" else "No match for request")
-            }
+            matchRequest(request, list)
         }
     } catch (e: Throwable) {
         logger.error("Scenario file could not be loaded", e)
@@ -51,6 +49,7 @@ internal class StaticMockProvider(
 
     private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
         list.firstOrNull { it.request.match(request) }?.response
+            .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
     private fun RequestDescriptor.match(request: Request): Boolean =
         (method?.equals(request.method(), true) ?: true) &&
@@ -67,10 +66,15 @@ internal class StaticMockProvider(
     override fun loadResponseBody(request: Request, path: String): ByteArray? =
         loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readBytes()
 
-    private fun getRelativePath(base: String, child: String): String {
-        val segments = base.split("/").dropLast(1) + child.split("/")
-        return segments.filterIndexed { index, segment ->
-            segment != ".." && (index == segments.size - 1 || segments[index + 1] != "..")
-        }.joinToString("/")
+    private fun getRelativePath(base: String, child: String): String =
+        concatenatePaths(base, child).cleanFolderList().joinToString("/")
+
+    private fun concatenatePaths(base: String, child: String) =
+        base.split("/").dropLast(1) + child.split("/")
+
+    private fun List<String>.cleanFolderList() = filterIndexed { index, segment ->
+        segment != ".." && (index == size - 1 || get(index + 1) != "..")
     }
+
+    override fun toString(): String = "static mock configuration"
 }

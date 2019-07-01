@@ -16,12 +16,6 @@
 
 apply plugin: 'kotlin'
 
-test {
-    options {
-        useJUnitPlatform()
-    }
-}
-
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

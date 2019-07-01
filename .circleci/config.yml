@@ -209,13 +209,16 @@ jobs:
           destination: reports
       - store_test_results:
           path: tests/build/test-results
+      - save_cache:
+          key: build-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - "."
   publish_snapshot:
     docker:
       - image: circleci/android:api-28
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
-      - checkout
       - restore_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
@@ -227,7 +230,6 @@ jobs:
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
-      - checkout
       - restore_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:

@@ -22,7 +22,8 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -39,8 +40,8 @@ class DynamicMockTests {
         }
         val response = client.newCall(buildRequest(url, method = "GET")).execute()
 
-        Assertions.assertEquals(202, response.code())
-        Assertions.assertEquals("some random body", response.body()?.string())
+        assertEquals(202, response.code())
+        assertEquals("some random body", response.body()?.string())
     }
 
     @Test
@@ -54,8 +55,8 @@ class DynamicMockTests {
 
         val response = client.newCall(buildRequest(url, method = "GET")).execute()
 
-        Assertions.assertEquals(202, response.code())
-        Assertions.assertEquals(body, response.body()?.string())
+        assertEquals(202, response.code())
+        assertEquals(body, response.body()?.string())
     }
 
     @Test
@@ -81,15 +82,15 @@ class DynamicMockTests {
         val response2 =
             client.newCall(buildRequest("http://www.test.fr/request2", method = "GET")).execute()
 
-        Assertions.assertEquals(result1, response1.body()?.string())
-        Assertions.assertEquals(result2, response2.body()?.string())
+        assertEquals(result1, response1.body()?.string())
+        assertEquals(result2, response2.body()?.string())
     }
 
     @Test
     fun `should not allow init an interceptor in record mode with no recorder`() {
         val exception = assertThrows<IllegalStateException> { setupProvider(RECORD) { null } }
-        Assertions.assertEquals(NO_RECORDER_ERROR, exception.message)
-        Assertions.assertFalse(::interceptor.isInitialized)
+        assertEquals(NO_RECORDER_ERROR, exception.message)
+        assertFalse(::interceptor.isInitialized)
     }
 
     @Test
@@ -98,7 +99,7 @@ class DynamicMockTests {
         val exception = assertThrows<IllegalStateException> {
             interceptor.mode = RECORD
         }
-        Assertions.assertEquals(NO_RECORDER_ERROR, exception.message)
+        assertEquals(NO_RECORDER_ERROR, exception.message)
     }
 
     private fun setupProvider(callback: RequestCallback) {
