@@ -485,6 +485,32 @@ class StaticMockTests {
 
     @ParameterizedTest
     @MethodSource("data")
+    fun `should handle null request and response bodies when recording`(mapper: Mapper) {
+        enqueueServerResponse(200, null)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
+
+        executeRequest("request", "GET", null)
+
+        withFile("$SAVE_FOLDER/request.json") {
+            val result: List<Matcher> =
+                mapper.readMatches(it)
+            val expectedResult = Matcher(
+                RequestDescriptor(method = "GET"),
+                ResponseDescriptor(
+                    code = 200,
+                    mediaType = "text/plain",
+                    headers = listOf(
+                        Header("Content-Length", "0"),
+                        Header("Content-Type", "text/plain")
+                    )
+                )
+            )
+            assertEquals(listOf(expectedResult), result)
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
     fun `should update existing descriptors when recording`(mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         enqueueServerResponse(200, "second body")
@@ -690,13 +716,15 @@ class StaticMockTests {
 
     private fun enqueueServerResponse(
         responseCode: Int,
-        responseBody: String,
+        responseBody: String?,
         headers: List<Pair<String, String>> = listOf(),
         contentType: String? = null
     ) {
         val serverResponse = MockResponse().apply {
             setResponseCode(responseCode)
-            setBody(responseBody)
+            if (responseBody != null) {
+                setBody(responseBody)
+            }
             addHeader("Content-Type", contentType ?: "text/plain")
             headers.forEach { addHeader(it.first, it.second) }
         }
