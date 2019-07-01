@@ -16,18 +16,12 @@
 
 apply plugin: 'kotlin'
 
-test {
-    options {
-        useJUnitPlatform()
-    }
-}
-
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     api project(':mocker')
 
-    api 'com.google.code.gson:gson:2.8.5'
+    api "com.google.code.gson:gson:$gson_version"
 }
 
 apply from: '../gradle/dokka.gradle'

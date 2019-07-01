@@ -43,6 +43,8 @@ repositories {
 
 ### Dependencies
 
+#### Adding HttpMocker
+
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
 files for static mocks. Currently, there are four possible options that are provided for parsing, based on three of the 
 most commonly used libraries for JSON parsing (Jackson, Gson, Moshi) and a custom implementation (no third party dependency), 
@@ -71,6 +73,12 @@ of the `Mapper` class):
 ```gradle
 implementation "fr.speekha.httpmocker:mocker:1.1.3"
 ```
+
+#### External dependencies
+
+* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.2.
+* It also depends on the SLF4J API for logging.
+* JSON parsers depend on their respective external libraries: Jackson 2.9.9, Gson 2.8.5 or Moshi 1.8.0
 
 ### Proguard rules
 
@@ -101,8 +109,7 @@ it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that 
 provide the response for each request programmatically, which allows you to define stateful 
 responses (identical calls could lead to different answers based on what the user did in between 
 these calls). The response can be provided by implementing the `RequestCallback` interface or 
-simply provide a lambda function to do the computation. Several callbacks can be added to the 
-interceptor.
+simply provide a lambda function to do the computation. 
 
 Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
 an example for an Android app using static mocks, with a few more options:
@@ -132,6 +139,10 @@ handle JSON format for the moment and are based on Jackson, Gson or Moshi. They 
 specific modules so you can choose one based on the JSON library you already use, thus limiting
 the risk for duplicate libraries serving the same purpose in your app. An implementation based on 
 a custom JSON parser that does not use any dependencies is also available. 
+
+Static and dynamic scenarios can be used together. Several dynamic callbacks can be added to the 
+interceptor, but only one static configuration is allowed. Dynamic callbacks will be used first to 
+find a suitable mock, and if none is found, the static configuration will be tested next.
 
 If you choose the mixed mode, requests that can not be answered by a predefined scenario will 
 actually be executed. Hence the mixed mode: responses can come from a scenario file (or dynamic 
