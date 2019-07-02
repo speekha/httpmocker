@@ -485,6 +485,32 @@ class StaticMockTests {
 
     @ParameterizedTest
     @MethodSource("data")
+    fun `should handle null request and response bodies when recording`(mapper: Mapper) {
+        enqueueServerResponse(200, null)
+        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
+
+        executeRequest("request", "GET", null)
+
+        withFile("$SAVE_FOLDER/request.json") {
+            val result: List<Matcher> =
+                mapper.readMatches(it)
+            val expectedResult = Matcher(
+                RequestDescriptor(method = "GET"),
+                ResponseDescriptor(
+                    code = 200,
+                    mediaType = "text/plain",
+                    headers = listOf(
+                        Header("Content-Length", "0"),
+                        Header("Content-Type", "text/plain")
+                    )
+                )
+            )
+            assertEquals(listOf(expectedResult), result)
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
     fun `should update existing descriptors when recording`(mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         enqueueServerResponse(200, "second body")
@@ -612,6 +638,36 @@ class StaticMockTests {
         assertEquals("server response", executeGetRequest("serverMatch").body()?.string())
     }
 
+    @ParameterizedTest
+    @MethodSource("data")
+    fun `should support dynamic and static mocks together`(mapper: Mapper) {
+        val result1 = "Dynamic"
+        val result2 = "simple body"
+
+        interceptor = MockResponseInterceptor.Builder()
+            .useDynamicMocks {
+                if (it.url().toString().contains("dynamic"))
+                    ResponseDescriptor(body = result1)
+                else null
+            }
+            .decodeScenarioPathWith(filingPolicy)
+            .loadFileWith(loadingLambda)
+            .parseScenariosWith(mapper)
+            .setInterceptorStatus(ENABLED)
+            .build()
+
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+
+        val response1 =
+            client.newCall(buildRequest("http://www.test.fr/dynamic", method = "GET")).execute()
+        val response2 =
+            client.newCall(buildRequest("http://www.test.fr/request", method = "GET")).execute()
+
+        assertEquals(result1, response1.body()?.string())
+        assertEquals(result2, response2.body()?.string())
+    }
+
+
     private fun File.readAsString() = FileInputStream(this).readAsString()
 
     private fun assertFileExists(path: String) = withFile(path) {
@@ -660,13 +716,15 @@ class StaticMockTests {
 
     private fun enqueueServerResponse(
         responseCode: Int,
-        responseBody: String,
+        responseBody: String?,
         headers: List<Pair<String, String>> = listOf(),
         contentType: String? = null
     ) {
         val serverResponse = MockResponse().apply {
             setResponseCode(responseCode)
-            setBody(responseBody)
+            if (responseBody != null) {
+                setBody(responseBody)
+            }
             addHeader("Content-Type", contentType ?: "text/plain")
             headers.forEach { addHeader(it.first, it.second) }
         }
