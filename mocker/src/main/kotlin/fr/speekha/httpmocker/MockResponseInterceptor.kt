@@ -39,7 +39,7 @@ import java.io.InputStream
  */
 class MockResponseInterceptor
 private constructor(
-    private var provider: ScenarioProvider,
+    private var providers: List<ScenarioProvider>,
     private var requestRecorder: RequestRecorder?
 ) : Interceptor {
 
@@ -64,7 +64,7 @@ private constructor(
     private val logger = getLogger()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        logger.info("Intercepted request ${chain.request()}")
+        logger.info("Intercepted request ${chain.request()}: Interceptor is $mode")
         return when (mode) {
             Mode.DISABLED -> proceedWithRequest(chain)
             Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(
@@ -78,42 +78,64 @@ private constructor(
 
     private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
-    private fun mockResponse(request: Request): Response? {
-        logger.info("Looking up mock scenario for $request")
-        return provider.loadResponse(request)?.let { response ->
-            logger.info("Response was found: $response")
-            when {
-                response.delay > 0 -> Thread.sleep(response.delay)
-                delay > 0 -> Thread.sleep(delay)
+    private fun mockResponse(request: Request): Response? = providers.asSequence()
+        .mapNotNull { provider ->
+            logger.info("Looking up mock scenario for $request in $provider")
+            provider.loadResponse(request)?.let { response ->
+                executeMockResponse(response, request, provider)
             }
-            buildResponse(request, response)
+        }
+        .firstOrNull()
+
+    private fun executeMockResponse(
+        response: ResponseDescriptor,
+        request: Request,
+        provider: ScenarioProvider
+    ): Response {
+        logger.info("Response was found: $response")
+        simulateDelay(response)
+        return buildResponse(request, response, provider)
+    }
+
+    private fun simulateDelay(response: ResponseDescriptor) {
+        when {
+            response.delay > 0 -> Thread.sleep(response.delay)
+            delay > 0 -> Thread.sleep(delay)
         }
     }
 
-    private fun buildResponse(request: Request, response: ResponseDescriptor): Response =
-        Response.Builder()
-            .request(request)
-            .protocol(Protocol.HTTP_1_1)
-            .code(response.code)
-            .message(messageForHttpCode(response.code))
-            .body(loadResponseBody(request, response))
-            .apply {
-                header("Content-type", response.mediaType)
-                response.headers.forEach {
-                    header(it.name, it.value)
-                }
-            }
-            .build()
+    private fun buildResponse(
+        request: Request,
+        response: ResponseDescriptor,
+        provider: ScenarioProvider? = null
+    ): Response = Response.Builder()
+        .request(request)
+        .protocol(Protocol.HTTP_1_1)
+        .code(response.code)
+        .message(messageForHttpCode(response.code))
+        .addHeaders(response)
+        .body(loadResponseBody(request, response, provider))
+        .build()
+
+    private fun Response.Builder.addHeaders(response: ResponseDescriptor) = apply {
+        header("Content-type", response.mediaType)
+        response.headers.forEach {
+            header(it.name, it.value)
+        }
+    }
+
+    private fun loadResponseBody(
+        request: Request,
+        response: ResponseDescriptor,
+        provider: ScenarioProvider? = null
+    ) = ResponseBody.create(
+        MediaType.parse(response.mediaType), response.bodyFile?.let {
+            logger.info("Loading response body from file: $it")
+            provider?.loadResponseBody(request, it)
+        } ?: response.body.toByteArray()
+    )
 
     private fun responseNotFound() = ResponseDescriptor(code = 404, body = "Page not found")
-
-    private fun loadResponseBody(request: Request, response: ResponseDescriptor) =
-        ResponseBody.create(
-            MediaType.parse(response.mediaType), response.bodyFile?.let {
-                logger.info("Loading response body from file: $it")
-                provider.loadResponseBody(request, it)
-            } ?: response.body.toByteArray()
-        )
 
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
         val response = proceedWithRequest(chain)
@@ -129,15 +151,17 @@ private constructor(
     /**
      * Defines the interceptor's state and how it is supposed to respond to requests (intercept them, let them through or record them)
      */
-    enum class Mode {
+    enum class Mode(private val status: String) {
         /** lets every request through without interception. */
-        DISABLED,
+        DISABLED("disabled"),
         /** intercepts all requests and return responses found in a predefined configuration */
-        ENABLED,
+        ENABLED("enabled"),
         /** allows to look for responses locally, but execute the request if no response is found */
-        MIXED,
+        MIXED("in mixed mode"),
         /** allows to record actual requests and responses for future use as mock scenarios */
-        RECORD
+        RECORD("recording");
+
+        override fun toString(): String = status
     }
 
     /**
@@ -145,7 +169,7 @@ private constructor(
      */
     class Builder {
 
-        private var filingPolicy: FilingPolicy? = null
+        private var filingPolicy: FilingPolicy = MirrorPathPolicy()
         private var openFile: LoadFile? = null
         private var mapper: Mapper? = null
         private var root: File? = null
@@ -159,9 +183,6 @@ private constructor(
          * @param policy the naming policy to use for scenario files
          */
         fun decodeScenarioPathWith(policy: FilingPolicy) = apply {
-            if (dynamicCallbacks.isNotEmpty()) {
-                error(MOCK_PROVIDER_OVERLOAD)
-            }
             filingPolicy = policy
         }
 
@@ -171,9 +192,6 @@ private constructor(
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
         fun loadFileWith(loading: LoadFile) = apply {
-            if (dynamicCallbacks.isNotEmpty()) {
-                error(MOCK_PROVIDER_OVERLOAD)
-            }
             openFile = loading
         }
 
@@ -182,9 +200,6 @@ private constructor(
          * @param callback A callback to invoke when a request in intercepted
          */
         fun useDynamicMocks(callback: RequestCallback) = apply {
-            if (openFile != null || filingPolicy != null) {
-                error(MOCK_PROVIDER_OVERLOAD)
-            }
             dynamicCallbacks += callback
         }
 
@@ -238,25 +253,29 @@ private constructor(
         /**
          * Builds the interceptor.
          */
-        fun build(): MockResponseInterceptor {
-            val policy = filingPolicy ?: MirrorPathPolicy()
+        fun build(): MockResponseInterceptor = MockResponseInterceptor(
+            buildProviders(),
+            mapper?.let { RequestRecorder(it, filingPolicy, root) }).apply {
+            if (interceptorMode == Mode.RECORD && root == null) {
+                error(NO_RECORDER_ERROR)
+            }
+            delay = simulatedDelay
+            mode = interceptorMode
+        }
+
+        private fun buildProviders(): List<ScenarioProvider> {
             val dynamicMockProvider =
                 dynamicCallbacks.takeIf { it.isNotEmpty() }?.let { DynamicMockProvider(it) }
-            return MockResponseInterceptor(
-                dynamicMockProvider ?: StaticMockProvider(
-                    policy,
-                    openFile ?: error(NO_LOADER_ERROR),
-                    mapper ?: error(NO_MAPPER_ERROR)
-                ),
-                mapper?.let { RequestRecorder(it, policy, root) }
-            ).apply {
-                if (interceptorMode == Mode.RECORD && root == null) {
-                    error(NO_RECORDER_ERROR)
-                }
-                delay = simulatedDelay
-                mode = interceptorMode
-            }
+            val staticMockProvider = buildStaticProvider()
+            return listOfNotNull(dynamicMockProvider, staticMockProvider)
         }
+
+        private fun buildStaticProvider(): StaticMockProvider? =
+            if (openFile != null || mapper != null) {
+                val loader = openFile ?: error(NO_LOADER_ERROR)
+                val jsonMapper = mapper ?: error(NO_MAPPER_ERROR)
+                StaticMockProvider(filingPolicy, loader, jsonMapper)
+            } else null
     }
 }
 
@@ -276,9 +295,6 @@ const val NO_MAPPER_ERROR =
 
 const val NO_RECORDER_ERROR =
     "Network calls can not be recorded without a folder where to save files. Please add a root folder."
-
-const val MOCK_PROVIDER_OVERLOAD =
-    "You can only have either static or dynamic mocks."
 
 private val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     200 to "OK",

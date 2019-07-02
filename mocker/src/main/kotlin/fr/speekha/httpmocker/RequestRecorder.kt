@@ -38,7 +38,7 @@ internal class RequestRecorder(
     fun saveFiles(record: CallRecord) = try {
         val requestFile = File(rootFolder, filingPolicy.getPath(record.request))
         logger.debug("Saving scenario file $requestFile")
-        val matchers = createMatcher(record, requestFile)
+        val matchers = buildMatcherList(record, requestFile)
         saveRequestFile(requestFile, matchers)
         matchers.last().response.bodyFile?.let { responseFile ->
             saveResponseBody(File(requestFile.parentFile, responseFile), record.body)
@@ -47,18 +47,24 @@ internal class RequestRecorder(
         logger.error("Error while writing scenario", e)
     }
 
-    private fun createMatcher(record: CallRecord, requestFile: File): List<Matcher> = with(record) {
-        val previousRecords: List<Matcher> = if (requestFile.exists())
-            mapper.readMatches(requestFile).toMutableList()
-        else emptyList()
-        return previousRecords + Matcher(
+    private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> =
+        with(record) {
+            val previousRecords: List<Matcher> = if (requestFile.exists())
+                mapper.readMatches(requestFile).toMutableList()
+            else emptyList()
+            return previousRecords + buildMatcher(previousRecords, record)
+        }
+
+    private fun CallRecord.buildMatcher(previousRecords: List<Matcher>, record: CallRecord) =
+        Matcher(
             request.toDescriptor(),
             response.toDescriptor(
                 previousRecords.size,
-                record.body?.let { getExtension(response.body()?.contentType()) }
+                record.body
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { getExtension(response.body()?.contentType()) }
             )
         )
-    }
 
     private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) =
         writeFile(requestFile) {

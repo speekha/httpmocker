@@ -38,4 +38,5 @@ internal class DynamicMockProvider(
 
     private fun computeKey(request: Request): String = request.hashCode().toString()
 
+    override fun toString(): String = "dynamic mock configuration"
 }
