@@ -16,9 +16,18 @@
 
 package fr.speekha.httpmocker.model
 
+/**
+ * Describes a request pattern and the appropriate response for that request
+ */
 data class Matcher(
 
+    /**
+     * The request to match
+     */
     val request: RequestDescriptor = RequestDescriptor(),
 
+    /**
+     * The mocked response
+     */
     val response: ResponseDescriptor
 )

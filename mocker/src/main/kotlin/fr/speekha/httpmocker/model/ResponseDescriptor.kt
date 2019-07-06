@@ -16,17 +16,38 @@
 
 package fr.speekha.httpmocker.model
 
+/**
+ * Describes all the elements of a mocked response.
+ */
 data class ResponseDescriptor(
 
+    /**
+     * Simulated delay for this response
+     */
     val delay: Long = 0,
 
+    /**
+     * HTTP response code
+     */
     val code: Int = 200,
 
+    /**
+     * Content type
+     */
     val mediaType: String = "text/plain",
 
+    /**
+     * List of headers
+     */
     val headers: List<Header> = emptyList(),
 
+    /**
+     * Response body, if bodyFile is null
+     */
     val body: String = "",
 
+    /**
+     * File to use to load the response body
+     */
     val bodyFile: String? = null
 )

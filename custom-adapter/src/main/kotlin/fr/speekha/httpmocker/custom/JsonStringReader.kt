@@ -18,16 +18,26 @@ package fr.speekha.httpmocker.custom
 
 import java.util.regex.Pattern
 
+/**
+ * A reader object to parse a JSON stream
+ * @param json the string to parse
+ */
 class JsonStringReader(
     private val json: String
 ) {
 
     private var index = 0
 
-    fun hasNext(): Boolean {
-        return index < json.length && json[index] != '}' && json[index] != ']'
-    }
+    /**
+     * Checks whether the string still has tokens to process
+     * @return false if the unit being parsed has been completely processed, true if it still
+     * contains elements
+     */
+    fun hasNext(): Boolean = index < json.length && json[index] != '}' && json[index] != ']'
 
+    /**
+     * Moves to the next element in an object or a list
+     */
     fun next() {
         val comma = json.indexOf(',', index) + 1
         val brace = json.indexOf('}', index)
@@ -35,6 +45,9 @@ class JsonStringReader(
         index = listOf(comma, brace, bracket).filter { it >= index }.min() ?: index
     }
 
+    /**
+     * Processes the beginning of an object
+     */
     fun beginObject() {
         val start = json.indexOf("{", index)
         if (start < index || !isBlank(index, start)) {
@@ -44,6 +57,9 @@ class JsonStringReader(
         }
     }
 
+    /**
+     * Processes the end of an object
+     */
     fun endObject() {
         val brace = json.indexOf('}', index)
         if (!json.substring(index, brace).isBlank()) {
@@ -52,6 +68,9 @@ class JsonStringReader(
         index = brace + 1
     }
 
+    /**
+     * Processes the beginning of a list
+     */
     fun beginList() {
         val start = json.indexOf("[", index)
         if (start < index || !isBlank(index, start)) {
@@ -61,6 +80,9 @@ class JsonStringReader(
         }
     }
 
+    /**
+     * Processes the end of a list
+     */
     fun endList() {
         val bracket = json.indexOf(']', index)
         if (!json.substring(index, bracket).isBlank()) {
@@ -69,6 +91,10 @@ class JsonStringReader(
         index = bracket + 1
     }
 
+    /**
+     * Reads the name of a JSON field
+     * @return the name of the current field as a String
+     */
     fun readFieldName(): String {
         val backupIndex = index
         val stringLitteral = extractStringLitteral()
@@ -82,10 +108,22 @@ class JsonStringReader(
         }
     }
 
+    /**
+     * Reads an Integer field value
+     * @return the field value as an Integer
+     */
     fun readInt(): Int = extractNumericLitteral().toInt()
 
+    /**
+     * Reads a Long field value
+     * @return the field value as a Long
+     */
     fun readLong(): Long = extractNumericLitteral().toLong()
 
+    /**
+     * Reads a String field value
+     * @return the field value as a String
+     */
     fun readString(): String {
         val start = json.indexOf("\"", index)
         if (start < index || !isBlank(index, start)) {
@@ -96,7 +134,10 @@ class JsonStringReader(
         return extractStringLitteral()
     }
 
-
+    /**
+     * Reads an object field value
+     * @return the field value as an object
+     */
     fun <T : Any> readObject(adapter: ObjectAdapter<T>): T {
         val brace = json.indexOf('{', index)
         if (!isBlank(index, brace)) {
