@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.custom
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-class MatcherAdapter : ObjectAdapter<Matcher> {
+internal class MatcherAdapter : ObjectAdapter<Matcher> {
 
     override fun fromJson(reader: JsonStringReader): Matcher {
         var matcher = Matcher(response = ResponseDescriptor())

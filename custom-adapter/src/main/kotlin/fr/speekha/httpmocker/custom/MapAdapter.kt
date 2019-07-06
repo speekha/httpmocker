@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.custom
 
-class MapAdapter : ObjectAdapter<Map<String, String>> {
+internal class MapAdapter : ObjectAdapter<Map<String, String>> {
 
     override fun fromJson(reader: JsonStringReader): Map<String, String> {
         val map = mutableMapOf<String, String>()

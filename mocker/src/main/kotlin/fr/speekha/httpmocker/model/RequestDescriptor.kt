@@ -16,20 +16,44 @@
 
 package fr.speekha.httpmocker.model
 
+/**
+ * Describes a request to match
+ */
 data class RequestDescriptor(
 
+    /**
+     * HTTP method (GET, POST...)
+     */
     val method: String? = null,
 
+    /**
+     * URL host name
+     */
     val host: String? = null,
 
+    /**
+     * URL TCP port
+     */
     val port: Int? = null,
 
+    /**
+     * URL path
+     */
     val path: String? = null,
 
+    /**
+     * List of request headers
+     */
     val headers: List<Header> = emptyList(),
 
+    /**
+     * Query parameters
+     */
     val params: Map<String, String> = emptyMap(),
 
+    /**
+     * Request body
+     */
     val body: String? = null
 
 )

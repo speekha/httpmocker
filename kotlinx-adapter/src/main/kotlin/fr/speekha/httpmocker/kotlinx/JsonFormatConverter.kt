@@ -23,7 +23,7 @@ import java.util.regex.Pattern
  * Headers are generally serialized as a map of String keys and values, but duplicate keys are
  * possible (for instance "Set-Cookie" or "Cookie" header can occur several times with different
  * values in the same request or response), which is not supported by Kotlinx serialization.
- * This class llows to convert the JSON format supported by other modules to a format compatible
+ * This class allows to convert the JSON format supported by other modules to a format compatible
  * with Kotlinx serialization.
  * If this class is not used, scenarios will have to match the following format for headers:
  * <code>

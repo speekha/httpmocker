@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.custom
 
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-class ResponseAdapter : ObjectAdapter<ResponseDescriptor>{
+internal class ResponseAdapter : ObjectAdapter<ResponseDescriptor>{
 
     override fun fromJson(reader: JsonStringReader): ResponseDescriptor {
         var response = ResponseDescriptor()
