@@ -24,7 +24,7 @@ import fr.speekha.httpmocker.model.Matcher
  */
 class CustomMapper : Mapper {
 
-    val adapter = MatcherAdapter()
+    private val adapter = MatcherAdapter()
 
     override fun fromJson(json: String): List<Matcher> = JsonStringReader(json).parseJson(adapter)
 

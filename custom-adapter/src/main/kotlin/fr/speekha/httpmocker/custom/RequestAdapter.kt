@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.custom
 
 import fr.speekha.httpmocker.model.RequestDescriptor
 
-class RequestAdapter : ObjectAdapter<RequestDescriptor>{
+internal class RequestAdapter : ObjectAdapter<RequestDescriptor>{
 
     override fun fromJson(reader: JsonStringReader): RequestDescriptor {
         var request = RequestDescriptor()
