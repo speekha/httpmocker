@@ -28,16 +28,20 @@ class CustomMapper : Mapper {
 
     override fun fromJson(json: String): List<Matcher> = JsonStringReader(json).parseJson(adapter)
 
-    private fun JsonStringReader.parseJson(matcherMapper: MatcherAdapter): MutableList<Matcher> {
-        val list = mutableListOf<Matcher>()
+    private fun JsonStringReader.parseJson(matcherMapper: MatcherAdapter): List<Matcher> {
         beginList()
-        while (hasNext()) {
-            list += matcherMapper.fromJson(this)
-            next()
-        }
+        val list = populateList(matcherMapper)
         endList()
         return list
     }
+
+    private fun JsonStringReader.populateList(matcherMapper: MatcherAdapter): List<Matcher> =
+        mutableListOf<Matcher>().also { list ->
+            while (hasNext()) {
+                list += matcherMapper.fromJson(this)
+                next()
+            }
+        }
 
     override fun toJson(matchers: List<Matcher>): String = compactJson(matchers.toJson())
 

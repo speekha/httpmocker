@@ -28,6 +28,8 @@ class JsonStringReader(
 
     private var index = 0
 
+    private val numericPattern = Pattern.compile("\\d[\\d ]*")
+
     /**
      * Checks whether the string still has tokens to process
      * @return false if the unit being parsed has been completely processed, true if it still
@@ -97,14 +99,14 @@ class JsonStringReader(
      */
     fun readFieldName(): String {
         val backupIndex = index
-        val stringLitteral = extractStringLitteral()
+        val stringLiteral = extractStringLiteral()
         val colon = json.indexOf(":", index) + 1
         if (colon <= index || !isFieldSeparator(index, colon)) {
             index = backupIndex
             parseError(NO_FIELD_ID_ERROR)
         } else {
             index = colon
-            return stringLitteral
+            return stringLiteral
         }
     }
 
@@ -112,13 +114,13 @@ class JsonStringReader(
      * Reads an Integer field value
      * @return the field value as an Integer
      */
-    fun readInt(): Int = extractNumericLitteral().toInt()
+    fun readInt(): Int = extractNumericLiteral().toInt()
 
     /**
      * Reads a Long field value
      * @return the field value as a Long
      */
-    fun readLong(): Long = extractNumericLitteral().toLong()
+    fun readLong(): Long = extractNumericLiteral().toLong()
 
     /**
      * Reads a String field value
@@ -131,7 +133,7 @@ class JsonStringReader(
         } else {
             index = start
         }
-        return extractStringLitteral()
+        return extractStringLiteral()
     }
 
     /**
@@ -147,7 +149,7 @@ class JsonStringReader(
         return adapter.fromJson(this)
     }
 
-    private fun extractStringLitteral(): String {
+    private fun extractStringLiteral(): String {
         val start = json.indexOf("\"", index)
         val end = json.indexOf("\"", start + 1)
         if (start < 1 || end == -1 || !isBlank(index, start)) {
@@ -157,9 +159,8 @@ class JsonStringReader(
         return json.substring(start + 1, end)
     }
 
-    private fun extractNumericLitteral(): String {
-        val pattern = Pattern.compile("\\d[\\d ]*")
-        val matcher = pattern.matcher(json.substring(index))
+    private fun extractNumericLiteral(): String {
+        val matcher = numericPattern.matcher(json.substring(index))
         if (!matcher.find() || !isBlank(index, index + matcher.start())) {
             parseError(INVALID_NUMBER_ERROR)
         }
@@ -171,7 +172,8 @@ class JsonStringReader(
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
-    private fun parseError(message: String): Nothing = error("$message${extractAfterCurrentPosition()}")
+    private fun parseError(message: String): Nothing =
+        error("$message${extractAfterCurrentPosition()}")
 
     private fun extractAfterCurrentPosition() = json.substring(index).truncate(10)
 }
