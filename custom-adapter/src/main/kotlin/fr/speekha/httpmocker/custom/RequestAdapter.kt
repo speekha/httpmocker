@@ -18,26 +18,21 @@ package fr.speekha.httpmocker.custom
 
 import fr.speekha.httpmocker.model.RequestDescriptor
 
-internal class RequestAdapter : ObjectAdapter<RequestDescriptor>{
+internal class RequestAdapter : BaseObjectAdapter<RequestDescriptor>() {
 
-    override fun fromJson(reader: JsonStringReader): RequestDescriptor {
-        var request = RequestDescriptor()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            request = when (val field = reader.readFieldName()) {
-                "method" -> request.copy(method = reader.readString())
-                "port" -> request.copy(port = reader.readInt())
-                "host" -> request.copy(host = reader.readString())
-                "path" -> request.copy(path = reader.readString())
-                "headers" -> request.copy(headers = reader.readObject(HeaderListAdapter()))
-                "params" -> request.copy(params = reader.readObject(MapAdapter()))
-                "body" -> request.copy(body = reader.readString())
-                else -> error("Unknown field $field")
-            }
-            reader.next()
-        }
-        reader.endObject()
-        return request
+    override fun createObject(): RequestDescriptor = RequestDescriptor()
+
+    override fun updateObject(
+        reader: JsonStringReader,
+        builder: RequestDescriptor
+    ): RequestDescriptor = when (val field = reader.readFieldName()) {
+        "method" -> builder.copy(method = reader.readString())
+        "port" -> builder.copy(port = reader.readInt())
+        "host" -> builder.copy(host = reader.readString())
+        "path" -> builder.copy(path = reader.readString())
+        "headers" -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
+        "params" -> builder.copy(params = reader.readObject(MapAdapter()))
+        "body" -> builder.copy(body = reader.readString())
+        else -> error("Unknown field $field")
     }
-
 }
