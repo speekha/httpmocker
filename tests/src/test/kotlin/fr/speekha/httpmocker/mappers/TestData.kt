@@ -22,9 +22,7 @@ import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readAsStringList
 import org.junit.jupiter.api.Assertions.assertEquals
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.io.OutputStream
 
 internal val completeData = listOf(
     Matcher(
@@ -38,7 +36,7 @@ internal val completeData = listOf(
                 Header("reqHeader1", "2"),
                 Header("reqHeader2", "3")
             ),
-            params = mapOf("param" to "1"),
+            params = mapOf("param1" to "1", "param2" to "2"),
             body = ".*1.*"
         ),
         ResponseDescriptor(
@@ -83,16 +81,10 @@ internal fun getMinimalOutput() = listOf(
             "}}]")
 )
 
-internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream) -> Unit) {
-    val stream = ByteArrayOutputStream()
-    stream.use {
-        writeBlock(it)
-    }
-    val result = stream.toByteArray()
-        .toString(Charsets.UTF_8)
-        .split('\n')
+internal fun testStream(expectedResult: List<String>, actual: String) {
+    val result = actual.split('\n')
         .joinToString("") {
-            it.trim().replace(Regex(":[ ]+"), ":")
+            it.trim().replace(Regex(":\\p{Space}+"), ":")
         }
     val expected = expectedResult.joinToString("") { it.trim() }
     assertEquals(expected, result)

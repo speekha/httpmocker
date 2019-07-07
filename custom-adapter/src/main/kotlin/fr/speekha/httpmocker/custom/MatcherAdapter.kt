@@ -19,21 +19,16 @@ package fr.speekha.httpmocker.custom
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-internal class MatcherAdapter : ObjectAdapter<Matcher> {
+internal class MatcherAdapter : BaseObjectAdapter<Matcher>() {
 
-    override fun fromJson(reader: JsonStringReader): Matcher {
-        var matcher = Matcher(response = ResponseDescriptor())
-        reader.beginObject()
-        while (reader.hasNext()) {
-            matcher = when (val field = reader.readFieldName()) {
-                "request" -> matcher.copy(request = reader.readObject(RequestAdapter()))
-                "response" -> matcher.copy(response = reader.readObject(ResponseAdapter()))
-                else -> error("Unknown field $field")
-            }
-            reader.next()
-        }
-        reader.endObject()
-        return matcher
+    override fun createObject(): Matcher = Matcher(response = ResponseDescriptor())
+
+    override fun updateObject(
+        reader: JsonStringReader,
+        builder: Matcher
+    ): Matcher = when (val field = reader.readFieldName()) {
+        "request" -> builder.copy(request = reader.readObject(RequestAdapter()))
+        "response" -> builder.copy(response = reader.readObject(ResponseAdapter()))
+        else -> error("Unknown field $field")
     }
-
 }

@@ -11,7 +11,8 @@
         "reqHeader2": "3"
       },
       "params": {
-        "param": "1"
+        "param1": "1",
+        "param2": "2"
       },
       "body": ".*1.*"
     },

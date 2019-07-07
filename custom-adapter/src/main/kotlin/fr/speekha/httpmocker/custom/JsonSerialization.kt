@@ -26,7 +26,7 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
  * @param json the JSON stream to clean
  * @return the JSON with all useless blanks removed
  */
-fun compactJson(json: String): String =
+internal fun compactJson(json: String): String =
     json.split("\n").joinToString("") { it.trim() }
 
 internal fun List<Matcher>.toJson() =
@@ -56,7 +56,7 @@ internal fun RequestDescriptor.toJson(): String = listOf(
 
 internal fun <K, V> Map<K, V>.toJson(): String =
     entries.joinToString(
-        separator = ", ",
+        separator = ",\n",
         prefix = "{\n",
         postfix = "\n      }"
     ) { "        \"${it.key}\": \"${it.value}\"" }
@@ -83,8 +83,9 @@ private fun String?.wrap() = this?.let { "\"$it\"" }
 private fun Int?.wrap() = this?.toString()
 
 /**
- * Truncates a string adds ... to show that the String is incomplete
+ * Truncates a string and adds ... to show that the String is incomplete
  * @param limit the maximum length for the String
  * @return the truncated version of the String
  */
-fun String.truncate(limit: Int): String = takeIf { length <= limit } ?: substring(0, limit - 3) + "..."
+fun String.truncate(limit: Int): String =
+    takeIf { length <= limit } ?: substring(0, limit - 3) + "..."

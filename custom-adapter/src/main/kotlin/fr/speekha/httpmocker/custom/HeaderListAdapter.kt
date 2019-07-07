@@ -18,19 +18,13 @@ package fr.speekha.httpmocker.custom
 
 import fr.speekha.httpmocker.model.Header
 
-internal class HeaderListAdapter : ObjectAdapter<List<Header>> {
+internal class HeaderListAdapter : BaseObjectAdapter<List<Header>>() {
 
-    override fun fromJson(reader: JsonStringReader): List<Header> {
-        val list = mutableListOf<Header>()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            val field = reader.readFieldName()
-            val value = reader.readString()
-            reader.next()
-            list += Header(field, value)
-        }
-        reader.endObject()
-        return list
-    }
+    override fun createObject(): List<Header> = listOf()
 
+    override fun updateObject(reader: JsonStringReader, builder: List<Header>): List<Header> =
+        builder + Header(
+            reader.readFieldName(),
+            reader.readString()
+        )
 }
