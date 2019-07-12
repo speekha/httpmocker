@@ -66,12 +66,12 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
     @Test
     fun `should write a proper JSON file`() {
         val expected = getExpectedOutput()
-        testStream(expected, mapper.toJson(listOf(completeData[0])))
+        testStream(expected, mapper.serialize(listOf(completeData[0])))
     }
 
     @Test
     fun `should write a proper minimum JSON file`() {
         val expected = getMinimalOutput()
-        testStream(expected, mapper.toJson(listOf(Matcher(response = ResponseDescriptor()))))
+        testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
     }
 }

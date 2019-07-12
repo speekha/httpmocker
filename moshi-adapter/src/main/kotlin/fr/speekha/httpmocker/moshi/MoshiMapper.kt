@@ -39,7 +39,7 @@ class MoshiMapper : Mapper {
         )
     }
 
-    override fun fromJson(json: String): List<Matcher> = adapter.fromJson(json) ?: emptyList()
+    override fun deserialize(payload: String): List<Matcher> = adapter.fromJson(payload) ?: emptyList()
 
-    override fun toJson(matchers: List<Matcher>): String = adapter.toJson(matchers)
+    override fun serialize(matchers: List<Matcher>): String = adapter.toJson(matchers)
 }
