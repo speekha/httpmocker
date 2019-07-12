@@ -42,15 +42,15 @@ class GsonMapper : Mapper {
 
     private val dataType = MatcherType().type
 
-    override fun fromJson(json: String): List<Matcher> =
-        adapter.parse(json).map {
+    override fun deserialize(payload: String): List<Matcher> =
+        adapter.parse(payload).map {
             it.toModel()
         }
 
     private fun Gson.parse(json: String) =
         fromJson<List<JsonMatcher>>(json, dataType) ?: emptyList()
 
-    override fun toJson(matchers: List<Matcher>): String =
+    override fun serialize(matchers: List<Matcher>): String =
         adapter.toJson(matchers.map { it.fromModel() })
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()

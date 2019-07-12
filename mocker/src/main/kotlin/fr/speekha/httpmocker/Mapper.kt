@@ -32,7 +32,7 @@ interface Mapper : Parser {
      * @param stream the JSON data as an input stream
      * @return the corresponding data objects
      */
-    fun readMatches(stream: InputStream): List<Matcher> = fromJson(stream.readAsString())
+    fun readMatches(stream: InputStream): List<Matcher> = deserialize(stream.readAsString())
 
     /**
      * Reads possible matches from a JSON input stream
@@ -47,27 +47,27 @@ interface Mapper : Parser {
      * @param matchers the list of Matchers to serialize
      */
     fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(toJson(matchers).toByteArray())
+        it.write(serialize(matchers).toByteArray())
     }
 
 }
 
 /**
- * A JSON parser, allowing to convert lists of Matcher objects to JSON and back
+ * A file parser, allowing to convert lists of Matcher objects to text file (JSON or other) and back
  */
 interface Parser {
 
     /**
-     * Parses a JSON string as a list of Matchers
-     * @param json the JSON string to parse
+     * Parses a string as a list of Matchers
+     * @param payload the serialized data to parse
      * @return the corresponding list
      */
-    fun fromJson(json: String): List<Matcher>
+    fun deserialize(payload: String): List<Matcher>
 
     /**
-     * Serializes a list of matchers as a JSON stream
+     * Serializes a list of matchers as a string (JSON, XML, CSV...)
      * @param matchers the list of matchers to serialize
-     * @return a JSON string representing the list
+     * @return a text formatted string representing the list
      */
-    fun toJson(matchers: List<Matcher>): String
+    fun serialize(matchers: List<Matcher>): String
 }

@@ -26,7 +26,7 @@ class CustomMapper : Mapper {
 
     private val adapter = MatcherAdapter()
 
-    override fun fromJson(json: String): List<Matcher> = JsonStringReader(json).parseJson(adapter)
+    override fun deserialize(payload: String): List<Matcher> = JsonStringReader(payload).parseJson(adapter)
 
     private fun JsonStringReader.parseJson(matcherMapper: MatcherAdapter): List<Matcher> {
         beginList()
@@ -43,6 +43,6 @@ class CustomMapper : Mapper {
             }
         }
 
-    override fun toJson(matchers: List<Matcher>): String = compactJson(matchers.toJson())
+    override fun serialize(matchers: List<Matcher>): String = compactJson(matchers.toJson())
 
 }

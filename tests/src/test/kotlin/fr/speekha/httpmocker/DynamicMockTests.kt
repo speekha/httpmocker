@@ -124,21 +124,6 @@ class DynamicMockTests {
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
-    private fun setupProvider(
-        vararg callback: (Request) -> ResponseDescriptor?
-    ) {
-        interceptor = MockResponseInterceptor.Builder()
-            .apply {
-                callback.forEach {
-                    useDynamicMocks(it)
-                }
-            }
-            .setInterceptorStatus(ENABLED)
-            .build()
-
-        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-    }
-
     companion object {
         const val url = "http://www.test.fr/path1?param=1"
     }

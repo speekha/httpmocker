@@ -55,14 +55,14 @@ class KotlinxMapper(
         serialModule = EmptyModule
     }
 
-    override fun fromJson(json: String): List<Matcher> =
-        parseMatcherList(adapter.parseJson(formatInput(json)))
+    override fun deserialize(payload: String): List<Matcher> =
+        parseMatcherList(adapter.parseJson(formatInput(payload)))
 
     private fun parseMatcherList(json: JsonElement): List<Matcher> = json.jsonArray.map {
         it.toMatcher()
     }
 
-    override fun toJson(matchers: List<Matcher>): String = formatOutput(
+    override fun serialize(matchers: List<Matcher>): String = formatOutput(
         adapter.stringify(JsonMatcher.serializer().list, matchers.map { JsonMatcher(it) })
     )
 }
