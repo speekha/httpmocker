@@ -25,6 +25,8 @@ import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
@@ -82,9 +84,9 @@ class StaticMockTests {
         server.start()
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should not interfere with requests when disabled`(mapper: Mapper) {
+    fun `should not interfere with requests when disabled`(title: String, mapper: Mapper) {
         setUpInterceptor(DISABLED, mapper)
         enqueueServerResponse(200, "body")
 
@@ -94,9 +96,9 @@ class StaticMockTests {
         assertEquals("body", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a 404 error when response is not found`(mapper: Mapper) {
+    fun `should return a 404 error when response is not found`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/unknown")
@@ -104,9 +106,9 @@ class StaticMockTests {
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a 404 error when an exception occurs`(mapper: Mapper) {
+    fun `should return a 404 error when an exception occurs`(title: String, mapper: Mapper) {
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
@@ -117,9 +119,12 @@ class StaticMockTests {
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a 404 error when no response matches the criteria`(mapper: Mapper) {
+    fun `should return a 404 error when no response matches the criteria`(
+        title: String,
+        mapper: Mapper
+    ) {
         whenever(loadingLambda.invoke(any())) doAnswer {
             error("Loading error")
         }
@@ -130,9 +135,9 @@ class StaticMockTests {
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a 200 when response is found`(mapper: Mapper) {
+    fun `should return a 200 when response is found`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request")
@@ -140,9 +145,12 @@ class StaticMockTests {
         assertResponseCode(response, 200, "OK")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a predefined response body from json descriptor`(mapper: Mapper) {
+    fun `should return a predefined response body from json descriptor`(
+        title: String,
+        mapper: Mapper
+    ) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request")
@@ -151,9 +159,12 @@ class StaticMockTests {
         assertEquals("simple body", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a predefined response body from separate file`(mapper: Mapper) {
+    fun `should return a predefined response body from separate file`(
+        title: String,
+        mapper: Mapper
+    ) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/body_file")
@@ -162,9 +173,12 @@ class StaticMockTests {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a predefined response body from separate file in the same folder`(mapper: Mapper) {
+    fun `should return a predefined response body from separate file in the same folder`(
+        title: String,
+        mapper: Mapper
+    ) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/folder/request_in_folder")
@@ -173,9 +187,12 @@ class StaticMockTests {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a predefined response body from separate file in a different folder`(mapper: Mapper) {
+    fun `should return a predefined response body from separate file in a different folder`(
+        title: String,
+        mapper: Mapper
+    ) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request_in_other_folder")
@@ -184,9 +201,12 @@ class StaticMockTests {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return a predefined response body from separate file in a parent folder`(mapper: Mapper) {
+    fun `should return a predefined response body from separate file in a parent folder`(
+        title: String,
+        mapper: Mapper
+    ) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/folder2/request_in_other_folder")
@@ -195,9 +215,9 @@ class StaticMockTests {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should return proper headers`(mapper: Mapper) {
+    fun `should return proper headers`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/request")
@@ -206,9 +226,9 @@ class StaticMockTests {
         assertEquals("simple header", response.header("testHeader"))
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should handle redirects`(mapper: Mapper) {
+    fun `should handle redirects`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/redirect")
@@ -217,9 +237,9 @@ class StaticMockTests {
         assertEquals("http://www.google.com", response.header("Location"))
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should handle media type`(mapper: Mapper) {
+    fun `should handle media type`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val response = executeGetRequest("/mediatype")
@@ -230,9 +250,9 @@ class StaticMockTests {
         assertEquals("json", response.body()?.contentType()?.subtype())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should select response based on query params`(mapper: Mapper) {
+    fun `should select response based on query params`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val param1 = executeGetRequest("/query_param?param=1").body()?.string()
@@ -242,9 +262,9 @@ class StaticMockTests {
         assertEquals("param B", param2)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should select response based on URL path`(mapper: Mapper) {
+    fun `should select response based on URL path`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
         val interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(policy)
@@ -261,9 +281,9 @@ class StaticMockTests {
         assertEquals("based on URL", client.newCall(request).execute().body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should select response based on host`(mapper: Mapper) {
+    fun `should select response based on host`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
         val interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(policy)
@@ -280,9 +300,9 @@ class StaticMockTests {
         assertEquals("based on host", client.newCall(request).execute().body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should select response based on port`(mapper: Mapper) {
+    fun `should select response based on port`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
         val interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(policy)
@@ -299,9 +319,9 @@ class StaticMockTests {
         assertEquals("based on port", client.newCall(request).execute().body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should select response based on headers`(mapper: Mapper) {
+    fun `should select response based on headers`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val param1 = executeGetRequest("/headers").body()?.string()
@@ -318,9 +338,9 @@ class StaticMockTests {
         assertEquals("with headers", param2)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should take http method into account`(mapper: Mapper) {
+    fun `should take http method into account`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val get = executeGetRequest("/method").body()?.string()
@@ -335,9 +355,9 @@ class StaticMockTests {
     }
 
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should select response based on request body`(mapper: Mapper) {
+    fun `should select response based on request body`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val match = executeRequest("/body_matching", "POST", "azer1zere").body()?.string()
@@ -347,9 +367,9 @@ class StaticMockTests {
         assertEquals("no match", noMatch)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should allow to delay all responses`(mapper: Mapper) {
+    fun `should allow to delay all responses`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
         interceptor.delay = 50
 
@@ -361,9 +381,9 @@ class StaticMockTests {
         assertTrue(delay >= threshold, "Time was $delay (< $threshold ms)")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should allow to delay responses based on configuration`(mapper: Mapper) {
+    fun `should allow to delay responses based on configuration`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val delay = measureTimeMillis {
@@ -379,9 +399,9 @@ class StaticMockTests {
         assertTrue(noDelay < threshold, "Time without delay was $noDelay (> $threshold ms)")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should delegate path resolutions`(mapper: Mapper) {
+    fun `should delegate path resolutions`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
         val request = initRequest("/request")
@@ -390,9 +410,12 @@ class StaticMockTests {
         verify(filingPolicy).getPath(request)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should support mixed mode to execute request when no response is found locally`(mapper: Mapper) {
+    fun `should support mixed mode to execute request when no response is found locally`(
+        title: String,
+        mapper: Mapper
+    ) {
         enqueueServerResponse(200, "body")
         setUpInterceptor(MIXED, mapper)
 
@@ -405,9 +428,9 @@ class StaticMockTests {
         assertEquals("simple body", localResponse.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should let requests through when recording`(mapper: Mapper) {
+    fun `should let requests through when recording`(title: String, mapper: Mapper) {
         enqueueServerResponse(200, "body")
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
@@ -417,9 +440,12 @@ class StaticMockTests {
         assertEquals("body", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should let requests through when recording even if saving fails`(mapper: Mapper) {
+    fun `should let requests through when recording even if saving fails`(
+        title: String,
+        mapper: Mapper
+    ) {
         enqueueServerResponse(200, "body")
         setUpInterceptor(RECORD, mapper, "")
 
@@ -429,9 +455,12 @@ class StaticMockTests {
         assertEquals("body", response.body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should store requests and responses in the proper locations when recording`(mapper: Mapper) {
+    fun `should store requests and responses in the proper locations when recording`(
+        title: String,
+        mapper: Mapper
+    ) {
         enqueueServerResponse(200, "body")
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
@@ -441,9 +470,9 @@ class StaticMockTests {
         assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should store requests and responses when recording`(mapper: Mapper) {
+    fun `should store requests and responses when recording`(title: String, mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
@@ -483,9 +512,12 @@ class StaticMockTests {
         }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should handle null request and response bodies when recording`(mapper: Mapper) {
+    fun `should handle null request and response bodies when recording`(
+        title: String,
+        mapper: Mapper
+    ) {
         enqueueServerResponse(200, null)
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
 
@@ -509,9 +541,9 @@ class StaticMockTests {
         }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should update existing descriptors when recording`(mapper: Mapper) {
+    fun `should update existing descriptors when recording`(title: String, mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         enqueueServerResponse(200, "second body")
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
@@ -570,9 +602,9 @@ class StaticMockTests {
         }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should add proper extension to response files`(mapper: Mapper) {
+    fun `should add proper extension to response files`(title: String, mapper: Mapper) {
         enqueueServerResponse(200, "body", contentType = "image/png")
         enqueueServerResponse(200, "body", contentType = "application/json")
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
@@ -584,9 +616,12 @@ class StaticMockTests {
         assertFileExists("$SAVE_FOLDER/record/request2_body_0.json")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should match indexes in descriptor file and actual response file name`(mapper: Mapper) {
+    fun `should match indexes in descriptor file and actual response file name`(
+        title: String,
+        mapper: Mapper
+    ) {
         enqueueServerResponse(200, "body", contentType = "image/png")
         enqueueServerResponse(200, "body", contentType = "application/json")
         setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
@@ -598,9 +633,12 @@ class StaticMockTests {
         assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should allow to stack several interceptors thanks to mixed mode`(mapper: Mapper) {
+    fun `should allow to stack several interceptors thanks to mixed mode`(
+        title: String,
+        mapper: Mapper
+    ) {
         enqueueServerResponse(200, "server response")
 
         val inMemoryPolicy = InMemoryPolicy(mapper)
@@ -638,9 +676,9 @@ class StaticMockTests {
         assertEquals("server response", executeGetRequest("serverMatch").body()?.string())
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should support dynamic and static mocks together`(mapper: Mapper) {
+    fun `should support dynamic and static mocks together`(title: String, mapper: Mapper) {
         val result1 = "Dynamic"
         val result2 = "simple body"
 
@@ -763,10 +801,14 @@ class StaticMockTests {
 
         @JvmStatic
         fun data(): Stream<Arguments> = Stream.of(
-            Arguments.of(JacksonMapper()),
-            Arguments.of(GsonMapper()),
-            Arguments.of(MoshiMapper()),
-            Arguments.of(CustomMapper())
+            Arguments.of("Jackson", JacksonMapper()),
+            Arguments.of("Gson", GsonMapper()),
+            Arguments.of("Moshi", MoshiMapper()),
+            Arguments.of("Custom mapper", CustomMapper()),
+            Arguments.of(
+                "Kotlinx serialization",
+                KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export)
+            )
         )
     }
 }

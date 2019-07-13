@@ -18,34 +18,31 @@ package fr.speekha.httpmocker.custom
 
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.readAsString
-import java.io.InputStream
-import java.io.OutputStream
 
 /**
- * An adapter using custom JSON parsing to serialize/deserialize scenarios.
+ * A mapper using custom JSON parsing to serialize/deserialize scenarios.
  */
 class CustomMapper : Mapper {
 
-    override fun readMatches(stream: InputStream): List<Matcher> {
-        val matcherMapper = MatcherAdapter()
+    private val adapter = MatcherAdapter()
 
-        val list = mutableListOf<Matcher>()
+    override fun deserialize(payload: String): List<Matcher> = JsonStringReader(payload).parseJson(adapter)
 
-        val json = stream.readAsString()
-        val reader = JsonStringReader(json)
-        reader.beginList()
-        while (reader.hasNext()) {
-            list += matcherMapper.fromJson(reader)
-            reader.next()
-        }
-        reader.endList()
-
+    private fun JsonStringReader.parseJson(matcherMapper: MatcherAdapter): List<Matcher> {
+        beginList()
+        val list = populateList(matcherMapper)
+        endList()
         return list
     }
 
-    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(compactJson(matchers.toJson()).toByteArray(Charsets.UTF_8))
-    }
+    private fun JsonStringReader.populateList(matcherMapper: MatcherAdapter): List<Matcher> =
+        mutableListOf<Matcher>().also { list ->
+            while (hasNext()) {
+                list += matcherMapper.fromJson(this)
+                next()
+            }
+        }
+
+    override fun serialize(matchers: List<Matcher>): String = compactJson(matchers.toJson())
 
 }

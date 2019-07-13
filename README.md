@@ -14,7 +14,7 @@ configuration files instead. The interceptor will also allow to record scenarios
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.3'
+httpmocker_version = '1.1.4'
 ```
 
 ## Gradle 
@@ -46,24 +46,28 @@ repositories {
 #### Adding HttpMocker
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
-files for static mocks. Currently, there are four possible options that are provided for parsing, based on three of the 
-most commonly used libraries for JSON parsing (Jackson, Gson, Moshi) and a custom implementation (no third party dependency), 
-so you can choose the one matching what you already use in your application (this will help you prevent duplicate libraries in 
-your classpath, like Jackson and GSON). If you choose one of these options, all you need to add is the corresponding 
+files for static mocks. Currently, there are five possible options that are provided for parsing, based on some of the 
+most commonly used libraries for JSON parsing (Jackson, Gson, Moshi, Kotlinx serialization) and a custom implementation 
+(no third party dependency), so you can choose the one matching what you already use in your application (this will 
+help you prevent duplicate libraries in your classpath, like Jackson and GSON). If you choose one of these options, all 
+you need to add is the corresponding 
 `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.3"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.1.4"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.3"
+implementation "fr.speekha.httpmocker:gson-adapter:1.1.4"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.3"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.1.4"
+
+// Parses JSON scenarios using Kotlinx Serialization
+implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.4"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.3"
+implementation "fr.speekha.httpmocker:custom-adapter:1.1.4"
 ```
 
 If none of those options suits your needs or if you would prefer to only use dynamic mocks, you can add 
@@ -71,7 +75,7 @@ the main dependency to your project (using static mocks will require that you pr
 of the `Mapper` class):
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.3"
+implementation "fr.speekha.httpmocker:mocker:1.1.4"
 ```
 
 #### External dependencies

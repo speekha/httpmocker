@@ -22,9 +22,7 @@ import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readAsStringList
 import org.junit.jupiter.api.Assertions.assertEquals
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.io.OutputStream
 
 internal val completeData = listOf(
     Matcher(
@@ -38,7 +36,7 @@ internal val completeData = listOf(
                 Header("reqHeader1", "2"),
                 Header("reqHeader2", "3")
             ),
-            params = mapOf("param" to "1"),
+            params = mapOf("param1" to "1", "param2" to "2"),
             body = ".*1.*"
         ),
         ResponseDescriptor(
@@ -70,29 +68,24 @@ internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
 internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     .map {
         it.trim()
-            .replace(": ", ":")
-            .replace(",", "")
+            .replace(Regex(":[ ]+"), ":")
     }
 
-internal fun testStream(expectedResult: List<String>, writeBlock: (OutputStream) -> Unit) {
-    val stream = ByteArrayOutputStream()
-    stream.use {
-        writeBlock(it)
-    }
-    val result = stream.toByteArray()
-        .toString(Charsets.UTF_8)
-        .split('\n')
+internal fun getMinimalOutput() = listOf(
+    ("[{" +
+            "\"request\":{" +
+            "\"headers\":{},\"params\":{}" +
+            "}," +
+            "\"response\":{" +
+            "\"delay\":0,\"code\":200,\"media-type\":\"text/plain\",\"headers\":{},\"body\":\"\"" +
+            "}}]")
+)
+
+internal fun testStream(expectedResult: List<String>, actual: String) {
+    val result = actual.split('\n')
         .joinToString("") {
-            it.trim().replace(": ", ":").replace(",", "")
+            it.trim().replace(Regex(":\\p{Space}+"), ":")
         }
-    assertEquals(
-        expectedResult.sumBy { it.length },
-        result.length,
-        """Length of generated JSON differs:
-            Expected: ${getCompleteInput().readAsStringList().joinToString("") {it.trim()}}
-            Actual:   ${stream.toByteArray().toString(Charsets.UTF_8)}""".trimIndent()
-    )
-    assertEquals("", expectedResult.fold(result) { acc, token ->
-        acc.replaceFirst(token, "")
-    })
+    val expected = expectedResult.joinToString("") { it.trim() }
+    assertEquals(expected, result)
 }

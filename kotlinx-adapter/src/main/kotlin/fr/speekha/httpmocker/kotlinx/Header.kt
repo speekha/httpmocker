@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.kotlinx
 
-/**
- * Describes a request pattern and the appropriate response for that request
- */
-data class Matcher(
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.Header as Model
 
-    /**
-     * The request to match
-     */
-    val request: RequestDescriptor = RequestDescriptor(),
-
-    /**
-     * The mocked response
-     */
-    val response: ResponseDescriptor
-)
+@Serializable
+internal data class Header(
+    val name: String?,
+    var value: String?
+) {
+    constructor(model: Model) : this(model.name, model.value)
+}

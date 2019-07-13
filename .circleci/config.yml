@@ -39,6 +39,8 @@ jobs:
       - restore_cache:
           keys:
             - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
       - checkout
       - restore_cache:
           keys:
@@ -102,6 +104,14 @@ jobs:
     steps:
       - build-module:
           module: "custom-adapter"
+  build_kotlinx:
+    docker:
+      - image: circleci/android:api-28
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - build-module:
+          module: "kotlinx-adapter"
   build_demo:
     docker:
       - image: circleci/android:api-28
@@ -162,6 +172,9 @@ jobs:
             - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
       - restore_cache:
           keys:
+            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
             - build-demo-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Gather libs
@@ -201,6 +214,9 @@ jobs:
       - restore_cache:
           keys:
             - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Tests
           command: ./gradlew tests:test --stacktrace
@@ -256,6 +272,9 @@ workflows:
       - build_custom:
           requires:
             - build_core
+      - build_kotlinx:
+          requires:
+            - build_core
       - build_demo:
           requires:
             - build_jackson
@@ -265,6 +284,7 @@ workflows:
             - build_gson
             - build_moshi
             - build_custom
+            - build_kotlinx
             - build_demo
       - test:
           requires:
@@ -272,6 +292,7 @@ workflows:
             - build_gson
             - build_moshi
             - build_custom
+            - build_kotlinx
       - publish_snapshot:
           requires:
             - test

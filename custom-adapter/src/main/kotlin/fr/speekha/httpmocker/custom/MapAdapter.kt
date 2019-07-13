@@ -16,19 +16,12 @@
 
 package fr.speekha.httpmocker.custom
 
-class MapAdapter : ObjectAdapter<Map<String, String>> {
+internal class MapAdapter : BaseObjectAdapter<Map<String, String>>() {
 
-    override fun fromJson(reader: JsonStringReader): Map<String, String> {
-        val map = mutableMapOf<String, String>()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            val field = reader.readFieldName()
-            val value = reader.readString()
-            reader.next()
-            map += field to value
-        }
-        reader.endObject()
-        return map
-    }
+    override fun createObject(): Map<String, String> = mapOf()
 
+    override fun updateObject(
+        reader: JsonStringReader,
+        builder: Map<String, String>
+    ): Map<String, String> = builder + (reader.readFieldName() to reader.readString())
 }

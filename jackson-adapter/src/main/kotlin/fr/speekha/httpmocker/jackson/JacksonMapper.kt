@@ -33,12 +33,19 @@ import fr.speekha.httpmocker.jackson.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.jackson.ResponseDescriptor as JsonResponseDescriptor
 
 /**
- * An adapter using Jackson to serialize/deserialize scenarios.
+ * A mapper using Jackson to serialize/deserialize scenarios.
  */
 class JacksonMapper : Mapper {
 
     private val mapper: ObjectMapper =
         jacksonObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
+
+    override fun deserialize(payload: String): List<Matcher> =
+        mapper.readValue<List<JsonMatcher>>(payload, jacksonTypeRef<List<JsonMatcher>>())
+            .map { it.toModel() }
+
+    override fun serialize(matchers: List<Matcher>): String =
+        mapper.writeValueAsString(matchers.map { it.fromModel() })
 
     override fun readMatches(stream: InputStream): List<Matcher> =
         mapper.readValue<List<JsonMatcher>>(stream, jacksonTypeRef<List<JsonMatcher>>())

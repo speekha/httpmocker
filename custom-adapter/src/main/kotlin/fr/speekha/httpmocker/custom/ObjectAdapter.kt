@@ -16,6 +16,17 @@
 
 package fr.speekha.httpmocker.custom
 
+/**
+ * Adapter to convert a JSON snippet to an object of type T. That adapter must implement all
+ * the necessary steps to decode the JSON string into the corresponding object.
+ * @param T type of the object to return when parsing JSON
+ */
 interface ObjectAdapter<T : Any> {
+
+    /**
+     * Parses the JSON block to instantiate an object
+     * @param reader the JSON reader to use to access the JSON data
+     * @return the concrete object for that JSON
+     */
     fun fromJson(reader: JsonStringReader): T
 }

@@ -25,29 +25,51 @@ import okhttp3.Response
 import okhttp3.ResponseBody
 import okio.Buffer
 
-fun RequestBody.readAsString(): String? = Buffer().let {
+/**
+ * Reads a request body and returns it as a String
+ * @return a string with the request body content
+ */
+internal fun RequestBody.readAsString(): String? = Buffer().let {
     writeTo(it)
     it.inputStream().bufferedReader().use { reader -> reader.readText() }
 }
 
-fun Request.matchBody(request: RequestDescriptor): Boolean = request.body?.let { bodyPattern ->
+/**
+ * Tries to match an OkHttp Request with a request template
+ * @return true if the request matches the template, false if it doesn't
+ */
+internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.body?.let { bodyPattern ->
     val requestBody = body()?.readAsString()
     requestBody != null && Regex(bodyPattern).matches(requestBody)
 } ?: true
 
-fun Request.toDescriptor() = RequestDescriptor(
+/**
+ * Converts an OkHttp Request to a template
+ * @return the request description
+ */
+internal fun Request.toDescriptor() = RequestDescriptor(
     method = method(),
     body = body()?.readAsString(),
     params = url().queryParameterNames().associate { it to (url().queryParameter(it) ?: "") },
     headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
 )
 
-fun Response.toDescriptor(duplicates: Int, extension: String?) = ResponseDescriptor(
+/**
+ * Converts an OkHttp Response to a mock entry
+ * @return the response description
+ */
+internal fun Response.toDescriptor(duplicates: Int, extension: String?) = ResponseDescriptor(
     code = code(),
     bodyFile = extension?.let { request().url().pathSegments().last() + "_body_$duplicates$it" },
     headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
 )
 
-fun Response.copyResponse(body: ByteArray?): Response = newBuilder()
+/**
+ * Duplicates a response and creates a new body for the duplicate (response body is a stream and
+ * can only be read once)
+ * @param body the response body to include
+ * @return the copy of the original response
+ */
+internal fun Response.copyResponse(body: ByteArray?): Response = newBuilder()
     .body(ResponseBody.create(body()?.contentType(), body ?: byteArrayOf()))
     .build()
