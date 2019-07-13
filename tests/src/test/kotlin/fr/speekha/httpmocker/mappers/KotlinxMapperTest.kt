@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.mappers
 
-/**
- * Describes a request pattern and the appropriate response for that request
- */
-data class Matcher(
+import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 
-    /**
-     * The request to match
-     */
-    val request: RequestDescriptor = RequestDescriptor(),
-
-    /**
-     * The mocked response
-     */
-    val response: ResponseDescriptor
-)
+class KotlinxMapperTest :
+    AbstractJsonMapperTest(KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export))

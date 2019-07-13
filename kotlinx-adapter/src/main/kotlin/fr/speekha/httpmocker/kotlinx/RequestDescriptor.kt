@@ -14,46 +14,28 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.kotlinx
 
-/**
- * Describes a request to match
- */
-data class RequestDescriptor(
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.RequestDescriptor as Model
 
-    /**
-     * HTTP method (GET, POST...)
-     */
+@Serializable
+internal data class RequestDescriptor(
     val method: String? = null,
-
-    /**
-     * URL host name
-     */
     val host: String? = null,
-
-    /**
-     * URL TCP port
-     */
     val port: Int? = null,
-
-    /**
-     * URL path
-     */
     val path: String? = null,
-
-    /**
-     * List of request headers
-     */
-    val headers: List<Header> = emptyList(),
-
-    /**
-     * Query parameters
-     */
-    val params: Map<String, String> = emptyMap(),
-
-    /**
-     * Request body
-     */
+    val headers: List<Header>? = null,
+    val params: Map<String, String>? = null,
     val body: String? = null
-
-)
+) {
+    constructor(model: Model) : this(
+        model.method,
+        model.host,
+        model.port,
+        model.path,
+        model.headers.map { Header(it) },
+        model.params,
+        model.body
+    )
+}

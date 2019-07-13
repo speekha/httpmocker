@@ -21,19 +21,24 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-fun compactJson(json: String): String =
+/**
+ * Removes all unnecessary blanks from a JSON string.
+ * @param json the JSON stream to clean
+ * @return the JSON with all useless blanks removed
+ */
+internal fun compactJson(json: String): String =
     json.split("\n").joinToString("") { it.trim() }
 
-fun List<Matcher>.toJson() =
+internal fun List<Matcher>.toJson() =
     joinToString(separator = ", ", prefix = "[\n", postfix = "]") { it.toJson() }
 
-fun Matcher.toJson(): String = """  {
+internal fun Matcher.toJson(): String = """  {
     "request": ${request.toJson()},
     "response": ${response.toJson()}
   }
 """
 
-fun RequestDescriptor.toJson(): String = listOf(
+internal fun RequestDescriptor.toJson(): String = listOf(
     "method" to method.wrap(),
     "host" to host.wrap(),
     "port" to port.wrap(),
@@ -49,16 +54,16 @@ fun RequestDescriptor.toJson(): String = listOf(
         postfix = "\n    }"
     ) { (key, value) -> "      \"$key\": $value" }
 
-fun <K, V> Map<K, V>.toJson(): String =
+internal fun <K, V> Map<K, V>.toJson(): String =
     entries.joinToString(
-        separator = ", ",
+        separator = ",\n",
         prefix = "{\n",
         postfix = "\n      }"
     ) { "        \"${it.key}\": \"${it.value}\"" }
 
-fun Header.toJson(): String = "\"$name\": \"$value\""
+internal fun Header.toJson(): String = "\"$name\": \"$value\""
 
-fun ResponseDescriptor.toJson(): String = listOf(
+internal fun ResponseDescriptor.toJson(): String = listOf(
     "delay" to delay.toString(),
     "code" to code.toString(),
     "media-type" to mediaType.wrap(),
@@ -77,4 +82,10 @@ private fun String?.wrap() = this?.let { "\"$it\"" }
 
 private fun Int?.wrap() = this?.toString()
 
-fun String.truncate(limit: Int): String = takeIf { length <= limit } ?: substring(0, limit - 3) + "..."
+/**
+ * Truncates a string and adds ... to show that the String is incomplete
+ * @param limit the maximum length for the String
+ * @return the truncated version of the String
+ */
+fun String.truncate(limit: Int): String =
+    takeIf { length <= limit } ?: substring(0, limit - 3) + "..."

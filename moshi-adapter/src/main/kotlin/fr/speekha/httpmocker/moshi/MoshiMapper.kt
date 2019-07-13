@@ -21,16 +21,12 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types.newParameterizedType
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.readAsString
-import java.io.InputStream
-import java.io.OutputStream
 
 
 /**
- * An adapter using Moshi to serialize/deserialize scenarios.
+ * A mapper using Moshi to serialize/deserialize scenarios.
  */
 class MoshiMapper : Mapper {
-
     private val adapter: JsonAdapter<List<Matcher>>
 
     init {
@@ -43,10 +39,7 @@ class MoshiMapper : Mapper {
         )
     }
 
-    override fun readMatches(stream: InputStream): List<Matcher> =
-        adapter.fromJson(stream.readAsString()) ?: emptyList()
+    override fun deserialize(payload: String): List<Matcher> = adapter.fromJson(payload) ?: emptyList()
 
-    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(adapter.toJson(matchers).toByteArray(Charsets.UTF_8))
-    }
+    override fun serialize(matchers: List<Matcher>): String = adapter.toJson(matchers)
 }

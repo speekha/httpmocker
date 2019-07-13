@@ -16,10 +16,19 @@
 
 package fr.speekha.httpmocker.model
 
+/**
+ * A request or response header. Simple key-value pair.
+ */
 data class Header(
 
+    /**
+     * Header key
+     */
     val name: String = "",
 
+    /**
+     * Header value
+     */
     var value: String = ""
 
 )

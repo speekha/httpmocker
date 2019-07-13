@@ -18,6 +18,9 @@ package fr.speekha.httpmocker.policies
 
 import okhttp3.Request
 
+/**
+ * Simple filing policy that use a single file for all scenarios.
+ */
 class SingleFilePolicy(private val file: String) : FilingPolicy {
     override fun getPath(request: Request): String = file
 }

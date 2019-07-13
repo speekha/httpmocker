@@ -17,10 +17,13 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-abstract class AbstractJsonMapperTest(private val mapper: Mapper) {
+abstract class AbstractJsonMapperTest(val mapper: Mapper) {
 
     @Test
     fun `should parse a JSON file`() {
@@ -34,11 +37,41 @@ abstract class AbstractJsonMapperTest(private val mapper: Mapper) {
         assertEquals(partialData, result)
     }
 
+
+    @Test
+    fun `should handle headers with colons`() {
+        val json = """[
+  {
+    "response": {
+      "headers": {
+        "Location": "http://www.google.com"
+      }
+    }
+  }
+]"""
+
+        assertEquals(
+            listOf(
+                Matcher(
+                    response = ResponseDescriptor(
+                        headers = listOf(
+                            Header("Location", "http://www.google.com")
+                        )
+                    )
+                )
+            ), mapper.readMatches(json.byteInputStream())
+        )
+    }
+
     @Test
     fun `should write a proper JSON file`() {
         val expected = getExpectedOutput()
-        testStream(expected) {
-            mapper.writeValue(it, listOf(completeData[0]))
-        }
+        testStream(expected, mapper.serialize(listOf(completeData[0])))
+    }
+
+    @Test
+    fun `should write a proper minimum JSON file`() {
+        val expected = getMinimalOutput()
+        testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
     }
 }

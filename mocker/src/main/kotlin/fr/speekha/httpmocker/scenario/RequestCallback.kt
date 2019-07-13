@@ -19,8 +19,16 @@ package fr.speekha.httpmocker.scenario
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Request
 
+/**
+ * A callback to provide a dynamic mock response.
+ */
 interface RequestCallback {
 
+    /**
+     * Computes the appropriate response for a request
+     * @param request the request to answer
+     * @return the description of the mock response
+     */
     fun loadResponse(request: Request): ResponseDescriptor?
 
 }

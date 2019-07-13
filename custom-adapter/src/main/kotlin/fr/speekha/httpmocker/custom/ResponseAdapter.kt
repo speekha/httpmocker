@@ -18,25 +18,20 @@ package fr.speekha.httpmocker.custom
 
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-class ResponseAdapter : ObjectAdapter<ResponseDescriptor>{
+internal class ResponseAdapter : BaseObjectAdapter<ResponseDescriptor>() {
 
-    override fun fromJson(reader: JsonStringReader): ResponseDescriptor {
-        var response = ResponseDescriptor()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            response = when (val field = reader.readFieldName()) {
-                "delay" -> response.copy(delay= reader.readLong())
-                "code" -> response.copy(code= reader.readInt())
-                "media-type" -> response.copy(mediaType = reader.readString())
-                "headers" -> response.copy(headers = reader.readObject(HeaderListAdapter()))
-                "body" -> response.copy(body = reader.readString())
-                "body-file" -> response.copy(bodyFile = reader.readString())
-                else -> error("Unknown field $field")
-            }
-            reader.next()
-        }
-        reader.endObject()
-        return response
+    override fun createObject(): ResponseDescriptor = ResponseDescriptor()
+
+    override fun updateObject(
+        reader: JsonStringReader,
+        builder: ResponseDescriptor
+    ): ResponseDescriptor = when (val field = reader.readFieldName()) {
+        "delay" -> builder.copy(delay = reader.readLong())
+        "code" -> builder.copy(code = reader.readInt())
+        "media-type" -> builder.copy(mediaType = reader.readString())
+        "headers" -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
+        "body" -> builder.copy(body = reader.readString())
+        "body-file" -> builder.copy(bodyFile = reader.readString())
+        else -> error("Unknown field $field")
     }
-
 }
