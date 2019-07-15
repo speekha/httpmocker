@@ -41,5 +41,14 @@ class SingleFolderPolicyTest {
         Assertions.assertEquals("test_with_path.json", policy.getPath(request))
     }
 
+    @Test
+    fun `should handle empty path segments`() {
+        val policy: FilingPolicy = SingleFolderPolicy("folder")
+        val request = buildRequest(
+            "http://www.somestuff.com/test/with/path/", listOf("header" to "value"), "POST", "body"
+        )
+        Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
+    }
+
 
 }

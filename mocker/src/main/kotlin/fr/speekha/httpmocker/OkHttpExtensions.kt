@@ -19,6 +19,7 @@ package fr.speekha.httpmocker
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import okhttp3.HttpUrl
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
@@ -60,9 +61,13 @@ internal fun Request.toDescriptor() = RequestDescriptor(
  */
 internal fun Response.toDescriptor(duplicates: Int, extension: String?) = ResponseDescriptor(
     code = code(),
-    bodyFile = extension?.let { request().url().pathSegments().last() + "_body_$duplicates$it" },
+    bodyFile = extension?.let {
+        request().url().toBodyFile() + "_body_$duplicates$it"
+    },
     headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
 )
+
+private fun HttpUrl.toBodyFile() = pathSegments().last().takeUnless { it.isNullOrBlank() } ?: "index"
 
 /**
  * Duplicates a response and creates a new body for the duplicate (response body is a stream and

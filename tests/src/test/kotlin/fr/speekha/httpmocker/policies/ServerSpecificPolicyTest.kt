@@ -17,17 +17,27 @@
 package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ServerSpecificPolicyTest {
 
+    private val policy: FilingPolicy = ServerSpecificPolicy()
+
     @Test
     fun `should include URL host in path`() {
-        val policy: FilingPolicy = ServerSpecificPolicy()
         val request = buildRequest(
             "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
         )
-        Assertions.assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
+        assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
+    }
+
+
+    @Test
+    fun `should handle URL when last segment is empty`() {
+        val request = buildRequest(
+            "http://www.somestuff.com/test/with/path/", listOf("header" to "value"), "POST", "body"
+        )
+        assertEquals("www.somestuff.com/test/with/path/index.json", policy.getPath(request))
     }
 }
