@@ -257,7 +257,7 @@ private constructor(
             buildProviders(),
             mapper?.let { RequestRecorder(it, filingPolicy, root) }).apply {
             if (interceptorMode == Mode.RECORD && root == null) {
-                error(NO_RECORDER_ERROR)
+                error(NO_ROOT_FOLDER_ERROR)
             }
             delay = simulatedDelay
             mode = interceptorMode
@@ -294,6 +294,9 @@ const val NO_MAPPER_ERROR =
     "No mapper has been provided to deserialize scenarios. Please specify a Mapper to decode the scenario files."
 
 const val NO_RECORDER_ERROR =
+    "Recording configuration is not complete. Please add a Mapper."
+
+const val NO_ROOT_FOLDER_ERROR =
     "Network calls can not be recorded without a folder where to save files. Please add a root folder."
 
 private val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
