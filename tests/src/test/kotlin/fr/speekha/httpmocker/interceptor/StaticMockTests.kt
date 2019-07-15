@@ -315,6 +315,16 @@ class StaticMockTests : TestWithServer() {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
+    fun `should take http protocol into account`(title: String, mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val get = executeGetRequest("/protocol").body()?.string()
+
+        assertEquals("HTTP", get)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
     fun `should take http method into account`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
@@ -328,7 +338,6 @@ class StaticMockTests : TestWithServer() {
         assertEquals("put", put)
         assertEquals("delete", delete)
     }
-
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
