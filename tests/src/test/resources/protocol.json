@@ -1,0 +1,18 @@
+[
+  {
+    "request": {
+      "protocol": "https"
+    },
+    "response": {
+      "body": "HTTPS"
+    }
+  },
+  {
+    "request": {
+      "protocol": "http"
+    },
+    "response": {
+      "body": "HTTP"
+    }
+  }
+]

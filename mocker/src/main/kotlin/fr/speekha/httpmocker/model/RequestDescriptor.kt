@@ -22,6 +22,11 @@ package fr.speekha.httpmocker.model
 data class RequestDescriptor(
 
     /**
+     * Protocol (HTTP, HTTPS)
+     */
+    val protocol: String? = null,
+
+    /**
      * HTTP method (GET, POST...)
      */
     val method: String? = null,

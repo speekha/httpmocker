@@ -39,6 +39,7 @@ internal fun Matcher.toJson(): String = """  {
 """
 
 internal fun RequestDescriptor.toJson(): String = listOf(
+    "protocol" to protocol.wrap(),
     "method" to method.wrap(),
     "host" to host.wrap(),
     "port" to port.wrap(),
