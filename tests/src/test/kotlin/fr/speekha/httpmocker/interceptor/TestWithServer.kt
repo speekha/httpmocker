@@ -32,6 +32,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.io.FileInputStream
@@ -73,7 +74,7 @@ open class TestWithServer {
     protected fun File.readAsString() = FileInputStream(this).readAsString()
 
     protected fun assertFileExists(path: String) = withFile(path) {
-        Assertions.assertTrue(it.exists())
+        assertTrue(it.exists())
     }
 
     protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
