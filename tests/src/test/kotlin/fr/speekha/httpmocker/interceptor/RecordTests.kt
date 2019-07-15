@@ -81,6 +81,21 @@ class RecordTests : TestWithServer() {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
+    fun `should name body file correctly when last path segment is empty`(
+        title: String,
+        mapper: Mapper
+    ) {
+        enqueueServerResponse(200, "body")
+        setUpInterceptor(mapper)
+
+        executeGetRequest("record/")
+
+        assertFileExists("$SAVE_FOLDER/record/index.json")
+        assertFileExists("$SAVE_FOLDER/record/index_body_0.txt")
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
     fun `should store requests and responses when recording`(title: String, mapper: Mapper) {
         enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
         setUpInterceptor(mapper)
@@ -259,7 +274,9 @@ class RecordTests : TestWithServer() {
     ) {
         interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith {
-                (it.url().encodedPath() + ".json").drop(1)
+                val path = it.url().encodedPath()
+                (path + if (path.endsWith("/")) "index.json" else ".json")
+                    .drop(1)
             }
             .parseScenariosWith(mapper)
             .saveScenariosIn(File(rootFolder))

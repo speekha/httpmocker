@@ -74,7 +74,7 @@ open class TestWithServer {
     protected fun File.readAsString() = FileInputStream(this).readAsString()
 
     protected fun assertFileExists(path: String) = withFile(path) {
-        assertTrue(it.exists())
+        assertTrue(it.exists(), "File $path does not exist")
     }
 
     protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))

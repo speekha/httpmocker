@@ -23,6 +23,8 @@ import okhttp3.Request
  */
 class MirrorPathPolicy : FilingPolicy {
 
-    override fun getPath(request: Request): String = request.url().pathSegments().joinToString("/") + ".json"
+    override fun getPath(request: Request): String = with(request.url().pathSegments()) {
+        joinToString("/") + if (last() == "") "index.json" else ".json"
+    }
 
 }
