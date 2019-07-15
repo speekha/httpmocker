@@ -89,7 +89,7 @@ class DynamicMockTests {
     @Test
     fun `should not allow init an interceptor in record mode with no recorder`() {
         val exception = assertThrows<IllegalStateException> { setupProvider(RECORD) { null } }
-        assertEquals(NO_RECORDER_ERROR, exception.message)
+        assertEquals(NO_ROOT_FOLDER_ERROR, exception.message)
         assertFalse(::interceptor.isInitialized)
     }
 
