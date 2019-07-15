@@ -16,13 +16,13 @@
 
 package fr.speekha.httpmocker.demo.ui
 
-import android.Manifest.permission.*
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
