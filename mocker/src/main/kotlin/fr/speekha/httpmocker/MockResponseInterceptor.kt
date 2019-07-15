@@ -187,6 +187,17 @@ private constructor(
         }
 
         /**
+         * For static mocks: Defines the policy used to retrieve the configuration files based
+         * on the request being intercepted
+         * @param policy a lambda to use as the naming policy for scenario files
+         */
+        fun decodeScenarioPathWith(policy: (Request) -> String) = apply {
+            filingPolicy = object : FilingPolicy {
+                override fun getPath(request: Request): String = policy(request)
+            }
+        }
+
+        /**
          * For static mocks: Defines a loading function to retrieve the scenario files as a stream
          * @param loading a function to load files by name and path as a stream (could use
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
@@ -270,12 +281,12 @@ private constructor(
             return listOfNotNull(dynamicMockProvider, staticMockProvider)
         }
 
-        private fun buildStaticProvider(): StaticMockProvider? =
-            if (openFile != null || mapper != null) {
+        private fun buildStaticProvider(): StaticMockProvider? = mapper?.let { jsonMapper ->
+            if (openFile != null) {
                 val loader = openFile ?: error(NO_LOADER_ERROR)
-                val jsonMapper = mapper ?: error(NO_MAPPER_ERROR)
                 StaticMockProvider(filingPolicy, loader, jsonMapper)
             } else null
+        }
     }
 }
 
