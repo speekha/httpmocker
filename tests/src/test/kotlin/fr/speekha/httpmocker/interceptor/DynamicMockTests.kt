@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.interceptor
 
+import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.RECORD
+import fr.speekha.httpmocker.NO_RECORDER_ERROR
+import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
+import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
@@ -38,7 +42,12 @@ class DynamicMockTests {
         setupProvider {
             ResponseDescriptor(code = 202, body = "some random body")
         }
-        val response = client.newCall(buildRequest(url, method = "GET")).execute()
+        val response = client.newCall(
+            buildRequest(
+                url,
+                method = "GET"
+            )
+        ).execute()
 
         assertEquals(202, response.code())
         assertEquals("some random body", response.body()?.string())
@@ -53,7 +62,12 @@ class DynamicMockTests {
         }
         setupProvider(callback)
 
-        val response = client.newCall(buildRequest(url, method = "GET")).execute()
+        val response = client.newCall(
+            buildRequest(
+                url,
+                method = "GET"
+            )
+        ).execute()
 
         assertEquals(202, response.code())
         assertEquals(body, response.body()?.string())
@@ -78,9 +92,19 @@ class DynamicMockTests {
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
         val response1 =
-            client.newCall(buildRequest("http://www.test.fr/request1", method = "GET")).execute()
+            client.newCall(
+                buildRequest(
+                    "http://www.test.fr/request1",
+                    method = "GET"
+                )
+            ).execute()
         val response2 =
-            client.newCall(buildRequest("http://www.test.fr/request2", method = "GET")).execute()
+            client.newCall(
+                buildRequest(
+                    "http://www.test.fr/request2",
+                    method = "GET"
+                )
+            ).execute()
 
         assertEquals(result1, response1.body()?.string())
         assertEquals(result2, response2.body()?.string())
