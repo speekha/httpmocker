@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright 2019 David Blanc
   ~
@@ -15,78 +14,108 @@
   ~ limitations under the License.
   -->
 
-<android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ui.MainActivity">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.MainActivity"
+    >
 
     <TextView
-            android:id="@+id/tvState"
+        android:id="@+id/tvState"
+        style="?textAppearanceSubtitle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/mocking_state"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/radioState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:checkedButton="@id/stateDisabled"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvState"
+        app:singleSelection="true"
+        >
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stateDisabled"
+            style="?materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/mocking_state"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_margin="8dp"
-    />
+            android:text="@string/state_disabled"
+            />
 
-    <RadioGroup
-            android:id="@+id/radioState"
-            android:layout_width="0dp" android:layout_height="wrap_content"
-            app:layout_constraintLeft_toRightOf="@id/tvState"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:orientation="vertical">
-        <RadioButton android:id="@+id/stateDisabled"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:checked="true"
-                     android:text="@string/state_disabled"/>
-        <RadioButton android:id="@+id/stateEnabled"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="@string/state_enabled"/>
-        <RadioButton android:id="@+id/stateMixed"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="@string/state_mixed"/>
-        <RadioButton android:id="@+id/stateRecord"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="@string/state_record"/>
-    </RadioGroup>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stateEnabled"
+            style="?materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/state_enabled"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stateMixed"
+            style="?materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/state_mixed"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stateRecord"
+            style="?materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/state_record"
+            />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <TextView
-            android:id="@+id/tvDirectory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/download_directory_info"
-            app:layout_constraintLeft_toLeftOf="@id/radioState"
-            app:layout_constraintTop_toBottomOf="@+id/radioState"
-            android:enabled="false"
-            android:layout_margin="8dp"
-    />
+        android:id="@+id/tvDirectory"
+        style="?textAppearanceSubtitle1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:enabled="false"
+        android:text="@string/download_directory_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioState"
+        />
 
-    <Button android:id="@+id/btnCall"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/tvDirectory"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:text="@string/call_service_button"
-    />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCall"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/call_service_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvDirectory"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/results"
-            android:layout_width="0dp" android:layout_height="0dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnCall"
-            app:layout_constraintBottom_toBottomOf="parent"
-    />
-</android.support.constraint.ConstraintLayout>
+        android:id="@+id/results"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnCall"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

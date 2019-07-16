@@ -23,6 +23,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
@@ -39,15 +40,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        radioState.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setMode(
-                when (checkedId) {
-                    R.id.stateEnabled -> 1
-                    R.id.stateMixed -> 2
-                    R.id.stateRecord -> 3
-                    else -> 0
-                }
-            )
+        radioState.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                presenter.setMode(
+                    when (checkedId) {
+                        R.id.stateEnabled -> MockResponseInterceptor.Mode.ENABLED
+                        R.id.stateMixed -> MockResponseInterceptor.Mode.MIXED
+                        R.id.stateRecord -> MockResponseInterceptor.Mode.RECORD
+                        else -> MockResponseInterceptor.Mode.DISABLED
+                    }
+                )
+            } else {
+                if (-1 == radioState.checkedButtonId) radioState.check(R.id.stateDisabled)
+            }
         }
 
         btnCall.setOnClickListener {

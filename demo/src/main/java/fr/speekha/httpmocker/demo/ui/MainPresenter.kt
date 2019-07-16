@@ -57,8 +57,8 @@ class MainPresenter(
         }
     }
 
-    override fun setMode(mode: Int) {
-        mocker.mode = MockResponseInterceptor.Mode.values()[mode]
+    override fun setMode(mode: MockResponseInterceptor.Mode) {
+        mocker.mode = mode
         if (mocker.mode == MockResponseInterceptor.Mode.RECORD) {
             view.checkPermission()
         }
