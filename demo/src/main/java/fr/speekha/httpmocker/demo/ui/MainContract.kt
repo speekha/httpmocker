@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.demo.ui
 
+import androidx.annotation.IntegerRes
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.model.Repo
 
@@ -25,7 +26,7 @@ interface MainContract {
         fun setResult(result: List<Repo>)
         fun setError(message: String?)
         fun checkPermission()
-        fun updateStorageLabel(enabled: Boolean)
+        fun updateDescriptionLabel(@IntegerRes resId: Int)
     }
 
     interface Presenter {

@@ -20,6 +20,7 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.annotation.IntegerRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun updateStorageLabel(enabled: Boolean) {
-        tvDirectory.isEnabled = enabled
+    override fun updateDescriptionLabel(@IntegerRes resId: Int) {
+        tvMessage.setText(resId)
     }
 }
