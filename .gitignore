@@ -26,6 +26,7 @@ hs_err_pid*
 build
 .idea
 *.iml
+local.properties
 
 # Ignore Gradle GUI config
 gradle-app.setting

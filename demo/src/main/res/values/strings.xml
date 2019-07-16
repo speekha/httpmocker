@@ -16,7 +16,7 @@
 
 <resources>
     <string name="app_name">HttpMocker Demo</string>
-    <string name="mocking_state">Mocking state:</string>
+    <string name="mocking_state">Mocking state</string>
     <string name="state_disabled">Disabled</string>
     <string name="state_enabled">Enabled</string>
     <string name="state_mixed">Mixed</string>
