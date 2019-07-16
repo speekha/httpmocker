@@ -18,8 +18,13 @@ package fr.speekha.httpmocker.demo.ui
 
 import android.util.Log
 import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainPresenter(
@@ -48,21 +53,29 @@ class MainPresenter(
         apiService.listRepositoriesForOrganisation(org)
     }
 
-    private suspend fun loadTopContributor(org: String, repo: String) = withContext(Dispatchers.IO) {
-        try {
-            apiService.listContributorsForRepository(org, repo)
-        } catch (e: Throwable) {
-            Log.e("Presenter", e.message, e)
-            null
+    private suspend fun loadTopContributor(org: String, repo: String) =
+        withContext(Dispatchers.IO) {
+            try {
+                apiService.listContributorsForRepository(org, repo)
+            } catch (e: Throwable) {
+                Log.e("Presenter", e.message, e)
+                null
+            }
         }
-    }
 
     override fun setMode(mode: MockResponseInterceptor.Mode) {
         mocker.mode = mode
         if (mocker.mode == MockResponseInterceptor.Mode.RECORD) {
             view.checkPermission()
         }
-        view.updateStorageLabel(mocker.mode == MockResponseInterceptor.Mode.RECORD)
+        view.updateDescriptionLabel(
+            when (mocker.mode) {
+                MockResponseInterceptor.Mode.DISABLED -> R.string.disabled_description
+                MockResponseInterceptor.Mode.ENABLED -> R.string.enabled_description
+                MockResponseInterceptor.Mode.MIXED -> R.string.mixed_description
+                MockResponseInterceptor.Mode.RECORD -> R.string.record_description
+            }
+        )
     }
 
     override fun stop() {
