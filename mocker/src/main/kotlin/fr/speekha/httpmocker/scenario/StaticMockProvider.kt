@@ -52,6 +52,7 @@ internal class StaticMockProvider(
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
     private fun RequestDescriptor.match(request: Request): Boolean =
+        (protocol?.equals(request.url().scheme(), true) ?: true) &&
         (method?.equals(request.method(), true) ?: true) &&
                 (host?.equals(request.url().host(), true) ?: true) &&
                 (port?.let { it == request.url().port() } ?: true) &&

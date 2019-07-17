@@ -27,6 +27,9 @@ internal data class RequestDescriptor
 @JsonCreator
 constructor(
 
+    @JsonProperty("protocol")
+    val protocol: String? = null,
+
     @JsonProperty("method")
     val method: String? = null,
 

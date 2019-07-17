@@ -25,8 +25,12 @@ import okhttp3.Request
 class SingleFolderPolicy(private val rootFolder: String = "") : FilingPolicy {
 
     override fun getPath(request: Request): String {
-        val fileName = request.url().pathSegments().joinToString("_")
-        return if (rootFolder.isEmpty()) "$fileName.json" else "$rootFolder/$fileName.json"
+        val prefix = if (rootFolder.isEmpty()) "" else "$rootFolder/"
+        val fileName = request.url()
+            .pathSegments()
+            .filter { it.isNotEmpty() }
+            .joinToString("_")
+        return "$prefix$fileName.json"
     }
 
 }

@@ -1,6 +1,7 @@
 [
   {
     "request": {
+      "protocol": "https",
       "method": "post",
       "host": "test.com",
       "port": 15926,

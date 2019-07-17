@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class MirrorPathPolicyTest {
@@ -29,6 +29,14 @@ class MirrorPathPolicyTest {
         val request = buildRequest(
             "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
         )
-        Assertions.assertEquals("test/with/path.json", policy.getPath(request))
+        assertEquals("test/with/path.json", policy.getPath(request))
+    }
+
+    @Test
+    fun `should handle URL when last segment is empty`() {
+        val request = buildRequest(
+            "http://www.somestuff.com/test/with/path/", listOf("header" to "value"), "POST", "body"
+        )
+        assertEquals("test/with/path/index.json", policy.getPath(request))
     }
 }
