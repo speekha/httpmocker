@@ -16,13 +16,15 @@
 
 package fr.speekha.httpmocker.demo.ui
 
-import android.Manifest.permission.*
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+import androidx.annotation.IntegerRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
@@ -39,15 +41,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        radioState.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setMode(
-                when (checkedId) {
-                    R.id.stateEnabled -> 1
-                    R.id.stateMixed -> 2
-                    R.id.stateRecord -> 3
-                    else -> 0
-                }
-            )
+        radioState.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                presenter.setMode(
+                    when (checkedId) {
+                        R.id.stateEnabled -> MockResponseInterceptor.Mode.ENABLED
+                        R.id.stateMixed -> MockResponseInterceptor.Mode.MIXED
+                        R.id.stateRecord -> MockResponseInterceptor.Mode.RECORD
+                        else -> MockResponseInterceptor.Mode.DISABLED
+                    }
+                )
+            } else {
+                if (-1 == radioState.checkedButtonId) radioState.check(R.id.stateDisabled)
+            }
         }
 
         btnCall.setOnClickListener {
@@ -80,7 +86,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun updateStorageLabel(enabled: Boolean) {
-        tvDirectory.isEnabled = enabled
+    override fun updateDescriptionLabel(@IntegerRes resId: Int) {
+        tvMessage.setText(resId)
     }
 }

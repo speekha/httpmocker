@@ -14,54 +14,35 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.interceptor
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
-import fr.speekha.httpmocker.custom.CustomMapper
-import fr.speekha.httpmocker.gson.GsonMapper
-import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
-import fr.speekha.httpmocker.kotlinx.KotlinxMapper
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.InMemoryPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.Before
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.Collections
 import java.util.stream.Stream
 import kotlin.system.measureTimeMillis
 
-class StaticMockTests {
-
-    private val server = MockWebServer()
-
-    private val mockServerBaseUrl: String
-        get() = "http://127.0.0.1:${server.port}"
+class StaticMockTests : TestWithServer() {
 
     private val loadingLambda: (String) -> InputStream? = mock {
         on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
@@ -73,15 +54,6 @@ class StaticMockTests {
                 1
             )
         }
-    }
-
-    private lateinit var interceptor: MockResponseInterceptor
-
-    private lateinit var client: OkHttpClient
-
-    @Before
-    fun setUp() {
-        server.start()
     }
 
     @ParameterizedTest(name = "{0}")
@@ -277,7 +249,8 @@ class StaticMockTests {
             .addInterceptor(interceptor)
             .build()
 
-        val request = buildRequest("http://someHost.com:12345/aTestUrl")
+        val request =
+            buildRequest("http://someHost.com:12345/aTestUrl")
         assertEquals("based on URL", client.newCall(request).execute().body()?.string())
     }
 
@@ -296,7 +269,8 @@ class StaticMockTests {
             .addInterceptor(interceptor)
             .build()
 
-        val request = buildRequest("http://hostTest.com:12345/anyUrl")
+        val request =
+            buildRequest("http://hostTest.com:12345/anyUrl")
         assertEquals("based on host", client.newCall(request).execute().body()?.string())
     }
 
@@ -315,7 +289,8 @@ class StaticMockTests {
             .addInterceptor(interceptor)
             .build()
 
-        val request = buildRequest("http://someHost.com:45612/anyUrl")
+        val request =
+            buildRequest("http://someHost.com:45612/anyUrl")
         assertEquals("based on port", client.newCall(request).execute().body()?.string())
     }
 
@@ -340,6 +315,16 @@ class StaticMockTests {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
+    fun `should take http protocol into account`(title: String, mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val get = executeGetRequest("/protocol").body()?.string()
+
+        assertEquals("HTTP", get)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
     fun `should take http method into account`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
@@ -353,7 +338,6 @@ class StaticMockTests {
         assertEquals("put", put)
         assertEquals("delete", delete)
     }
-
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
@@ -430,211 +414,6 @@ class StaticMockTests {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    fun `should let requests through when recording`(title: String, mapper: Mapper) {
-        enqueueServerResponse(200, "body")
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        val response = executeGetRequest("record/request")
-
-        assertResponseCode(response, 200, "OK")
-        assertEquals("body", response.body()?.string())
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should let requests through when recording even if saving fails`(
-        title: String,
-        mapper: Mapper
-    ) {
-        enqueueServerResponse(200, "body")
-        setUpInterceptor(RECORD, mapper, "")
-
-        val response = executeGetRequest("record/request")
-
-        assertResponseCode(response, 200, "OK")
-        assertEquals("body", response.body()?.string())
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should store requests and responses in the proper locations when recording`(
-        title: String,
-        mapper: Mapper
-    ) {
-        enqueueServerResponse(200, "body")
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        executeGetRequest("record/request")
-
-        assertFileExists("$SAVE_FOLDER/record/request.json")
-        assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should store requests and responses when recording`(title: String, mapper: Mapper) {
-        enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        executeRequest(
-            "request?param1=value1",
-            "POST",
-            "requestBody",
-            listOf("someHeader" to "someValue")
-        )
-
-        withFile("$SAVE_FOLDER/request.json") {
-            val result: List<Matcher> =
-                mapper.readMatches(it)
-            val expectedResult = Matcher(
-                RequestDescriptor(
-                    method = "POST",
-                    body = "requestBody",
-                    params = mapOf("param1" to "value1"),
-                    headers = listOf(Header("someHeader", "someValue"))
-                ),
-                ResponseDescriptor(
-                    code = 200,
-                    bodyFile = "request_body_0.txt",
-                    mediaType = "text/plain",
-                    headers = listOf(
-                        Header("Content-Length", "4"),
-                        Header("Content-Type", "text/plain"),
-                        Header("someKey", "someValue")
-                    )
-                )
-            )
-            assertEquals(listOf(expectedResult), result)
-        }
-
-        withFile("$SAVE_FOLDER/request_body_0.txt") {
-            assertEquals("body", it.readAsString())
-        }
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should handle null request and response bodies when recording`(
-        title: String,
-        mapper: Mapper
-    ) {
-        enqueueServerResponse(200, null)
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        executeRequest("request", "GET", null)
-
-        withFile("$SAVE_FOLDER/request.json") {
-            val result: List<Matcher> =
-                mapper.readMatches(it)
-            val expectedResult = Matcher(
-                RequestDescriptor(method = "GET"),
-                ResponseDescriptor(
-                    code = 200,
-                    mediaType = "text/plain",
-                    headers = listOf(
-                        Header("Content-Length", "0"),
-                        Header("Content-Type", "text/plain")
-                    )
-                )
-            )
-            assertEquals(listOf(expectedResult), result)
-        }
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should update existing descriptors when recording`(title: String, mapper: Mapper) {
-        enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
-        enqueueServerResponse(200, "second body")
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        executeRequest(
-            "request?param1=value1",
-            "POST",
-            "requestBody",
-            listOf("someHeader" to "someValue")
-        )
-        executeGetRequest("request")
-
-        withFile("$SAVE_FOLDER/request.json") {
-            val result: List<Matcher> =
-                mapper.readMatches(it)
-            val expectedResult = listOf(
-                Matcher(
-                    RequestDescriptor(
-                        method = "POST",
-                        body = "requestBody",
-                        params = mapOf("param1" to "value1"),
-                        headers = listOf(Header("someHeader", "someValue"))
-                    ),
-                    ResponseDescriptor(
-                        code = 200,
-                        bodyFile = "request_body_0.txt",
-                        mediaType = "text/plain",
-                        headers = listOf(
-                            Header("Content-Length", "4"),
-                            Header("Content-Type", "text/plain"),
-                            Header("someKey", "someValue")
-                        )
-                    )
-                ),
-                Matcher(
-                    RequestDescriptor(method = "GET"),
-                    ResponseDescriptor(
-                        code = 200,
-                        bodyFile = "request_body_1.txt",
-                        mediaType = "text/plain",
-                        headers = listOf(
-                            Header("Content-Length", "11"),
-                            Header("Content-Type", "text/plain")
-                        )
-                    )
-                )
-            )
-            assertEquals(expectedResult, result)
-        }
-
-        withFile("$SAVE_FOLDER/request_body_0.txt") {
-            assertEquals("body", it.readAsString())
-        }
-        withFile("$SAVE_FOLDER/request_body_1.txt") {
-            assertEquals("second body", it.readAsString())
-        }
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should add proper extension to response files`(title: String, mapper: Mapper) {
-        enqueueServerResponse(200, "body", contentType = "image/png")
-        enqueueServerResponse(200, "body", contentType = "application/json")
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        executeGetRequest("record/request1")
-        executeGetRequest("record/request2")
-
-        assertFileExists("$SAVE_FOLDER/record/request1_body_0.png")
-        assertFileExists("$SAVE_FOLDER/record/request2_body_0.json")
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should match indexes in descriptor file and actual response file name`(
-        title: String,
-        mapper: Mapper
-    ) {
-        enqueueServerResponse(200, "body", contentType = "image/png")
-        enqueueServerResponse(200, "body", contentType = "application/json")
-        setUpInterceptor(RECORD, mapper, SAVE_FOLDER)
-
-        executeGetRequest("record/request")
-        executeGetRequest("record/request")
-
-        assertFileExists("$SAVE_FOLDER/record/request_body_0.png")
-        assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
     fun `should allow to stack several interceptors thanks to mixed mode`(
         title: String,
         mapper: Mapper
@@ -697,118 +476,38 @@ class StaticMockTests {
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
         val response1 =
-            client.newCall(buildRequest("http://www.test.fr/dynamic", method = "GET")).execute()
+            client.newCall(
+                buildRequest(
+                    "http://www.test.fr/dynamic",
+                    method = "GET"
+                )
+            ).execute()
         val response2 =
-            client.newCall(buildRequest("http://www.test.fr/request", method = "GET")).execute()
+            client.newCall(
+                buildRequest(
+                    "http://www.test.fr/request",
+                    method = "GET"
+                )
+            ).execute()
 
         assertEquals(result1, response1.body()?.string())
         assertEquals(result2, response2.body()?.string())
     }
 
-
-    private fun File.readAsString() = FileInputStream(this).readAsString()
-
-    private fun assertFileExists(path: String) = withFile(path) {
-        assertTrue(it.exists())
-    }
-
-    private fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
-
-    @AfterEach
-    fun clearFolder() {
-        val folder = File(SAVE_FOLDER)
-        if (folder.exists()) {
-            Files.walk(folder.toPath())
-                .sorted(Collections.reverseOrder<Any>())
-                .map(Path::toFile)
-                .forEach { it.delete() }
-        }
-    }
-
-    private fun setUpInterceptor(
-        mode: MockResponseInterceptor.Mode,
-        mapper: Mapper? = null,
-        rootFolder: String? = null
-    ) {
+    private fun setUpInterceptor(mode: MockResponseInterceptor.Mode, mapper: Mapper) {
         interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(filingPolicy)
             .loadFileWith(loadingLambda)
-            .apply {
-                if (mapper != null) {
-                    parseScenariosWith(mapper)
-                }
-                if (rootFolder != null) {
-                    saveScenariosIn(File(rootFolder))
-                }
-            }
+            .parseScenariosWith(mapper)
             .setInterceptorStatus(mode)
             .build()
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
-    private fun assertResponseCode(response: Response, code: Int, message: String) {
-        assertEquals(code, response.code())
-        assertEquals(message, response.message())
-    }
-
-    private fun enqueueServerResponse(
-        responseCode: Int,
-        responseBody: String?,
-        headers: List<Pair<String, String>> = listOf(),
-        contentType: String? = null
-    ) {
-        val serverResponse = MockResponse().apply {
-            setResponseCode(responseCode)
-            if (responseBody != null) {
-                setBody(responseBody)
-            }
-            addHeader("Content-Type", contentType ?: "text/plain")
-            headers.forEach { addHeader(it.first, it.second) }
-        }
-        server.enqueue(serverResponse)
-    }
-
-    private fun executeGetRequest(
-        url: String,
-        headers: List<Pair<String, String>> = emptyList()
-    ): Response =
-        executeRequest(url, "GET", null, headers)
-
-    private fun executeRequest(
-        url: String,
-        method: String,
-        body: String?,
-        headers: List<Pair<String, String>> = emptyList()
-    ): Response {
-        val request = initRequest(url, headers, method, body)
-        return client.newCall(request).execute()
-    }
-
-    private fun initRequest(
-        url: String,
-        headers: List<Pair<String, String>> = emptyList(),
-        method: String = "GET",
-        body: String? = null
-    ): Request {
-        val path = if (url.startsWith("/")) url.drop(1) else url
-        return buildRequest("$mockServerBaseUrl/$path", headers, method, body)
-    }
-
-
     companion object {
-        private const val SAVE_FOLDER = "testFolder"
-
         @JvmStatic
-        fun data(): Stream<Arguments> = Stream.of(
-            Arguments.of("Jackson", JacksonMapper()),
-            Arguments.of("Gson", GsonMapper()),
-            Arguments.of("Moshi", MoshiMapper()),
-            Arguments.of("Custom mapper", CustomMapper()),
-            Arguments.of(
-                "Kotlinx serialization",
-                KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export)
-            )
-        )
+        fun data(): Stream<Arguments> =
+            mappers
     }
 }

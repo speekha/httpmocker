@@ -21,6 +21,7 @@ import fr.speekha.httpmocker.model.RequestDescriptor as Model
 
 @Serializable
 internal data class RequestDescriptor(
+    val protocol: String? = null,
     val method: String? = null,
     val host: String? = null,
     val port: Int? = null,
@@ -30,6 +31,7 @@ internal data class RequestDescriptor(
     val body: String? = null
 ) {
     constructor(model: Model) : this(
+        model.protocol,
         model.method,
         model.host,
         model.port,

@@ -22,8 +22,8 @@ import okhttp3.Request
  * Simple filing policy that uses the complete URL, including host name, to retrieve configuration files.
  */
 class ServerSpecificPolicy : FilingPolicy {
-    override fun getPath(request: Request): String {
-        val url = request.url()
-        return (listOf(url.host()) + url.pathSegments()).joinToString("/") + ".json"
-    }
+    override fun getPath(request: Request): String =
+        with(listOf(request.url().host()) + request.url().pathSegments()) {
+            joinToString("/") + if (last() == "") "index.json" else ".json"
+        }
 }

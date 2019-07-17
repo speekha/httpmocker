@@ -22,6 +22,8 @@ import fr.speekha.httpmocker.moshikotlin.Header
 @JsonClass(generateAdapter = true)
 internal data class RequestDescriptor(
 
+    val protocol: String? = null,
+
     val method: String? = null,
 
     val host: String? = null,

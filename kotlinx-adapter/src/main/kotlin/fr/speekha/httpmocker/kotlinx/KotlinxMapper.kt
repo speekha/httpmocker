@@ -72,6 +72,7 @@ private fun JsonElement.toMatcher(): Matcher =
 
 private fun JsonElement?.toRequest(): RequestDescriptor = this?.run {
     RequestDescriptor(
+        jsonObject["protocol"]?.asLiteral(),
         jsonObject["method"]?.asLiteral(),
         jsonObject["host"]?.asLiteral(),
         jsonObject["port"]?.primitive?.int,
