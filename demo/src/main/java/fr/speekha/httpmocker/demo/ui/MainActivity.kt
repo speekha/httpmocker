@@ -20,30 +20,48 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.annotation.IntegerRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
-import org.koin.android.ext.android.inject
-import org.koin.core.parameter.parametersOf
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-class MainActivity : AppCompatActivity(), MainContract.View {
-    private val presenter: MainContract.Presenter by inject { parametersOf(this) }
+class MainActivity : AppCompatActivity() {
 
+    private val viewModel by viewModel<MainViewModel>()
     private val adapter = RepoAdapter(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        observe(viewModel.getData()) { data ->
+            when (data) {
+                is Data.Loading -> showLoading()
+                is Data.Success -> setResult(data.repos)
+                is Data.Error -> setError(data.message)
+            }
+        }
+
+        observe(viewModel.getState()) { state ->
+            when (state) {
+                is State.Permission -> checkPermission()
+                is State.Message -> updateDescriptionLabel(state.message)
+            }
+        }
+
         radioState.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
-                presenter.setMode(
+                viewModel.setMode(
                     when (checkedId) {
                         R.id.stateEnabled -> MockResponseInterceptor.Mode.ENABLED
                         R.id.stateMixed -> MockResponseInterceptor.Mode.MIXED
@@ -57,36 +75,42 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
 
         btnCall.setOnClickListener {
-            presenter.callService()
+            viewModel.callService()
         }
 
         results.adapter = adapter
         results.layoutManager = LinearLayoutManager(this)
     }
 
-    override fun onStop() {
-        super.onStop()
-        presenter.stop()
+    private fun showLoading() {
+        results.isVisible = false
+        loader.isVisible = true
     }
 
-    override fun setResult(result: List<Repo>) {
+    private fun setResult(result: List<Repo>) {
+        loader.isVisible = false
+        results.isVisible = true
         adapter.repos = result
         adapter.notifyDataSetChanged()
     }
 
-    override fun setError(message: String?) {
+    private fun setError(message: String?) {
         adapter.repos = null
         adapter.errorMessage = message
         adapter.notifyDataSetChanged()
     }
 
-    override fun checkPermission() {
+    private fun checkPermission() {
         if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
         }
     }
 
-    override fun updateDescriptionLabel(@IntegerRes resId: Int) {
+    private fun updateDescriptionLabel(@StringRes resId: Int) {
         tvMessage.setText(resId)
     }
+}
+
+fun <T : Any, L : LiveData<T>> LifecycleOwner.observe(liveData: L, body: (T?) -> Unit) {
+    liveData.observe(this, Observer(body))
 }
