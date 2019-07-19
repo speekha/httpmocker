@@ -30,4 +30,6 @@ ext {
     artifactory_version = '4.9.6'
     slf4j_version = '1.7.26'
     junit_version = '5.4.2'
+    mockito_version = '2.27.0'
+    mockito_kotlin_version = '2.1.0'
 }
