@@ -100,7 +100,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/stateDisabled"
-            style="?materialButtonOutlinedStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/state_disabled"
@@ -108,7 +108,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/stateEnabled"
-            style="?materialButtonOutlinedStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/state_enabled"
@@ -116,7 +116,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/stateMixed"
-            style="?materialButtonOutlinedStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/state_mixed"
@@ -124,7 +124,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/stateRecord"
-            style="?materialButtonOutlinedStyle"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/state_record"
