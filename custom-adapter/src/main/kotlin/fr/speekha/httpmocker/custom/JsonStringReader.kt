@@ -151,12 +151,13 @@ class JsonStringReader(
 
     private fun extractStringLiteral(): String {
         val start = json.indexOf("\"", index)
-        val end = json.indexOf("\"", start + 1)
+        val match = Regex("[^\\\\]\"").find(json, start)
+        val end = match?.range?.endInclusive ?: -1
         if (start < 1 || end == -1 || !isBlank(index, start)) {
             parseError(WRONG_START_OF_STRING_ERROR)
         }
         index = end + 1
-        return json.substring(start + 1, end)
+        return json.substring(start + 1, end).replace("\\\"", "\"")
     }
 
     private fun extractNumericLiteral(): String {

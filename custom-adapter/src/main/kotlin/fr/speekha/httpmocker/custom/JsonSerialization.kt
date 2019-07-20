@@ -55,14 +55,14 @@ internal fun RequestDescriptor.toJson(): String = listOf(
         postfix = "\n    }"
     ) { (key, value) -> "      \"$key\": $value" }
 
-internal fun <K, V> Map<K, V>.toJson(): String =
+internal fun Map<String, String>.toJson(): String =
     entries.joinToString(
         separator = ",\n",
         prefix = "{\n",
         postfix = "\n      }"
-    ) { "        \"${it.key}\": \"${it.value}\"" }
+    ) { "        \"${it.key}\": ${it.value.wrap()}" }
 
-internal fun Header.toJson(): String = "\"$name\": \"$value\""
+internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
 
 internal fun ResponseDescriptor.toJson(): String = listOf(
     "delay" to delay.toString(),
@@ -79,7 +79,7 @@ internal fun ResponseDescriptor.toJson(): String = listOf(
         postfix = "\n    }"
     ) { (key, value) -> "      \"$key\": $value" }
 
-private fun String?.wrap() = this?.let { "\"$it\"" }
+private fun String?.wrap() = this?.let { "\"${it.replace("\"", "\\\"")}\"" }
 
 private fun Int?.wrap() = this?.toString()
 
