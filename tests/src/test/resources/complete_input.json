@@ -9,7 +9,8 @@
       "headers": {
         "reqHeader1": "1",
         "reqHeader1": "2",
-        "reqHeader2": "3"
+        "reqHeader2": "3",
+        "Set-Cookie": "\"cookie\"=\"value\""
       },
       "params": {
         "param1": "1",

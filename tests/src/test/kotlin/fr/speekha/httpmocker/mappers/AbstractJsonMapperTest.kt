@@ -37,7 +37,6 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
         assertEquals(partialData, result)
     }
 
-
     @Test
     fun `should handle headers with colons`() {
         val json = """[
@@ -56,6 +55,31 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
                     response = ResponseDescriptor(
                         headers = listOf(
                             Header("Location", "http://www.google.com")
+                        )
+                    )
+                )
+            ), mapper.readMatches(json.byteInputStream())
+        )
+    }
+
+    @Test
+    fun `should handle headers with quotes`() {
+        val json = """[
+  {
+    "response": {
+      "headers": {
+        "Set-Cookie": "\"cookie\"=\"value\""
+      }
+    }
+  }
+]"""
+
+        assertEquals(
+            listOf(
+                Matcher(
+                    response = ResponseDescriptor(
+                        headers = listOf(
+                            Header("Set-Cookie", "\"cookie\"=\"value\"")
                         )
                     )
                 )
