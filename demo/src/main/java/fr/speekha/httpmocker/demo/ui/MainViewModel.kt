@@ -1,6 +1,5 @@
 package fr.speekha.httpmocker.demo.ui
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,7 +34,7 @@ class MainViewModel(
             val org = "kotlin"
             val repos = loadRepos(org)
                 .map {
-                    val contributor = loadTopContributor(org, it.name)?.firstOrNull()
+                    val contributor = loadTopContributor(org, it.name).firstOrNull()
                     it.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
                 }
             data.postValue(Data.Success(repos))
@@ -65,12 +64,7 @@ class MainViewModel(
 
     private suspend fun loadTopContributor(org: String, repo: String) =
         withContext(Dispatchers.IO) {
-            try {
-                apiService.listContributorsForRepository(org, repo)
-            } catch (e: Throwable) {
-                Log.e("Presenter", e.message, e)
-                null
-            }
+            apiService.listContributorsForRepository(org, repo)
         }
 }
 

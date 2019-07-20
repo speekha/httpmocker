@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
         observe(viewModel.getData()) { data ->
             when (data) {
-                is Data.Loading -> showLoading()
+                is Data.Loading -> showLoading(true)
                 is Data.Success -> setResult(data.repos)
                 is Data.Error -> setError(data.message)
             }
@@ -82,19 +82,19 @@ class MainActivity : AppCompatActivity() {
         results.layoutManager = LinearLayoutManager(this)
     }
 
-    private fun showLoading() {
-        results.isVisible = false
-        loader.isVisible = true
+    private fun showLoading(visible: Boolean) {
+        results.isVisible = !visible
+        loader.isVisible = visible
     }
 
     private fun setResult(result: List<Repo>) {
-        loader.isVisible = false
-        results.isVisible = true
+        showLoading(false)
         adapter.repos = result
         adapter.notifyDataSetChanged()
     }
 
     private fun setError(message: String?) {
+        showLoading(false)
         adapter.repos = null
         adapter.errorMessage = message
         adapter.notifyDataSetChanged()
