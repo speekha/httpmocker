@@ -45,6 +45,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
     buildToolsVersion '29.0.1'
 }
 
@@ -73,4 +76,10 @@ dependencies {
 
     //implementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
     implementation project(':jackson-adapter')
+
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
+    testImplementation "androidx.arch.core:core-testing:2.0.1"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
 }
