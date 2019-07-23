@@ -219,12 +219,14 @@ jobs:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Tests
-          command: ./gradlew tests:test --stacktrace
+          command: ./gradlew tests:test demo:test --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
       - store_test_results:
           path: tests/build/test-results
+      - store_test_results:
+          path: demo/build/test-results
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
