@@ -149,6 +149,17 @@ class JsonStringReader(
         return adapter.fromJson(this)
     }
 
+    fun readBoolean(): Boolean {
+        val resultTrue = json.substring(index).trimStart().startsWith("true")
+        val resultFalse = json.substring(index).trimStart().startsWith("false")
+        if (!resultTrue && !resultFalse) {
+            parseError(INVALID_BOOLEAN_ERROR)
+        }
+        index = if (resultTrue) json.indexOf("true", index) + 4
+        else json.indexOf("false", index) + 5
+        return resultTrue
+    }
+
     private fun extractStringLiteral(): String {
         val start = json.indexOf("\"", index)
         val match = Regex("[^\\\\]\"").find(json, start)
@@ -177,6 +188,7 @@ class JsonStringReader(
         error("$message${extractAfterCurrentPosition()}")
 
     private fun extractAfterCurrentPosition() = json.substring(index).truncate(10)
+
 }
 
 const val WRONG_START_OF_OBJECT_ERROR = "No object starts here: "
@@ -187,4 +199,5 @@ const val WRONG_END_OF_LIST_ERROR = "List is not entirely processed: "
 const val WRONG_START_OF_STRING_ERROR = "No string starts here: "
 const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value for a field: "
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
+const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 

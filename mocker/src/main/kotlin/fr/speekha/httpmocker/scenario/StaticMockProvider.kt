@@ -53,7 +53,7 @@ internal class StaticMockProvider(
 
     private fun RequestDescriptor.match(request: Request): Boolean =
         (protocol?.equals(request.url().scheme(), true) ?: true) &&
-        (method?.equals(request.method(), true) ?: true) &&
+                (method?.equals(request.method(), true) ?: true) &&
                 (host?.equals(request.url().host(), true) ?: true) &&
                 (port?.let { it == request.url().port() } ?: true) &&
                 (path?.let { it == request.url().encodedPath() } ?: true) &&
@@ -62,7 +62,8 @@ internal class StaticMockProvider(
                 (path?.let { it == request.url().encodedPath() } ?: true) &&
                 headers.all { request.headers(it.name).contains(it.value) } &&
                 params.all { request.url().queryParameter(it.key) == it.value } &&
-                request.matchBody(this)
+                request.matchBody(this) &&
+                (!exactMatch || (headers.size == request.headers().size() && params.size == request.url().querySize()))
 
     override fun loadResponseBody(request: Request, path: String): ByteArray? =
         loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readBytes()

@@ -351,6 +351,17 @@ class StaticMockTests : TestWithServer() {
         assertEquals("no match", noMatch)
     }
 
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    fun `should select response based on exact matches`(title: String, mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val response = executeGetRequest("/exact_match?param1=1&param2=2")
+
+        assertEquals(404, response.code())
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     fun `should allow to delay all responses`(title: String, mapper: Mapper) {

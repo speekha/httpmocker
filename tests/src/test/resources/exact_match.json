@@ -1,0 +1,13 @@
+[
+  {
+    "request": {
+      "exact-match" : true,
+      "params": {
+        "param1": "1"
+      }
+    },
+    "response": {
+      "body": "Found response"
+    }
+  }
+]

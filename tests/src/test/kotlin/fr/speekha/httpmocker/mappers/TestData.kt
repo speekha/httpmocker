@@ -27,6 +27,7 @@ import java.io.InputStream
 internal val completeData = listOf(
     Matcher(
         RequestDescriptor(
+            exactMatch = true,
             protocol = "https",
             method = "post",
             host = "test.com",

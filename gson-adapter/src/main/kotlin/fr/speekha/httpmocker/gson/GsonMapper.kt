@@ -62,10 +62,10 @@ class GsonMapper : Mapper {
         Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel())
 
     private fun JsonRequestDescriptor.toModel() =
-        RequestDescriptor(protocol, method, host, port, path, headers.toModel(), params, body)
+        RequestDescriptor(exactMatch ?: false, protocol, method, host, port, path, headers.toModel(), params, body)
 
     private fun RequestDescriptor.fromModel() =
-        JsonRequestDescriptor(protocol, method, host, port, path, getHeaders(), params, body)
+        JsonRequestDescriptor(exactMatch.takeIf { it }, protocol, method, host, port, path, getHeaders(), params, body)
 
     private fun RequestDescriptor.getHeaders() =
         HeaderAdapter.HeaderList(headers.map { it.fromModel() })
