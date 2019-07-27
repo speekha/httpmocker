@@ -25,11 +25,13 @@ import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.OkHttpClient
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Collections
@@ -46,7 +48,7 @@ class RecordTests : TestWithServer() {
         val response = executeGetRequest("record/request")
 
         assertResponseCode(response, 200, "OK")
-        Assertions.assertEquals("body", response.body()?.string())
+        assertEquals("body", response.body()?.string())
     }
 
     @ParameterizedTest(name = "{0}")
@@ -56,12 +58,26 @@ class RecordTests : TestWithServer() {
         mapper: Mapper
     ) {
         enqueueServerResponse(200, "body")
-        setUpInterceptor(mapper, "")
+        setUpInterceptor(mapper, "", false)
 
         val response = executeGetRequest("record/request")
 
         assertResponseCode(response, 200, "OK")
-        Assertions.assertEquals("body", response.body()?.string())
+        assertEquals("body", response.body()?.string())
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    fun `recording failure should return an error if desired`(
+        title: String,
+        mapper: Mapper
+    ) {
+        enqueueServerResponse(200, "body")
+        setUpInterceptor(mapper, "", true)
+
+        assertThrows<FileNotFoundException> {
+            executeGetRequest("record/request")
+        }
     }
 
     @ParameterizedTest(name = "{0}")
@@ -128,11 +144,11 @@ class RecordTests : TestWithServer() {
                     )
                 )
             )
-            Assertions.assertEquals(listOf(expectedResult), result)
+            assertEquals(listOf(expectedResult), result)
         }
 
         withFile("$SAVE_FOLDER/request_body_0.txt") {
-            Assertions.assertEquals("body", it.readAsString())
+            assertEquals("body", it.readAsString())
         }
     }
 
@@ -161,7 +177,7 @@ class RecordTests : TestWithServer() {
                     )
                 )
             )
-            Assertions.assertEquals(listOf(expectedResult), result)
+            assertEquals(listOf(expectedResult), result)
         }
     }
 
@@ -215,14 +231,14 @@ class RecordTests : TestWithServer() {
                     )
                 )
             )
-            Assertions.assertEquals(expectedResult, result)
+            assertEquals(expectedResult, result)
         }
 
         withFile("$SAVE_FOLDER/request_body_0.txt") {
-            Assertions.assertEquals("body", it.readAsString())
+            assertEquals("body", it.readAsString())
         }
         withFile("$SAVE_FOLDER/request_body_1.txt") {
-            Assertions.assertEquals("second body", it.readAsString())
+            assertEquals("second body", it.readAsString())
         }
     }
 
@@ -270,7 +286,8 @@ class RecordTests : TestWithServer() {
 
     private fun setUpInterceptor(
         mapper: Mapper,
-        rootFolder: String = SAVE_FOLDER
+        rootFolder: String = SAVE_FOLDER,
+        failOnError: Boolean = false
     ) {
         interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith {
@@ -280,6 +297,7 @@ class RecordTests : TestWithServer() {
             }
             .parseScenariosWith(mapper)
             .saveScenariosIn(File(rootFolder))
+            .failOnRecordingError(failOnError)
             .setInterceptorStatus(RECORD)
             .build()
 

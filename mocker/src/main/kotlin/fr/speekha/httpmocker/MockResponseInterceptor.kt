@@ -176,6 +176,7 @@ private constructor(
         private var simulatedDelay: Long = 0
         private var interceptorMode: Mode = Mode.DISABLED
         private val dynamicCallbacks = mutableListOf<RequestCallback>()
+        private var showSavingErrors = false
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
@@ -243,6 +244,15 @@ private constructor(
         }
 
         /**
+         * Allows to return an error if saving fails when recording.
+         * @param failOnError if true, failure to save scenarios will throw an exception.
+         * If false, saving exceptions will be ignored.
+         */
+        fun failOnRecordingError(failOnError: Boolean) = apply {
+            showSavingErrors = failOnError
+        }
+
+        /**
          * Allows to set a fake delay for every requests (can be overridden in a scenario) to
          * achieve a more realistic behavior (probably necessary if you want to display loading
          * animations during your network calls).
@@ -266,7 +276,7 @@ private constructor(
          */
         fun build(): MockResponseInterceptor = MockResponseInterceptor(
             buildProviders(),
-            mapper?.let { RequestRecorder(it, filingPolicy, root) }).apply {
+            mapper?.let { RequestRecorder(it, filingPolicy, root, showSavingErrors) }).apply {
             if (interceptorMode == Mode.RECORD && root == null) {
                 error(NO_ROOT_FOLDER_ERROR)
             }
@@ -287,6 +297,7 @@ private constructor(
                 StaticMockProvider(filingPolicy, loader, jsonMapper)
             } else null
         }
+
     }
 }
 
