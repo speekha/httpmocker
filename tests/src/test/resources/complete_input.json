@@ -1,6 +1,7 @@
 [
   {
     "request": {
+      "exact-match": true,
       "protocol": "https",
       "method": "post",
       "host": "test.com",

@@ -27,6 +27,7 @@ import fr.speekha.httpmocker.model.Matcher
  * A mapper using Moshi to serialize/deserialize scenarios.
  */
 class MoshiMapper : Mapper {
+
     private val adapter: JsonAdapter<List<Matcher>>
 
     init {

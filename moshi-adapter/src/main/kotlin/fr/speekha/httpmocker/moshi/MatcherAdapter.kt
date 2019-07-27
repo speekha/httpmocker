@@ -39,10 +39,10 @@ internal class MatcherAdapter {
     }
 
     private fun requestFromJson(request: JsonRequestDescriptor) =
-        RequestDescriptor(request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerFromJson(it) }, request.params, request.body)
+        RequestDescriptor(request.exactMatch ?: false, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerFromJson(it) }, request.params, request.body)
 
     private fun requestToJson(request: RequestDescriptor) =
-        JsonRequestDescriptor(request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerToJson(it) }, request.params, request.body)
+        JsonRequestDescriptor(request.exactMatch.takeIf { it }, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerToJson(it) }, request.params, request.body)
 
     private fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
         response.delay,

@@ -26,6 +26,7 @@ internal class RequestAdapter : BaseObjectAdapter<RequestDescriptor>() {
         reader: JsonStringReader,
         builder: RequestDescriptor
     ): RequestDescriptor = when (val field = reader.readFieldName()) {
+        "exact-match" -> builder.copy(exactMatch= reader.readBoolean())
         "protocol" -> builder.copy(protocol = reader.readString())
         "method" -> builder.copy(method = reader.readString())
         "port" -> builder.copy(port = reader.readInt())

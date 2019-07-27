@@ -16,11 +16,15 @@
 
 package fr.speekha.httpmocker.moshi
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import fr.speekha.httpmocker.moshikotlin.Header
 
 @JsonClass(generateAdapter = true)
 internal data class RequestDescriptor(
+
+    @field:Json(name = "exact-match")
+    val exactMatch: Boolean? = null,
 
     val protocol: String? = null,
 

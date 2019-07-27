@@ -16,7 +16,12 @@
 
 package fr.speekha.httpmocker.gson
 
+import com.google.gson.annotations.SerializedName
+
 internal data class RequestDescriptor(
+
+    @SerializedName("exact-match")
+    val exactMatch: Boolean? = null,
 
     val protocol: String? = null,
 

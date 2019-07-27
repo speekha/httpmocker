@@ -39,6 +39,7 @@ internal fun Matcher.toJson(): String = """  {
 """
 
 internal fun RequestDescriptor.toJson(): String = listOf(
+    "exact-match" to exactMatch.takeIf { it },
     "protocol" to protocol.wrap(),
     "method" to method.wrap(),
     "host" to host.wrap(),
