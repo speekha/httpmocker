@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.custom
 
+import java.util.Locale
 import java.util.regex.Pattern
 
 /**
@@ -29,6 +30,8 @@ class JsonStringReader(
     private var index = 0
 
     private val numericPattern = Pattern.compile("\\d[\\d ]*")
+
+    private val alphanumericPattern = Pattern.compile("[^,}\\]\\s]+")
 
     /**
      * Checks whether the string still has tokens to process
@@ -114,13 +117,20 @@ class JsonStringReader(
      * Reads an Integer field value
      * @return the field value as an Integer
      */
-    fun readInt(): Int = extractNumericLiteral().toInt()
+    fun readInt(): Int = parseNumeric(String::toInt)
 
     /**
      * Reads a Long field value
      * @return the field value as a Long
      */
-    fun readLong(): Long = extractNumericLiteral().toLong()
+    fun readLong(): Long = parseNumeric(String::toLong)
+
+    /**
+     * Reads a Boolean field value
+     * @return the field value as a Boolean
+     */
+    fun readBoolean(): Boolean =
+        parseToken(alphanumericPattern, INVALID_BOOLEAN_ERROR, this::parseBoolean)
 
     /**
      * Reads a String field value
@@ -149,15 +159,24 @@ class JsonStringReader(
         return adapter.fromJson(this)
     }
 
-    fun readBoolean(): Boolean {
-        val resultTrue = json.substring(index).trimStart().startsWith("true")
-        val resultFalse = json.substring(index).trimStart().startsWith("false")
-        if (!resultTrue && !resultFalse) {
-            parseError(INVALID_BOOLEAN_ERROR)
+    private fun <T : Number> parseNumeric(convert: String.() -> T): T =
+        parseToken(numericPattern, INVALID_NUMBER_ERROR) {
+            it.replace(" ", "").convert()
         }
-        index = if (resultTrue) json.indexOf("true", index) + 4
-        else json.indexOf("false", index) + 5
-        return resultTrue
+
+    private fun <T : Any> parseToken(pattern: Pattern, error: String, converter: (String) -> T): T {
+        val position = index
+        return try {
+            converter(extractLiteral(pattern, error))
+        } catch (e: Throwable) {
+            parseError(error, position)
+        }
+    }
+
+    private fun parseBoolean(value: String): Boolean = when (value.toLowerCase(Locale.ROOT)) {
+        "true" -> true
+        "false" -> false
+        else -> error(INVALID_BOOLEAN_ERROR)
     }
 
     private fun extractStringLiteral(): String {
@@ -171,23 +190,25 @@ class JsonStringReader(
         return json.substring(start + 1, end).replace("\\\"", "\"")
     }
 
-    private fun extractNumericLiteral(): String {
-        val matcher = numericPattern.matcher(json.substring(index))
+    private fun extractAlphaNumericLiteral(): String = extractLiteral(alphanumericPattern)
+
+    private fun extractLiteral(pattern: Pattern, error: String = INVALID_TOKEN_ERROR): String {
+        val matcher = pattern.matcher(json.substring(index))
         if (!matcher.find() || !isBlank(index, index + matcher.start())) {
-            parseError(INVALID_NUMBER_ERROR)
+            parseError(error)
         }
         index += matcher.end()
-        return matcher.group().replace(" ", "")
+        return matcher.group()
     }
 
     private fun isFieldSeparator(start: Int, end: Int) = json.substring(start, end).trim() == ":"
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
-    private fun parseError(message: String): Nothing =
-        error("$message${extractAfterCurrentPosition()}")
+    private fun parseError(message: String, position: Int = index): Nothing =
+        error("$message${extractAfterCurrentPosition(position)}")
 
-    private fun extractAfterCurrentPosition() = json.substring(index).truncate(10)
+    private fun extractAfterCurrentPosition(position: Int) = json.substring(position).truncate(10)
 
 }
 
@@ -199,5 +220,6 @@ const val WRONG_END_OF_LIST_ERROR = "List is not entirely processed: "
 const val WRONG_START_OF_STRING_ERROR = "No string starts here: "
 const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value for a field: "
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
+const val INVALID_TOKEN_ERROR = "Invalid token value: "
 const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 
