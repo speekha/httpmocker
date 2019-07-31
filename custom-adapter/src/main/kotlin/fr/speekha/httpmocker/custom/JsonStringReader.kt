@@ -29,10 +29,6 @@ class JsonStringReader(
 
     private var index = 0
 
-    private val numericPattern = Pattern.compile("\\d[\\d ]*")
-
-    private val alphanumericPattern = Pattern.compile("[^,}\\]\\s]+")
-
     /**
      * Checks whether the string still has tokens to process
      * @return false if the unit being parsed has been completely processed, true if it still
@@ -190,8 +186,6 @@ class JsonStringReader(
         return json.substring(start + 1, end).replace("\\\"", "\"")
     }
 
-    private fun extractAlphaNumericLiteral(): String = extractLiteral(alphanumericPattern)
-
     private fun extractLiteral(pattern: Pattern, error: String = INVALID_TOKEN_ERROR): String {
         val matcher = pattern.matcher(json.substring(index))
         if (!matcher.find() || !isBlank(index, index + matcher.start())) {
@@ -223,3 +217,5 @@ const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
 const val INVALID_TOKEN_ERROR = "Invalid token value: "
 const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 
+private val numericPattern = Pattern.compile("\\d[\\d ]*")
+private val alphanumericPattern = Pattern.compile("[^,}\\]\\s]+")
