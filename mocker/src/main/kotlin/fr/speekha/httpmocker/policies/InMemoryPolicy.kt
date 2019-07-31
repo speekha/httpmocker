@@ -31,6 +31,7 @@ import java.io.PipedOutputStream
  * val interceptor = MockResponseInterceptor(policy, policy::matchRequest)
  * }</pre>
  */
+@Deprecated("Dynamic mocks are a better way to mock calls programmatically")
 class InMemoryPolicy(
     private val mapper: Mapper
 ) : FilingPolicy {
