@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.scenario
 
 import fr.speekha.httpmocker.LoadFile
 import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.RequestComparator
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.matchBody
 import fr.speekha.httpmocker.model.Matcher
@@ -30,7 +31,8 @@ import java.util.Locale
 internal class StaticMockProvider(
     private val filingPolicy: FilingPolicy,
     private val loadFileContent: LoadFile,
-    private val mapper: Mapper
+    private val mapper: Mapper,
+    private val requestComparator: RequestComparator?
 ) : ScenarioProvider {
 
     private val logger = getLogger()
@@ -51,19 +53,23 @@ internal class StaticMockProvider(
         list.firstOrNull { it.request.match(request) }?.response
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
-    private fun RequestDescriptor.match(request: Request): Boolean =
-        (protocol?.equals(request.url().scheme(), true) ?: true) &&
-                (method?.equals(request.method(), true) ?: true) &&
-                (host?.equals(request.url().host(), true) ?: true) &&
-                (port?.let { it == request.url().port() } ?: true) &&
-                (path?.let { it == request.url().encodedPath() } ?: true) &&
-                (host?.let { it.toLowerCase(Locale.ROOT) == request.url().host() } ?: true) &&
-                (port?.let { it == request.url().port() } ?: true) &&
-                (path?.let { it == request.url().encodedPath() } ?: true) &&
-                headers.all { request.headers(it.name).contains(it.value) } &&
-                params.all { request.url().queryParameter(it.key) == it.value } &&
-                request.matchBody(this) &&
-                (!exactMatch || (headers.size == request.headers().size() && params.size == request.url().querySize()))
+    private fun RequestDescriptor.match(request: Request): Boolean {
+        if (requestComparator != null) {
+            return requestComparator.compare(request, this)
+        }
+        return (protocol?.equals(request.url().scheme(), true) ?: true) &&
+            (method?.equals(request.method(), true) ?: true) &&
+            (host?.equals(request.url().host(), true) ?: true) &&
+            (port?.let { it == request.url().port() } ?: true) &&
+            (path?.let { it == request.url().encodedPath() } ?: true) &&
+            (host?.let { it.toLowerCase(Locale.ROOT) == request.url().host() } ?: true) &&
+            (port?.let { it == request.url().port() } ?: true) &&
+            (path?.let { it == request.url().encodedPath() } ?: true) &&
+            headers.all { request.headers(it.name).contains(it.value) } &&
+            params.all { request.url().queryParameter(it.key) == it.value } &&
+            request.matchBody(this) &&
+            (!exactMatch || (headers.size == request.headers().size() && params.size == request.url().querySize()))
+    }
 
     override fun loadResponseBody(request: Request, path: String): ByteArray? =
         loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readBytes()

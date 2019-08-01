@@ -23,8 +23,10 @@ import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainContract
 import fr.speekha.httpmocker.demo.ui.MainPresenter
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -35,7 +37,11 @@ val injectionModule: Module = module {
     single {
         MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(MirrorPathPolicy())
-            .loadFileWith(get<Context>().assets::open)
+            .loadFileWith(get<Context>().assets::open) { request: Request, requestDescriptor: RequestDescriptor ->
+                (requestDescriptor.method?.equals(request.method(), true) ?: true) &&
+                    requestDescriptor.headers.all { request.headers(it.name).contains(it.value) } &&
+                    requestDescriptor.params.all { request.url().queryParameter(it.key) == it.value }
+            }
             .parseScenariosWith(JacksonMapper())
             .saveScenariosIn(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

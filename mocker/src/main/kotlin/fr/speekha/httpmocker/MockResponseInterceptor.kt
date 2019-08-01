@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.RequestRecorder.CallRecord
+import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
@@ -172,6 +173,7 @@ private constructor(
         private var filingPolicy: FilingPolicy = MirrorPathPolicy()
         private var openFile: LoadFile? = null
         private var mapper: Mapper? = null
+        private var requestComparator: RequestComparator? = null
         private var root: File? = null
         private var simulatedDelay: Long = 0
         private var interceptorMode: Mode = Mode.DISABLED
@@ -203,8 +205,19 @@ private constructor(
          * @param loading a function to load files by name and path as a stream (could use
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
-        fun loadFileWith(loading: LoadFile) = apply {
-            openFile = loading
+        fun loadFileWith(
+            loading: LoadFile,
+            requestComparator: ((request: Request, requestDescriptor: RequestDescriptor) -> Boolean)? = null
+        ) =
+            apply {
+                if (requestComparator != null) {
+                    this.requestComparator = object : RequestComparator {
+                        override fun compare(request: Request, requestDescriptor: RequestDescriptor): Boolean {
+                            return requestComparator(request, requestDescriptor)
+                        }
+                    }
+                }
+            this.openFile = loading
         }
 
         /**
@@ -294,7 +307,7 @@ private constructor(
         private fun buildStaticProvider(): StaticMockProvider? = mapper?.let { jsonMapper ->
             if (openFile != null) {
                 val loader = openFile ?: error(NO_LOADER_ERROR)
-                StaticMockProvider(filingPolicy, loader, jsonMapper)
+                StaticMockProvider(filingPolicy, loader, jsonMapper, requestComparator)
             } else null
         }
 
@@ -402,3 +415,7 @@ private val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     526 to "Invalid SSL Certificate",
     527 to "Railgun Error"
 )
+
+interface RequestComparator {
+    fun compare(request: Request, requestDescriptor: RequestDescriptor): Boolean
+}
