@@ -1,29 +1,21 @@
 package fr.speekha.httpmocker.demo.ui
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
+import fr.speekha.httpmocker.jackson.JacksonMapper
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 
 @ExperimentalCoroutinesApi
-class MainViewModelTest {
-
-    @get:Rule
-    var coroutinesTestRule = CoroutinesTestRule()
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+class MainViewModelTest : ViewModelTest() {
 
     private val org = "kotlin"
     private val repo = "repo"
@@ -31,9 +23,11 @@ class MainViewModelTest {
     private val contributions = 1
     private val id = 0L
 
-    private val mockService = mock<GithubApiEndpoints>()
-    private val mockResponseInterceptor =
-        MockResponseInterceptor.Builder().parseScenariosWith(mock()).build()
+    private val mockService = mockk<GithubApiEndpoints>()
+    private val mockResponseInterceptor = MockResponseInterceptor.Builder()
+        .parseScenariosWith(JacksonMapper())
+        .build()
+
     private lateinit var viewModel: MainViewModel
 
     @Before
@@ -42,93 +36,97 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `should load repos and top contributors successfully`() {
-        val observer = mock<Observer<Data>>()
+    fun `should succeed repos and top contributors calls`() = runBlockingTest {
+        val observer = spyk<Observer<Data>>()
         viewModel.getData().observeForever(observer)
 
-        coroutinesTestRule.testDispatcher.runBlockingTest {
-            whenever(mockService.listRepositoriesForOrganisation(org))
-                .thenReturn(listOf(Repo(id, repo, topContributor = contributor)))
-            whenever(mockService.listContributorsForRepository(org, repo))
-                .thenReturn(listOf(User(login = contributor, contributions = contributions)))
-            viewModel.callService()
-        }
+        coEvery { mockService.listRepositoriesForOrganisation(org) } returns
+                listOf(Repo(id, repo, topContributor = contributor))
+        coEvery { mockService.listContributorsForRepository(org, repo) } returns
+                listOf(User(login = contributor, contributions = contributions))
 
-        verify(observer).onChanged(Data.Loading)
-        verify(observer).onChanged(
-            Data.Success(
-                listOf(
-                    Repo(
-                        id,
-                        repo,
-                        topContributor = "$contributor - $contributions contributions"
+        viewModel.callService()
+
+        coVerifyOrder {
+            observer.onChanged(Data.Loading)
+            observer.onChanged(
+                Data.Success(
+                    listOf(
+                        Repo(
+                            id,
+                            repo,
+                            topContributor = "$contributor - $contributions contributions"
+                        )
                     )
                 )
             )
-        )
+        }
+        confirmVerified(observer)
         viewModel.getData().removeObserver(observer)
     }
 
     @Test
-    fun `should load repos successfully and fail top contributors`() {
-        val observer = mock<Observer<Data>>()
+    fun `should succeed repos call and fail top contributors call`() = runBlockingTest {
+        val observer = spyk<Observer<Data>>()
         viewModel.getData().observeForever(observer)
+        coEvery { mockService.listRepositoriesForOrganisation(org) } returns
+                listOf(Repo(id, repo, topContributor = contributor))
+        coEvery { mockService.listContributorsForRepository(org, repo) } returns emptyList()
 
-        coroutinesTestRule.testDispatcher.runBlockingTest {
-            whenever(mockService.listRepositoriesForOrganisation(org))
-                .thenReturn(listOf(Repo(id, repo, topContributor = contributor)))
-            whenever(mockService.listContributorsForRepository(org, repo))
-                .thenReturn(null)
-            viewModel.callService()
-        }
+        viewModel.callService()
 
-        verify(observer).onChanged(Data.Loading)
-        verify(observer).onChanged(
-            Data.Success(
-                listOf(Repo(id, repo))
+        coVerifyOrder {
+            observer.onChanged(Data.Loading)
+            observer.onChanged(
+                Data.Success(listOf(Repo(id, repo)))
             )
-        )
+        }
+        confirmVerified(observer)
         viewModel.getData().removeObserver(observer)
     }
 
     @Test
     fun `should update state according to disabled mode`() {
-        val observer = mock<Observer<State>>()
+        val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
         viewModel.setMode(MockResponseInterceptor.Mode.DISABLED)
 
-        verify(observer).onChanged(State.Message(R.string.disabled_description))
+        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.DISABLED)
+        verify { observer.onChanged(State.Message(R.string.disabled_description)) }
     }
 
     @Test
     fun `should update state according to enabled mode`() {
-        val observer = mock<Observer<State>>()
+        val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
         viewModel.setMode(MockResponseInterceptor.Mode.ENABLED)
 
-        verify(observer).onChanged(State.Message(R.string.enabled_description))
+        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.ENABLED)
+        verify { observer.onChanged(State.Message(R.string.enabled_description)) }
     }
 
     @Test
     fun `should update state according to mixed mode`() {
-        val observer = mock<Observer<State>>()
+        val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
         viewModel.setMode(MockResponseInterceptor.Mode.MIXED)
 
-        verify(observer).onChanged(State.Message(R.string.mixed_description))
+        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.MIXED)
+        verify { observer.onChanged(State.Message(R.string.mixed_description)) }
     }
 
     @Test
     fun `should check permission and update state according to record mode`() {
-        val observer = mock<Observer<State>>()
+        val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
         viewModel.setMode(MockResponseInterceptor.Mode.RECORD)
 
-        verify(observer).onChanged(State.Permission)
-        verify(observer).onChanged(State.Message(R.string.record_description))
+        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.RECORD)
+        verify { observer.onChanged(State.Permission) }
+        verify { observer.onChanged(State.Message(R.string.record_description)) }
     }
 }
