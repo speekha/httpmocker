@@ -35,7 +35,8 @@ internal val completeData = listOf(
             headers = listOf(
                 Header("reqHeader1", "1"),
                 Header("reqHeader1", "2"),
-                Header("reqHeader2", "3")
+                Header("reqHeader2", "3"),
+                Header("Set-Cookie", "\"cookie\"=\"value\"")
             ),
             params = mapOf("param1" to "1", "param2" to "2"),
             body = ".*1.*"

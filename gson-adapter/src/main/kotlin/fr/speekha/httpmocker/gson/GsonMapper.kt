@@ -37,6 +37,7 @@ class GsonMapper : Mapper {
 
     private val adapter: Gson = GsonBuilder()
         .setPrettyPrinting()
+        .disableHtmlEscaping()
         .registerTypeAdapter(HeaderAdapter.HeaderList::class.java, HeaderAdapter())
         .create()
 
