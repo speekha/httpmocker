@@ -35,7 +35,6 @@ import java.util.stream.Stream
 
 class JsonStringReaderTest {
 
-
     @Test
     fun `should parse empty string`() {
         val reader = JsonStringReader("")
@@ -105,6 +104,15 @@ class JsonStringReaderTest {
         reader.beginObject()
         reader.readFieldName()
         assertEquals(result, reader.readString())
+    }
+
+    @Test
+    fun `should read string with quotes`() {
+        val result = """a test \"string\""""
+        val reader = JsonStringReader("{\"field\":\"$result\"}")
+        reader.beginObject()
+        reader.readFieldName()
+        assertEquals("""a test "string"""", reader.readString())
     }
 
     @ParameterizedTest
