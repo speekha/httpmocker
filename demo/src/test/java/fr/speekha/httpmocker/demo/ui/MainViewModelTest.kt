@@ -77,9 +77,26 @@ class MainViewModelTest : ViewModelTest() {
 
         coVerifyOrder {
             observer.onChanged(Data.Loading)
-            observer.onChanged(
-                Data.Success(listOf(Repo(id, repo)))
-            )
+            observer.onChanged(Data.Success(listOf(Repo(id, repo))))
+        }
+        confirmVerified(observer)
+        viewModel.getData().removeObserver(observer)
+    }
+
+
+    @Test
+    fun `should fail repos call`() = runBlockingTest {
+        val errorMessage = "error"
+        val observer = spyk<Observer<Data>>()
+        viewModel.getData().observeForever(observer)
+        coEvery { mockService.listRepositoriesForOrganisation(org) } throws
+                IllegalStateException(errorMessage)
+
+        viewModel.callService()
+
+        coVerifyOrder {
+            observer.onChanged(Data.Loading)
+            observer.onChanged(Data.Error(errorMessage))
         }
         confirmVerified(observer)
         viewModel.getData().removeObserver(observer)
