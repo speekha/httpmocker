@@ -12,6 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 
 @ExperimentalCoroutinesApi
@@ -71,7 +72,7 @@ class MainViewModelTest : ViewModelTest() {
         viewModel.getData().observeForever(observer)
         coEvery { mockService.listRepositoriesForOrganisation(org) } returns
                 listOf(Repo(id, repo, topContributor = contributor))
-        coEvery { mockService.listContributorsForRepository(org, repo) } returns emptyList()
+        coEvery { mockService.listContributorsForRepository(org, repo) } throws IOException()
 
         viewModel.callService()
 
@@ -89,8 +90,7 @@ class MainViewModelTest : ViewModelTest() {
         val errorMessage = "error"
         val observer = spyk<Observer<Data>>()
         viewModel.getData().observeForever(observer)
-        coEvery { mockService.listRepositoriesForOrganisation(org) } throws
-                IllegalStateException(errorMessage)
+        coEvery { mockService.listRepositoriesForOrganisation(org) } throws IOException(errorMessage)
 
         viewModel.callService()
 
