@@ -1,0 +1,13 @@
+[
+  {
+    "request": {
+      "params": {
+        "param1": "1",
+        "param2": null
+      }
+    },
+    "response": {
+      "body": "Body found"
+    }
+  }
+]

@@ -25,5 +25,5 @@ internal data class Header
     val name: String = "",
 
     @JsonProperty("value")
-    var value: String = ""
+    var value: String? = null
 )

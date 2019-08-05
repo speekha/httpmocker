@@ -35,16 +35,17 @@ import fr.speekha.httpmocker.gson.ResponseDescriptor as JsonResponseDescriptor
  */
 class GsonMapper : Mapper {
 
-    private val adapter: Gson = GsonBuilder()
+    private val gson: Gson = GsonBuilder()
         .setPrettyPrinting()
         .disableHtmlEscaping()
         .registerTypeAdapter(HeaderAdapter.HeaderList::class.java, HeaderAdapter())
+        .registerTypeAdapter(ParamsAdapter.ParamList::class.java, ParamsAdapter())
         .create()
 
     private val dataType = MatcherType().type
 
     override fun deserialize(payload: String): List<Matcher> =
-        adapter.parse(payload).map {
+        gson.parse(payload).map {
             it.toModel()
         }
 
@@ -52,7 +53,7 @@ class GsonMapper : Mapper {
         fromJson<List<JsonMatcher>>(json, dataType) ?: emptyList()
 
     override fun serialize(matchers: List<Matcher>): String =
-        adapter.toJson(matchers.map { it.fromModel() })
+        gson.toJson(matchers.map { it.fromModel() })
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()
 
@@ -62,10 +63,30 @@ class GsonMapper : Mapper {
         Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel())
 
     private fun JsonRequestDescriptor.toModel() =
-        RequestDescriptor(exactMatch ?: false, protocol, method, host, port, path, headers.toModel(), params, body)
+        RequestDescriptor(
+            exactMatch ?: false,
+            protocol,
+            method,
+            host,
+            port,
+            path,
+            headers.toModel(),
+            params.associate { it },
+            body
+        )
 
     private fun RequestDescriptor.fromModel() =
-        JsonRequestDescriptor(exactMatch.takeIf { it }, protocol, method, host, port, path, getHeaders(), params, body)
+        JsonRequestDescriptor(
+            exactMatch.takeIf { it },
+            protocol,
+            method,
+            host,
+            port,
+            path,
+            getHeaders(),
+            ParamsAdapter.ParamList(params),
+            body
+        )
 
     private fun RequestDescriptor.getHeaders() =
         HeaderAdapter.HeaderList(headers.map { it.fromModel() })

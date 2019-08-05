@@ -20,27 +20,26 @@ import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import fr.speekha.httpmocker.gson.Header as JsonHeader
 
-internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
+internal class ParamsAdapter : TypeAdapter<ParamsAdapter.ParamList>() {
 
-    class HeaderList(list: List<JsonHeader> = emptyList()) : ArrayList<JsonHeader>(list)
+    class ParamList(map: Map<String, String?> = emptyMap()) : ArrayList<Pair<String, String?>>(map.entries.map { it.key to it.value })
 
-    override fun write(writer: JsonWriter?, headers: HeaderList?) {
+    override fun write(writer: JsonWriter?, params: ParamList?) {
         writer?.run {
             beginObject()
             serializeNulls = true
-            headers?.forEach {
-                name(it.name)
-                value(it.value)
+            params?.forEach {
+                name(it.first)
+                value(it.second)
             }
             serializeNulls = false
             endObject()
         }
     }
 
-    override fun read(reader: JsonReader?): HeaderList = reader?.run {
-        val list = HeaderList()
+    override fun read(reader: JsonReader?): ParamList = reader?.run {
+        val list = ParamList()
         beginObject()
         while (hasNext()) {
             val name = nextName()
@@ -50,9 +49,9 @@ internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
             } else {
                 nextString()
             }
-            list += JsonHeader(name, value)
+            list += name to value
         }
         endObject()
         list
-    } ?: HeaderList()
+    } ?: ParamList()
 }

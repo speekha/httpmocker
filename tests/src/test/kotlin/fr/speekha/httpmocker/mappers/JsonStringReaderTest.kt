@@ -176,7 +176,7 @@ class JsonStringReaderTest {
     @Test
     fun `should iterate through object`() {
         val reader = JsonStringReader(simpleObject)
-        val list = mutableListOf<Pair<String, String>>()
+        val list = mutableListOf<Pair<String, String?>>()
         reader.beginObject()
         while (reader.hasNext()) {
             val field = reader.readFieldName()
@@ -220,7 +220,7 @@ class JsonStringReaderTest {
     @Test
     fun `should iterate through list of strings`() {
         val json = "[\"1\", \"2\", \"3\"]"
-        val list = mutableListOf<String>()
+        val list = mutableListOf<String?>()
         with(JsonStringReader(json)) {
             beginList()
             while (hasNext()) {
@@ -234,11 +234,11 @@ class JsonStringReaderTest {
 
     @Test
     fun `should iterate through list`() {
-        val list = mutableListOf<Map<String, String>>()
+        val list = mutableListOf<Map<String, String?>>()
         with(JsonStringReader(simpleList)) {
             beginList()
             while (hasNext()) {
-                val map = mutableMapOf<String, String>()
+                val map = mutableMapOf<String, String?>()
                 beginObject()
                 while (hasNext()) {
                     val field = readFieldName()
@@ -264,7 +264,7 @@ class JsonStringReaderTest {
     fun `should detect when list is not entirely processed`() {
         with(JsonStringReader(simpleList)) {
             beginList()
-            val map = mutableMapOf<String, String>()
+            val map = mutableMapOf<String, String?>()
             beginObject()
             while (hasNext()) {
                 val field = readFieldName()
@@ -307,16 +307,18 @@ class JsonStringReaderTest {
 
     @Test
     fun `should read object field`() {
-        val reader = JsonStringReader(complexObject)
-        val obj = mutableMapOf<String, Any>()
-        reader.beginObject()
-        obj[reader.readFieldName()] = reader.readString()
-        obj[reader.readFieldName()] = reader.readObject(mapAdapter)
-        reader.next()
-        assertEquals(
-            mapOf("field0" to "0", "object" to mapOf("field1" to "1", "field2" to "2")),
-            obj
-        )
+        with(JsonStringReader(complexObject)) {
+            val obj = mutableMapOf<String, Any>()
+            beginObject()
+            obj[readFieldName()] = readString() ?: error("Incorrect object name")
+            next()
+            obj[readFieldName()] = readObject(mapAdapter)
+            next()
+            assertEquals(
+                mapOf("field0" to "0", "object" to mapOf("field1" to "1", "field2" to "2")),
+                obj
+            )
+        }
     }
 
     @Test
@@ -328,8 +330,8 @@ class JsonStringReaderTest {
                 readObject(mapAdapter)
             }
             assertEquals(
-                "$WRONG_START_OF_OBJECT_ERROR \"0\"\n" +
-                        "  ...", exception.message
+                "$WRONG_START_OF_OBJECT_ERROR \"0\",\n" +
+                        " ...", exception.message
             )
         }
     }
@@ -340,9 +342,9 @@ class JsonStringReaderTest {
         assertEquals(output, input.truncate(10))
     }
 
-    private val mapAdapter = object : ObjectAdapter<Map<String, String>> {
-        override fun fromJson(reader: JsonStringReader): Map<String, String> {
-            val map = mutableMapOf<String, String>()
+    private val mapAdapter = object : ObjectAdapter<Map<String, String?>> {
+        override fun fromJson(reader: JsonStringReader): Map<String, String?> {
+            val map = mutableMapOf<String, String?>()
             reader.beginObject()
             while (reader.hasNext()) {
                 val field = reader.readFieldName()
@@ -378,7 +380,7 @@ class JsonStringReaderTest {
 
         val complexObject = """
             {
-              "field0" : "0"
+              "field0" : "0",
               "object" : {
                 "field1": "1",
                 "field2": "2"

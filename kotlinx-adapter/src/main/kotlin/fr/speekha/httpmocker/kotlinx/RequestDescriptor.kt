@@ -30,7 +30,7 @@ internal data class RequestDescriptor(
     val port: Int? = null,
     val path: String? = null,
     val headers: List<Header>? = null,
-    val params: Map<String, String>? = null,
+    val params: Map<String, String?>? = null,
     val body: String? = null
 ) {
     constructor(model: Model) : this(

@@ -108,7 +108,7 @@ class JsonFormatConverter {
     private fun mapInputHeader(header: String): String = with(separatorPattern.matcher(header)) {
         if (find()) {
             val key = header.substring(0..start()).trim()
-            val value = header.substring(end() - 1).trim()
+            val value = header.substring(end()).trim()
             """
             |
             |        {
@@ -125,6 +125,6 @@ class JsonFormatConverter {
             Pattern.compile("\"headers\"\\p{Space}*:\\p{Space}*\\[[^]]*]")
         private val inputHeaderPattern =
             Pattern.compile("\"headers\"\\p{Space}*:\\p{Space}*\\{[^}]*}")
-        private val separatorPattern = Pattern.compile("\"\\p{Space}*:\\p{Space}*\"")
+        private val separatorPattern = Pattern.compile("\"\\p{Space}*:\\p{Space}*")
     }
 }

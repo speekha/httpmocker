@@ -35,7 +35,7 @@ internal data class RequestDescriptor(
 
     val headers: HeaderAdapter.HeaderList? = HeaderAdapter.HeaderList(),
 
-    val params: Map<String, String> = emptyMap(),
+    val params: ParamsAdapter.ParamList = ParamsAdapter.ParamList(),
 
     val body: String? = null
 

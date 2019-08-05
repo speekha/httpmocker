@@ -22,10 +22,10 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.moshi.Header as JsonHeader
 import fr.speekha.httpmocker.moshi.Matcher as JsonMatcher
 import fr.speekha.httpmocker.moshi.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
-import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
 
 internal class MatcherAdapter {
     @FromJson
@@ -34,7 +34,7 @@ internal class MatcherAdapter {
     }
 
     @ToJson
-    fun eventToJson(matcher: Matcher): JsonMatcher {
+    fun matcherToJson(matcher: Matcher): JsonMatcher {
         return JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
     }
 

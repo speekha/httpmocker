@@ -11,11 +11,13 @@
         "reqHeader1": "1",
         "reqHeader1": "2",
         "reqHeader2": "3",
+        "reqHeader3": null,
         "Set-Cookie": "\"cookie\"=\"value\""
       },
       "params": {
         "param1": "1",
-        "param2": "2"
+        "param2": "2",
+        "param3": null
       },
       "body": ".*1.*"
     },

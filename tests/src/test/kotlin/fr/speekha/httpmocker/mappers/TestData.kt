@@ -37,9 +37,10 @@ internal val completeData = listOf(
                 Header("reqHeader1", "1"),
                 Header("reqHeader1", "2"),
                 Header("reqHeader2", "3"),
+                Header("reqHeader3", null),
                 Header("Set-Cookie", "\"cookie\"=\"value\"")
             ),
-            params = mapOf("param1" to "1", "param2" to "2"),
+            params = mapOf("param1" to "1", "param2" to "2", "param3" to null),
             body = ".*1.*"
         ),
         ResponseDescriptor(
