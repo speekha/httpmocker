@@ -105,7 +105,7 @@ class JsonStringReader(
             parseError(NO_FIELD_ID_ERROR)
         } else {
             index = colon
-            return stringLiteral
+            return stringLiteral ?: parseError(NO_FIELD_ID_ERROR)
         }
     }
 
@@ -132,15 +132,7 @@ class JsonStringReader(
      * Reads a String field value
      * @return the field value as a String
      */
-    fun readString(): String {
-        val start = json.indexOf("\"", index)
-        if (start < index || !isBlank(index, start)) {
-            parseError(WRONG_START_OF_STRING_FIELD_ERROR)
-        } else {
-            index = start
-        }
-        return extractStringLiteral()
-    }
+    fun readString(): String? = extractNullableStringLiteral()
 
     /**
      * Reads an object field value
@@ -160,7 +152,11 @@ class JsonStringReader(
             it.replace(" ", "").convert()
         }
 
-    private fun <T : Any> parseToken(pattern: Pattern, error: String, converter: (String) -> T): T {
+    private fun <T : Any?> parseToken(
+        pattern: Pattern,
+        error: String,
+        converter: (String) -> T
+    ): T {
         val position = index
         return try {
             converter(extractLiteral(pattern, error))
@@ -175,7 +171,17 @@ class JsonStringReader(
         else -> error(INVALID_BOOLEAN_ERROR)
     }
 
-    private fun extractStringLiteral(): String {
+    private fun extractNullableStringLiteral(): String? =
+        parseToken(stringPattern, WRONG_START_OF_STRING_FIELD_ERROR) {
+                val trimmed = it.trim()
+            when {
+                "null" == trimmed -> null
+                trimmed.startsWith('"') && trimmed.endsWith('"') -> trimmed.drop(1).dropLast(1).replace("\\\"", "\"")
+                else -> parseError(WRONG_START_OF_STRING_FIELD_ERROR)
+            }
+        }
+
+    private fun extractStringLiteral(): String? {
         val start = json.indexOf("\"", index)
         val match = Regex("[^\\\\]\"").find(json, start)
         val end = match?.range?.endInclusive ?: -1
@@ -186,7 +192,10 @@ class JsonStringReader(
         return json.substring(start + 1, end).replace("\\\"", "\"")
     }
 
-    private fun extractLiteral(pattern: Pattern, error: String = INVALID_TOKEN_ERROR): String {
+    private fun extractLiteral(
+        pattern: Pattern,
+        error: String = INVALID_TOKEN_ERROR
+    ): String {
         val matcher = pattern.matcher(json.substring(index))
         if (!matcher.find() || !isBlank(index, index + matcher.start())) {
             parseError(error)
@@ -195,14 +204,16 @@ class JsonStringReader(
         return matcher.group()
     }
 
-    private fun isFieldSeparator(start: Int, end: Int) = json.substring(start, end).trim() == ":"
+    private fun isFieldSeparator(start: Int, end: Int) =
+        json.substring(start, end).trim() == ":"
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
     private fun parseError(message: String, position: Int = index): Nothing =
         error("$message${extractAfterCurrentPosition(position)}")
 
-    private fun extractAfterCurrentPosition(position: Int) = json.substring(position).truncate(10)
+    private fun extractAfterCurrentPosition(position: Int) =
+        json.substring(position).truncate(10)
 
 }
 
@@ -219,3 +230,4 @@ const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 
 private val numericPattern = Pattern.compile("\\d[\\d ]*")
 private val alphanumericPattern = Pattern.compile("[^,}\\]\\s]+")
+private val stringPattern = Pattern.compile("[^,}\\]]+")

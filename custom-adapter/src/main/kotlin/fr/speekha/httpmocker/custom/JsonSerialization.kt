@@ -56,7 +56,7 @@ internal fun RequestDescriptor.toJson(): String = listOf(
         postfix = "\n    }"
     ) { (key, value) -> "      \"$key\": $value" }
 
-internal fun Map<String, String>.toJson(): String =
+internal fun Map<String, String?>.toJson(): String =
     entries.joinToString(
         separator = ",\n",
         prefix = "{\n",

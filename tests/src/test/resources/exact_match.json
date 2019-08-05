@@ -2,12 +2,23 @@
   {
     "request": {
       "exact-match" : true,
+      "headers": {
+        "header1": "1"
+      }
+    },
+    "response": {
+      "body": "Exact headers"
+    }
+  },
+  {
+    "request": {
+      "exact-match" : true,
       "params": {
         "param1": "1"
       }
     },
     "response": {
-      "body": "Found response"
+      "body": "Exact params"
     }
   }
 ]

@@ -59,7 +59,7 @@ data class RequestDescriptor(
     /**
      * Query parameters
      */
-    val params: Map<String, String> = emptyMap(),
+    val params: Map<String, String?> = emptyMap(),
 
     /**
      * Request body

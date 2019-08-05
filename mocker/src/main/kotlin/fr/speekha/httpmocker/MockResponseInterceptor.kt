@@ -120,7 +120,9 @@ private constructor(
     private fun Response.Builder.addHeaders(response: ResponseDescriptor) = apply {
         header("Content-type", response.mediaType)
         response.headers.forEach {
-            header(it.name, it.value)
+            if (it.value != null) {
+                header(it.name, it.value)
+            }
         }
     }
 

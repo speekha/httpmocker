@@ -34,6 +34,7 @@ class MoshiMapper : Mapper {
         val moshi = Moshi.Builder()
             .add(HeaderAdapter())
             .add(MatcherAdapter())
+            .add(ParamAdapter())
             .build()
         adapter = moshi.adapter(
             newParameterizedType(List::class.java, Matcher::class.java)

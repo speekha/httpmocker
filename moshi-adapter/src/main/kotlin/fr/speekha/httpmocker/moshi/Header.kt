@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.moshikotlin
+package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.JsonClass
 
@@ -22,5 +22,5 @@ import com.squareup.moshi.JsonClass
 internal data class Header(
     val name: String = "",
 
-    var value: String = ""
+    var value: String? = null
 )

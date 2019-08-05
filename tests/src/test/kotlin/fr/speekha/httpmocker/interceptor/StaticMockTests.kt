@@ -236,6 +236,18 @@ class StaticMockTests : TestWithServer() {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
+    fun `should select response based on absent query params`(title: String, mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val param1 = executeGetRequest("/absent_query_param?param1=1").body()?.string()
+        val param2 = executeGetRequest("/absent_query_param?param1=1&param2=2")
+
+        assertEquals("Body found", param1)
+        assertEquals(404, param2.code())
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
     fun `should select response based on URL path`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
         val interceptor = MockResponseInterceptor.Builder()
@@ -299,8 +311,8 @@ class StaticMockTests : TestWithServer() {
     fun `should select response based on headers`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
-        val param1 = executeGetRequest("/headers").body()?.string()
-        val param2 = executeGetRequest(
+        val noHeaders = executeGetRequest("/headers").body()?.string()
+        val headers = executeGetRequest(
             "/headers",
             listOf(
                 "header1" to "1",
@@ -308,9 +320,31 @@ class StaticMockTests : TestWithServer() {
                 "header2" to "3"
             )
         ).body()?.string()
+        val header1 = executeGetRequest(
+            "/headers",
+            listOf("header1" to "1")
+        ).body()?.string()
+        val header2 = executeGetRequest(
+            "/headers",
+            listOf("header2" to "2")
+        ).body()?.string()
 
-        assertEquals("no header", param1)
-        assertEquals("with headers", param2)
+        assertEquals("no header", noHeaders)
+        assertEquals("with header 1", header1)
+        assertEquals("with header 2", header2)
+        assertEquals("with headers", headers)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    fun `should select response based on absent headers`(title: String, mapper: Mapper) {
+        setUpInterceptor(ENABLED, mapper)
+
+        val correctHeader = executeGetRequest("/absent_header", listOf("header1" to "1")).body()?.string()
+        val extraHeader = executeGetRequest("/absent_header", listOf("header1" to "1", "header2" to "2"))
+
+        assertEquals("Body found", correctHeader)
+        assertEquals(404, extraHeader.code())
     }
 
     @ParameterizedTest(name = "{0}")
@@ -357,9 +391,16 @@ class StaticMockTests : TestWithServer() {
     fun `should select response based on exact matches`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
 
-        val response = executeGetRequest("/exact_match?param1=1&param2=2")
+        val exactHeader = executeGetRequest("/exact_match", listOf("header1" to "1"))
+        val extraHeader =
+            executeGetRequest("/exact_match", listOf("header1" to "1", "header2" to "2"))
+        val exactParam = executeGetRequest("/exact_match?param1=1")
+        val extraParam = executeGetRequest("/exact_match?param1=1&param2=2")
 
-        assertEquals(404, response.code())
+        assertEquals("Exact headers", exactHeader.body()?.string())
+        assertEquals(404, extraHeader.code())
+        assertEquals("Exact params", exactParam.body()?.string())
+        assertEquals(404, extraParam.code())
     }
 
     @ParameterizedTest(name = "{0}")
