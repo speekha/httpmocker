@@ -116,6 +116,23 @@ class JsonStringReaderTest {
         assertEquals("""a test "string"""", reader.readString())
     }
 
+    @Test
+    fun `should handle null strings`() {
+        val reader = JsonStringReader("{\"field\": null }")
+        reader.beginObject()
+        reader.readFieldName()
+        assertNull(reader.readString())
+    }
+
+    @Test
+    fun `should read string with special characters`() {
+        val result = """ { [ \" , } ] """
+        val reader = JsonStringReader("{\"field\":\"$result\"}")
+        reader.beginObject()
+        reader.readFieldName()
+        assertEquals(""" { [ " , } ] """, reader.readString())
+    }
+
     @ParameterizedTest
     @MethodSource("stringErrors")
     fun `should detect error on read string`(input: String, output: String) {
@@ -219,7 +236,7 @@ class JsonStringReaderTest {
 
     @Test
     fun `should iterate through list of strings`() {
-        val json = "[\"1\", \"2\", \"3\"]"
+        val json = """["1", "2", "3"]"""
         val list = mutableListOf<String?>()
         with(JsonStringReader(json)) {
             beginList()

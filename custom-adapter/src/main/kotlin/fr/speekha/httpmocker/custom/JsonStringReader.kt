@@ -17,7 +17,6 @@
 package fr.speekha.httpmocker.custom
 
 import java.util.Locale
-import java.util.regex.Pattern
 
 /**
  * A reader object to parse a JSON stream
@@ -132,7 +131,7 @@ class JsonStringReader(
      * Reads a String field value
      * @return the field value as a String
      */
-    fun readString(): String? = extractNullableStringLiteral()
+    fun readString(): String? = extractStringLiteral(WRONG_START_OF_STRING_FIELD_ERROR)
 
     /**
      * Reads an object field value
@@ -153,7 +152,7 @@ class JsonStringReader(
         }
 
     private fun <T : Any?> parseToken(
-        pattern: Pattern,
+        pattern: Regex,
         error: String,
         converter: (String) -> T
     ): T {
@@ -171,37 +170,30 @@ class JsonStringReader(
         else -> error(INVALID_BOOLEAN_ERROR)
     }
 
-    private fun extractNullableStringLiteral(): String? =
-        parseToken(stringPattern, WRONG_START_OF_STRING_FIELD_ERROR) {
-                val trimmed = it.trim()
+    private fun extractStringLiteral(error: String = WRONG_START_OF_STRING_ERROR): String? =
+        parseToken(stringPattern, error) {
+            val trimmed = it.trim()
             when {
                 "null" == trimmed -> null
-                trimmed.startsWith('"') && trimmed.endsWith('"') -> trimmed.drop(1).dropLast(1).replace("\\\"", "\"")
-                else -> parseError(WRONG_START_OF_STRING_FIELD_ERROR)
+                trimmed.startsWith('"') && trimmed.endsWith('"') -> trimmed.drop(1).dropLast(1).replace(
+                    "\\\"",
+                    "\""
+                )
+                else -> parseError(error)
             }
         }
 
-    private fun extractStringLiteral(): String? {
-        val start = json.indexOf("\"", index)
-        val match = Regex("[^\\\\]\"").find(json, start)
-        val end = match?.range?.endInclusive ?: -1
-        if (start < 1 || end == -1 || !isBlank(index, start)) {
-            parseError(WRONG_START_OF_STRING_ERROR)
-        }
-        index = end + 1
-        return json.substring(start + 1, end).replace("\\\"", "\"")
-    }
-
     private fun extractLiteral(
-        pattern: Pattern,
+        pattern: Regex,
         error: String = INVALID_TOKEN_ERROR
     ): String {
-        val matcher = pattern.matcher(json.substring(index))
-        if (!matcher.find() || !isBlank(index, index + matcher.start())) {
+        val find = pattern.find(json.substring(index))
+        val range = find?.range
+        if (range == null || !isBlank(index, index + range.first)) {
             parseError(error)
         }
-        index += matcher.end()
-        return matcher.group()
+        index += range.last + 1
+        return find.value
     }
 
     private fun isFieldSeparator(start: Int, end: Int) =
@@ -228,6 +220,6 @@ const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
 const val INVALID_TOKEN_ERROR = "Invalid token value: "
 const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 
-private val numericPattern = Pattern.compile("\\d[\\d ]*")
-private val alphanumericPattern = Pattern.compile("[^,}\\]\\s]+")
-private val stringPattern = Pattern.compile("[^,}\\]]+")
+private val numericPattern = Regex("\\d[\\d ]*")
+private val alphanumericPattern = Regex("[^,}\\]\\s]+")
+private val stringPattern = Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")
