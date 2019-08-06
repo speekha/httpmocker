@@ -49,6 +49,7 @@ class RepoAdapter(
             topContributor.text = repo.topContributor ?: "Error retrieving contributor"
         } else {
             repoName.text = errorMessage ?: "No result to display"
+            topContributor.text = null
         }
     }
 
