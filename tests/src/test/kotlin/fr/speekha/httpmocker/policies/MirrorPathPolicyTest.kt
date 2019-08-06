@@ -18,25 +18,40 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
+@DisplayName("MirrorPathPolicy")
 class MirrorPathPolicyTest {
 
     val policy: FilingPolicy = MirrorPathPolicy()
 
-    @Test
-    fun `should keep the same path as the URL`() {
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
-        )
-        assertEquals("test/with/path.json", policy.getPath(request))
-    }
+    @Nested
+    @DisplayName("Given a path mirroring policy")
+    inner class ParseJson {
+        @Test
+        @DisplayName("When processing a URL, then file path should be kept from the URL")
+        fun keepUrl() {
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            assertEquals("test/with/path.json", policy.getPath(request))
+        }
 
-    @Test
-    fun `should handle URL when last segment is empty`() {
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path/", listOf("header" to "value"), "POST", "body"
-        )
-        assertEquals("test/with/path/index.json", policy.getPath(request))
+        @Test
+        @DisplayName("When processing an URL ending with a '/', then index.json should be added in the last empty segment")
+        fun emptyFolder() {
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path/",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            assertEquals("test/with/path/index.json", policy.getPath(request))
+        }
     }
 }
