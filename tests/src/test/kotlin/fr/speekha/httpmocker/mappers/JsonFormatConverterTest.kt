@@ -18,22 +18,26 @@ package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
+@DisplayName("JSON format conversion")
 class JsonFormatConverterTest {
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "When input {0}, then output should be properly formatted")
     @MethodSource("dataImport")
-    fun `should format JSON properly for reading`(title: String, input: String, output: String) {
+    @DisplayName("Given a proper JSON stream to read")
+    fun readConversionTest(title: String, input: String, output: String) {
         assertEquals(output, JsonFormatConverter().import(input))
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "When input {0}, then output should be properly formatted")
     @MethodSource("dataExport")
-    fun `should format JSON properly for writing`(title: String, input: String, output: String) {
+    @DisplayName("Given a proper JSON stream to write")
+    fun writeConversionTest(title: String, input: String, output: String) {
         assertEquals(output, JsonFormatConverter().export(input))
     }
 
@@ -47,10 +51,12 @@ class JsonFormatConverterTest {
 
         @JvmStatic
         fun dataExport(): Stream<Arguments> = testTitles.zip(
-            kotlinxFormat  zip commonFormat) { a, (b, c) -> Arguments.of(a, b, c) }
+            kotlinxFormat zip commonFormat
+        ) { a, (b, c) -> Arguments.of(a, b, c) }
             .stream()
 
-        private val testTitles = listOf("Minimal JSON", "Empty header list", "One header", "Duplicate headers")
+        private val testTitles =
+            listOf("is a minimal JSON", "contains an empty header list", "contains one header", "contains duplicate headers")
 
         private val commonFormat = listOf(
             """

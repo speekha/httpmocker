@@ -17,5 +17,7 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import org.junit.jupiter.api.DisplayName
 
+@DisplayName("Jackson Adapter")
 class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper())

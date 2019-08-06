@@ -21,25 +21,31 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 abstract class AbstractJsonMapperTest(val mapper: Mapper) {
 
-    @Test
-    fun `should parse a JSON file`() {
-        val result = mapper.readMatches(getCompleteInput())
-        assertEquals(completeData, result)
-    }
+    @Nested
+    @DisplayName("Given a JSON stream to parse")
+    inner class ParseJson {
 
-    @Test
-    fun `should populate default values properly`() {
-        val result = mapper.readMatches(getPartialInput())
-        assertEquals(partialData, result)
-    }
+        @Test
+        fun `When input is a comprehensive file, then a fully populated object should be returned`() {
+            val result = mapper.readMatches(getCompleteInput())
+            assertEquals(completeData, result)
+        }
 
-    @Test
-    fun `should handle headers with colons`() {
-        val json = """[
+        @Test
+        fun `When input is a partial scenario, then default values should be used`() {
+            val result = mapper.readMatches(getPartialInput())
+            assertEquals(partialData, result)
+        }
+
+        @Test
+        fun `When headers contain colons, then their value should be properly parsed`() {
+            val json = """[
   {
     "response": {
       "headers": {
@@ -49,22 +55,22 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
   }
 ]"""
 
-        assertEquals(
-            listOf(
-                Matcher(
-                    response = ResponseDescriptor(
-                        headers = listOf(
-                            Header("Location", "http://www.google.com")
+            assertEquals(
+                listOf(
+                    Matcher(
+                        response = ResponseDescriptor(
+                            headers = listOf(
+                                Header("Location", "http://www.google.com")
+                            )
                         )
                     )
-                )
-            ), mapper.readMatches(json.byteInputStream())
-        )
-    }
+                ), mapper.readMatches(json.byteInputStream())
+            )
+        }
 
-    @Test
-    fun `should handle headers with quotes`() {
-        val json = """[
+        @Test
+        fun `When headers contain quotes, then their value should be properly parsed`() {
+            val json = """[
   {
     "response": {
       "headers": {
@@ -74,28 +80,36 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
   }
 ]"""
 
-        assertEquals(
-            listOf(
-                Matcher(
-                    response = ResponseDescriptor(
-                        headers = listOf(
-                            Header("Set-Cookie", "\"cookie\"=\"value\"")
+            assertEquals(
+                listOf(
+                    Matcher(
+                        response = ResponseDescriptor(
+                            headers = listOf(
+                                Header("Set-Cookie", "\"cookie\"=\"value\"")
+                            )
                         )
                     )
-                )
-            ), mapper.readMatches(json.byteInputStream())
-        )
+                ), mapper.readMatches(json.byteInputStream())
+            )
+        }
+
     }
 
-    @Test
-    fun `should write a proper JSON file`() {
-        val expected = getExpectedOutput()
-        testStream(expected, mapper.serialize(listOf(completeData[0])))
-    }
+    @Nested
+    @DisplayName("Given a scenario to write")
+    inner class WriteJson {
 
-    @Test
-    fun `should write a proper minimum JSON file`() {
-        val expected = getMinimalOutput()
-        testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
+        @Test
+        fun `When input is minimal, then null fields should be omitted`() {
+            val expected = getMinimalOutput()
+            testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
+        }
+
+        @Test
+        fun `When input is a complete object, the all fields should be properly written`() {
+            val expected = getExpectedOutput()
+            testStream(expected, mapper.serialize(listOf(completeData[0])))
+        }
+
     }
 }
