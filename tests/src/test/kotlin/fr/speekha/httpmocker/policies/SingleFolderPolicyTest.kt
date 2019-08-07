@@ -22,7 +22,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("SingleFolderPolicy")
+@DisplayName("Single Folder Policy")
 class SingleFolderPolicyTest {
 
     @Nested

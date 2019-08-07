@@ -23,7 +23,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.*
+import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
+import fr.speekha.httpmocker.MockResponseInterceptor.Mode.MIXED
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
@@ -56,19 +57,7 @@ class StaticMockTests : TestWithServer() {
         }
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("data")
-    fun `should not interfere with requests when disabled`(title: String, mapper: Mapper) {
-        setUpInterceptor(DISABLED, mapper)
-        enqueueServerResponse(200, "body")
-
-        val response = executeGetRequest("")
-
-        assertResponseCode(response, 200, "OK")
-        assertEquals("body", response.body()?.string())
-    }
-
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a 404 error when response is not found`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -78,7 +67,7 @@ class StaticMockTests : TestWithServer() {
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a 404 error when an exception occurs`(title: String, mapper: Mapper) {
         whenever(loadingLambda.invoke(any())) doAnswer {
@@ -91,7 +80,7 @@ class StaticMockTests : TestWithServer() {
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a 404 error when no response matches the criteria`(
         title: String,
@@ -107,7 +96,7 @@ class StaticMockTests : TestWithServer() {
         assertResponseCode(response, 404, "Not Found")
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a 200 when response is found`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -117,7 +106,7 @@ class StaticMockTests : TestWithServer() {
         assertResponseCode(response, 200, "OK")
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a predefined response body from json descriptor`(
         title: String,
@@ -131,7 +120,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("simple body", response.body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a predefined response body from separate file`(
         title: String,
@@ -145,7 +134,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a predefined response body from separate file in the same folder`(
         title: String,
@@ -159,7 +148,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a predefined response body from separate file in a different folder`(
         title: String,
@@ -173,7 +162,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return a predefined response body from separate file in a parent folder`(
         title: String,
@@ -187,7 +176,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("separate body file", response.body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should return proper headers`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -198,7 +187,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("simple header", response.header("testHeader"))
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should handle redirects`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -209,7 +198,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("http://www.google.com", response.header("Location"))
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should handle media type`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -222,7 +211,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("json", response.body()?.contentType()?.subtype())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on query params`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -234,7 +223,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("param B", param2)
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on absent query params`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -246,7 +235,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals(404, param2.code())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on URL path`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
@@ -266,7 +255,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("based on URL", client.newCall(request).execute().body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on host`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
@@ -286,7 +275,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("based on host", client.newCall(request).execute().body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on port`(title: String, mapper: Mapper) {
         val policy = SingleFilePolicy("single_file.json")
@@ -306,7 +295,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("based on port", client.newCall(request).execute().body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on headers`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -335,7 +324,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("with headers", headers)
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on absent headers`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -347,7 +336,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals(404, extraHeader.code())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should take http protocol into account`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -357,7 +346,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("HTTP", get)
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should take http method into account`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -373,7 +362,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("delete", delete)
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on request body`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -386,7 +375,7 @@ class StaticMockTests : TestWithServer() {
     }
 
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should select response based on exact matches`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -403,7 +392,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals(404, extraParam.code())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should allow to delay all responses`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -417,7 +406,7 @@ class StaticMockTests : TestWithServer() {
         assertTrue(delay >= threshold, "Time was $delay (< $threshold ms)")
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should allow to delay responses based on configuration`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -435,7 +424,7 @@ class StaticMockTests : TestWithServer() {
         assertTrue(noDelay < threshold, "Time without delay was $noDelay (> $threshold ms)")
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should delegate path resolutions`(title: String, mapper: Mapper) {
         setUpInterceptor(ENABLED, mapper)
@@ -446,7 +435,7 @@ class StaticMockTests : TestWithServer() {
         verify(filingPolicy).getPath(request)
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should support mixed mode to execute request when no response is found locally`(
         title: String,
@@ -464,7 +453,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("simple body", localResponse.body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should allow to stack several interceptors thanks to mixed mode`(
         title: String,
@@ -507,7 +496,7 @@ class StaticMockTests : TestWithServer() {
         assertEquals("server response", executeGetRequest("serverMatch").body()?.string())
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Mapper: {0}")
     @MethodSource("data")
     fun `should support dynamic and static mocks together`(title: String, mapper: Mapper) {
         val result1 = "Dynamic"
@@ -559,7 +548,6 @@ class StaticMockTests : TestWithServer() {
 
     companion object {
         @JvmStatic
-        fun data(): Stream<Arguments> =
-            mappers
+        fun data(): Stream<Arguments> = mappers
     }
 }

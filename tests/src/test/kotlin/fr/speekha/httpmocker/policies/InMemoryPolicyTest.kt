@@ -29,7 +29,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("InMemoryPolicy")
+@DisplayName("In-Memory Policy")
 class InMemoryPolicyTest {
 
     private val mapper = JacksonMapper()

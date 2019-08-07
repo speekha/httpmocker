@@ -22,7 +22,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("ServerSpecificPolicy")
+@DisplayName("Server Specific Policy")
 class ServerSpecificPolicyTest {
 
     private val policy: FilingPolicy = ServerSpecificPolicy()
