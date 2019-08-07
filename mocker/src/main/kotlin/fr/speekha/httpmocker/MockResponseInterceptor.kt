@@ -185,7 +185,7 @@ private constructor(
          * on the request being intercepted
          * @param policy the naming policy to use for scenario files
          */
-        fun decodeScenarioPathWith(policy: FilingPolicy) = apply {
+        fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply {
             filingPolicy = policy
         }
 
@@ -194,10 +194,12 @@ private constructor(
          * on the request being intercepted
          * @param policy a lambda to use as the naming policy for scenario files
          */
-        fun decodeScenarioPathWith(policy: (Request) -> String) = apply {
-            filingPolicy = object : FilingPolicy {
-                override fun getPath(request: Request): String = policy(request)
-            }
+        fun decodeScenarioPathWith(policy: (Request) -> String): Builder = apply {
+            filingPolicy = FilingPolicyBuilder(policy)
+        }
+
+        private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
+            override fun getPath(request: Request): String = policy(request)
         }
 
         /**
@@ -205,7 +207,7 @@ private constructor(
          * @param loading a function to load files by name and path as a stream (could use
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
-        fun loadFileWith(loading: LoadFile) = apply {
+        fun loadFileWith(loading: LoadFile): Builder = apply {
             openFile = loading
         }
 
@@ -213,7 +215,7 @@ private constructor(
          * Uses dynamic mocks to answer network requests instead of file scenarios
          * @param callback A callback to invoke when a request in intercepted
          */
-        fun useDynamicMocks(callback: RequestCallback) = apply {
+        fun useDynamicMocks(callback: RequestCallback): Builder = apply {
             dynamicCallbacks += callback
         }
 
@@ -223,17 +225,20 @@ private constructor(
          * ResponseDescriptor for the current Request or null if not suitable Response could be
          * computed
          */
-        fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?) =
-            useDynamicMocks(object : RequestCallback {
-                override fun loadResponse(request: Request): ResponseDescriptor? =
-                    callback(request)
-            })
+        fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?): Builder =
+            useDynamicMocks(CallBackBuilder(callback))
+
+        private class CallBackBuilder(
+            private val block: (Request) -> ResponseDescriptor?
+        ) : RequestCallback {
+            override fun loadResponse(request: Request): ResponseDescriptor? = block(request)
+        }
 
         /**
          * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
          * @param objectMapper A Mapper to parse scenario files.
          */
-        fun parseScenariosWith(objectMapper: Mapper) = apply {
+        fun parseScenariosWith(objectMapper: Mapper): Builder = apply {
             mapper = objectMapper
         }
 
@@ -241,7 +246,7 @@ private constructor(
          * Defines the folder where scenarios should be stored when recording
          * @param folder the root folder where saved scenarios should be saved
          */
-        fun saveScenariosIn(folder: File) = apply {
+        fun saveScenariosIn(folder: File): Builder = apply {
             root = folder
         }
 
@@ -250,7 +255,7 @@ private constructor(
          * @param failOnError if true, failure to save scenarios will throw an exception.
          * If false, saving exceptions will be ignored.
          */
-        fun failOnRecordingError(failOnError: Boolean) = apply {
+        fun failOnRecordingError(failOnError: Boolean): Builder = apply {
             showSavingErrors = failOnError
         }
 
@@ -260,7 +265,7 @@ private constructor(
          * animations during your network calls).
          * @param delay default pause delay for network responses in ms
          */
-        fun addFakeNetworkDelay(delay: Long) = apply {
+        fun addFakeNetworkDelay(delay: Long): Builder = apply {
             simulatedDelay = delay
         }
 
@@ -269,7 +274,7 @@ private constructor(
          * requests...)
          * @param status The interceptor mode
          */
-        fun setInterceptorStatus(status: Mode) = apply {
+        fun setInterceptorStatus(status: Mode): Builder = apply {
             interceptorMode = status
         }
 
