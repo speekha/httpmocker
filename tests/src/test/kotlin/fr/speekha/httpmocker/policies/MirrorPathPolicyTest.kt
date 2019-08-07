@@ -29,7 +29,7 @@ class MirrorPathPolicyTest {
 
     @Nested
     @DisplayName("Given a path mirroring policy")
-    inner class ParseJson {
+    inner class TestPolicy {
         @Test
         @DisplayName("When processing a URL, then file path should be kept from the URL")
         fun keepUrl() {
@@ -43,7 +43,7 @@ class MirrorPathPolicyTest {
         }
 
         @Test
-        @DisplayName("When processing an URL ending with a '/', then index.json should be added in the last empty segment")
+        @DisplayName("When processing a URL ending with a '/', then index.json should be added in the last empty segment")
         fun emptyFolder() {
             val request = buildRequest(
                 "http://www.somestuff.com/test/with/path/",
