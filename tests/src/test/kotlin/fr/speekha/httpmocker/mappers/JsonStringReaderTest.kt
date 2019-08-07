@@ -30,8 +30,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -175,8 +173,6 @@ class JsonStringReaderTest {
 
     }
 
-
-    @TestInstance(PER_CLASS)
     @Nested
     @DisplayName("Given an object with a String field as input")
     inner class StringField {
@@ -217,17 +213,13 @@ class JsonStringReaderTest {
         }
 
         @ParameterizedTest(name = "Incorrect value: {0}")
-        @MethodSource("stringErrors")
+        @MethodSource("fr.speekha.httpmocker.mappers.JsonStringReaderTest#stringErrors")
         fun `When String is incorrect, an error should occur`(input: String, output: String) {
             val reader = JsonStringReader(input)
             val exception = assertThrows<IllegalStateException> { reader.readString() }
             assertEquals(output, exception.message)
         }
 
-        fun stringErrors(): Stream<Arguments> = listOf(
-            arrayOf("{a test string}", "$WRONG_START_OF_STRING_FIELD_ERROR{a test..."),
-            arrayOf("{\"a test string\"}", "$WRONG_START_OF_STRING_FIELD_ERROR{\"a tes...")
-        ).map { Arguments.of(*it) }.stream()
     }
 
     @Nested
@@ -473,5 +465,10 @@ class JsonStringReaderTest {
             arrayOf("azertyuiopazertyuiol", "azertyu...")
         ).map { Arguments.of(*it) }.stream()
 
+        @JvmStatic
+        fun stringErrors(): Stream<Arguments> = listOf(
+            arrayOf("{a test string}", "$WRONG_START_OF_STRING_FIELD_ERROR{a test..."),
+            arrayOf("{\"a test string\"}", "$WRONG_START_OF_STRING_FIELD_ERROR{\"a tes...")
+        ).map { Arguments.of(*it) }.stream()
     }
 }

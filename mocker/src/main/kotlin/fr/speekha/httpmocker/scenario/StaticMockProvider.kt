@@ -34,16 +34,13 @@ internal class StaticMockProvider(
 
     private val matcher = RequestMatcher()
 
-    override fun loadResponse(request: Request): ResponseDescriptor? = try {
+    override fun loadResponse(request: Request): ResponseDescriptor? {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")
-        loadFileContent(path)?.let { stream ->
+        return loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
-    } catch (e: Throwable) {
-        logger.error("Scenario file could not be loaded", e)
-        null
     }
 
     private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =

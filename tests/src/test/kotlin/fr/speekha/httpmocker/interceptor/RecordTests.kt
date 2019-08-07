@@ -32,8 +32,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -83,11 +81,10 @@ class RecordTests : TestWithServer() {
     }
 
     @Nested
-    @TestInstance(PER_CLASS)
     @DisplayName("Given an mock interceptor in record mode")
     inner class InterceptionTest {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When a request is recorded, then it should not be blocked")
         fun `should let requests through when recording`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body")
@@ -100,7 +97,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request fails, then it should not interfere with the request")
         fun `should let requests through when recording even if saving fails`(
             title: String,
@@ -116,7 +113,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request fails and errors are expected, then the error should be returned")
         fun `recording failure should return an error if desired`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body")
@@ -127,16 +124,15 @@ class RecordTests : TestWithServer() {
             }
         }
 
-        fun data(): Stream<Arguments> = mappers
+        fun data(): Stream<Arguments> = mappers()
     }
 
     @Nested
-    @TestInstance(PER_CLASS)
     @DisplayName("Given an mock interceptor in record mode with a root folder")
     inner class RecordTest {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request, then scenario and response body files should be created in that folder")
         fun `should store requests and responses in the proper locations when recording`(
             title: String,
@@ -152,7 +148,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request for a URL ending with a '/', then scenario files should be named with 'index'")
         fun `should name body file correctly when last path segment is empty`(
             title: String,
@@ -168,7 +164,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request, then content of scenario files should be correct")
         fun `should store requests and responses when recording`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
@@ -211,7 +207,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request or response with a null body, then body should be empty in scenario files")
         fun `should handle null request and response bodies when recording`(
             title: String,
@@ -241,7 +237,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When a scenario already exists for a request, then the scenario should be completed with the new one")
         fun `should update existing descriptors when recording`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
@@ -303,7 +299,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a response body, then the file should have the proper extension")
         fun `should add proper extension to response files`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body", contentType = "image/png")
@@ -318,7 +314,7 @@ class RecordTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("data")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When several matches exist for a request, then the body file should have the same index as the request in the scenario")
         fun `should match indexes in descriptor file and actual response file name`(
             title: String,
@@ -345,8 +341,6 @@ class RecordTests : TestWithServer() {
                     .forEach { it.delete() }
             }
         }
-
-        fun data(): Stream<Arguments> = mappers
     }
 
     private fun setUpInterceptor(
