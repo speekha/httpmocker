@@ -18,26 +18,42 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
+@DisplayName("ServerSpecificPolicy")
 class ServerSpecificPolicyTest {
 
     private val policy: FilingPolicy = ServerSpecificPolicy()
 
-    @Test
-    fun `should include URL host in path`() {
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
-        )
-        assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
-    }
+    @Nested
+    @DisplayName("Given a server specific policy")
+    inner class TestPolicy {
+
+        @Test
+        @DisplayName("When processing a URL, host should be present in final path")
+        fun `should include URL host in path`() {
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
+        }
 
 
-    @Test
-    fun `should handle URL when last segment is empty`() {
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path/", listOf("header" to "value"), "POST", "body"
-        )
-        assertEquals("www.somestuff.com/test/with/path/index.json", policy.getPath(request))
+        @Test
+        @DisplayName("When processing a URL ending with a '/', then index.json should be added in the last empty segment")
+        fun `should handle URL when last segment is empty`() {
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path/",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            assertEquals("www.somestuff.com/test/with/path/index.json", policy.getPath(request))
+        }
     }
 }
