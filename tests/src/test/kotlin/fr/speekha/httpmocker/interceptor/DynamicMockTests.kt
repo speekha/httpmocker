@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test
 class DynamicMockTests : TestWithServer() {
 
     @Nested
-    @DisplayName("Given an mock interceptor")
-    inner class DynamicTests {
+    @DisplayName("Given an mock interceptor that is disabled")
+    inner class DisabledInterceptor {
 
         @Test
-        @DisplayName("When interceptor is disabled, then it should not interfere with requests")
+        @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() {
             setupProvider(DISABLED) { null }
             enqueueServerResponse(200, "body")
@@ -46,6 +46,31 @@ class DynamicMockTests : TestWithServer() {
 
             assertResponseCode(response, 200, "OK")
             assertEquals("body", response.body()?.string())
+        }
+    }
+
+    @Nested
+    @DisplayName("Given an enabled mock interceptor with a dynamic callback")
+    inner class DynamicTests {
+
+        @Test
+        @DisplayName("When no response is provided, then a 404 error should occur")
+        fun `should return a 404 error when response is not found`() {
+            setupProvider(ENABLED) { null }
+
+            val response = executeGetRequest("/unknown")
+
+            assertResponseCode(response, 404, "Not Found")
+        }
+
+        @Test
+        @DisplayName("When an error occurs while answering a request, then a 404 error should occur")
+        fun `should return a 404 error when an exception occurs`() {
+            setupProvider(ENABLED) { error("Unexpected error") }
+
+            val response = executeGetRequest("/unknown")
+
+            assertResponseCode(response, 404, "Not Found")
         }
 
         @Test
@@ -134,18 +159,18 @@ class DynamicMockTests : TestWithServer() {
 
         }
 
-        private fun setupProvider(
-            status: MockResponseInterceptor.Mode = ENABLED,
-            callback: (Request) -> ResponseDescriptor?
-        ) {
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks(callback)
-                .setInterceptorStatus(status)
-                .build()
+    }
 
-            client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        }
+    private fun setupProvider(
+        status: MockResponseInterceptor.Mode = ENABLED,
+        callback: (Request) -> ResponseDescriptor?
+    ) {
+        interceptor = MockResponseInterceptor.Builder()
+            .useDynamicMocks(callback)
+            .setInterceptorStatus(status)
+            .build()
 
+        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
     companion object {
