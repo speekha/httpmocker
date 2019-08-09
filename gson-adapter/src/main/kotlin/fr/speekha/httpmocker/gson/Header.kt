@@ -19,5 +19,5 @@ package fr.speekha.httpmocker.gson
 internal data class Header(
     val name: String = "",
 
-    var value: String = ""
+    var value: String? = null
 )

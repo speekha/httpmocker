@@ -22,6 +22,11 @@ package fr.speekha.httpmocker.model
 data class RequestDescriptor(
 
     /**
+     * Request has to match exactly (extra parameters implies a failure)
+     */
+    val exactMatch: Boolean = false,
+
+    /**
      * Protocol (HTTP, HTTPS)
      */
     val protocol: String? = null,
@@ -54,7 +59,7 @@ data class RequestDescriptor(
     /**
      * Query parameters
      */
-    val params: Map<String, String> = emptyMap(),
+    val params: Map<String, String?> = emptyMap(),
 
     /**
      * Request body

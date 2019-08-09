@@ -38,7 +38,8 @@ import fr.speekha.httpmocker.jackson.ResponseDescriptor as JsonResponseDescripto
 class JacksonMapper : Mapper {
 
     private val mapper: ObjectMapper =
-        jacksonObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
+        jacksonObjectMapper()
+            .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
 
     override fun deserialize(payload: String): List<Matcher> =
         mapper.readValue<List<JsonMatcher>>(payload, jacksonTypeRef<List<JsonMatcher>>())
@@ -52,7 +53,7 @@ class JacksonMapper : Mapper {
             .map { it.toModel() }
 
     override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) =
-        mapper.writeValue(outputStream, matchers.map { it.fromModel() })
+        mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, matchers.map { it.fromModel() })
 }
 
 private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.fromModel())
@@ -60,10 +61,10 @@ private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.from
 private fun JsonMatcher.toModel() = Matcher(request.toModel(), response.toModel())
 
 private fun JsonRequestDescriptor.toModel() =
-    RequestDescriptor(protocol, method, host, port, path, headers.map { it.toModel() }, params, body)
+    RequestDescriptor(exactMatch ?: false, protocol, method, host, port, path, headers.map { it.toModel() }, params, body)
 
 private fun RequestDescriptor.fromModel() =
-    JsonRequestDescriptor(protocol, method, host, port, path, headers.map { it.fromModel() }, params, body)
+    JsonRequestDescriptor(exactMatch.takeIf { it }, protocol, method, host, port, path, headers.map { it.fromModel() }, params, body)
 
 private fun JsonHeader.toModel() = Header(name, value)
 

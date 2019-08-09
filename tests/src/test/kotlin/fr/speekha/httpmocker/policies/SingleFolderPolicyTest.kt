@@ -18,37 +18,67 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
+@DisplayName("Single Folder Policy")
 class SingleFolderPolicyTest {
 
+    @Nested
+    @DisplayName("Given a path mirroring policy")
+    inner class TestPolicy {
 
-    @Test
-    fun `should store configuration files in a single folder`() {
-        val policy: FilingPolicy = SingleFolderPolicy("folder")
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
-        )
-        Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
+        @Test
+        @DisplayName("When processing a URL, then resulting file should be in the predefined folder and filename should match URL path")
+        fun `should store configuration files in a single folder`() {
+            val policy: FilingPolicy = SingleFolderPolicy("folder")
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
+        }
+
+        @Test
+        @DisplayName("When configured folder is empty, then resulting path should only contain a file name")
+        fun `should handle empty root folder`() {
+            val policy: FilingPolicy = SingleFolderPolicy("")
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            Assertions.assertEquals("test_with_path.json", policy.getPath(request))
+        }
+
+        @Test
+        @DisplayName("When processing a URL ending with a '/', then file name should be based on the URL path")
+        fun `should handle empty path segments`() {
+            val policy: FilingPolicy = SingleFolderPolicy("folder")
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path/",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
+        }
+
+        @Test
+        @DisplayName("When processing a URL with an empty path, then file name should be index.json")
+        fun `should handle empty path URL`() {
+            val policy: FilingPolicy = SingleFolderPolicy("folder")
+            val request = buildRequest(
+                "http://www.somestuff.com/",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            Assertions.assertEquals("folder/index.json", policy.getPath(request))
+        }
     }
-
-    @Test
-    fun `should handle empty root folder`() {
-        val policy: FilingPolicy = SingleFolderPolicy("")
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
-        )
-        Assertions.assertEquals("test_with_path.json", policy.getPath(request))
-    }
-
-    @Test
-    fun `should handle empty path segments`() {
-        val policy: FilingPolicy = SingleFolderPolicy("folder")
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path/", listOf("header" to "value"), "POST", "body"
-        )
-        Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
-    }
-
-
 }

@@ -18,17 +18,29 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
+@DisplayName("Single File Policy")
 class SingleFilePolicyTest {
 
-    @Test
-    fun `should always return the same file`() {
-        val file = "folder/singleFile.json"
-        val policy: FilingPolicy = SingleFilePolicy(file)
-        val request = buildRequest(
-            "http://www.somestuff.com/test/with/path", listOf("header" to "value"), "POST", "body"
-        )
-        Assertions.assertEquals(file, policy.getPath(request))
+    @Nested
+    @DisplayName("Given a path mirroring policy")
+    inner class TestPolicy {
+
+        @Test
+        @DisplayName("When processing a URL, then file path should always be the same")
+        fun `should always return the same file`() {
+            val file = "folder/singleFile.json"
+            val policy: FilingPolicy = SingleFilePolicy(file)
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            Assertions.assertEquals(file, policy.getPath(request))
+        }
     }
 }

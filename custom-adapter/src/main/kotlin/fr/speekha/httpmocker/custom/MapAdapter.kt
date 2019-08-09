@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.custom
 
-internal class MapAdapter : BaseObjectAdapter<Map<String, String>>() {
+internal class MapAdapter : BaseObjectAdapter<Map<String, String?>>() {
 
     override fun createObject(): Map<String, String> = mapOf()
 
     override fun updateObject(
         reader: JsonStringReader,
-        builder: Map<String, String>
-    ): Map<String, String> = builder + (reader.readFieldName() to reader.readString())
+        builder: Map<String, String?>
+    ): Map<String, String?> = builder + (reader.readFieldName() to reader.readString())
 }

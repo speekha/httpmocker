@@ -20,7 +20,7 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
+import fr.speekha.httpmocker.moshi.Header as JsonHeader
 
 internal class HeaderAdapter {
 
@@ -30,7 +30,12 @@ internal class HeaderAdapter {
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
-            val value = reader.nextString()
+            val value = if (reader.peek() != JsonReader.Token.NULL) {
+                reader.nextString()
+            } else {
+                reader.nextNull<Unit>()
+                null
+            }
             list += JsonHeader(name, value)
         }
         reader.endObject()
@@ -40,10 +45,12 @@ internal class HeaderAdapter {
     @ToJson
     fun headerToJson(writer: JsonWriter, headers: List<JsonHeader>) {
         writer.beginObject()
+        writer.serializeNulls = true
         headers.forEach {
             writer.name(it.name)
             writer.value(it.value)
         }
+        writer.serializeNulls = false
         writer.endObject()
     }
 }

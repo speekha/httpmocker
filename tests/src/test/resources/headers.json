@@ -12,6 +12,26 @@
     }
   },
   {
+    "request": {
+      "headers": {
+        "header1": "1"
+      }
+    },
+    "response": {
+      "body": "with header 1"
+    }
+  },
+  {
+    "request": {
+      "headers": {
+        "header2": "2"
+      }
+    },
+    "response": {
+      "body": "with header 2"
+    }
+  },
+  {
     "response": {
       "body": "no header"
     }

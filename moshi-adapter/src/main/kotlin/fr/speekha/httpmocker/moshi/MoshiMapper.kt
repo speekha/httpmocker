@@ -27,12 +27,14 @@ import fr.speekha.httpmocker.model.Matcher
  * A mapper using Moshi to serialize/deserialize scenarios.
  */
 class MoshiMapper : Mapper {
+
     private val adapter: JsonAdapter<List<Matcher>>
 
     init {
         val moshi = Moshi.Builder()
             .add(HeaderAdapter())
             .add(MatcherAdapter())
+            .add(ParamAdapter())
             .build()
         adapter = moshi.adapter(
             newParameterizedType(List::class.java, Matcher::class.java)

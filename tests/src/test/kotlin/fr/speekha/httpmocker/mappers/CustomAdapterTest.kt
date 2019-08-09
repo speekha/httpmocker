@@ -17,30 +17,7 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.custom.CustomMapper
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.RequestDescriptor
-import fr.speekha.httpmocker.model.ResponseDescriptor
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.DisplayName
 
-class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper()) {
-    @Test
-    fun `step by step`() {
-        val json = """[
-  {
-    "request": {},
-    "response": {}
-  },
-  {
-    "response": {}
-  }
-]"""
-        val mapper = CustomMapper()
-        assertEquals(
-            listOf(
-                Matcher(response = ResponseDescriptor()),
-                Matcher(RequestDescriptor(), ResponseDescriptor())
-            ), mapper.readMatches(json.byteInputStream())
-        )
-    }
-}
+@DisplayName("Custom Adapter")
+class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper())

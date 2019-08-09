@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.custom
 
-import java.util.regex.Pattern
+import java.util.Locale
 
 /**
  * A reader object to parse a JSON stream
@@ -27,8 +27,6 @@ class JsonStringReader(
 ) {
 
     private var index = 0
-
-    private val numericPattern = Pattern.compile("\\d[\\d ]*")
 
     /**
      * Checks whether the string still has tokens to process
@@ -106,7 +104,7 @@ class JsonStringReader(
             parseError(NO_FIELD_ID_ERROR)
         } else {
             index = colon
-            return stringLiteral
+            return stringLiteral ?: parseError(NO_FIELD_ID_ERROR)
         }
     }
 
@@ -114,27 +112,26 @@ class JsonStringReader(
      * Reads an Integer field value
      * @return the field value as an Integer
      */
-    fun readInt(): Int = extractNumericLiteral().toInt()
+    fun readInt(): Int = parseNumeric(String::toInt)
 
     /**
      * Reads a Long field value
      * @return the field value as a Long
      */
-    fun readLong(): Long = extractNumericLiteral().toLong()
+    fun readLong(): Long = parseNumeric(String::toLong)
+
+    /**
+     * Reads a Boolean field value
+     * @return the field value as a Boolean
+     */
+    fun readBoolean(): Boolean =
+        parseToken(alphanumericPattern, INVALID_BOOLEAN_ERROR, this::parseBoolean)
 
     /**
      * Reads a String field value
      * @return the field value as a String
      */
-    fun readString(): String {
-        val start = json.indexOf("\"", index)
-        if (start < index || !isBlank(index, start)) {
-            parseError(WRONG_START_OF_STRING_FIELD_ERROR)
-        } else {
-            index = start
-        }
-        return extractStringLiteral()
-    }
+    fun readString(): String? = extractStringLiteral(WRONG_START_OF_STRING_FIELD_ERROR)
 
     /**
      * Reads an object field value
@@ -149,33 +146,67 @@ class JsonStringReader(
         return adapter.fromJson(this)
     }
 
-    private fun extractStringLiteral(): String {
-        val start = json.indexOf("\"", index)
-        val end = json.indexOf("\"", start + 1)
-        if (start < 1 || end == -1 || !isBlank(index, start)) {
-            parseError(WRONG_START_OF_STRING_ERROR)
+    private fun <T : Number> parseNumeric(convert: String.() -> T): T =
+        parseToken(numericPattern, INVALID_NUMBER_ERROR) {
+            it.replace(" ", "").convert()
         }
-        index = end + 1
-        return json.substring(start + 1, end)
+
+    private fun <T : Any?> parseToken(
+        pattern: Regex,
+        error: String,
+        converter: (String) -> T
+    ): T {
+        val position = index
+        return try {
+            converter(extractLiteral(pattern, error))
+        } catch (e: Throwable) {
+            parseError(error, position)
+        }
     }
 
-    private fun extractNumericLiteral(): String {
-        val matcher = numericPattern.matcher(json.substring(index))
-        if (!matcher.find() || !isBlank(index, index + matcher.start())) {
-            parseError(INVALID_NUMBER_ERROR)
-        }
-        index += matcher.end()
-        return matcher.group().replace(" ", "")
+    private fun parseBoolean(value: String): Boolean = when (value.toLowerCase(Locale.ROOT)) {
+        "true" -> true
+        "false" -> false
+        else -> error(INVALID_BOOLEAN_ERROR)
     }
 
-    private fun isFieldSeparator(start: Int, end: Int) = json.substring(start, end).trim() == ":"
+    private fun extractStringLiteral(error: String = WRONG_START_OF_STRING_ERROR): String? =
+        parseToken(stringPattern, error) {
+            val trimmed = it.trim()
+            when {
+                "null" == trimmed -> null
+                trimmed.startsWith('"') && trimmed.endsWith('"') -> trimmed.drop(1).dropLast(1).replace(
+                    "\\\"",
+                    "\""
+                )
+                else -> parseError(error)
+            }
+        }
+
+    private fun extractLiteral(
+        pattern: Regex,
+        error: String = INVALID_TOKEN_ERROR
+    ): String {
+        val find = pattern.find(json.substring(index))
+        val range = find?.range
+        if (range == null || !isBlank(index, index + range.first)) {
+            parseError(error)
+        }
+        index += range.last + 1
+        return find.value
+    }
+
+    private fun isFieldSeparator(start: Int, end: Int) =
+        json.substring(start, end).trim() == ":"
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
-    private fun parseError(message: String): Nothing =
-        error("$message${extractAfterCurrentPosition()}")
+    private fun parseError(message: String, position: Int = index): Nothing =
+        error("$message${extractAfterCurrentPosition(position)}")
 
-    private fun extractAfterCurrentPosition() = json.substring(index).truncate(10)
+    private fun extractAfterCurrentPosition(position: Int) =
+        json.substring(position).truncate(10)
+
 }
 
 const val WRONG_START_OF_OBJECT_ERROR = "No object starts here: "
@@ -186,4 +217,9 @@ const val WRONG_END_OF_LIST_ERROR = "List is not entirely processed: "
 const val WRONG_START_OF_STRING_ERROR = "No string starts here: "
 const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value for a field: "
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
+const val INVALID_TOKEN_ERROR = "Invalid token value: "
+const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 
+private val numericPattern = Regex("\\d[\\d ]*")
+private val alphanumericPattern = Regex("[^,}\\]\\s]+")
+private val stringPattern = Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")

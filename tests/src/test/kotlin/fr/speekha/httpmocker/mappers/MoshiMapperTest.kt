@@ -17,5 +17,7 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.moshi.MoshiMapper
+import org.junit.jupiter.api.DisplayName
 
+@DisplayName("Moshi Adapter")
 class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())
