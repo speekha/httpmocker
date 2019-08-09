@@ -19,13 +19,10 @@ package fr.speekha.httpmocker.scenario
 import fr.speekha.httpmocker.LoadFile
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.getLogger
-import fr.speekha.httpmocker.matchBody
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.Request
-import java.util.Locale
 
 internal class StaticMockProvider(
     private val filingPolicy: FilingPolicy,
@@ -35,34 +32,20 @@ internal class StaticMockProvider(
 
     private val logger = getLogger()
 
-    override fun loadResponse(request: Request): ResponseDescriptor? = try {
+    private val matcher = RequestMatcher()
+
+    override fun loadResponse(request: Request): ResponseDescriptor? {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")
-        loadFileContent(path)?.let { stream ->
+        return loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
-    } catch (e: Throwable) {
-        logger.error("Scenario file could not be loaded", e)
-        null
     }
 
     private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
-        list.firstOrNull { it.request.match(request) }?.response
+        list.firstOrNull { matcher.matchRequest(it.request, request) }?.response
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
-
-    private fun RequestDescriptor.match(request: Request): Boolean =
-        (protocol?.equals(request.url().scheme(), true) ?: true) &&
-        (method?.equals(request.method(), true) ?: true) &&
-                (host?.equals(request.url().host(), true) ?: true) &&
-                (port?.let { it == request.url().port() } ?: true) &&
-                (path?.let { it == request.url().encodedPath() } ?: true) &&
-                (host?.let { it.toLowerCase(Locale.ROOT) == request.url().host() } ?: true) &&
-                (port?.let { it == request.url().port() } ?: true) &&
-                (path?.let { it == request.url().encodedPath() } ?: true) &&
-                headers.all { request.headers(it.name).contains(it.value) } &&
-                params.all { request.url().queryParameter(it.key) == it.value } &&
-                request.matchBody(this)
 
     override fun loadResponseBody(request: Request, path: String): ByteArray? =
         loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readBytes()

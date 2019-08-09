@@ -28,9 +28,9 @@ internal class ResponseAdapter : BaseObjectAdapter<ResponseDescriptor>() {
     ): ResponseDescriptor = when (val field = reader.readFieldName()) {
         "delay" -> builder.copy(delay = reader.readLong())
         "code" -> builder.copy(code = reader.readInt())
-        "media-type" -> builder.copy(mediaType = reader.readString())
+        "media-type" -> builder.copy(mediaType = reader.readString() ?: "")
         "headers" -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
-        "body" -> builder.copy(body = reader.readString())
+        "body" -> builder.copy(body = reader.readString() ?: "")
         "body-file" -> builder.copy(bodyFile = reader.readString())
         else -> error("Unknown field $field")
     }

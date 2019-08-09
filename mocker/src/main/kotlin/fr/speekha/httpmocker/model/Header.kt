@@ -29,6 +29,6 @@ data class Header(
     /**
      * Header value
      */
-    var value: String = ""
+    val value: String? = null
 
 )

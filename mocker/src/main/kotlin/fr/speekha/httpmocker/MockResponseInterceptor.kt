@@ -81,8 +81,13 @@ private constructor(
     private fun mockResponse(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
-            provider.loadResponse(request)?.let { response ->
-                executeMockResponse(response, request, provider)
+            try {
+                provider.loadResponse(request)?.let { response ->
+                    executeMockResponse(response, request, provider)
+                }
+            } catch (e: Throwable) {
+                logger.error("Scenario file could not be loaded", e)
+                null
             }
         }
         .firstOrNull()
@@ -120,7 +125,9 @@ private constructor(
     private fun Response.Builder.addHeaders(response: ResponseDescriptor) = apply {
         header("Content-type", response.mediaType)
         response.headers.forEach {
-            header(it.name, it.value)
+            if (it.value != null) {
+                header(it.name, it.value)
+            }
         }
     }
 
@@ -176,13 +183,14 @@ private constructor(
         private var simulatedDelay: Long = 0
         private var interceptorMode: Mode = Mode.DISABLED
         private val dynamicCallbacks = mutableListOf<RequestCallback>()
+        private var showSavingErrors = false
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
          * on the request being intercepted
          * @param policy the naming policy to use for scenario files
          */
-        fun decodeScenarioPathWith(policy: FilingPolicy) = apply {
+        fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply {
             filingPolicy = policy
         }
 
@@ -191,10 +199,12 @@ private constructor(
          * on the request being intercepted
          * @param policy a lambda to use as the naming policy for scenario files
          */
-        fun decodeScenarioPathWith(policy: (Request) -> String) = apply {
-            filingPolicy = object : FilingPolicy {
-                override fun getPath(request: Request): String = policy(request)
-            }
+        fun decodeScenarioPathWith(policy: (Request) -> String): Builder = apply {
+            filingPolicy = FilingPolicyBuilder(policy)
+        }
+
+        private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
+            override fun getPath(request: Request): String = policy(request)
         }
 
         /**
@@ -202,7 +212,7 @@ private constructor(
          * @param loading a function to load files by name and path as a stream (could use
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
-        fun loadFileWith(loading: LoadFile) = apply {
+        fun loadFileWith(loading: LoadFile): Builder = apply {
             openFile = loading
         }
 
@@ -210,7 +220,7 @@ private constructor(
          * Uses dynamic mocks to answer network requests instead of file scenarios
          * @param callback A callback to invoke when a request in intercepted
          */
-        fun useDynamicMocks(callback: RequestCallback) = apply {
+        fun useDynamicMocks(callback: RequestCallback): Builder = apply {
             dynamicCallbacks += callback
         }
 
@@ -220,17 +230,20 @@ private constructor(
          * ResponseDescriptor for the current Request or null if not suitable Response could be
          * computed
          */
-        fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?) =
-            useDynamicMocks(object : RequestCallback {
-                override fun loadResponse(request: Request): ResponseDescriptor? =
-                    callback(request)
-            })
+        fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?): Builder =
+            useDynamicMocks(CallBackBuilder(callback))
+
+        private class CallBackBuilder(
+            private val block: (Request) -> ResponseDescriptor?
+        ) : RequestCallback {
+            override fun loadResponse(request: Request): ResponseDescriptor? = block(request)
+        }
 
         /**
          * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
          * @param objectMapper A Mapper to parse scenario files.
          */
-        fun parseScenariosWith(objectMapper: Mapper) = apply {
+        fun parseScenariosWith(objectMapper: Mapper): Builder = apply {
             mapper = objectMapper
         }
 
@@ -238,8 +251,17 @@ private constructor(
          * Defines the folder where scenarios should be stored when recording
          * @param folder the root folder where saved scenarios should be saved
          */
-        fun saveScenariosIn(folder: File) = apply {
+        fun saveScenariosIn(folder: File): Builder = apply {
             root = folder
+        }
+
+        /**
+         * Allows to return an error if saving fails when recording.
+         * @param failOnError if true, failure to save scenarios will throw an exception.
+         * If false, saving exceptions will be ignored.
+         */
+        fun failOnRecordingError(failOnError: Boolean): Builder = apply {
+            showSavingErrors = failOnError
         }
 
         /**
@@ -248,7 +270,7 @@ private constructor(
          * animations during your network calls).
          * @param delay default pause delay for network responses in ms
          */
-        fun addFakeNetworkDelay(delay: Long) = apply {
+        fun addFakeNetworkDelay(delay: Long): Builder = apply {
             simulatedDelay = delay
         }
 
@@ -257,7 +279,7 @@ private constructor(
          * requests...)
          * @param status The interceptor mode
          */
-        fun setInterceptorStatus(status: Mode) = apply {
+        fun setInterceptorStatus(status: Mode): Builder = apply {
             interceptorMode = status
         }
 
@@ -266,7 +288,7 @@ private constructor(
          */
         fun build(): MockResponseInterceptor = MockResponseInterceptor(
             buildProviders(),
-            mapper?.let { RequestRecorder(it, filingPolicy, root) }).apply {
+            mapper?.let { RequestRecorder(it, filingPolicy, root, showSavingErrors) }).apply {
             if (interceptorMode == Mode.RECORD && root == null) {
                 error(NO_ROOT_FOLDER_ERROR)
             }
@@ -287,6 +309,7 @@ private constructor(
                 StaticMockProvider(filingPolicy, loader, jsonMapper)
             } else null
         }
+
     }
 }
 

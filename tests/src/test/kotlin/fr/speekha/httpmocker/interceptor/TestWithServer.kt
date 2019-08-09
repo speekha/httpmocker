@@ -116,8 +116,9 @@ open class TestWithServer {
     }
 
     companion object {
-        val mappers: Stream<Arguments>
-            get() = Stream.of(
+
+        @JvmStatic
+        fun mappers() : Stream<Arguments> = Stream.of(
                 Arguments.of("Jackson", JacksonMapper()),
                 Arguments.of("Gson", GsonMapper()),
                 Arguments.of("Moshi", MoshiMapper()),

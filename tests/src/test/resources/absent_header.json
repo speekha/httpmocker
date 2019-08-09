@@ -1,0 +1,13 @@
+[
+  {
+    "request": {
+      "headers": {
+        "header1": "1",
+        "header2": null
+      }
+    },
+    "response": {
+      "body": "Body found"
+    }
+  }
+]

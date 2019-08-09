@@ -22,10 +22,10 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.moshi.Header as JsonHeader
 import fr.speekha.httpmocker.moshi.Matcher as JsonMatcher
 import fr.speekha.httpmocker.moshi.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
-import fr.speekha.httpmocker.moshikotlin.Header as JsonHeader
 
 internal class MatcherAdapter {
     @FromJson
@@ -34,15 +34,15 @@ internal class MatcherAdapter {
     }
 
     @ToJson
-    fun eventToJson(matcher: Matcher): JsonMatcher {
+    fun matcherToJson(matcher: Matcher): JsonMatcher {
         return JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
     }
 
     private fun requestFromJson(request: JsonRequestDescriptor) =
-        RequestDescriptor(request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerFromJson(it) }, request.params, request.body)
+        RequestDescriptor(request.exactMatch ?: false, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerFromJson(it) }, request.params, request.body)
 
     private fun requestToJson(request: RequestDescriptor) =
-        JsonRequestDescriptor(request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerToJson(it) }, request.params, request.body)
+        JsonRequestDescriptor(request.exactMatch.takeIf { it }, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerToJson(it) }, request.params, request.body)
 
     private fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
         response.delay,

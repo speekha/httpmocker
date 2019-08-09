@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.gson
 
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import fr.speekha.httpmocker.gson.Header as JsonHeader
 
@@ -28,10 +29,12 @@ internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
     override fun write(writer: JsonWriter?, headers: HeaderList?) {
         writer?.run {
             beginObject()
+            serializeNulls = true
             headers?.forEach {
                 name(it.name)
                 value(it.value)
             }
+            serializeNulls = false
             endObject()
         }
     }
@@ -41,7 +44,12 @@ internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
         beginObject()
         while (hasNext()) {
             val name = nextName()
-            val value = nextString()
+            val value = if (peek() == JsonToken.NULL) {
+                nextNull()
+                null
+            } else {
+                nextString()
+            }
             list += JsonHeader(name, value)
         }
         endObject()

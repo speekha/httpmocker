@@ -30,6 +30,8 @@ class SingleFolderPolicy(private val rootFolder: String = "") : FilingPolicy {
             .pathSegments()
             .filter { it.isNotEmpty() }
             .joinToString("_")
+            .takeIf { it.isNotBlank() }
+            ?: "index"
         return "$prefix$fileName.json"
     }
 

@@ -28,24 +28,32 @@ import java.io.OutputStream
 internal class RequestRecorder(
     private val mapper: Mapper,
     private val filingPolicy: FilingPolicy,
-    private val rootFolder: File?
+    private val rootFolder: File?,
+    private val failOnError: Boolean
 ) {
 
     private val logger = getLogger()
 
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
-    fun saveFiles(record: CallRecord) = try {
-        val requestFile = File(rootFolder, filingPolicy.getPath(record.request))
-        logger.debug("Saving scenario file $requestFile")
-        val matchers = buildMatcherList(record, requestFile)
-        saveRequestFile(requestFile, matchers)
-        matchers.last().response.bodyFile?.let { responseFile ->
-            saveResponseBody(File(requestFile.parentFile, responseFile), record.body)
+    fun saveFiles(record: CallRecord) {
+        try {
+            val requestFile = getRequestFilePath(record)
+            val matchers = buildMatcherList(record, requestFile)
+            saveRequestFile(requestFile, matchers)
+            saveResponseBody(matchers, requestFile, record)
+        } catch (e: Throwable) {
+            logger.error("Error while writing scenario", e)
+            if (failOnError) {
+                throw e
+            }
         }
-    } catch (e: Throwable) {
-        logger.error("Error while writing scenario", e)
     }
+
+    private fun getRequestFilePath(record: CallRecord): File =
+        File(rootFolder, filingPolicy.getPath(record.request)).also {
+            logger.debug("Saving scenario file $it")
+        }
 
     private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> =
         with(record) {
@@ -71,7 +79,18 @@ internal class RequestRecorder(
             mapper.writeValue(it, matchers)
         }
 
-    private fun saveResponseBody(storeFile: File, body: ByteArray?) = body?.let { array ->
+    private fun saveResponseBody(
+        matchers: List<Matcher>,
+        requestFile: File,
+        record: CallRecord
+    ) = matchers.last().response.bodyFile?.let { responseFile ->
+        val storeFile = File(requestFile.parentFile, responseFile)
+        record.body?.let { array ->
+            saveBodyFile(storeFile, array)
+        }
+    }
+
+    private fun saveBodyFile(storeFile: File, array: ByteArray) {
         logger.debug("Saving response body file ${storeFile.name}")
         writeFile(storeFile) {
             it.write(array)

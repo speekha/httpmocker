@@ -27,6 +27,9 @@ internal data class RequestDescriptor
 @JsonCreator
 constructor(
 
+    @JsonProperty("exact-match")
+    val exactMatch: Boolean? = null,
+
     @JsonProperty("protocol")
     val protocol: String? = null,
 
@@ -48,7 +51,8 @@ constructor(
     val headers: List<Header> = emptyList(),
 
     @JsonProperty("params")
-    val params: Map<String, String> = emptyMap(),
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    val params: Map<String, String?> = emptyMap(),
 
     @JsonProperty("body")
     val body: String? = null

@@ -20,11 +20,11 @@ import android.content.Context
 import android.os.Environment
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
-import fr.speekha.httpmocker.demo.ui.MainContract
-import fr.speekha.httpmocker.demo.ui.MainPresenter
+import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.OkHttpClient
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -62,5 +62,7 @@ val injectionModule: Module = module {
         get<Retrofit>().create(GithubApiEndpoints::class.java)
     }
 
-    factory<MainContract.Presenter> { (view: MainContract.View) -> MainPresenter(view, get(), get()) }
+    viewModel {
+        MainViewModel(get(), get())
+    }
 }
