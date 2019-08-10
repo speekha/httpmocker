@@ -136,11 +136,12 @@ jobs:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew demo:clean demo:assemble --stacktrace
-      - save_cache:
-          key: build-demo-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - demo/build
+          command: ./gradlew demo:clean demo:assemble demo:testDebugUnitTest --stacktrace
+      - store_test_results:
+          path: demo/build/test-results
+      - store_artifacts:
+          path: demo/build/outputs/apk/
+          destination: apks
   store_artifacts:
     docker:
       - image: circleci/android:api-29
@@ -173,18 +174,12 @@ jobs:
       - restore_cache:
           keys:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-demo-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
       - store_artifacts:
           path: build/libs
           destination: libs
-      - store_artifacts:
-          path: demo/build/outputs/apk/
-          destination: apks
   test:
     docker:
       - image: circleci/android:api-29
@@ -219,14 +214,12 @@ jobs:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Tests
-          command: ./gradlew tests:test demo:test --stacktrace
+          command: ./gradlew tests:test --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
       - store_test_results:
           path: tests/build/test-results
-      - store_test_results:
-          path: demo/build/test-results
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -287,7 +280,6 @@ workflows:
             - build_moshi
             - build_custom
             - build_kotlinx
-            - build_demo
       - test:
           requires:
             - build_jackson
