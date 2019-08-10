@@ -1,6 +1,6 @@
 # HttpMocker
 
-[![CircleCI](https://circleci.com/gh/speekha/httpmocker.svg?style=svg)](https://circleci.com/gh/speekha/httpmocker)
+[![CircleCI](https://circleci.com/gh/speekha/httpmocker.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
 **HttpMocker** is a very lightweight Kotlin library that allows to mock HTTP calls relying on the OkHttp library.
