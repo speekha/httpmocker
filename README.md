@@ -1,5 +1,7 @@
 # HttpMocker
 
+[![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
+
 **HttpMocker** is a very lightweight Kotlin library that allows to mock HTTP calls relying on the OkHttp library.
 
 * It can be used for unit or integration tests, so your tests can rely on predefined responses and not
