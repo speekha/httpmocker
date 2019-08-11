@@ -11,7 +11,8 @@ server errors.
 * It can also be used to implement an offline mode in your application for debugging or demo purposes.
 
 Thanks to the MockResponseInterceptor, network calls will not be dispatched to the network but read from JSON
-configuration files instead. The interceptor will also allow to record scenarios so they can be reused later.
+configuration files or computed dynamically instead. The interceptor will also allow to record scenarios so they
+can be reused later.
 
 
 ## Current Version
@@ -116,7 +117,7 @@ it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that 
 provide the response for each request programmatically, which allows you to define stateful 
 responses (identical calls could lead to different answers based on what the user did in between 
 these calls). The response can be provided by implementing the `RequestCallback` interface or 
-simply provide a lambda function to do the computation. 
+you can simply provide a lambda function to do the computation. 
 
 Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
 an example for an Android app using static mocks, with a few more options:
@@ -133,19 +134,19 @@ an example for an Android app using static mocks, with a few more options:
 In this example, we decided to store the scenarios in the assets folder of the app (but you 
 could also have them as resources in your classpath and use the `Classloader` to access them or 
 even store them in a certain folder and access that folder with any File API you're comfortable 
-with). You also need to provide the FilePolicy you want to use: that policy defines which file to 
+with). You also need to provide the `FilePolicy` you want to use: that policy defines which file to 
 check to find a match for a request. A few policies are provided in the library, but you can also 
-define your own. An `InMemoryPolicy` allows to configure your static scenarios entirely through code 
-and keep them in memory instead of reading them from an actual file on the disc. 
+define your own. 
 
 Additionally, you need to provide a Mapper to parse the JSON scenario files. In theory, 
-scenarios do not have to be stored as JSON: you could use XML if you prefer, or any other format, 
-as long as you provide your own Mapper class to serialize and deserialize the business objects. As 
+scenarios do not have to be stored as JSON: you could use XML if you prefered, or any other format, 
+as long as you provide your own `Mapper` class to serialize and deserialize the business objects. As 
 far as this lib is concerned though, a  few mappers are available out of the box, but they only 
-handle JSON format for the moment and are based on Jackson, Gson or Moshi. They are provided in 
-specific modules so you can choose one based on the JSON library you already use, thus limiting
-the risk for duplicate libraries serving the same purpose in your app. An implementation based on 
-a custom JSON parser that does not use any dependencies is also available. 
+handle JSON format for the moment and are based on Jackson, Gson, Moshi and Kotlinx serialization. 
+They are provided in specific modules so you can choose one based on the JSON library you already 
+use, thus limiting the risk for duplicate libraries serving the same purpose in your app. An 
+implementation based on a custom JSON parser that does not need any other dependencies is also 
+available. 
 
 Static and dynamic scenarios can be used together. Several dynamic callbacks can be added to the 
 interceptor, but only one static configuration is allowed. Dynamic callbacks will be used first to 
