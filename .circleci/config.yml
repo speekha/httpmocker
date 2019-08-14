@@ -193,9 +193,12 @@ jobs:
       JVM_OPTS: -Xmx3200m
     steps:
       - restore_all_caches
-      - run:
-          name: Tests
-          command: ./gradlew tests:check --stacktrace
+      - check_task
+          script: gradle tests:check
+          always:
+            junit_artifacts:
+              path: "**/test-results/**/*.xml"
+              format: junit
       - store_artifacts:
           path: tests/build/reports
           destination: reports
