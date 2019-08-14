@@ -193,17 +193,15 @@ jobs:
       JVM_OPTS: -Xmx3200m
     steps:
       - restore_all_caches
-      - check_task
-          script: gradle tests:check
-          always:
-            junit_artifacts:
-              path: "**/test-results/**/*.xml"
-              format: junit
+      - run:
+          name: Tests
+          command: ./gradlew tests:check --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
       - store_test_results:
           path: tests/build/test-results
+          format: junit
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
