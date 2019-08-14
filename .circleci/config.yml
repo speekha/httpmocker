@@ -1,6 +1,6 @@
 version: 2.1
 commands:
-  build-module:
+  build_module:
     description: "Builds a specific module"
     parameters:
       module:
@@ -26,6 +26,37 @@ commands:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
             - << parameters.module >>/build
+  restore_all_caches:
+    description: "Restores previous build steps state"
+    steps:
+      - restore_cache:
+          keys:
+            - source-{{ .Branch }}-{{ .Revision }}
+            - source-{{ .Branch }}-
+            - source-
+      - checkout
+      - restore_cache:
+          keys:
+            - jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+            - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          keys:
+            - build-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
 
 jobs:
   prepare_dependencies:
@@ -70,7 +101,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build-module:
+      - build_module:
           module: "mocker"
   build_jackson:
     docker:
@@ -78,7 +109,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build-module:
+      - build_module:
           module: "jackson-adapter"
   build_gson:
     docker:
@@ -86,7 +117,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build-module:
+      - build_module:
           module: "gson-adapter"
   build_moshi:
     docker:
@@ -94,7 +125,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build-module:
+      - build_module:
           module: "moshi-adapter"
   build_custom:
     docker:
@@ -102,7 +133,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build-module:
+      - build_module:
           module: "custom-adapter"
   build_kotlinx:
     docker:
@@ -110,7 +141,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - build-module:
+      - build_module:
           module: "kotlinx-adapter"
   build_demo:
     docker:
@@ -148,32 +179,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
-      - restore_cache:
-          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - checkout
-      - restore_cache:
-          keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_all_caches
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
@@ -186,35 +192,10 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
-      - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
-      - restore_cache:
-          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - checkout
-      - restore_cache:
-          keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew tests:test --stacktrace
+          command: ./gradlew tests:check --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
