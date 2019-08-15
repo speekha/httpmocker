@@ -24,6 +24,8 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -71,6 +73,21 @@ class DynamicMockTests : TestWithServer() {
             val response = executeGetRequest("/unknown")
 
             assertResponseCode(response, 404, "Not Found")
+        }
+
+        @Test
+        @DisplayName("When an error occurs while answering a request, then the request body should be the error")
+        fun `should return the error message when an exception occurs`() {
+            setupProvider(ENABLED) { error("Unexpected error") }
+
+            val response = executeGetRequest("/unknown").body()?.string()
+
+            assertThat(
+                response, StringStartsWith(
+                    "java.lang.IllegalStateException: Unexpected error\n" +
+                            "\tat fr.speekha.httpmocker.interceptor.DynamicMockTests"
+                )
+            )
         }
 
         @Test
