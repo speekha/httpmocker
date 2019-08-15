@@ -82,12 +82,15 @@ private constructor(
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
             try {
-                provider.loadResponse(request)?.let { response ->
-                    executeMockResponse(response, request, provider)
-                }
+                provider.loadResponse(request)
             } catch (e: Throwable) {
                 logger.error("Scenario file could not be loaded", e)
-                null
+                val exceptionType = e.javaClass.name
+                val message = e.message
+                val stackTrace = e.stackTrace.joinToString("\n\tat ")
+                responseNotFound("$exceptionType: $message\n\tat $stackTrace")
+            }?.let { response ->
+                executeMockResponse(response, request, provider)
             }
         }
         .firstOrNull()
@@ -142,7 +145,7 @@ private constructor(
         } ?: response.body.toByteArray()
     )
 
-    private fun responseNotFound() = ResponseDescriptor(code = 404, body = "Page not found")
+    private fun responseNotFound(body: String = "Page not found") = ResponseDescriptor(code = 404, body = body)
 
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
         val response = proceedWithRequest(chain)
