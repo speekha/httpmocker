@@ -228,3 +228,10 @@ Here is an example of scenario in JSON form:
  "application/json", with a header "myHeader" of value "headerValue1". The body for this response will be found in 
  a nearby file name "body_content.txt". In any other cases, the request will be answered with the second response:
  a HTTP 200 response with "headerValue2" as header and a simple string "No body here" as body.
+
+# Publications
+
+[Introductory blog post on Kt. Academy](https://blog.kotlin-academy.com/httpmock-my-first-oss-library-5bae8adbccf4)
+
+[Kotlin Weekly](https://mailchi.mp/kotlinweekly/kotlin-weekly-155) mentioned it
+
