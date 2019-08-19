@@ -4,6 +4,8 @@
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
+[![codebeat badge](https://codebeat.co/badges/a361e616-a1a0-4e85-b6a7-2bc82f31f7ac)](https://codebeat.co/projects/github-com-speekha-httpmocker-develop)
+
 **HttpMocker** is a very lightweight Kotlin library that allows to mock HTTP calls relying on the OkHttp library.
 
 * It can be used for unit or integration tests, so your tests can rely on predefined responses and not
