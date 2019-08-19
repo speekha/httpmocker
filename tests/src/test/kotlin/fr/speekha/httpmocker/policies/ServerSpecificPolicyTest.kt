@@ -43,7 +43,6 @@ class ServerSpecificPolicyTest {
             assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
         }
 
-
         @Test
         @DisplayName("When processing a URL ending with a '/', then index.json should be added in the last empty segment")
         fun `should handle URL when last segment is empty`() {

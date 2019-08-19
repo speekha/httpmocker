@@ -80,7 +80,6 @@ internal class MatcherAdapter {
         response.bodyFile
     )
 
-
     private fun headerFromJson(header: JsonHeader): Header = Header(header.name, header.value)
 
     private fun headerToJson(header: Header) = JsonHeader(header.name, header.value)

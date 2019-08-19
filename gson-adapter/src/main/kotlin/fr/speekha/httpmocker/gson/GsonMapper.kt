@@ -111,4 +111,3 @@ class GsonMapper : Mapper {
             bodyFile
         )
 }
-

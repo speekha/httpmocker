@@ -138,7 +138,6 @@ class StaticMockTests : TestWithServer() {
 
             assertEquals("simple body", response.body()?.string())
         }
-
     }
 
     @Nested
@@ -335,7 +334,6 @@ class StaticMockTests : TestWithServer() {
             client = OkHttpClient.Builder()
                 .addInterceptor(interceptor)
                 .build()
-
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -474,7 +472,6 @@ class StaticMockTests : TestWithServer() {
             assertEquals(404, extraHeader.code())
         }
 
-
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match request body")
@@ -487,7 +484,6 @@ class StaticMockTests : TestWithServer() {
             assertEquals("matched", match)
             assertEquals("no match", noMatch)
         }
-
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")

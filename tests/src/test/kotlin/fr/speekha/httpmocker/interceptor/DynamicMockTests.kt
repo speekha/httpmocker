@@ -173,9 +173,7 @@ class DynamicMockTests : TestWithServer() {
                 .build()
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-
         }
-
     }
 
     private fun setupProvider(

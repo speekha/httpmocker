@@ -92,7 +92,6 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
                 ), mapper.readMatches(json.byteInputStream())
             )
         }
-
     }
 
     @Nested
@@ -110,6 +109,5 @@ abstract class AbstractJsonMapperTest(val mapper: Mapper) {
             val expected = getExpectedOutput()
             testStream(expected, mapper.serialize(listOf(completeData[0])))
         }
-
     }
 }

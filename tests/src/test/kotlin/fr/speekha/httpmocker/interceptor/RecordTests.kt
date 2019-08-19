@@ -366,5 +366,4 @@ class RecordTests : TestWithServer() {
     companion object {
         private const val SAVE_FOLDER = "testFolder"
     }
-
 }
