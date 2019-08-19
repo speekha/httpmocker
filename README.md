@@ -4,17 +4,20 @@
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
+[![codebeat badge](https://codebeat.co/badges/a361e616-a1a0-4e85-b6a7-2bc82f31f7ac)](https://codebeat.co/projects/github-com-speekha-httpmocker-develop)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
+
 **HttpMocker** is a very lightweight Kotlin library that allows to mock HTTP calls relying on the OkHttp library.
 
 * It can be used for unit or integration tests, so your tests can rely on predefined responses and not
 execute actual calls to servers, thus avoiding the risk of unpredictable results due to network failure or 
 server errors. 
+
 * It can also be used to implement an offline mode in your application for debugging or demo purposes.
 
 Thanks to the MockResponseInterceptor, network calls will not be dispatched to the network but read from JSON
 configuration files or computed dynamically instead. The interceptor will also allow to record scenarios so they
 can be reused later.
-
 
 ## Current Version
 
@@ -97,7 +100,7 @@ is recommended to keep the mapping classes unobfuscated. You can refer to the
 
 The custom and moshi parsers are immune to obfuscation because they do not use any introspection.
 
-# Quickstart
+## Quickstart
 
 Mocking http calls relies on a simple Interceptor: MockResponseInterceptor. All you need to set it up
 is to add it to your OkHttp client. Here's an example with minimal configuration using dynamic mocks:
@@ -169,10 +172,11 @@ you can delete all the superfluous criteria manually.
 ## Building static scenarios
 
 Answering a request with a static mock is done in two steps:
-- First, if the interceptor is enabled (or in mixed mode), it will try to compute a file name were the appropriate 
+* First, if the interceptor is enabled (or in mixed mode), it will try to compute a file name were the appropriate 
 scenario should be stored. Based on the filing policy you chose, those files can be organized in a lot of different 
 ways: all in the same folder, in separate folders matching the URL path, ignoring or not the server hostname.
-- Second, once the file is found, its content will be loaded, and a more exact match will have to be found. Scenario 
+
+* Second, once the file is found, its content will be loaded, and a more exact match will have to be found. Scenario 
 files contain a list of "Matchers", that is a list of request patterns and corresponding responses. Based on the 
 request it is trying to answer, the interceptor is going to scan through all the request declarations and stop as soon
 as it finds one that matches the situation.
@@ -180,9 +184,9 @@ as it finds one that matches the situation.
 When writing a request pattern, the elements included are supposed to be found in the requests to match. The more 
 elements, the more precise the match has to be. The less elements, the more permissive the match. A request can even 
 be omitted altogether (in this case, all requests match):
- * When specifying a method, matching request have to use the same HTTP method.
- * When specifying query parameters, matching requests must have at least all these parameters (but can have more).
- * When specifying headers, matching request must have all the same headers (but can have more).
+* When specifying a method, matching request have to use the same HTTP method.
+* When specifying query parameters, matching requests must have at least all these parameters (but can have more).
+* When specifying headers, matching request must have all the same headers (but can have more).
 
 Here is an example of scenario in JSON form:
  
@@ -228,3 +232,15 @@ Here is an example of scenario in JSON form:
  "application/json", with a header "myHeader" of value "headerValue1". The body for this response will be found in 
  a nearby file name "body_content.txt". In any other cases, the request will be answered with the second response:
  a HTTP 200 response with "headerValue2" as header and a simple string "No body here" as body.
+
+## Author
+
+[![Follow me](https://avatars.githubusercontent.com/u/17544216?s=60)](https://twitter.com/speekha)
+
+[![Follow me](https://img.shields.io/twitter/follow/speekha?style=social)](https://twitter.com/speekha)
+
+## Publications
+
+[Introductory blog post on Kt. Academy](https://blog.kotlin-academy.com/httpmock-my-first-oss-library-5bae8adbccf4)
+
+[Kotlin Weekly](https://mailchi.mp/kotlinweekly/kotlin-weekly-155) mentioned it

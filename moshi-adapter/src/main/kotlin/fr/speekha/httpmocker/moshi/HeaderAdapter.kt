@@ -30,12 +30,7 @@ internal class HeaderAdapter {
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
-            val value = if (reader.peek() != JsonReader.Token.NULL) {
-                reader.nextString()
-            } else {
-                reader.nextNull<Unit>()
-                null
-            }
+            val value = reader.readStringOrNull()
             list += JsonHeader(name, value)
         }
         reader.endObject()

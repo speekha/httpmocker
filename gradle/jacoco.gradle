@@ -14,11 +14,24 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.scenario
+apply plugin: 'jacoco'
 
-import okhttp3.Request
+jacoco {
+    toolVersion = "0.8.4"
+    reportsDir = file("$buildDir/reports")
+}
 
-internal interface ScenarioProvider : RequestCallback {
+jacocoTestReport {
+    group = "Reporting"
+    description = "Generate Jacoco coverage report"
+    additionalSourceDirs.from = files(sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from = files(sourceSets.main.allSource.srcDirs)
+    classDirectories.from = files(sourceSets.main.output)
+    executionData.from = files("$buildDir/jacoco/test.exec")
+    reports {
+        xml.enabled = true
+        html.enabled = true
+        csv.enabled = true
+    }
 
-    fun loadResponseBody(request: Request, path: String): ByteArray?
 }

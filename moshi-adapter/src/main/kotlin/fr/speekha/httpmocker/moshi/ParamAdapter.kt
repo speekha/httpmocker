@@ -29,12 +29,7 @@ internal class ParamAdapter {
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
-            val value = if (reader.peek() != JsonReader.Token.NULL) {
-                reader.nextString()
-            } else {
-                reader.nextNull<Unit>()
-                null
-            }
+            val value = reader.readStringOrNull()
             map += name to value
         }
         reader.endObject()
@@ -42,10 +37,10 @@ internal class ParamAdapter {
     }
 
     @ToJson
-    fun paramToJson(writer: JsonWriter, headers: Map<String, String?>) {
+    fun paramToJson(writer: JsonWriter, params: Map<String, String?>) {
         writer.beginObject()
         writer.serializeNulls = true
-        headers.forEach {
+        params.forEach {
             writer.name(it.key)
             writer.value(it.value)
         }

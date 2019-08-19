@@ -34,5 +34,4 @@ class SingleFolderPolicy(private val rootFolder: String = "") : FilingPolicy {
             ?: "index"
         return "$prefix$fileName.json"
     }
-
 }
