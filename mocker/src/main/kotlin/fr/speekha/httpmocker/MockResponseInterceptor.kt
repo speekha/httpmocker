@@ -146,7 +146,8 @@ private constructor(
         } ?: response.body.toByteArray()
     )
 
-    private fun responseNotFound(body: String = "Page not found") = ResponseDescriptor(code = 404, body = body)
+    private fun responseNotFound(body: String = "Page not found") =
+        ResponseDescriptor(code = 404, body = body)
 
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
         val response = proceedWithRequest(chain)
@@ -179,34 +180,31 @@ private constructor(
     /**
      * Builder to instantiate an interceptor.
      */
-    class Builder {
-
-        private var filingPolicy: FilingPolicy = MirrorPathPolicy()
-        private var openFile: LoadFile? = null
-        private var mapper: Mapper? = null
-        private var root: File? = null
-        private var simulatedDelay: Long = 0
-        private var interceptorMode: Mode = Mode.DISABLED
-        private val dynamicCallbacks = mutableListOf<RequestCallback>()
-        private var showSavingErrors = false
+    data class Builder(
+        private val filingPolicy: FilingPolicy = MirrorPathPolicy(),
+        private val openFile: LoadFile? = null,
+        private val mapper: Mapper? = null,
+        private val root: File? = null,
+        private val simulatedDelay: Long = 0,
+        private val interceptorMode: Mode = Mode.DISABLED,
+        private val dynamicCallbacks: List<RequestCallback> = emptyList(),
+        private val showSavingErrors: Boolean = false
+    ) {
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
          * on the request being intercepted
          * @param policy the naming policy to use for scenario files
          */
-        fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply {
-            filingPolicy = policy
-        }
+        fun decodeScenarioPathWith(policy: FilingPolicy): Builder = copy(filingPolicy = policy)
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
          * on the request being intercepted
          * @param policy a lambda to use as the naming policy for scenario files
          */
-        fun decodeScenarioPathWith(policy: (Request) -> String): Builder = apply {
-            filingPolicy = FilingPolicyBuilder(policy)
-        }
+        fun decodeScenarioPathWith(policy: (Request) -> String): Builder =
+            copy(filingPolicy = FilingPolicyBuilder(policy))
 
         private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
             override fun getPath(request: Request): String = policy(request)
@@ -217,17 +215,14 @@ private constructor(
          * @param loading a function to load files by name and path as a stream (could use
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
-        fun loadFileWith(loading: LoadFile): Builder = apply {
-            openFile = loading
-        }
+        fun loadFileWith(loading: LoadFile): Builder = copy(openFile = loading)
 
         /**
          * Uses dynamic mocks to answer network requests instead of file scenarios
          * @param callback A callback to invoke when a request in intercepted
          */
-        fun useDynamicMocks(callback: RequestCallback): Builder = apply {
-            dynamicCallbacks += callback
-        }
+        fun useDynamicMocks(callback: RequestCallback): Builder =
+            copy(dynamicCallbacks = dynamicCallbacks + callback)
 
         /**
          * Uses dynamic mocks to answer network requests instead of file scenarios
@@ -248,26 +243,21 @@ private constructor(
          * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
          * @param objectMapper A Mapper to parse scenario files.
          */
-        fun parseScenariosWith(objectMapper: Mapper): Builder = apply {
-            mapper = objectMapper
-        }
+        fun parseScenariosWith(objectMapper: Mapper): Builder = copy(mapper = objectMapper)
 
         /**
          * Defines the folder where scenarios should be stored when recording
          * @param folder the root folder where saved scenarios should be saved
          */
-        fun saveScenariosIn(folder: File): Builder = apply {
-            root = folder
-        }
+        fun saveScenariosIn(folder: File): Builder = copy(root = folder)
 
         /**
          * Allows to return an error if saving fails when recording.
          * @param failOnError if true, failure to save scenarios will throw an exception.
          * If false, saving exceptions will be ignored.
          */
-        fun failOnRecordingError(failOnError: Boolean): Builder = apply {
-            showSavingErrors = failOnError
-        }
+        fun failOnRecordingError(failOnError: Boolean): Builder =
+            copy(showSavingErrors = failOnError)
 
         /**
          * Allows to set a fake delay for every requests (can be overridden in a scenario) to
@@ -275,18 +265,14 @@ private constructor(
          * animations during your network calls).
          * @param delay default pause delay for network responses in ms
          */
-        fun addFakeNetworkDelay(delay: Long): Builder = apply {
-            simulatedDelay = delay
-        }
+        fun addFakeNetworkDelay(delay: Long): Builder = copy(simulatedDelay = delay)
 
         /**
          * Defines how the interceptor should initially behave (can be enabled, disable, record
          * requests...)
          * @param status The interceptor mode
          */
-        fun setInterceptorStatus(status: Mode): Builder = apply {
-            interceptorMode = status
-        }
+        fun setInterceptorStatus(status: Mode): Builder = copy(interceptorMode = status)
 
         /**
          * Builds the interceptor.
@@ -309,10 +295,9 @@ private constructor(
         }
 
         private fun buildStaticProvider(): StaticMockProvider? = mapper?.let { jsonMapper ->
-            if (openFile != null) {
-                val loader = openFile ?: error(NO_LOADER_ERROR)
-                StaticMockProvider(filingPolicy, loader, jsonMapper)
-            } else null
+            openFile?.let { fileLoading ->
+                StaticMockProvider(filingPolicy, fileLoading, jsonMapper)
+            }
         }
     }
 }
@@ -326,11 +311,6 @@ typealias LoadFile = (String) -> InputStream?
 
 const val RECORD_NOT_SUPPORTED_ERROR =
     "Recording is not supported with the current parameters."
-
-const val NO_LOADER_ERROR = "No method has been provided to load the scenarios."
-
-const val NO_MAPPER_ERROR =
-    "No mapper has been provided to deserialize scenarios. Please specify a Mapper to decode the scenario files."
 
 const val NO_RECORDER_ERROR =
     "Recording configuration is not complete. Please add a Mapper."
