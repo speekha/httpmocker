@@ -34,7 +34,6 @@ import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-
 class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModel<MainViewModel>()
@@ -43,22 +42,22 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        initObservers()
+        initViews()
+    }
 
-        observe(viewModel.getData()) { data ->
-            when (data) {
-                is Data.Loading -> showLoading(true)
-                is Data.Success -> setResult(data.repos)
-                is Data.Error -> setError(data.message)
-            }
-        }
+    private fun initObservers() {
+        observeDataLoading()
+        observeState()
+    }
 
-        observe(viewModel.getState()) { state ->
-            when (state) {
-                is State.Permission -> checkPermission()
-                is State.Message -> updateDescriptionLabel(state.message)
-            }
-        }
+    private fun initViews() {
+        results.adapter = adapter
+        results.layoutManager = LinearLayoutManager(this)
+        setupListeners()
+    }
 
+    private fun setupListeners() {
         radioState.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 viewModel.setMode(
@@ -77,9 +76,25 @@ class MainActivity : AppCompatActivity() {
         btnCall.setOnClickListener {
             viewModel.callService()
         }
+    }
 
-        results.adapter = adapter
-        results.layoutManager = LinearLayoutManager(this)
+    private fun observeState() {
+        observe(viewModel.getState()) { state ->
+            when (state) {
+                is State.Permission -> checkPermission()
+                is State.Message -> updateDescriptionLabel(state.message)
+            }
+        }
+    }
+
+    private fun observeDataLoading() {
+        observe(viewModel.getData()) { data ->
+            when (data) {
+                is Data.Loading -> showLoading(true)
+                is Data.Success -> setResult(data.repos)
+                is Data.Error -> setError(data.message)
+            }
+        }
     }
 
     private fun showLoading(visible: Boolean) {
@@ -101,7 +116,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermission() {
-        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
         }
     }

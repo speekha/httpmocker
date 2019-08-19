@@ -22,7 +22,6 @@ import com.squareup.moshi.Types.newParameterizedType
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
 
-
 /**
  * A mapper using Moshi to serialize/deserialize scenarios.
  */

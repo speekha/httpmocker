@@ -16,11 +16,16 @@
 
 package fr.speekha.httpmocker.moshi
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.NAME
+import fr.speekha.httpmocker.VALUE
 
 @JsonClass(generateAdapter = true)
 internal data class Header(
+    @field:Json(name = NAME)
     val name: String = "",
 
+    @field:Json(name = VALUE)
     var value: String? = null
 )

@@ -24,7 +24,7 @@ import fr.speekha.httpmocker.gson.Header as JsonHeader
 
 internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
 
-    class HeaderList(list: List<JsonHeader> = emptyList()) : ArrayList<JsonHeader>(list)
+    internal class HeaderList(list: List<JsonHeader> = emptyList()) : ArrayList<JsonHeader>(list)
 
     override fun write(writer: JsonWriter?, headers: HeaderList?) {
         writer?.run {

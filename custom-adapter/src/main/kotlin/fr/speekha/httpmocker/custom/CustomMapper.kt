@@ -44,5 +44,6 @@ class CustomMapper : Mapper {
         }
 
     override fun serialize(matchers: List<Matcher>): String = compactJson(matchers.toJson())
-
 }
+
+fun unknownFieldError(field: String): Nothing = error("Unknown field $field")

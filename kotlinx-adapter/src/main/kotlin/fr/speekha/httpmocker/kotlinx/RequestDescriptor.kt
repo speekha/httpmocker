@@ -16,21 +16,38 @@
 
 package fr.speekha.httpmocker.kotlinx
 
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.METHOD
+import fr.speekha.httpmocker.PARAMS
+import fr.speekha.httpmocker.PATH
+import fr.speekha.httpmocker.PORT
+import fr.speekha.httpmocker.PROTOCOL
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.RequestDescriptor as Model
 
 @Serializable
 internal data class RequestDescriptor(
-    @SerialName("exact-match")
+    @SerialName(EXACT_MATCH)
     val exactMatch: Boolean? = null,
+    @SerialName(PROTOCOL)
     val protocol: String? = null,
+    @SerialName(METHOD)
     val method: String? = null,
+    @SerialName(HOST)
     val host: String? = null,
+    @SerialName(PORT)
     val port: Int? = null,
+    @SerialName(PATH)
     val path: String? = null,
+    @SerialName(HEADERS)
     val headers: List<Header>? = null,
+    @SerialName(PARAMS)
     val params: Map<String, String?>? = null,
+    @SerialName(BODY)
     val body: String? = null
 ) {
     constructor(model: Model) : this(

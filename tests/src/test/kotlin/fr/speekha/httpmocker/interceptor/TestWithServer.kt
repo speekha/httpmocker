@@ -118,15 +118,15 @@ open class TestWithServer {
     companion object {
 
         @JvmStatic
-        fun mappers() : Stream<Arguments> = Stream.of(
-                Arguments.of("Jackson", JacksonMapper()),
-                Arguments.of("Gson", GsonMapper()),
-                Arguments.of("Moshi", MoshiMapper()),
-                Arguments.of("Custom mapper", CustomMapper()),
-                Arguments.of(
-                    "Kotlinx serialization",
-                    KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export)
-                )
+        fun mappers(): Stream<Arguments> = Stream.of(
+            Arguments.of("Jackson", JacksonMapper()),
+            Arguments.of("Gson", GsonMapper()),
+            Arguments.of("Moshi", MoshiMapper()),
+            Arguments.of("Custom mapper", CustomMapper()),
+            Arguments.of(
+                "Kotlinx serialization",
+                KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export)
             )
+        )
     }
 }

@@ -16,14 +16,19 @@
 
 package fr.speekha.httpmocker.kotlinx
 
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.Matcher as Model
 
 @Serializable
 internal data class Matcher(
 
+    @SerialName(REQUEST)
     val request: RequestDescriptor? = null,
 
+    @SerialName(RESPONSE)
     val response: ResponseDescriptor
 ) {
     constructor(model: Model) : this(

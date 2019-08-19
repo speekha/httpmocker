@@ -57,5 +57,4 @@ class RepoAdapter(
         val repoName: TextView = itemView.findViewById(R.id.repoName)
         val topContributor: TextView = itemView.findViewById(R.id.topContributor)
     }
-
 }

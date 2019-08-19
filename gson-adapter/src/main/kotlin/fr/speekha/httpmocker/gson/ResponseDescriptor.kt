@@ -17,20 +17,32 @@
 package fr.speekha.httpmocker.gson
 
 import com.google.gson.annotations.SerializedName
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.BODY_FILE
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.DEFAULT_RESPONSE_CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.MEDIA_TYPE
 
 internal data class ResponseDescriptor(
 
+    @SerializedName(DELAY)
     val delay: Long = 0,
 
-    val code: Int = 200,
+    @SerializedName(CODE)
+    val code: Int = DEFAULT_RESPONSE_CODE,
 
-    @SerializedName("media-type")
-    val mediaType: String = "text/plain",
+    @SerializedName(MEDIA_TYPE)
+    val mediaType: String = DEFAULT_MEDIA_TYPE,
 
+    @SerializedName(HEADERS)
     val headers: HeaderAdapter.HeaderList? = HeaderAdapter.HeaderList(),
 
+    @SerializedName(BODY)
     val body: String = "",
 
-    @SerializedName("body-file")
+    @SerializedName(BODY_FILE)
     val bodyFile: String? = null
 )
