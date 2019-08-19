@@ -26,5 +26,4 @@ class MirrorPathPolicy : FilingPolicy {
     override fun getPath(request: Request): String = with(request.url().pathSegments()) {
         joinToString("/") + if (last() == "") "index.json" else ".json"
     }
-
 }

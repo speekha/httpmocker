@@ -314,7 +314,6 @@ private constructor(
                 StaticMockProvider(filingPolicy, loader, jsonMapper)
             } else null
         }
-
     }
 }
 

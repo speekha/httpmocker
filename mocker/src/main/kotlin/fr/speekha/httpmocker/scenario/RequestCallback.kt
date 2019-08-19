@@ -30,5 +30,4 @@ interface RequestCallback {
      * @return the description of the mock response
      */
     fun loadResponse(request: Request): ResponseDescriptor?
-
 }

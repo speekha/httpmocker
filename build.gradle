@@ -25,7 +25,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
@@ -60,6 +60,7 @@ allprojects {
         verbose = true
         android = false
         reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
+        additionalEditorconfigFile = file("../config/.editorconfig")
 
         filter {
             exclude("**/generated/**")
@@ -76,7 +77,7 @@ subprojects {
     plugins.apply("io.gitlab.arturbosch.detekt")
 
     detekt {
-        config = files("../gradle/detekt.yml")
+        config = files("../config/detekt.yml")
         parallel = true
         reports {
             xml { enabled = true }

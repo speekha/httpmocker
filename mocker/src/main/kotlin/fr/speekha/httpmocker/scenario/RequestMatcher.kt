@@ -64,5 +64,4 @@ class RequestMatcher {
 
     private fun RequestDescriptor.matchProtocol(request: Request) =
         (protocol?.equals(request.url().scheme(), true) ?: true)
-
 }

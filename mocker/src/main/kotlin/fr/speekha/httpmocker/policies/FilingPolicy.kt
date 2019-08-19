@@ -29,5 +29,4 @@ interface FilingPolicy {
      * @return the path where the JSON configuration can be loaded
      */
     fun getPath(request: Request): String
-
 }

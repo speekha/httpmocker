@@ -36,7 +36,6 @@ internal class RequestRecorder(
 
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
-
     @SuppressWarnings("TooGenericExceptionCaught")
     fun saveFiles(record: CallRecord) {
         try {
