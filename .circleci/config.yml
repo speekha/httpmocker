@@ -206,6 +206,26 @@ jobs:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
             - "."
+  quality:
+    docker:
+      - image: circleci/android:api-29
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - restore_all_caches
+      - run:
+          name: Tests
+          command: ./gradlew mocker:check --stacktrace
+      - store_artifacts:
+          path: mocker/build/reports
+          destination: reports
+      - store_test_results:
+          path: mocker/build/reports
+          format: junit
+      - save_cache:
+          key: build-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - "."
   publish_snapshot:
     docker:
       - image: circleci/android:api-29
@@ -269,9 +289,17 @@ workflows:
             - build_moshi
             - build_custom
             - build_kotlinx
+      - quality:
+          requires:
+            - build_jackson
+            - build_gson
+            - build_moshi
+            - build_custom
+            - build_kotlinx
       - publish_snapshot:
           requires:
             - test
+            - quality
           filters:
             branches:
               only: develop
