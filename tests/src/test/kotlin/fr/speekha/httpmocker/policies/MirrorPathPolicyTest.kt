@@ -43,7 +43,8 @@ class MirrorPathPolicyTest {
         }
 
         @Test
-        @DisplayName("When processing a URL ending with a '/', then index.json should be added in the last empty segment")
+        @DisplayName("When processing a URL ending with a '/', " +
+                "then index.json should be added in the last empty segment")
         fun emptyFolder() {
             val request = buildRequest(
                 "http://www.somestuff.com/test/with/path/",
