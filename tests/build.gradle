@@ -16,10 +16,16 @@
 
 apply plugin: 'kotlin'
 
+
 test {
     options {
         useJUnitPlatform()
     }
+//    jacoco {
+//        append = false
+//        destinationFile = file("$buildDir/jacoco/junitPlatformTest.exec")
+//        includeNoLocationClasses = true
+//    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -56,5 +62,4 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
 
     testImplementation "org.slf4j:slf4j-simple:$slf4j_version"
-
 }

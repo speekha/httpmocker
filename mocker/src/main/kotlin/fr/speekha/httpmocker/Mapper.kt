@@ -49,7 +49,6 @@ interface Mapper : Parser {
     fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
         it.write(serialize(matchers).toByteArray())
     }
-
 }
 
 /**

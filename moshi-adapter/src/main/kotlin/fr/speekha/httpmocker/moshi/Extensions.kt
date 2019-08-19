@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.scenario
+package fr.speekha.httpmocker.moshi
 
-import okhttp3.Request
+import com.squareup.moshi.JsonReader
 
-internal interface ScenarioProvider : RequestCallback {
-
-    fun loadResponseBody(request: Request, path: String): ByteArray?
+fun JsonReader.readStringOrNull(): String? {
+    return if (peek() != JsonReader.Token.NULL) {
+        nextString()
+    } else {
+        nextNull<Unit>()
+        null
+    }
 }

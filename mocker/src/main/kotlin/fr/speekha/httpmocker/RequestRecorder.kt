@@ -36,6 +36,7 @@ internal class RequestRecorder(
 
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     fun saveFiles(record: CallRecord) {
         try {
             val requestFile = getRequestFilePath(record)
@@ -57,9 +58,11 @@ internal class RequestRecorder(
 
     private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> =
         with(record) {
-            val previousRecords: List<Matcher> = if (requestFile.exists())
+            val previousRecords: List<Matcher> = if (requestFile.exists()) {
                 mapper.readMatches(requestFile).toMutableList()
-            else emptyList()
+            } else {
+                emptyList()
+            }
             return previousRecords + buildMatcher(previousRecords, record)
         }
 
@@ -125,10 +128,9 @@ internal class RequestRecorder(
     private fun getExtension(contentType: MediaType?) =
         extensionMappings[contentType.toString()] ?: ".txt"
 
-    class CallRecord(
+    internal class CallRecord(
         val request: Request,
         val response: Response,
         val body: ByteArray?
     )
 }
-
