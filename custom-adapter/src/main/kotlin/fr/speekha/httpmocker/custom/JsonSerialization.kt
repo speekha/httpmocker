@@ -90,4 +90,6 @@ private fun Int?.wrap() = this?.toString()
  * @return the truncated version of the String
  */
 fun String.truncate(limit: Int): String =
-    takeIf { length <= limit } ?: substring(0, limit - 3) + "..."
+    takeIf { length <= limit } ?: substring(0, limit - ELLIPSIS_LENGTH) + "..."
+
+private const val ELLIPSIS_LENGTH = 3

@@ -37,5 +37,4 @@ internal abstract class BaseObjectAdapter<T : Any> : ObjectAdapter<T> {
     abstract fun createObject(): T
 
     abstract fun updateObject(reader: JsonStringReader, builder: T): T
-
 }
