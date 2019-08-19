@@ -229,7 +229,7 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build_core:
+      - build_core
       - build_jackson:
           requires:
             - build_core
