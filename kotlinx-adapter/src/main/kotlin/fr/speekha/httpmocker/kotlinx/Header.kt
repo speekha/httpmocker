@@ -16,12 +16,17 @@
 
 package fr.speekha.httpmocker.kotlinx
 
+import fr.speekha.httpmocker.NAME
+import fr.speekha.httpmocker.VALUE
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.Header as Model
 
 @Serializable
 internal data class Header(
+    @SerialName(NAME)
     val name: String?,
+    @SerialName(VALUE)
     var value: String?
 ) {
     constructor(model: Model) : this(model.name, model.value)

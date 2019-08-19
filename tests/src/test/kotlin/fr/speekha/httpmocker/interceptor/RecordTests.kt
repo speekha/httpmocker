@@ -114,7 +114,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a request fails and errors are expected, then the error should be returned")
+        @DisplayName(
+            "When recording a request fails and errors are expected, " +
+                    "then the error should be returned"
+        )
         fun `recording failure should return an error if desired`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body")
             setUpInterceptor(mapper, "", true)
@@ -124,6 +127,7 @@ class RecordTests : TestWithServer() {
             }
         }
 
+        @Suppress("unused")
         fun data(): Stream<Arguments> = mappers()
     }
 
@@ -133,7 +137,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a request, then scenario and response body files should be created in that folder")
+        @DisplayName(
+            "When recording a request, " +
+                    "then scenario and response body files should be created in that folder"
+        )
         fun `should store requests and responses in the proper locations when recording`(
             title: String,
             mapper: Mapper
@@ -149,7 +156,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a request for a URL ending with a '/', then scenario files should be named with 'index'")
+        @DisplayName(
+            "When recording a request for a URL ending with a '/', " +
+                    "then scenario files should be named with 'index'"
+        )
         fun `should name body file correctly when last path segment is empty`(
             title: String,
             mapper: Mapper
@@ -238,7 +248,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When a scenario already exists for a request, then the scenario should be completed with the new one")
+        @DisplayName(
+            "When a scenario already exists for a request, " +
+                    "then the scenario should be completed with the new one"
+        )
         fun `should update existing descriptors when recording`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
             enqueueServerResponse(200, "second body")
@@ -300,7 +313,8 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a response body, then the file should have the proper extension")
+        @DisplayName("When recording a response body, " +
+                "then the file should have the proper extension")
         fun `should add proper extension to response files`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body", contentType = "image/png")
             enqueueServerResponse(200, "body", contentType = "application/json")
@@ -315,7 +329,8 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When several matches exist for a request, then the body file should have the same index as the request in the scenario")
+        @DisplayName("When several matches exist for a request, " +
+                "then the body file should have the same index as the request in the scenario")
         fun `should match indexes in descriptor file and actual response file name`(
             title: String,
             mapper: Mapper
@@ -366,5 +381,4 @@ class RecordTests : TestWithServer() {
     companion object {
         private const val SAVE_FOLDER = "testFolder"
     }
-
 }

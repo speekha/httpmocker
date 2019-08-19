@@ -23,7 +23,9 @@ import com.google.gson.stream.JsonWriter
 
 internal class ParamsAdapter : TypeAdapter<ParamsAdapter.ParamList>() {
 
-    class ParamList(map: Map<String, String?> = emptyMap()) : ArrayList<Pair<String, String?>>(map.entries.map { it.key to it.value })
+    internal class ParamList(
+        map: Map<String, String?> = emptyMap()
+    ) : ArrayList<Pair<String, String?>>(map.entries.map { it.key to it.value })
 
     override fun write(writer: JsonWriter?, params: ParamList?) {
         writer?.run {

@@ -112,13 +112,13 @@ class JsonStringReader(
      * Reads an Integer field value
      * @return the field value as an Integer
      */
-    fun readInt(): Int = parseNumeric(String::toInt)
+    fun readInt(): Int = readNumeric(String::toInt)
 
     /**
      * Reads a Long field value
      * @return the field value as a Long
      */
-    fun readLong(): Long = parseNumeric(String::toLong)
+    fun readLong(): Long = readNumeric(String::toLong)
 
     /**
      * Reads a Boolean field value
@@ -146,11 +146,12 @@ class JsonStringReader(
         return adapter.fromJson(this)
     }
 
-    private fun <T : Number> parseNumeric(convert: String.() -> T): T =
+    private fun <T : Number> readNumeric(convert: String.() -> T): T =
         parseToken(numericPattern, INVALID_NUMBER_ERROR) {
             it.replace(" ", "").convert()
         }
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     private fun <T : Any?> parseToken(
         pattern: Regex,
         error: String,
@@ -205,8 +206,7 @@ class JsonStringReader(
         error("$message${extractAfterCurrentPosition(position)}")
 
     private fun extractAfterCurrentPosition(position: Int) =
-        json.substring(position).truncate(10)
-
+        json.substring(position).truncate(DEFAULT_TRUCATE_LENGTH)
 }
 
 const val WRONG_START_OF_OBJECT_ERROR = "No object starts here: "
@@ -223,3 +223,4 @@ const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
 private val numericPattern = Regex("\\d[\\d ]*")
 private val alphanumericPattern = Regex("[^,}\\]\\s]+")
 private val stringPattern = Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")
+private const val DEFAULT_TRUCATE_LENGTH = 10

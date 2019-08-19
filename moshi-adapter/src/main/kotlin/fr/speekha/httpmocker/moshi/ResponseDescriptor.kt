@@ -18,21 +18,33 @@ package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.BODY_FILE
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.DEFAULT_RESPONSE_CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.MEDIA_TYPE
 
 @JsonClass(generateAdapter = true)
 internal data class ResponseDescriptor(
 
+    @field:Json(name = DELAY)
     val delay: Long = 0,
 
-    val code: Int = 200,
+    @field:Json(name = CODE)
+    val code: Int = DEFAULT_RESPONSE_CODE,
 
-    @field:Json(name = "media-type")
-    val mediaType: String = "text/plain",
+    @field:Json(name = MEDIA_TYPE)
+    val mediaType: String = DEFAULT_MEDIA_TYPE,
 
+    @field:Json(name = HEADERS)
     val headers: List<Header> = emptyList(),
 
+    @field:Json(name = BODY)
     val body: String = "",
 
-    @field:Json(name = "body-file")
+    @field:Json(name = BODY_FILE)
     val bodyFile: String? = null
 )

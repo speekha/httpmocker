@@ -16,25 +16,35 @@
 
 package fr.speekha.httpmocker.custom
 
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.METHOD
+import fr.speekha.httpmocker.PARAMS
+import fr.speekha.httpmocker.PATH
+import fr.speekha.httpmocker.PORT
+import fr.speekha.httpmocker.PROTOCOL
 import fr.speekha.httpmocker.model.RequestDescriptor
 
 internal class RequestAdapter : BaseObjectAdapter<RequestDescriptor>() {
 
     override fun createObject(): RequestDescriptor = RequestDescriptor()
 
+    @SuppressWarnings("ComplexMethod")
     override fun updateObject(
         reader: JsonStringReader,
         builder: RequestDescriptor
     ): RequestDescriptor = when (val field = reader.readFieldName()) {
-        "exact-match" -> builder.copy(exactMatch= reader.readBoolean())
-        "protocol" -> builder.copy(protocol = reader.readString())
-        "method" -> builder.copy(method = reader.readString())
-        "port" -> builder.copy(port = reader.readInt())
-        "host" -> builder.copy(host = reader.readString())
-        "path" -> builder.copy(path = reader.readString())
-        "headers" -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
-        "params" -> builder.copy(params = reader.readObject(MapAdapter()))
-        "body" -> builder.copy(body = reader.readString())
-        else -> error("Unknown field $field")
+        EXACT_MATCH -> builder.copy(exactMatch = reader.readBoolean())
+        PROTOCOL -> builder.copy(protocol = reader.readString())
+        METHOD -> builder.copy(method = reader.readString())
+        PORT -> builder.copy(port = reader.readInt())
+        HOST -> builder.copy(host = reader.readString())
+        PATH -> builder.copy(path = reader.readString())
+        HEADERS -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
+        PARAMS -> builder.copy(params = reader.readObject(MapAdapter()))
+        BODY -> builder.copy(body = reader.readString())
+        else -> unknownFieldError(field)
     }
 }

@@ -77,7 +77,10 @@ class InMemoryPolicyTest {
         }
 
         @Test
-        @DisplayName("When processing a request with several possible matches, then all matching entries should be returned")
+        @DisplayName(
+            "When processing a request with several possible matches, " +
+                    "then all matching entries should be returned"
+        )
         fun `should allow to add several matchers for the same URL`() {
             val url = "http://www.test.fr/path1?param=1"
             policy.addMatcher(
@@ -110,7 +113,10 @@ class InMemoryPolicyTest {
         }
 
         @Test
-        @DisplayName("When processing requests with different URLs, then corresponding match should be returned")
+        @DisplayName(
+            "When processing requests with different URLs, " +
+                    "then corresponding match should be returned"
+        )
         fun `should allow to add matchers for different URLs`() {
             val url1 = "http://www.test.fr/path1?param=1"
             val url2 = "http://www.test.fr/path2?param=1"

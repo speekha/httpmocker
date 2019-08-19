@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.mappers
+package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.custom.CustomMapper
-import org.junit.jupiter.api.DisplayName
+const val REQUEST = "request"
+const val RESPONSE = "response"
+const val EXACT_MATCH = "exact-match"
+const val PROTOCOL = "protocol"
+const val METHOD = "method"
+const val HOST = "host"
+const val PORT = "port"
+const val PATH = "path"
+const val HEADERS = "headers"
+const val PARAMS = "params"
+const val DELAY = "delay"
+const val CODE = "code"
+const val MEDIA_TYPE = "media-type"
+const val BODY = "body"
+const val BODY_FILE = "body-file"
+const val NAME = "name"
+const val VALUE = "value"
 
-@DisplayName("Custom Adapter")
-class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper())
+const val DEFAULT_MEDIA_TYPE = "text/plain"
+const val DEFAULT_RESPONSE_CODE = 200

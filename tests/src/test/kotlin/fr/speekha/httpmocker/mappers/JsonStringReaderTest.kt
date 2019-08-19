@@ -170,7 +170,6 @@ class JsonStringReaderTest {
             val exception = assertThrows<IllegalStateException> { reader.readBoolean() }
             assertEquals("$INVALID_BOOLEAN_ERROR error }", exception.message)
         }
-
     }
 
     @Nested
@@ -219,7 +218,6 @@ class JsonStringReaderTest {
             val exception = assertThrows<IllegalStateException> { reader.readString() }
             assertEquals(output, exception.message)
         }
-
     }
 
     @Nested
@@ -300,7 +298,6 @@ class JsonStringReaderTest {
     @Nested
     @DisplayName("Given an object with an array field as input")
     inner class ArrayField {
-
 
         @Test
         fun `should iterate through list of integers`() {

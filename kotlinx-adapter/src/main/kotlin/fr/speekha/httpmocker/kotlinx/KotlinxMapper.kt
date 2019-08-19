@@ -16,7 +16,24 @@
 
 package fr.speekha.httpmocker.kotlinx
 
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.BODY_FILE
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.MEDIA_TYPE
+import fr.speekha.httpmocker.METHOD
 import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.NAME
+import fr.speekha.httpmocker.PARAMS
+import fr.speekha.httpmocker.PATH
+import fr.speekha.httpmocker.PORT
+import fr.speekha.httpmocker.PROTOCOL
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.VALUE
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
@@ -68,30 +85,30 @@ class KotlinxMapper(
 }
 
 private fun JsonElement.toMatcher(): Matcher =
-    Matcher(jsonObject["request"].toRequest(), jsonObject["response"].toResponse())
+    Matcher(jsonObject[REQUEST].toRequest(), jsonObject[RESPONSE].toResponse())
 
 private fun JsonElement?.toRequest(): RequestDescriptor = this?.run {
     RequestDescriptor(
-        jsonObject["exact-match"]?.primitive?.boolean ?: false,
-        jsonObject["protocol"]?.asNullableLiteral(),
-        jsonObject["method"]?.asNullableLiteral(),
-        jsonObject["host"]?.asNullableLiteral(),
-        jsonObject["port"]?.primitive?.int,
-        jsonObject["path"]?.asNullableLiteral(),
-        jsonObject["headers"].toHeaders(),
-        jsonObject["params"].toParams(),
-        jsonObject["body"]?.asNullableLiteral()
+        jsonObject[EXACT_MATCH]?.primitive?.boolean ?: false,
+        jsonObject[PROTOCOL]?.asNullableLiteral(),
+        jsonObject[METHOD]?.asNullableLiteral(),
+        jsonObject[HOST]?.asNullableLiteral(),
+        jsonObject[PORT]?.primitive?.int,
+        jsonObject[PATH]?.asNullableLiteral(),
+        jsonObject[HEADERS].toHeaders(),
+        jsonObject[PARAMS].toParams(),
+        jsonObject[BODY]?.asNullableLiteral()
     )
 } ?: RequestDescriptor()
 
 private fun JsonElement?.toResponse(): ResponseDescriptor = this?.run {
     var result = ResponseDescriptor()
-    jsonObject["delay"]?.let { result = result.copy(delay = it.primitive.long) }
-    jsonObject["code"]?.let { result = result.copy(code = it.primitive.int) }
-    jsonObject["media-type"]?.let { result = result.copy(mediaType = it.asLiteral()) }
-    jsonObject["headers"]?.let { result = result.copy(headers = jsonObject["headers"].toHeaders()) }
-    jsonObject["body"]?.let { result = result.copy(body = it.asLiteral()) }
-    jsonObject["body-file"]?.let { result = result.copy(bodyFile = it.asNullableLiteral()) }
+    jsonObject[DELAY]?.let { result = result.copy(delay = it.primitive.long) }
+    jsonObject[CODE]?.let { result = result.copy(code = it.primitive.int) }
+    jsonObject[MEDIA_TYPE]?.let { result = result.copy(mediaType = it.asLiteral()) }
+    jsonObject[HEADERS]?.let { result = result.copy(headers = jsonObject[HEADERS].toHeaders()) }
+    jsonObject[BODY]?.let { result = result.copy(body = it.asLiteral()) }
+    jsonObject[BODY_FILE]?.let { result = result.copy(bodyFile = it.asNullableLiteral()) }
     result
 } ?: ResponseDescriptor()
 
@@ -102,8 +119,8 @@ private fun JsonElement?.toParams(): Map<String, String?> = this?.run {
 private fun JsonElement?.toHeaders(): List<ModelHeader> = this?.run {
     jsonArray.map {
         ModelHeader(
-            it.jsonObject["name"].asNullableLiteral() ?: error("Incorrect header name"),
-            it.jsonObject["value"].asNullableLiteral()
+            it.jsonObject[NAME].asNullableLiteral() ?: error("Incorrect header name"),
+            it.jsonObject[VALUE].asNullableLiteral()
         )
     }
 } ?: listOf()
