@@ -60,7 +60,7 @@ allprojects {
         verbose = true
         android = false
         reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
-        additionalEditorconfigFile = file("../config/.editorconfig")
+        additionalEditorconfigFile = file("../.editorconfig")
 
         filter {
             exclude("**/generated/**")
@@ -77,7 +77,7 @@ subprojects {
     plugins.apply("io.gitlab.arturbosch.detekt")
 
     detekt {
-        config = files("../config/detekt.yml")
+        config = files("../detekt.yml")
         parallel = true
         reports {
             xml { enabled = true }
