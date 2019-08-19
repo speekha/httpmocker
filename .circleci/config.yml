@@ -195,7 +195,7 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew tests:check --stacktrace
+          command: ./gradlew tests:test --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
