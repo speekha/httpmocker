@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.gson
+package fr.speekha.httpmocker
 
-internal data class Header(
+const val REQUEST = "request"
+const val RESPONSE = "response"
+const val EXACT_MATCH = "exact-match"
+const val PROTOCOL = "protocol"
+const val METHOD = "method"
+const val HOST = "host"
+const val PORT = "port"
+const val PATH = "path"
+const val HEADERS = "headers"
+const val PARAMS = "params"
+const val DELAY = "delay"
+const val CODE = "code"
+const val MEDIA_TYPE = "media-type"
+const val BODY = "body"
+const val BODY_FILE = "body-file"
+const val NAME = "name"
+const val VALUE = "value"
 
-    val name: String = "",
-
-    var value: String? = null
-)
+const val DEFAULT_MEDIA_TYPE = "text/plain"
+const val DEFAULT_RESPONSE_CODE = 200

@@ -16,9 +16,15 @@
 
 package fr.speekha.httpmocker.gson
 
+import com.google.gson.annotations.SerializedName
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
+
 internal data class Matcher(
 
+    @SerializedName(REQUEST)
     val request: RequestDescriptor? = null,
 
+    @SerializedName(RESPONSE)
     val response: ResponseDescriptor
 )

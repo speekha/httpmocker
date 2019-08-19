@@ -34,5 +34,4 @@ internal class HeadersSerializer : JsonSerializer<List<Header>>() {
         }
         gen.writeEndObject()
     }
-
 }

@@ -29,20 +29,38 @@ import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
 
 internal class MatcherAdapter {
     @FromJson
-    fun matcherFromJson(matcher: JsonMatcher): Matcher {
-        return Matcher(requestFromJson(matcher.request), responseFromJson(matcher.response))
-    }
+    fun matcherFromJson(matcher: JsonMatcher): Matcher =
+        Matcher(requestFromJson(matcher.request), responseFromJson(matcher.response))
 
     @ToJson
-    fun matcherToJson(matcher: Matcher): JsonMatcher {
-        return JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
-    }
+    fun matcherToJson(matcher: Matcher): JsonMatcher =
+        JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
 
     private fun requestFromJson(request: JsonRequestDescriptor) =
-        RequestDescriptor(request.exactMatch ?: false, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerFromJson(it) }, request.params, request.body)
+        RequestDescriptor(
+            request.exactMatch ?: false,
+            request.protocol,
+            request.method,
+            request.host,
+            request.port,
+            request.path,
+            request.headers.map { headerFromJson(it) },
+            request.params,
+            request.body
+        )
 
     private fun requestToJson(request: RequestDescriptor) =
-        JsonRequestDescriptor(request.exactMatch.takeIf { it }, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerToJson(it) }, request.params, request.body)
+        JsonRequestDescriptor(
+            request.exactMatch.takeIf { it },
+            request.protocol,
+            request.method,
+            request.host,
+            request.port,
+            request.path,
+            request.headers.map { headerToJson(it) },
+            request.params,
+            request.body
+        )
 
     private fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
         response.delay,

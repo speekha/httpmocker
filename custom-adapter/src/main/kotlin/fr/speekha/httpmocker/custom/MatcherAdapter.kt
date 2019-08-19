@@ -16,6 +16,8 @@
 
 package fr.speekha.httpmocker.custom
 
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
@@ -27,8 +29,8 @@ internal class MatcherAdapter : BaseObjectAdapter<Matcher>() {
         reader: JsonStringReader,
         builder: Matcher
     ): Matcher = when (val field = reader.readFieldName()) {
-        "request" -> builder.copy(request = reader.readObject(RequestAdapter()))
-        "response" -> builder.copy(response = reader.readObject(ResponseAdapter()))
-        else -> error("Unknown field $field")
+        REQUEST -> builder.copy(request = reader.readObject(RequestAdapter()))
+        RESPONSE -> builder.copy(response = reader.readObject(ResponseAdapter()))
+        else -> unknownFieldError(field)
     }
 }

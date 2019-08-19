@@ -17,26 +17,43 @@
 package fr.speekha.httpmocker.gson
 
 import com.google.gson.annotations.SerializedName
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.METHOD
+import fr.speekha.httpmocker.PARAMS
+import fr.speekha.httpmocker.PATH
+import fr.speekha.httpmocker.PORT
+import fr.speekha.httpmocker.PROTOCOL
 
 internal data class RequestDescriptor(
 
-    @SerializedName("exact-match")
+    @SerializedName(EXACT_MATCH)
     val exactMatch: Boolean? = null,
 
+    @SerializedName(PROTOCOL)
     val protocol: String? = null,
 
+    @SerializedName(METHOD)
     val method: String? = null,
 
+    @SerializedName(HOST)
     val host: String? = null,
 
+    @SerializedName(PORT)
     val port: Int? = null,
 
+    @SerializedName(PATH)
     val path: String? = null,
 
+    @SerializedName(HEADERS)
     val headers: HeaderAdapter.HeaderList? = HeaderAdapter.HeaderList(),
 
+    @SerializedName(PARAMS)
     val params: ParamsAdapter.ParamList = ParamsAdapter.ParamList(),
 
+    @SerializedName(BODY)
     val body: String? = null
 
 )

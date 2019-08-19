@@ -21,28 +21,36 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.BODY_FILE
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.DEFAULT_RESPONSE_CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.MEDIA_TYPE
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 internal data class ResponseDescriptor
 @JsonCreator constructor(
 
-    @JsonProperty("delay")
+    @JsonProperty(DELAY)
     val delay: Long = 0,
 
-    @JsonProperty("code")
-    val code: Int = 200,
+    @JsonProperty(CODE)
+    val code: Int = DEFAULT_RESPONSE_CODE,
 
-    @JsonProperty("media-type")
-    val mediaType: String = "text/plain",
+    @JsonProperty(MEDIA_TYPE)
+    val mediaType: String = DEFAULT_MEDIA_TYPE,
 
-    @JsonProperty("headers")
+    @JsonProperty(HEADERS)
     @JsonDeserialize(using = HeadersDeserializer::class)
     @JsonSerialize(using = HeadersSerializer::class)
     val headers: List<Header> = emptyList(),
 
-    @JsonProperty("body")
+    @JsonProperty(BODY)
     val body: String = "",
 
-    @JsonProperty("body-file")
+    @JsonProperty(BODY_FILE)
     val bodyFile: String? = null
 )
