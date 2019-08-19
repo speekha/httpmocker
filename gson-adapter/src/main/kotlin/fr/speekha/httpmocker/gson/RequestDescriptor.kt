@@ -55,5 +55,4 @@ internal data class RequestDescriptor(
 
     @SerializedName(BODY)
     val body: String? = null
-
 )
