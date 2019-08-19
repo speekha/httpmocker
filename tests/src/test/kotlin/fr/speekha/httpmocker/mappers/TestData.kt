@@ -76,13 +76,13 @@ internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     }
 
 internal fun getMinimalOutput() = listOf(
-    ("[{" +
+    "[{" +
             "\"request\":{" +
             "\"headers\":{},\"params\":{}" +
             "}," +
             "\"response\":{" +
             "\"delay\":0,\"code\":200,\"media-type\":\"text/plain\",\"headers\":{},\"body\":\"\"" +
-            "}}]")
+            "}}]"
 )
 
 internal fun testStream(expectedResult: List<String>, actual: String) {
