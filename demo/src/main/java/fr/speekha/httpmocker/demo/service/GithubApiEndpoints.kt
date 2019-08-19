@@ -21,7 +21,6 @@ import fr.speekha.httpmocker.demo.model.User
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-
 interface GithubApiEndpoints {
 
     @GET("orgs/{org}/repos?per_page=10")

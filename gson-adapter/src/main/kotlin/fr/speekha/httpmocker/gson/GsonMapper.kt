@@ -29,7 +29,6 @@ import fr.speekha.httpmocker.gson.Matcher as JsonMatcher
 import fr.speekha.httpmocker.gson.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.gson.ResponseDescriptor as JsonResponseDescriptor
 
-
 /**
  * A mapper using Gson to serialize/deserialize scenarios.
  */
