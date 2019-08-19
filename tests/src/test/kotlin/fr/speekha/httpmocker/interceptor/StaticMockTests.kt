@@ -169,10 +169,10 @@ class StaticMockTests : TestWithServer() {
             val result2 = "simple body"
 
             interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks {
-                    if (it.url().toString().contains("dynamic"))
-                        ResponseDescriptor(body = result1)
-                    else null
+                .useDynamicMocks { request ->
+                    ResponseDescriptor(body = result1).takeIf {
+                        request.url().toString().contains("dynamic")
+                    }
                 }
                 .decodeScenarioPathWith(filingPolicy)
                 .loadFileWith(loadingLambda)
@@ -532,8 +532,10 @@ class StaticMockTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When a request with exact match is answered, " +
-                "then match should not allow extra headers or parameters")
+        @DisplayName(
+            "When a request with exact match is answered, " +
+                    "then match should not allow extra headers or parameters"
+        )
         fun `should select response based on exact matches`(title: String, mapper: Mapper) {
             setUpInterceptor(ENABLED, mapper)
 
@@ -575,8 +577,10 @@ class StaticMockTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When several interceptors are stacked, " +
-                "then each should delegate to the next one requests it can't answer")
+        @DisplayName(
+            "When several interceptors are stacked, " +
+                    "then each should delegate to the next one requests it can't answer"
+        )
         fun `should allow to stack several interceptors thanks to mixed mode`(
             title: String,
             mapper: Mapper
