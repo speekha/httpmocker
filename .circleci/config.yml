@@ -215,7 +215,7 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew mocker:check --stacktrace
+          command: ./gradlew detekt ktlintCheck lint --stacktrace
       - store_artifacts:
           path: mocker/build/reports
           destination: reports
