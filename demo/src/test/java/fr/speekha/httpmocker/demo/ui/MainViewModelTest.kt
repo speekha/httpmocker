@@ -92,7 +92,7 @@ class MainViewModelTest : ViewModelTest() {
         viewModel.getData().observeForever(observer)
         coEvery { mockService.listRepositoriesForOrganisation(org) } returns
                 listOf(Repo(id, repo, topContributor = contributor))
-        coEvery { mockService.listContributorsForRepository(org, repo) } throws IOException()
+        coEvery { mockService.listContributorsForRepository(org, repo) } throws IOException("Test exception")
 
         viewModel.callService()
 

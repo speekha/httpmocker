@@ -124,6 +124,7 @@ class RecordTests : TestWithServer() {
             }
         }
 
+        @Suppress("unused")
         fun data(): Stream<Arguments> = mappers()
     }
 

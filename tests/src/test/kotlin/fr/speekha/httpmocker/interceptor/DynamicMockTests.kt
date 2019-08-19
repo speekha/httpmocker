@@ -135,10 +135,10 @@ class DynamicMockTests : TestWithServer() {
             val result2 = "Second mock"
 
             interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks {
-                    if (it.url().toString().contains("1"))
-                        ResponseDescriptor(body = result1)
-                    else null
+                .useDynamicMocks { request ->
+                    ResponseDescriptor(body = result1).takeIf {
+                        request.url().toString().contains("1")
+                    }
                 }.useDynamicMocks {
                     ResponseDescriptor(body = result2)
                 }
