@@ -30,7 +30,8 @@ class SingleFolderPolicyTest {
     inner class TestPolicy {
 
         @Test
-        @DisplayName("When processing a URL, then resulting file should be in the predefined folder and filename should match URL path")
+        @DisplayName("When processing a URL, then resulting file should be " +
+                "in the predefined folder and filename should match URL path")
         fun `should store configuration files in a single folder`() {
             val policy: FilingPolicy = SingleFolderPolicy("folder")
             val request = buildRequest(

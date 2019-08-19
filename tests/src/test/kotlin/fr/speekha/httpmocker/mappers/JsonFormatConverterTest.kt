@@ -56,7 +56,12 @@ class JsonFormatConverterTest {
             .stream()
 
         private val testTitles =
-            listOf("is a minimal JSON", "contains an empty header list", "contains one header", "contains duplicate headers")
+            listOf(
+                "is a minimal JSON",
+                "contains an empty header list",
+                "contains one header",
+                "contains duplicate headers"
+            )
 
         private val commonFormat = listOf(
             """

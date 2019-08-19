@@ -218,7 +218,8 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a request or response with a null body, then body should be empty in scenario files")
+        @DisplayName("When recording a request or response with a null body, " +
+                "then body should be empty in scenario files")
         fun `should handle null request and response bodies when recording`(
             title: String,
             mapper: Mapper
