@@ -229,7 +229,13 @@ Here is an example of scenario in JSON form:
  a nearby file name "body_content.txt". In any other cases, the request will be answered with the second response:
  a HTTP 200 response with "headerValue2" as header and a simple string "No body here" as body.
 
-# Publications
+## Author
+
+[![Follow me](https://avatars.githubusercontent.com/u/17544216?s=60)](https://twitter.com/speekha)
+
+[![Follow me](https://img.shields.io/twitter/follow/speekha?style=social)](https://twitter.com/speekha)
+
+## Publications
 
 [Introductory blog post on Kt. Academy](https://blog.kotlin-academy.com/httpmock-my-first-oss-library-5bae8adbccf4)
 
