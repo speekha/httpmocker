@@ -78,6 +78,7 @@ private constructor(
 
     private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     private fun mockResponse(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
@@ -159,7 +160,8 @@ private constructor(
         HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
 
     /**
-     * Defines the interceptor's state and how it is supposed to respond to requests (intercept them, let them through or record them)
+     * Defines the interceptor's state and how it is supposed to respond to requests (intercept
+     * them, let them through or record them)
      */
     enum class Mode(private val status: String) {
         /** lets every request through without interception. */
@@ -317,8 +319,9 @@ private constructor(
 }
 
 /**
- * A loading function that takes a path as input and returns an InputStream to read from. Typical implementations can use
- * FileInputStream instantiations, Classloader.getResourceAsStream call or use of the AssetManager on Android.
+ * A loading function that takes a path as input and returns an InputStream to read from. Typical
+ * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
+ * use of the AssetManager on Android.
  */
 typealias LoadFile = (String) -> InputStream?
 
