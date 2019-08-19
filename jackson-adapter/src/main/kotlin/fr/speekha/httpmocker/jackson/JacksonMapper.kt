@@ -41,19 +41,21 @@ class JacksonMapper : Mapper {
         jacksonObjectMapper()
             .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
 
+        private val matcherTypeRef = jacksonTypeRef<List<JsonMatcher>>()
+
     override fun deserialize(payload: String): List<Matcher> =
-        mapper.readValue<List<JsonMatcher>>(payload, jacksonTypeRef<List<JsonMatcher>>())
-            .map { it.toModel() }
+        mapper.readValue<List<JsonMatcher>>(payload, matcherTypeRef).toModel()
 
     override fun serialize(matchers: List<Matcher>): String =
         mapper.writeValueAsString(matchers.map { it.fromModel() })
 
     override fun readMatches(stream: InputStream): List<Matcher> =
-        mapper.readValue<List<JsonMatcher>>(stream, jacksonTypeRef<List<JsonMatcher>>())
-            .map { it.toModel() }
+        mapper.readValue<List<JsonMatcher>>(stream, matcherTypeRef).toModel()
 
     override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) =
         mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, matchers.map { it.fromModel() })
+
+    private fun List<JsonMatcher>.toModel() = map { it.toModel() }
 }
 
 private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.fromModel())
