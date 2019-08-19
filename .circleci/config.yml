@@ -1,4 +1,15 @@
 version: 2.1
+
+references:
+  container_config: &container_config
+    docker:
+      - image: circleci/android:api-29
+
+    working_directory: ~/data
+
+    environment:
+      JVM_OPTS: -Xmx3g
+
 commands:
   build_module:
     description: "Builds a specific module"
@@ -59,13 +70,8 @@ commands:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
 
 jobs:
-  prepare_dependencies:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
-      #TERM: dumb
-
+  build_core:
+    <<: *container_config
     steps:
       - restore_cache:
           keys:
@@ -95,59 +101,40 @@ jobs:
           key: source-{{ .Branch }}-{{ .Revision }}
           paths:
             - "."
-  build_core:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
-    steps:
-      - build_module:
-          module: "mocker"
+      - run:
+          name: Build
+          command: ./gradlew mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
+      - save_cache:
+          key: build-mocker-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - mocker/build
   build_jackson:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - build_module:
           module: "jackson-adapter"
   build_gson:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - build_module:
           module: "gson-adapter"
   build_moshi:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - build_module:
           module: "moshi-adapter"
   build_custom:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - build_module:
           module: "custom-adapter"
   build_kotlinx:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - build_module:
           module: "kotlinx-adapter"
   build_demo:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - restore_cache:
           keys:
@@ -174,10 +161,7 @@ jobs:
           path: demo/build/outputs/apk/
           destination: apks
   store_artifacts:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - restore_all_caches
       - run:
@@ -187,10 +171,7 @@ jobs:
           path: build/libs
           destination: libs
   test:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - restore_all_caches
       - run:
@@ -207,10 +188,7 @@ jobs:
           paths:
             - "."
   quality:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
       - restore_all_caches
       - run:
@@ -227,8 +205,7 @@ jobs:
           paths:
             - "."
   publish_snapshot:
-    docker:
-      - image: circleci/android:api-29
+    <<: *container_config
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -238,8 +215,7 @@ jobs:
           name: Publish
           command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
   publish_release:
-    docker:
-      - image: circleci/android:api-29
+    <<: *container_config
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -253,10 +229,7 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - prepare_dependencies
       - build_core:
-          requires:
-            - prepare_dependencies
       - build_jackson:
           requires:
             - build_core
