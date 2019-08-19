@@ -15,32 +15,7 @@
  */
 
 apply plugin: 'kotlin'
-apply plugin: 'jacoco'
 
-jacoco {
-    toolVersion = "0.8.4"
-    reportsDir = file("$buildDir/reports")
-}
-
-jacocoTestReport {
-    group = "Reporting"
-    description = "Generate Jacoco coverage report"
-    classDirectories = fileTree(
-            dir: "$buildDir/classes/kotlin/main"
-    )
-    def coverageSourceDirs = [
-            "src/test/kotlin"
-    ]
-    additionalSourceDirs = files(coverageSourceDirs)
-    sourceDirectories = files(coverageSourceDirs)
-    executionData = files("$buildDir/jacoco/test.exec")
-    reports {
-        xml.enabled = true
-        html.enabled = true
-        csv.enabled = true
-    }
-
-}
 
 test {
     options {
