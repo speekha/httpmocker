@@ -37,14 +37,6 @@ internal class ParamAdapter {
     }
 
     @ToJson
-    fun paramToJson(writer: JsonWriter, params: Map<String, String?>) {
-        writer.beginObject()
-        writer.serializeNulls = true
-        params.forEach {
-            writer.name(it.key)
-            writer.value(it.value)
-        }
-        writer.serializeNulls = false
-        writer.endObject()
-    }
+    fun paramToJson(writer: JsonWriter, params: Map<String, String?>) =
+        writer.writeList(params.entries.map { it.key to it.value })
 }

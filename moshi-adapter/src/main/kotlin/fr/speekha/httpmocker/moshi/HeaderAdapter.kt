@@ -38,14 +38,6 @@ internal class HeaderAdapter {
     }
 
     @ToJson
-    fun headerToJson(writer: JsonWriter, headers: List<JsonHeader>) {
-        writer.beginObject()
-        writer.serializeNulls = true
-        headers.forEach {
-            writer.name(it.name)
-            writer.value(it.value)
-        }
-        writer.serializeNulls = false
-        writer.endObject()
-    }
+    fun headerToJson(writer: JsonWriter, headers: List<JsonHeader>) =
+        writer.writeList(headers.map { it.name to it.value })
 }
