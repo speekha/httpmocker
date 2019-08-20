@@ -101,19 +101,6 @@ private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
     jsonObject[BODY]?.asNullableLiteral()
 )
 
-//private fun JsonElement?.toResponse(): ResponseDescriptor = this?.run {
-//    var result = ResponseDescriptor()
-//    jsonObject[DELAY]?.let { result = result.copy(delay = it.primitive.long) }
-//    jsonObject[CODE]?.let { result = result.copy(code = it.primitive.int) }
-//    jsonObject[MEDIA_TYPE]?.let { result = result.copy(mediaType = it.asLiteral()) }
-//    jsonObject[HEADERS]?.let { result = result.copy(headers = jsonObject[HEADERS].toHeaders()) }
-//    jsonObject[BODY]?.let { result = result.copy(body = it.asLiteral()) }
-//    jsonObject[BODY_FILE]?.let { result = result.copy(bodyFile = it.asNullableLiteral()) }
-//println("Result: $result")
-//    result
-//} ?: ResponseDescriptor()
-
-
 private fun JsonElement?.toResponse(): ResponseDescriptor = ResponseDescriptor()
     .update(this, DELAY) { copy(delay = it.primitive.long) }
     .update(this, CODE) { copy(code = it.primitive.int) }
@@ -127,7 +114,7 @@ private fun ResponseDescriptor.update(
     field: String,
     updateObject: ResponseDescriptor.(JsonElement) -> ResponseDescriptor
 ): ResponseDescriptor =
-    jsonElement?.jsonObject?.get(field)?.jsonObject?.let { updateObject(it) } ?: this
+    jsonElement?.jsonObject?.get(field)?.let { updateObject(it) } ?: this
 
 private fun JsonElement?.toParams(): Map<String, String?> =
     this?.jsonObject?.mapValues { it.value.asNullableLiteral() } ?: mapOf()
