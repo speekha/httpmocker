@@ -16,22 +16,35 @@
 
 package fr.speekha.httpmocker.gson
 
-import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import fr.speekha.httpmocker.gson.Header as JsonHeader
 
-internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
+internal fun JsonReader.readStringOrNull(): String? = if (peek() == JsonToken.NULL) {
+    nextNull()
+    null
+} else {
+    nextString()
+}
 
-    internal class HeaderList(list: List<JsonHeader> = emptyList()) : ArrayList<JsonHeader>(list)
-
-    override fun write(writer: JsonWriter?, headers: HeaderList?) {
-        writer?.writeList(headers) { it.name to it.value }
+internal fun <T> JsonReader.readList(list: MutableList<T>, initObject: (String, String?) -> T) {
+    beginObject()
+    while (hasNext()) {
+        list += initObject(nextName(), readStringOrNull())
     }
+    endObject()
+}
 
-    override fun read(reader: JsonReader?): HeaderList = HeaderList().also {
-        reader?.run {
-            readList(it) { name, value -> JsonHeader(name, value) }
-        }
+internal fun <T> JsonWriter.writeList(
+    params: List<T>?,
+    transform: (T) -> Pair<String, String?>
+) {
+    beginObject()
+    serializeNulls = true
+    params?.map(transform)?.forEach { (name, value) ->
+        name(name)
+        value(value)
     }
+    serializeNulls = false
+    endObject()
 }

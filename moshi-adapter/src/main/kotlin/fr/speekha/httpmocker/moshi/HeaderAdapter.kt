@@ -25,17 +25,12 @@ import fr.speekha.httpmocker.moshi.Header as JsonHeader
 internal class HeaderAdapter {
 
     @FromJson
-    fun headerFromJson(reader: JsonReader): List<JsonHeader> {
-        val list = mutableListOf<JsonHeader>()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            val name = reader.nextName()
-            val value = reader.readStringOrNull()
-            list += JsonHeader(name, value)
+    fun headerFromJson(reader: JsonReader): List<JsonHeader> =
+        reader.readList(mutableListOf()) { name, value ->
+            add(
+                fr.speekha.httpmocker.moshi.Header(name, value)
+            )
         }
-        reader.endObject()
-        return list
-    }
 
     @ToJson
     fun headerToJson(writer: JsonWriter, headers: List<JsonHeader>) =
