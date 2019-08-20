@@ -60,30 +60,24 @@ class JsonFormatConverter {
     /**
      * Converts Kotlinx compatible JSON to common JSON format.
      */
-    fun compact(json: String): String = StringBuilder().apply {
-        convertJsonBlock(json,
-            outputHeaderPattern
-        ) { json, matcher, position ->
+    fun compact(input: String): String =
+        convertJsonBlock(input, outputHeaderPattern) { json, matcher, position ->
             exportHeaderBlock(json, matcher, position)
         }
-    }.toString()
 
     /**
      * Converts common format JSON to Kotlinx compatible one.
      */
-    fun expand(json: String): String = StringBuilder().apply {
-        convertJsonBlock(json,
-            inputHeaderPattern
-        ) { json, matcher, position ->
+    fun expand(input: String): String =
+        convertJsonBlock(input, inputHeaderPattern) { json, matcher, position ->
             importHeaderBlock(json, matcher, position)
         }
-    }.toString()
 
-    private fun StringBuilder.convertJsonBlock(
+    private fun convertJsonBlock(
         json: String,
         pattern: Pattern,
-        transform: (json: String, matcher: Matcher, position: Int) -> Unit
-    ) {
+        transform: StringBuilder.(json: String, matcher: Matcher, position: Int) -> Unit
+    ) = StringBuilder().apply {
         val matcher = pattern.matcher(json)
         var endPosition = 0
         while (matcher.find()) {
@@ -91,7 +85,7 @@ class JsonFormatConverter {
             endPosition = matcher.end()
         }
         append(json.substring(endPosition until json.length))
-    }
+    }.toString()
 
     private fun StringBuilder.exportHeaderBlock(json: String, matcher: Matcher, startAt: Int) {
         val openingBracket = json.indexOf("[", matcher.start())
