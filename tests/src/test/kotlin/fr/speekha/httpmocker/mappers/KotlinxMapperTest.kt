@@ -16,10 +16,10 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+import fr.speekha.httpmocker.JsonFormatConverter
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Kotlinx serialization Adapter")
 class KotlinxMapperTest :
-    AbstractJsonMapperTest(KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export))
+    AbstractJsonMapperTest(KotlinxMapper(JsonFormatConverter()::expand, JsonFormatConverter()::compact))

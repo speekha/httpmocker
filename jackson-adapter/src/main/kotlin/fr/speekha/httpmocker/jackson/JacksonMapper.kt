@@ -25,8 +25,6 @@ import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import java.io.InputStream
-import java.io.OutputStream
 import fr.speekha.httpmocker.jackson.Header as JsonHeader
 import fr.speekha.httpmocker.jackson.Matcher as JsonMatcher
 import fr.speekha.httpmocker.jackson.RequestDescriptor as JsonRequestDescriptor
@@ -46,15 +44,7 @@ class JacksonMapper : Mapper {
         mapper.readValue<List<JsonMatcher>>(payload, matcherTypeRef).toModel()
 
     override fun serialize(matchers: List<Matcher>): String =
-        mapper.writeValueAsString(matchers.map { it.fromModel() })
-
-    override fun readMatches(stream: InputStream): List<Matcher> =
-        mapper.readValue<List<JsonMatcher>>(stream, matcherTypeRef).toModel()
-
-    override fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) =
-        mapper.writerWithDefaultPrettyPrinter().writeValue(
-            outputStream,
-            matchers.map { it.fromModel() })
+        mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matchers.map { it.fromModel() })
 
     private fun List<JsonMatcher>.toModel() = map { it.toModel() }
 }

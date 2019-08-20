@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+import fr.speekha.httpmocker.JsonFormatConverter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest
@@ -31,14 +31,14 @@ class JsonFormatConverterTest {
     @MethodSource("dataImport")
     @DisplayName("Given a proper JSON stream to read")
     fun readConversionTest(title: String, input: String, output: String) {
-        assertEquals(output, JsonFormatConverter().import(input))
+        assertEquals(output, JsonFormatConverter().expand(input))
     }
 
     @ParameterizedTest(name = "When input {0}, then output should be properly formatted")
     @MethodSource("dataExport")
     @DisplayName("Given a proper JSON stream to write")
     fun writeConversionTest(title: String, input: String, output: String) {
-        assertEquals(output, JsonFormatConverter().export(input))
+        assertEquals(output, JsonFormatConverter().compact(input))
     }
 
     companion object {

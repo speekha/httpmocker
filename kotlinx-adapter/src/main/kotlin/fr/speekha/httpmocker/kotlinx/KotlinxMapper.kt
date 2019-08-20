@@ -49,9 +49,9 @@ import fr.speekha.httpmocker.model.Header as ModelHeader
 @UnstableDefault
 /**
  * A mapper using Kotlinx serialization to serialize/deserialize scenarios.
- * Common JSON format available with other mappers is not compatible with Kotlinx Serialization,
+ * The common JSON format available with other mappers is not compatible with Kotlinx Serialization,
  * so this mapper accepts transformation functions to handle the conversion between the common
- * format and the one supported by Kotlinx Serialization.
+ * compact format and the one supported by Kotlinx Serialization.
  * @see fr.speekha.httpmocker.kotlinx.JsonFormatConverter
  * @param formatInput transformation function to apply when reading JSON
  * @param formatOutput transformation function to apply when writing JSON
