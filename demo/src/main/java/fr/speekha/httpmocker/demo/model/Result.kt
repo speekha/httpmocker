@@ -16,56 +16,29 @@
 
 package fr.speekha.httpmocker.demo.model
 
-import fr.speekha.httpmocker.demo.model.Result.Companion.failure
-import fr.speekha.httpmocker.demo.model.Result.Companion.success
-
-class Result<T> private constructor(private val result: Any?) {
-
-    val isFailure: Boolean get() = result is Failure
-    val isSuccess: Boolean get() = result !is Failure
-
-    fun get(): T =
-        if (result is Failure) throw result.exception else result as? T ?: error(CAST_ERROR)
-
-    fun getOrNull(): T? = result as? T
-
-    inline fun getOrElse(default: () -> T): T = if (isFailure) default() else value
-
-    fun exceptionOrNull(): Throwable? = (result as? Failure)?.exception
-
-    companion object {
-        fun <T> success(value: T): Result<T> = Result(value)
-        fun <T> failure(exception: Throwable) = Result<T>(Failure(exception))
-    }
-
-    @PublishedApi
-    internal val exception: Throwable
-        get() = (result as? Failure)?.exception ?: error(CAST_ERROR)
-
-    @PublishedApi
-    internal val value: T
-        get() {
-            return result as? T ?: error(CAST_ERROR)
-        }
-
-    private class Failure(@JvmField val exception: Throwable)
+sealed class Result<T : Any> {
+    abstract fun getOrNull(): T?
 }
 
-private const val CAST_ERROR = "Unexpected value"
+class Success<T : Any>(val value: T) : Result<T>() {
+    override fun getOrNull(): T? = value
+}
+
+class Failure<T : Any>(val error: Throwable) : Result<T>() {
+    override fun getOrNull(): T? = null
+}
 
 @SuppressWarnings("TooGenericExceptionCaught")
-inline fun <T> resultOf(block: () -> T): Result<T> =
-    try {
-        success(block())
-    } catch (e: Throwable) {
-        failure(e)
-    }
-
-inline fun <T> Result<T>.onFailure(block: (Throwable) -> Unit): Result<T> = also {
-    if (isFailure) block(exception)
+inline fun <T : Any> resultOf(block: () -> T): Result<T> = try {
+    Success(block())
+} catch (e: Throwable) {
+    Failure(e)
 }
 
-inline fun <T> Result<T>.onSuccess(block: (T) -> Unit): Result<T> {
-    if (isSuccess) block(value)
-    return this
+inline fun <T : Any> Result<T>.onFailure(block: (Throwable) -> Unit): Result<T> = also {
+    if (it is Failure) block(it.error)
+}
+
+inline fun <T : Any> Result<T>.onSuccess(block: (T?) -> Unit): Result<T> = also {
+    if (it is Success) block(it.value)
 }
