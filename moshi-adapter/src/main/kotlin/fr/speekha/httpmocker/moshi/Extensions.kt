@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 
 fun JsonReader.readStringOrNull(): String? {
     return if (peek() != JsonReader.Token.NULL) {
@@ -25,4 +26,16 @@ fun JsonReader.readStringOrNull(): String? {
         nextNull<Unit>()
         null
     }
+}
+
+fun JsonWriter.writeList(params: Iterable<Pair<String, String?>>) {
+    beginObject()
+    serializeNulls = true
+    params.forEach {
+        val (name, value) = it
+        name(name)
+        value(value)
+    }
+    serializeNulls = false
+    endObject()
 }

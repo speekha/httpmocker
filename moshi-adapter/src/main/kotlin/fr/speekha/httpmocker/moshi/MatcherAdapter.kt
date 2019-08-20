@@ -36,49 +36,31 @@ internal class MatcherAdapter {
     fun matcherToJson(matcher: Matcher): JsonMatcher =
         JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
 
-    private fun requestFromJson(request: JsonRequestDescriptor) =
+    private fun requestFromJson(request: JsonRequestDescriptor) = with(request) {
         RequestDescriptor(
-            request.exactMatch ?: false,
-            request.protocol,
-            request.method,
-            request.host,
-            request.port,
-            request.path,
-            request.headers.map { headerFromJson(it) },
-            request.params,
-            request.body
+            exactMatch ?: false, protocol, method, host, port, path,
+            headers.map { headerFromJson(it) }, params, body
         )
+    }
 
-    private fun requestToJson(request: RequestDescriptor) =
+    private fun requestToJson(request: RequestDescriptor) = with(request) {
         JsonRequestDescriptor(
-            request.exactMatch.takeIf { it },
-            request.protocol,
-            request.method,
-            request.host,
-            request.port,
-            request.path,
-            request.headers.map { headerToJson(it) },
-            request.params,
-            request.body
+            exactMatch.takeIf { it }, protocol, method, host, port, path,
+            headers.map { headerToJson(it) }, params, body
         )
+    }
 
-    private fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
-        response.delay,
-        response.code,
-        response.mediaType,
-        response.headers.map { headerFromJson(it) },
-        response.body,
-        response.bodyFile
-    )
+    private fun responseFromJson(response: JsonResponseDescriptor) = with(response) {
+        ResponseDescriptor(
+            delay, code, mediaType, headers.map { headerFromJson(it) }, body, bodyFile
+        )
+    }
 
-    private fun responseToJson(response: ResponseDescriptor) = JsonResponseDescriptor(
-        response.delay,
-        response.code,
-        response.mediaType,
-        response.headers.map { headerToJson(it) },
-        response.body,
-        response.bodyFile
-    )
+    private fun responseToJson(response: ResponseDescriptor) = with(response) {
+        JsonResponseDescriptor(
+            delay, code, mediaType, headers.map { headerToJson(it) }, body, bodyFile
+        )
+    }
 
     private fun headerFromJson(header: JsonHeader): Header = Header(header.name, header.value)
 
