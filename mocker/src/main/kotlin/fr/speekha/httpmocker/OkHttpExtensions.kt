@@ -68,7 +68,7 @@ internal fun Response.toDescriptor(duplicates: Int, fileExtension: String?) = Re
     headers = headers().parseHeaders { headers(it) }
 )
 
-private fun Headers.parseHeaders(getHeaders:(String) -> List<String>) =
+private fun Headers.parseHeaders(getHeaders: (String) -> List<String>) =
     names().flatMap { name -> getHeaders(name).map { Header(name, it) } }
 
 private fun Request.parseQueryParameters() =

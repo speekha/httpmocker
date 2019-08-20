@@ -52,7 +52,7 @@ import fr.speekha.httpmocker.model.Header as ModelHeader
  * The common JSON format available with other mappers is not compatible with Kotlinx Serialization,
  * so this mapper accepts transformation functions to handle the conversion between the common
  * compact format and the one supported by Kotlinx Serialization.
- * @see fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+ * @see fr.speekha.httpmocker.JsonFormatConverter
  * @param formatInput transformation function to apply when reading JSON
  * @param formatOutput transformation function to apply when writing JSON
  */
@@ -84,45 +84,47 @@ class KotlinxMapper(
     )
 }
 
-private fun JsonElement.toMatcher(): Matcher =
-    Matcher(jsonObject[REQUEST].toRequest(), jsonObject[RESPONSE].toResponse())
+private fun JsonElement.toMatcher(): Matcher = Matcher(
+    jsonObject[REQUEST]?.toRequest() ?: RequestDescriptor(),
+    jsonObject[RESPONSE].toResponse()
+)
 
-private fun JsonElement?.toRequest(): RequestDescriptor = this?.run {
-    RequestDescriptor(
-        jsonObject[EXACT_MATCH]?.primitive?.boolean ?: false,
-        jsonObject[PROTOCOL]?.asNullableLiteral(),
-        jsonObject[METHOD]?.asNullableLiteral(),
-        jsonObject[HOST]?.asNullableLiteral(),
-        jsonObject[PORT]?.primitive?.int,
-        jsonObject[PATH]?.asNullableLiteral(),
-        jsonObject[HEADERS].toHeaders(),
-        jsonObject[PARAMS].toParams(),
-        jsonObject[BODY]?.asNullableLiteral()
+private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
+    jsonObject[EXACT_MATCH]?.primitive?.boolean ?: false,
+    jsonObject[PROTOCOL]?.asNullableLiteral(),
+    jsonObject[METHOD]?.asNullableLiteral(),
+    jsonObject[HOST]?.asNullableLiteral(),
+    jsonObject[PORT]?.primitive?.int,
+    jsonObject[PATH]?.asNullableLiteral(),
+    jsonObject[HEADERS].toHeaders(),
+    jsonObject[PARAMS].toParams(),
+    jsonObject[BODY]?.asNullableLiteral()
+)
+
+private fun JsonElement?.toResponse(): ResponseDescriptor = ResponseDescriptor()
+    .update(this, DELAY) { copy(delay = it.primitive.long) }
+    .update(this, CODE) { copy(code = it.primitive.int) }
+    .update(this, MEDIA_TYPE) { copy(mediaType = it.asLiteral()) }
+    .update(this, HEADERS) { copy(headers = it.toHeaders()) }
+    .update(this, BODY) { copy(body = it.asLiteral()) }
+    .update(this, BODY_FILE) { copy(bodyFile = it.asNullableLiteral()) }
+
+private fun ResponseDescriptor.update(
+    jsonElement: JsonElement?,
+    field: String,
+    updateObject: ResponseDescriptor.(JsonElement) -> ResponseDescriptor
+): ResponseDescriptor = also {
+    jsonElement?.jsonObject?.get(field)?.let { jsonObject -> updateObject(jsonObject) }
+}
+
+private fun JsonElement?.toParams(): Map<String, String?> =
+    this?.jsonObject?.mapValues { it.value.asNullableLiteral() } ?: mapOf()
+
+private fun JsonElement?.toHeaders(): List<ModelHeader> = this?.jsonArray?.map {
+    ModelHeader(
+        it.jsonObject[NAME].asNullableLiteral() ?: error("Incorrect header name"),
+        it.jsonObject[VALUE].asNullableLiteral()
     )
-} ?: RequestDescriptor()
-
-private fun JsonElement?.toResponse(): ResponseDescriptor = this?.run {
-    var result = ResponseDescriptor()
-    jsonObject[DELAY]?.let { result = result.copy(delay = it.primitive.long) }
-    jsonObject[CODE]?.let { result = result.copy(code = it.primitive.int) }
-    jsonObject[MEDIA_TYPE]?.let { result = result.copy(mediaType = it.asLiteral()) }
-    jsonObject[HEADERS]?.let { result = result.copy(headers = jsonObject[HEADERS].toHeaders()) }
-    jsonObject[BODY]?.let { result = result.copy(body = it.asLiteral()) }
-    jsonObject[BODY_FILE]?.let { result = result.copy(bodyFile = it.asNullableLiteral()) }
-    result
-} ?: ResponseDescriptor()
-
-private fun JsonElement?.toParams(): Map<String, String?> = this?.run {
-    jsonObject.mapValues { it.value.asNullableLiteral() }
-} ?: mapOf()
-
-private fun JsonElement?.toHeaders(): List<ModelHeader> = this?.run {
-    jsonArray.map {
-        ModelHeader(
-            it.jsonObject[NAME].asNullableLiteral() ?: error("Incorrect header name"),
-            it.jsonObject[VALUE].asNullableLiteral()
-        )
-    }
 } ?: listOf()
 
 private fun JsonElement?.asLiteral(): String = (this as? JsonLiteral)?.body?.toString() ?: ""
