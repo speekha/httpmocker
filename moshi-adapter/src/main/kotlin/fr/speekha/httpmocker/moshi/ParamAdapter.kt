@@ -24,17 +24,8 @@ import com.squareup.moshi.ToJson
 internal class ParamAdapter {
 
     @FromJson
-    fun paramFromJson(reader: JsonReader): Map<String, String?> {
-        val map = mutableMapOf<String, String?>()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            val name = reader.nextName()
-            val value = reader.readStringOrNull()
-            map += name to value
-        }
-        reader.endObject()
-        return map
-    }
+    fun paramFromJson(reader: JsonReader): Map<String, String?> =
+        reader.readList(mutableMapOf()) { name, value -> put(name, value) }
 
     @ToJson
     fun paramToJson(writer: JsonWriter, params: Map<String, String?>) =

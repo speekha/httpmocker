@@ -19,23 +19,30 @@ package fr.speekha.httpmocker.moshi
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 
-fun JsonReader.readStringOrNull(): String? {
-    return if (peek() != JsonReader.Token.NULL) {
-        nextString()
-    } else {
-        nextNull<Unit>()
-        null
-    }
-}
-
-fun JsonWriter.writeList(params: Iterable<Pair<String, String?>>) {
+internal fun JsonWriter.writeList(list: Iterable<Pair<String, String?>>) {
     beginObject()
     serializeNulls = true
-    params.forEach {
+    list.forEach {
         val (name, value) = it
         name(name)
         value(value)
     }
     serializeNulls = false
     endObject()
+}
+
+internal fun <T> JsonReader.readList(list: T, addObject: T.(String, String?) -> Unit): T {
+    beginObject()
+    while (hasNext()) {
+        list.addObject(nextName(), readStringOrNull())
+    }
+    endObject()
+    return list
+}
+
+internal fun JsonReader.readStringOrNull(): String? = if (peek() != JsonReader.Token.NULL) {
+    nextString()
+} else {
+    nextNull<Unit>()
+    null
 }

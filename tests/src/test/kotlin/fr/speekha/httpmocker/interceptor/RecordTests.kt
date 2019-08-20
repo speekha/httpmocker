@@ -44,6 +44,7 @@ import java.nio.file.Path
 import java.util.Collections
 import java.util.stream.Stream
 
+@Suppress("UNUSED_PARAMETER")
 class RecordTests : TestWithServer() {
 
     @Nested
