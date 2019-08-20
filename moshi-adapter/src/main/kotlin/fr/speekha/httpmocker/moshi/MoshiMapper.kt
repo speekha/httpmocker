@@ -27,20 +27,18 @@ import fr.speekha.httpmocker.model.Matcher
  */
 class MoshiMapper : Mapper {
 
-    private val adapter: JsonAdapter<List<Matcher>>
+    private val moshi = Moshi.Builder()
+        .add(HeaderAdapter())
+        .add(MatcherAdapter())
+        .add(ParamAdapter())
+        .build()
 
-    init {
-        val moshi = Moshi.Builder()
-            .add(HeaderAdapter())
-            .add(MatcherAdapter())
-            .add(ParamAdapter())
-            .build()
-        adapter = moshi.adapter(
-            newParameterizedType(List::class.java, Matcher::class.java)
-        )
-    }
+    private val adapter: JsonAdapter<List<Matcher>> = moshi.adapter(
+        newParameterizedType(List::class.java, Matcher::class.java)
+    )
 
-    override fun deserialize(payload: String): List<Matcher> = adapter.fromJson(payload) ?: emptyList()
+    override fun deserialize(payload: String): List<Matcher> =
+        adapter.fromJson(payload) ?: emptyList()
 
     override fun serialize(matchers: List<Matcher>): String = adapter.toJson(matchers)
 }

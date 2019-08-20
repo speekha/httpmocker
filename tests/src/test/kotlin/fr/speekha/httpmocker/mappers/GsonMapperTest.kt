@@ -16,8 +16,11 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("GSON Adapter")
-class GsonMapperTest : AbstractJsonMapperTest(GsonMapper())
+class GsonMapperTest : AbstractJsonMapperTest() {
+    override val mapper: Mapper = GsonMapper()
+}

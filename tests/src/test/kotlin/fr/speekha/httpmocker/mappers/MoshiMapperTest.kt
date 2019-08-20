@@ -16,8 +16,11 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Moshi Adapter")
-class MoshiMapperTest : AbstractJsonMapperTest(MoshiMapper())
+class MoshiMapperTest : AbstractJsonMapperTest() {
+    override val mapper: Mapper = MoshiMapper()
+}

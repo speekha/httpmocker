@@ -26,7 +26,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-abstract class AbstractJsonMapperTest(val mapper: Mapper) {
+abstract class AbstractJsonMapperTest {
+
+    abstract val mapper: Mapper
 
     @Nested
     @DisplayName("Given a JSON stream to parse")

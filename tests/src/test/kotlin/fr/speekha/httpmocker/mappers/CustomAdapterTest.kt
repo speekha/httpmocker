@@ -16,8 +16,11 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.custom.CustomMapper
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Custom Adapter")
-class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper())
+class CustomAdapterTest : AbstractJsonMapperTest() {
+    override val mapper: Mapper = CustomMapper()
+}
