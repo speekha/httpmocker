@@ -91,13 +91,15 @@ implementation "fr.speekha.httpmocker:mocker:1.1.6"
 
 * HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.2.
 * It also depends on the SLF4J API for logging.
-* JSON parsers depend on their respective external libraries: Jackson 2.9.9, Gson 2.8.5 or Moshi 1.8.0
+* JSON parsers depend on their respective external libraries: Jackson 2.9.9, Gson 2.8.5, Moshi 
+1.8.0 or KotlinX serialization 0.11.0.
 
 ### Proguard rules
 
-Since Jackson and Gson use some type of introspection or annotation processing to parse JSON streams, it 
-is recommended to keep the mapping classes unobfuscated. You can refer to the 
-[proguard-rules.pro](demo/proguard-rules.pro) file included in the demo app for an example of required rules.
+Since Jackson, Gson or Kotlinx serialization use some type of introspection or annotation 
+processing to parse JSON streams, it is recommended to keep the mapping classes unobfuscated. 
+You can refer to the [proguard-rules.pro](demo/proguard-rules.pro) file included in the demo app 
+for an example of required rules.
 
 The custom and moshi parsers are immune to obfuscation because they do not use any introspection.
 
