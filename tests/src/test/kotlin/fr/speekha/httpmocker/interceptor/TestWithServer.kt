@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.interceptor
 
+import fr.speekha.httpmocker.JsonFormatConverter
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.readAsString
@@ -125,7 +125,7 @@ open class TestWithServer {
             Arguments.of("Custom mapper", CustomMapper()),
             Arguments.of(
                 "Kotlinx serialization",
-                KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export)
+                KotlinxMapper(JsonFormatConverter()::expand, JsonFormatConverter()::compact)
             )
         )
     }

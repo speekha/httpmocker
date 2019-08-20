@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.kotlinx
+package fr.speekha.httpmocker
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
- * Headers are generally serialized as a map of String keys and values, but duplicate keys are
+ * Headers are generally serialized as a map of String keys and values, since it is more compact
+ * than using a list of specific objects for each header. But that implies that duplicate keys are
  * possible (for instance "Set-Cookie" or "Cookie" header can occur several times with different
- * values in the same request or response), which is not supported by Kotlinx serialization.
- * This class allows to convert the JSON format supported by other modules to a format compatible
- * with Kotlinx serialization.
- * If this class is not used, scenarios will have to match the following format for headers:
+ * values in the same request or response), which is not supported by Kotlinx serialization
+ * (and can be marked as inappropriate JSON by some code analysis tools).
+ * This class allows to convert the compact JSON format supported by most modules to a format
+ * compatible with Kotlinx serialization.
+ * If this class is not used, scenarios will have to match the following format for headers with
+ * Kotlinx serialization:
  * <code>
  * [
  *   {
@@ -48,21 +51,47 @@ import java.util.regex.Pattern
  *   }
  *  ]
  * </code>
+ *
+ * If the long format is preferred, the formatter can also be used with the other modules to force a
+ * more Lint-friendly JSON format.
  */
 class JsonFormatConverter {
 
     /**
      * Converts Kotlinx compatible JSON to common JSON format.
      */
-    fun export(json: String): String = StringBuilder().apply {
-        val matcher = outputHeaderPattern.matcher(json)
-        var position = 0
-        while (matcher.find()) {
+    fun compact(json: String): String = StringBuilder().apply {
+        convertJsonBlock(json,
+            outputHeaderPattern
+        ) { json, matcher, position ->
             exportHeaderBlock(json, matcher, position)
-            position = matcher.end()
         }
-        append(json.substring(position until json.length))
     }.toString()
+
+    /**
+     * Converts common format JSON to Kotlinx compatible one.
+     */
+    fun expand(json: String): String = StringBuilder().apply {
+        convertJsonBlock(json,
+            inputHeaderPattern
+        ) { json, matcher, position ->
+            importHeaderBlock(json, matcher, position)
+        }
+    }.toString()
+
+    private fun StringBuilder.convertJsonBlock(
+        json: String,
+        pattern: Pattern,
+        transform: (json: String, matcher: Matcher, position: Int) -> Unit
+    ) {
+        val matcher = pattern.matcher(json)
+        var endPosition = 0
+        while (matcher.find()) {
+            transform(json, matcher, endPosition)
+            endPosition = matcher.end()
+        }
+        append(json.substring(endPosition until json.length))
+    }
 
     private fun StringBuilder.exportHeaderBlock(json: String, matcher: Matcher, startAt: Int) {
         val openingBracket = json.indexOf("[", matcher.start())
@@ -77,19 +106,6 @@ class JsonFormatConverter {
             .replace(Regex("\\{\\p{Space}*\"name\"\\p{Space}*:\\p{Space}*"), "")
             .replace(Regex(",\\p{Space}*\"value\""), "")
             .replace(Regex("\\p{Space}*}\\p{Blank}*"), "")
-
-    /**
-     * Converts common format JSON to Kotlinx compatible one.
-     */
-    fun import(json: String): String = StringBuilder().apply {
-        var position = 0
-        val matcher = inputHeaderPattern.matcher(json)
-        while (matcher.find()) {
-            importHeaderBlock(json, matcher, position)
-            position = matcher.end()
-        }
-        append(json.substring(position until json.length))
-    }.toString()
 
     private fun StringBuilder.importHeaderBlock(json: String, matcher: Matcher, startAt: Int) {
         val openingBrace = json.indexOf("{", matcher.start())

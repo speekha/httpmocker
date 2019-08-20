@@ -22,6 +22,7 @@ import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.readMatches
 import okhttp3.Request
 
 internal class StaticMockProvider(

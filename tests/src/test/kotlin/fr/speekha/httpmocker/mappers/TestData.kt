@@ -85,10 +85,18 @@ internal fun getMinimalOutput() = listOf(
             "}}]"
 )
 
+/**
+ * Check equality after removing all the format enhancement added by the different JSON parsers (
+ * indentation, line feeds, etc.).
+ */
 internal fun testStream(expectedResult: List<String>, actual: String) {
     val result = actual.split('\n')
         .joinToString("") {
-            it.trim().replace(Regex(":\\p{Space}+"), ":")
+            it.trim()
+                .replace(Regex("\\p{Space}*:\\p{Space}+"), ":")
+                .replace("[ ", "[")
+                .replace(" ]", "]")
+                .replace("{ ", "{")
         }
     val expected = expectedResult.joinToString("") { it.trim() }
     assertEquals(expected, result)

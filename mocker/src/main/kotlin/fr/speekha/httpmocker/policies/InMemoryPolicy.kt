@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.writeValue
 import okhttp3.Request
 import java.io.InputStream
 import java.io.PipedInputStream
