@@ -23,9 +23,8 @@ internal fun JsonWriter.writeList(list: Iterable<Pair<String, String?>>) {
     beginObject()
     serializeNulls = true
     list.forEach {
-        val (name, value) = it
-        name(name)
-        value(value)
+        name(it.first)
+        value(it.second)
     }
     serializeNulls = false
     endObject()

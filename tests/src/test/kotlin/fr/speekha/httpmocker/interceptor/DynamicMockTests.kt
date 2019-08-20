@@ -113,7 +113,7 @@ class DynamicMockTests : TestWithServer() {
             val body = "Time: ${System.currentTimeMillis()}"
             val callback = object : RequestCallback {
                 override fun loadResponse(request: Request) =
-                    ResponseDescriptor(code = 202, body = body)
+                    ResponseDescriptor(code = 201, body = body)
             }
             setupProvider(callback)
 
@@ -124,12 +124,13 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(202, response.code())
+            assertEquals(201, response.code())
             assertEquals(body, response.body()?.string())
         }
 
         @Test
-        @DisplayName("When several callbacks are provided, then they should be called in turn to find the appropriate response")
+        @DisplayName("When several callbacks are provided, " +
+                "then they should be called in turn to find the appropriate response")
         fun `should support multiple callbacks`() {
             val result1 = "First mock"
             val result2 = "Second mock"

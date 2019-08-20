@@ -64,19 +64,19 @@ private constructor(
     private val logger = getLogger()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        logger.info("Intercepted request ${chain.request()}: Interceptor is $mode")
-        return when (mode) {
-            Mode.DISABLED -> proceedWithRequest(chain)
-            Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(
-                chain.request(),
-                responseNotFound()
-            )
-            Mode.MIXED -> mockResponse(chain.request()) ?: proceedWithRequest(chain)
-            Mode.RECORD -> recordCall(chain)
-        }
+        val request = chain.request()
+        logger.info("Intercepted request $request: Interceptor is $mode")
+        return respondToRequest(chain, request)
     }
 
-    private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
+    private fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
+        Mode.DISABLED -> proceedWithNetworkCall(chain)
+        Mode.ENABLED -> mockResponse(request) ?: buildResponse(request, responseNotFound())
+        Mode.MIXED -> mockResponse(request) ?: proceedWithNetworkCall(chain)
+        Mode.RECORD -> recordCall(chain)
+    }
+
+    private fun proceedWithNetworkCall(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
     @SuppressWarnings("TooGenericExceptionCaught")
     private fun mockResponse(request: Request): Response? = providers.asSequence()
@@ -150,7 +150,7 @@ private constructor(
         ResponseDescriptor(code = 404, body = body)
 
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
-        val response = proceedWithRequest(chain)
+        val response = proceedWithNetworkCall(chain)
         val body = response.body()?.bytes()
         val record = CallRecord(chain.request(), response, body)
         saveFiles(record)
