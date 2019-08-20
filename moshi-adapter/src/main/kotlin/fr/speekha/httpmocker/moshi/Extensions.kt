@@ -31,7 +31,7 @@ internal fun JsonWriter.writeList(list: Iterable<Pair<String, String?>>) {
     endObject()
 }
 
-internal fun <T> JsonReader.readList(list: T, addObject:T.(String, String?) -> Unit): T {
+internal fun <T> JsonReader.readList(list: T, addObject: T.(String, String?) -> Unit): T {
     beginObject()
     while (hasNext()) {
         list.addObject(nextName(), readStringOrNull())
