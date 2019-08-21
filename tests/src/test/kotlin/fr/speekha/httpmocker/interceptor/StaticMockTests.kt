@@ -586,7 +586,7 @@ class StaticMockTests : TestWithServer() {
             enqueueServerResponse(REQUEST_OK_CODE, "server response")
 
             val inMemoryInterceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks {request ->
+                .useDynamicMocks { request ->
                     ResponseDescriptor(
                         code = REQUEST_OK_CODE,
                         body = "in memory response",
