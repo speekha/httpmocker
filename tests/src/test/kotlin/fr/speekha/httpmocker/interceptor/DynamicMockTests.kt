@@ -131,8 +131,10 @@ class DynamicMockTests : TestWithServer() {
         }
 
         @Test
-        @DisplayName("When several callbacks are provided, " +
-                "then they should be called in turn to find the appropriate response")
+        @DisplayName(
+            "When several callbacks are provided, " +
+                    "then they should be called in turn to find the appropriate response"
+        )
         fun `should support multiple callbacks`() {
             val result1 = "First mock"
             val result2 = "Second mock"
