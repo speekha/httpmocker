@@ -40,6 +40,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
+@Suppress("UNUSED_PARAMETER")
 class StaticMockTests : TestWithServer() {
 
     private val loadingLambda: (String) -> InputStream? = mock {
