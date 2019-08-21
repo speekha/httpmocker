@@ -128,5 +128,10 @@ open class TestWithServer {
                 KotlinxMapper(JsonFormatConverter()::expand, JsonFormatConverter()::compact)
             )
         )
+
+        const val REQUEST_OK_CODE = 200
+        const val REQUEST_OK_MESSAGE = "OK"
+        const val NOT_FOUND_CODE = 404
+        const val NOT_FOUND_MESSAGE = "Not Found"
     }
 }

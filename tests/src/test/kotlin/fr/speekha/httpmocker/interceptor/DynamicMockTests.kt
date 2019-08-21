@@ -42,11 +42,11 @@ class DynamicMockTests : TestWithServer() {
         @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() {
             setupProvider(DISABLED) { null }
-            enqueueServerResponse(200, "body")
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
 
             val response = executeGetRequest("")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, "OK")
             assertEquals("body", response.body()?.string())
         }
     }
@@ -62,7 +62,7 @@ class DynamicMockTests : TestWithServer() {
 
             val response = executeGetRequest("/unknown")
 
-            assertResponseCode(response, 404, "Not Found")
+            assertResponseCode(response, NOT_FOUND_CODE, "Not Found")
         }
 
         @Test
@@ -72,7 +72,7 @@ class DynamicMockTests : TestWithServer() {
 
             val response = executeGetRequest("/unknown")
 
-            assertResponseCode(response, 404, "Not Found")
+            assertResponseCode(response, NOT_FOUND_CODE, "Not Found")
         }
 
         @Test
@@ -93,8 +93,9 @@ class DynamicMockTests : TestWithServer() {
         @Test
         @DisplayName("When a lambda is provided, then it should be used to answer requests")
         fun `should reply with a dynamically generated response`() {
+            val resultCode = 202
             setupProvider {
-                ResponseDescriptor(code = 202, body = "some random body")
+                ResponseDescriptor(code = resultCode, body = "some random body")
             }
             val response = client.newCall(
                 buildRequest(
@@ -103,17 +104,18 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(202, response.code())
+            assertEquals(resultCode, response.code())
             assertEquals("some random body", response.body()?.string())
         }
 
         @Test
         @DisplayName("When a stateful callback is provided, then it should be used to answer requests")
         fun `should reply with a stateful callback`() {
+            val resultCode = 201
             val body = "Time: ${System.currentTimeMillis()}"
             val callback = object : RequestCallback {
                 override fun loadResponse(request: Request) =
-                    ResponseDescriptor(code = 201, body = body)
+                    ResponseDescriptor(code = resultCode, body = body)
             }
             setupProvider(callback)
 
@@ -124,7 +126,7 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(201, response.code())
+            assertEquals(resultCode, response.code())
             assertEquals(body, response.body()?.string())
         }
 
