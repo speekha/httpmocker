@@ -26,11 +26,8 @@ import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
 import fr.speekha.httpmocker.MockResponseInterceptor.Mode.MIXED
 import fr.speekha.httpmocker.buildRequest
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
-import fr.speekha.httpmocker.policies.InMemoryPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -86,7 +83,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/unknown")
 
-            assertResponseCode(response, 404, "Not Found")
+            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -106,7 +103,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/no_match")
 
-            assertResponseCode(response, 404, "Not Found")
+            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -123,7 +120,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/unknown")
 
-            assertResponseCode(response, 404, "Not Found")
+            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -134,7 +131,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/request")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -228,7 +225,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/folder/request_in_folder")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("separate body file", response.body()?.string())
         }
 
@@ -246,7 +243,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/request_in_other_folder")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("separate body file", response.body()?.string())
         }
 
@@ -264,7 +261,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/folder2/request_in_other_folder")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("separate body file", response.body()?.string())
         }
     }
@@ -284,7 +281,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/request")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("simple header", response.header("testHeader"))
         }
 
@@ -314,7 +311,7 @@ class StaticMockTests : TestWithServer() {
 
             val response = executeGetRequest("/mediatype")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("application", response.body()?.contentType()?.type())
             assertEquals("application/json", response.header("Content-type"))
             assertEquals("json", response.body()?.contentType()?.subtype())
@@ -469,7 +466,7 @@ class StaticMockTests : TestWithServer() {
             val param2 = executeGetRequest("/absent_query_param?param1=1&param2=2")
 
             assertEquals("Body found", param1)
-            assertEquals(404, param2.code())
+            assertEquals(NOT_FOUND_CODE, param2.code())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -514,7 +511,7 @@ class StaticMockTests : TestWithServer() {
                 executeGetRequest("/absent_header", listOf("header1" to "1", "header2" to "2"))
 
             assertEquals("Body found", correctHeader)
-            assertEquals(404, extraHeader.code())
+            assertEquals(NOT_FOUND_CODE, extraHeader.code())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -546,9 +543,9 @@ class StaticMockTests : TestWithServer() {
             val extraParam = executeGetRequest("/exact_match?param1=1&param2=2")
 
             assertEquals("Exact headers", exactHeader.body()?.string())
-            assertEquals(404, extraHeader.code())
+            assertEquals(NOT_FOUND_CODE, extraHeader.code())
             assertEquals("Exact params", exactParam.body()?.string())
-            assertEquals(404, extraParam.code())
+            assertEquals(NOT_FOUND_CODE, extraParam.code())
         }
     }
 
@@ -563,15 +560,15 @@ class StaticMockTests : TestWithServer() {
             title: String,
             mapper: Mapper
         ) {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper)
 
             val serverResponse = executeGetRequest("")
             val localResponse = executeGetRequest("/request")
 
-            assertResponseCode(serverResponse, 200, "OK")
+            assertResponseCode(serverResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("body", serverResponse.body()?.string())
-            assertResponseCode(localResponse, 200, "OK")
+            assertResponseCode(localResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("simple body", localResponse.body()?.string())
         }
 
@@ -585,23 +582,16 @@ class StaticMockTests : TestWithServer() {
             title: String,
             mapper: Mapper
         ) {
-            enqueueServerResponse(200, "server response")
+            enqueueServerResponse(REQUEST_OK_CODE, "server response")
 
-            val inMemoryPolicy = InMemoryPolicy(mapper)
-            inMemoryPolicy.addMatcher(
-                "$mockServerBaseUrl/inMemory", Matcher(
-                    RequestDescriptor(method = "GET"),
+            val inMemoryInterceptor = MockResponseInterceptor.Builder()
+                .useDynamicMocks {request ->
                     ResponseDescriptor(
-                        code = 200,
+                        code = REQUEST_OK_CODE,
                         body = "in memory response",
                         mediaType = "text/plain"
-                    )
-                )
-            )
-            val inMemoryInterceptor = MockResponseInterceptor.Builder()
-                .decodeScenarioPathWith(inMemoryPolicy)
-                .loadFileWith(inMemoryPolicy::matchRequest)
-                .parseScenariosWith(mapper)
+                    ).takeIf { request.url().encodedPath() == "/inMemory" && request.method() == "GET" }
+                }
                 .setInterceptorStatus(MIXED)
                 .build()
 
