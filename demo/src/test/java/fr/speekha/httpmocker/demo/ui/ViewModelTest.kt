@@ -31,5 +31,5 @@ open class ViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     fun runBlockingTest(block: suspend TestCoroutineScope.() -> Unit) =
-        coroutinesTestRule.testDispatcher.runBlockingTest(block)
+        runBlockingTest(coroutinesTestRule.testDispatcher, block)
 }
