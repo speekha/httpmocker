@@ -1,6 +1,6 @@
 # HttpMocker
 
-[![Kotlin](https://img.shields.io/badge/kotlin-1.3.41-blue.svg)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.3.50-blue.svg)](http://kotlinlang.org)
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
@@ -246,4 +246,5 @@ Here is an example of scenario in JSON form:
 
 [Introductory blog post on Kt. Academy](https://blog.kotlin-academy.com/httpmock-my-first-oss-library-5bae8adbccf4)
 
-[Kotlin Weekly](https://mailchi.mp/kotlinweekly/kotlin-weekly-155) mentioned it
+[Kotlin Weekly](https://mailchi.mp/kotlinweekly/kotlin-weekly-155) and 
+[Android Weekly](https://androidweekly.net/issues/issue-371) mentioned it
