@@ -69,6 +69,9 @@ commands:
           keys:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
 
+orbs:
+  codecov: codecov/codecov@1.0.2
+
 jobs:
   build_core:
     <<: *container_config
@@ -183,6 +186,8 @@ jobs:
       - store_test_results:
           path: tests/build/test-results
           format: junit
+      - codecov/upload:
+          file: tests/build/reports/test/jacocoTestReport.xml
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
