@@ -163,6 +163,9 @@ jobs:
       - store_artifacts:
           path: demo/build/outputs/apk/
           destination: apks
+      - store_artifacts:
+          path: demo/build/reports
+          destination: reports
   store_artifacts:
     <<: *container_config
     steps:
@@ -197,22 +200,32 @@ jobs:
     steps:
       - restore_all_caches
       - run:
-          name: Tests
+          name: Check quality
           command: ./gradlew detekt ktlintCheck lint --stacktrace
       - store_artifacts:
           path: mocker/build/reports
+          destination: reports/mocker
       - store_artifacts:
           path: custom-adapter/build/reports
-      - store_artifacts:
-          path: demo/build/reports
+          destination: reports/custom-adapter
       - store_artifacts:
           path: gson-adapter/build/reports
+          destination: reports/gson-adapter
       - store_artifacts:
           path: jackson-adapter/build/reports
+          destination: reports/jackson-adapter
       - store_artifacts:
           path: kotlinx-adapter/build/reports
+          destination: reports/kotlinx-adapter
       - store_artifacts:
           path: moshi-adapter/build/reports
+          destination: reports/moshi-adapter
+      - store_artifacts:
+          path: tests/build/reports
+          destination: reports/tests
+      - store_artifacts:
+          path: demo/build/reports
+          destination: reports/demo
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
