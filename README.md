@@ -5,9 +5,9 @@
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
 [![codebeat badge](https://codebeat.co/badges/a361e616-a1a0-4e85-b6a7-2bc82f31f7ac)](https://codebeat.co/projects/github-com-speekha-httpmocker-develop)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
 [![CodeFactor](https://www.codefactor.io/repository/github/speekha/httpmocker/badge)](https://www.codefactor.io/repository/github/speekha/httpmocker)
-[![codecov](https://codecov.io/gh/speekha/httpmocker/branch/develop/graph/badge.svg)](https://codecov.io/gh/speekha/httpmocker)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
 
 **HttpMocker** is a very lightweight Kotlin library that allows to mock HTTP calls relying on the OkHttp library.
 

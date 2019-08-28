@@ -73,7 +73,7 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
     args = [
             "report",
             "-l",
-            "Java",
+            "Kotlin",
             "-r",
             "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     ]
