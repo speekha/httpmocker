@@ -21,11 +21,6 @@ test {
     options {
         useJUnitPlatform()
     }
-//    jacoco {
-//        append = false
-//        destinationFile = file("$buildDir/jacoco/junitPlatformTest.exec")
-//        includeNoLocationClasses = true
-//    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
