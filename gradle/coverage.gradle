@@ -22,7 +22,7 @@ ext {
 
 jacoco {
     toolVersion = "0.8.4"
-    reportsDir = file("$buildDir/reports")
+    reportsDir = file("$buildDir/reports/jacoco")
 }
 
 jacocoTestReport {
@@ -62,7 +62,6 @@ jacocoTestReport {
 configurations { codacy }
 repositories {
     maven { url "https://jitpack.io" }
-//    maven { url "http://dl.bintray.com/typesafe/maven-releases" }
 }
 dependencies {
     codacy 'com.github.codacy:codacy-coverage-reporter:6.0.4'
@@ -76,6 +75,6 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
             "-l",
             "Java",
             "-r",
-            "${buildDir}/reports/test/jacocoTestReport.xml"
+            "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     ]
 }

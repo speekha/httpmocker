@@ -187,7 +187,7 @@ jobs:
           path: tests/build/test-results
           format: junit
       - codecov/upload:
-          file: tests/build/reports/test/jacocoTestReport.xml
+          file: tests/build/reports/jacoco/test/jacocoTestReport.xml
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -201,10 +201,18 @@ jobs:
           command: ./gradlew detekt ktlintCheck lint --stacktrace
       - store_artifacts:
           path: mocker/build/reports
-          destination: reports
-      - store_test_results:
-          path: mocker/build/reports
-          format: junit
+      - store_artifacts:
+          path: custom-adapter/build/reports
+      - store_artifacts:
+          path: demo/build/reports
+      - store_artifacts:
+          path: gson-adapter/build/reports
+      - store_artifacts:
+          path: jackson-adapter/build/reports
+      - store_artifacts:
+          path: kotlinx-adapter/build/reports
+      - store_artifacts:
+          path: moshi-adapter/build/reports
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
