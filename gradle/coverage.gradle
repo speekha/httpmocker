@@ -61,10 +61,6 @@ jacocoTestReport {
 
 configurations { codacy }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     codacy 'com.codacy:codacy-coverage-reporter:6.0.4'
 }
