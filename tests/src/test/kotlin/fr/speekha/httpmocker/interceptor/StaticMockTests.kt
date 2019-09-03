@@ -325,8 +325,7 @@ class StaticMockTests : TestWithServer() {
                     "then default delay should be used"
         )
         fun `should allow to delay all responses`(title: String, mapper: Mapper) {
-            setUpInterceptor(ENABLED, mapper)
-            interceptor.delay = 50
+            setUpInterceptor(ENABLED, mapper, 50)
 
             val delay = measureTimeMillis {
                 executeGetRequest("/request").body()?.string()
@@ -614,12 +613,19 @@ class StaticMockTests : TestWithServer() {
         }
     }
 
-    private fun setUpInterceptor(mode: MockResponseInterceptor.Mode, mapper: Mapper) {
+    private fun setUpInterceptor(
+        mode: MockResponseInterceptor.Mode,
+        mapper: Mapper,
+        delay: Long? = null
+    ) {
         interceptor = MockResponseInterceptor.Builder()
             .decodeScenarioPathWith(filingPolicy)
             .loadFileWith(loadingLambda)
             .parseScenariosWith(mapper)
             .setInterceptorStatus(mode)
+            .apply {
+                delay?.let { addFakeNetworkDelay(it) }
+            }
             .build()
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
