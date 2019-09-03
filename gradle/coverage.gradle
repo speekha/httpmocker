@@ -35,28 +35,20 @@ jacocoTestReport {
         html.enabled = true
     }
 
-    def allClasses = files()
-    parent.subprojects.stream()
+    def allClasses = parent.subprojects.stream()
             .flatMap { project -> project.sourceSets.stream() }
-            .filter { it.name == 'main'}
-            .forEach {
-                allClasses = allClasses + it.output
+            .filter { it.name == 'main' }
+            .reduce(files()) { a, b ->
+                a + files(b.output.files.collect {
+                    println("file: " +it)
+                    fileTree(dir: it, exclude: '**/*JsonAdapter.class')
+                })
             }
 
     additionalSourceDirs.from = coverageSourceDirs
     sourceDirectories.from = coverageSourceDirs
     classDirectories.from = allClasses
     executionData.from = files("$buildDir/jacoco/test.exec")
-
-    // Bit hacky but fixes https://code.google.com/p/android/issues/detail?id=69174.
-    // We iterate through the compiled .class tree and rename $$ to $.
-    doFirst {
-        new File("$buildDir/classes/kotlin/test/").eachFileRecurse { file ->
-            if (file.name.contains('$$')) {
-                file.renameTo(file.path.replace('$$', '$'))
-            }
-        }
-    }
 }
 
 configurations { codacy }
