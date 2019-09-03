@@ -20,6 +20,7 @@ import fr.speekha.httpmocker.custom.INVALID_BOOLEAN_ERROR
 import fr.speekha.httpmocker.custom.INVALID_NUMBER_ERROR
 import fr.speekha.httpmocker.custom.JsonStringReader
 import fr.speekha.httpmocker.custom.NO_FIELD_ID_ERROR
+import fr.speekha.httpmocker.custom.NO_MORE_TOKEN_ERROR
 import fr.speekha.httpmocker.custom.ObjectAdapter
 import fr.speekha.httpmocker.custom.WRONG_END_OF_LIST_ERROR
 import fr.speekha.httpmocker.custom.WRONG_END_OF_OBJECT_ERROR
@@ -60,6 +61,11 @@ class JsonStringReaderTest {
         @Test
         fun `When reading a list, then an error should occur`() {
             assertError<IllegalStateException>(WRONG_START_OF_LIST_ERROR) { reader.beginList() }
+        }
+
+        @Test
+        fun `When trying to iterate, then an error should occur`() {
+            assertError<IllegalStateException>(NO_MORE_TOKEN_ERROR) { reader.next() }
         }
     }
 

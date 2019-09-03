@@ -42,7 +42,10 @@ class JsonStringReader(
         val comma = json.indexOf(',', index) + 1
         val brace = json.indexOf('}', index)
         val bracket = json.indexOf(']', index)
-        index = listOf(comma, brace, bracket).filter { it >= index }.min() ?: index
+        index = listOf(comma, brace, bracket)
+            .filter { it >= index && it < json.length }
+            .min()
+            ?: parseError(NO_MORE_TOKEN_ERROR)
     }
 
     /**
@@ -202,8 +205,10 @@ class JsonStringReader(
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
-    private fun parseError(message: String, position: Int = index): Nothing =
+    private fun parseError(message: String, position: Int = index): Nothing {
+        println("Error to come")
         error("$message${extractAfterCurrentPosition(position)}")
+    }
 
     private fun extractAfterCurrentPosition(position: Int) =
         json.substring(position).truncate(DEFAULT_TRUCATE_LENGTH)
@@ -219,8 +224,10 @@ const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value 
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
 const val INVALID_TOKEN_ERROR = "Invalid token value: "
 const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
+const val NO_MORE_TOKEN_ERROR = "No more token available: "
 
 private val numericPattern = Regex("\\d[\\d ]*")
 private val alphanumericPattern = Regex("[^,}\\]\\s]+")
-private val stringPattern = Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")
+private val stringPattern =
+    Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")
 private const val DEFAULT_TRUCATE_LENGTH = 10
