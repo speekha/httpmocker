@@ -71,7 +71,7 @@ private constructor(
 
     private fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
         Mode.DISABLED -> proceedWithNetworkCall(chain)
-        Mode.ENABLED -> mockResponse(request) ?: buildResponse(request, responseNotFound())
+        Mode.ENABLED -> mockResponse(request) ?: buildResponse(request, responseNotFound(), null)
         Mode.MIXED -> mockResponse(request) ?: proceedWithNetworkCall(chain)
         Mode.RECORD -> recordCall(chain)
     }
@@ -116,7 +116,7 @@ private constructor(
     private fun buildResponse(
         request: Request,
         response: ResponseDescriptor,
-        provider: ScenarioProvider? = null
+        provider: ScenarioProvider?
     ): Response = Response.Builder()
         .request(request)
         .protocol(Protocol.HTTP_1_1)
@@ -138,7 +138,7 @@ private constructor(
     private fun loadResponseBody(
         request: Request,
         response: ResponseDescriptor,
-        provider: ScenarioProvider? = null
+        provider: ScenarioProvider?
     ) = ResponseBody.create(
         MediaType.parse(response.mediaType), response.bodyFile?.let {
             logger.info("Loading response body from file: $it")
