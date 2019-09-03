@@ -60,11 +60,13 @@ jacocoTestReport {
 }
 
 configurations { codacy }
+
 repositories {
-    maven { url "https://jitpack.io" }
+    mavenCentral()
 }
+
 dependencies {
-    codacy 'com.github.codacy:codacy-coverage-reporter:6.0.4'
+    codacy 'com.codacy:codacy-coverage-reporter:6.0.4'
 }
 
 task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
