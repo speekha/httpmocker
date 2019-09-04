@@ -37,8 +37,7 @@ class MoshiMapper : Mapper {
         newParameterizedType(List::class.java, Matcher::class.java)
     )
 
-    override fun deserialize(payload: String): List<Matcher> =
-        adapter.fromJson(payload) ?: emptyList()
+    override fun deserialize(payload: String): List<Matcher>? = adapter.fromJson(payload)
 
     override fun serialize(matchers: List<Matcher>): String = adapter.toJson(matchers)
 }
