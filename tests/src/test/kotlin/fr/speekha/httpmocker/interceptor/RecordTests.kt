@@ -190,8 +190,7 @@ class RecordTests : TestWithServer() {
             )
 
             withFile("$SAVE_FOLDER/request.json") {
-                val result: List<Matcher> =
-                    mapper.readMatches(it)
+                val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     RequestDescriptor(
                         method = "POST",
@@ -220,8 +219,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a request or response with a null body, " +
-                "then body should be empty in scenario files")
+        @DisplayName(
+            "When recording a request or response with a null body, " +
+                    "then body should be empty in scenario files"
+        )
         fun `should handle null request and response bodies when recording`(
             title: String,
             mapper: Mapper
@@ -232,8 +233,7 @@ class RecordTests : TestWithServer() {
             executeRequest("request", "GET", null)
 
             withFile("$SAVE_FOLDER/request.json") {
-                val result: List<Matcher> =
-                    mapper.readMatches(it)
+                val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     RequestDescriptor(method = "GET"),
                     ResponseDescriptor(
@@ -269,8 +269,7 @@ class RecordTests : TestWithServer() {
             executeGetRequest("request")
 
             withFile("$SAVE_FOLDER/request.json") {
-                val result: List<Matcher> =
-                    mapper.readMatches(it)
+                val result = mapper.readMatches(it)
                 val expectedResult = listOf(
                     Matcher(
                         RequestDescriptor(
@@ -316,8 +315,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When recording a response body, " +
-                "then the file should have the proper extension")
+        @DisplayName(
+            "When recording a response body, " +
+                    "then the file should have the proper extension"
+        )
         fun `should add proper extension to response files`(title: String, mapper: Mapper) {
             enqueueServerResponse(200, "body", contentType = "image/png")
             enqueueServerResponse(200, "body", contentType = "application/json")
@@ -332,8 +333,10 @@ class RecordTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-        @DisplayName("When several matches exist for a request, " +
-                "then the body file should have the same index as the request in the scenario")
+        @DisplayName(
+            "When several matches exist for a request, " +
+                    "then the body file should have the same index as the request in the scenario"
+        )
         fun `should match indexes in descriptor file and actual response file name`(
             title: String,
             mapper: Mapper

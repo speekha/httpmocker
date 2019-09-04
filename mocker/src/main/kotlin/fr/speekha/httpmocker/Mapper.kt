@@ -33,7 +33,7 @@ interface Mapper {
      * @param payload the serialized data to parse
      * @return the corresponding list
      */
-    fun deserialize(payload: String): List<Matcher>
+    fun deserialize(payload: String): List<Matcher>?
 
     /**
      * Serializes a list of matchers as a string (JSON, XML, CSV...)
@@ -48,14 +48,14 @@ interface Mapper {
  * @param stream the JSON data as an input stream
  * @return the corresponding data objects
  */
-fun Mapper.readMatches(stream: InputStream): List<Matcher> = deserialize(stream.readAsString())
+fun Mapper.readMatches(stream: InputStream): List<Matcher>? = deserialize(stream.readAsString())
 
 /**
  * Reads possible matches from a JSON input stream
  * @param file the JSON data as a File
  * @return the corresponding data objects
  */
-fun Mapper.readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
+fun Mapper.readMatches(file: File): List<Matcher>? = readMatches(FileInputStream(file))
 
 /**
  * Writes possible matches in JSON in an output stream

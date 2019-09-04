@@ -44,8 +44,8 @@ internal class StaticMockProvider(
         }
     }
 
-    private fun matchRequest(request: Request, list: List<Matcher>): ResponseDescriptor? =
-        list.firstOrNull { matcher.matchRequest(it.request, request) }?.response
+    private fun matchRequest(request: Request, list: List<Matcher>?): ResponseDescriptor? =
+        list?.firstOrNull { matcher.matchRequest(it.request, request) }?.response
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
     override fun loadResponseBody(request: Request, path: String): ByteArray? =

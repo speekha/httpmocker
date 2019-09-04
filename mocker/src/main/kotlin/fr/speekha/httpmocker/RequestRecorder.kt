@@ -59,7 +59,7 @@ internal class RequestRecorder(
     private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> =
         with(record) {
             val previousRecords: List<Matcher> = if (requestFile.exists()) {
-                mapper.readMatches(requestFile).toMutableList()
+                mapper.readMatches(requestFile) ?: emptyList()
             } else {
                 emptyList()
             }
