@@ -35,14 +35,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Collections
-import java.util.stream.Stream
 
 @Suppress("UNUSED_PARAMETER")
 class RecordTests : TestWithServer() {
@@ -128,9 +126,6 @@ class RecordTests : TestWithServer() {
                 executeGetRequest("record/request")
             }
         }
-
-        @Suppress("unused")
-        fun data(): Stream<Arguments> = mappers()
     }
 
     @Nested
