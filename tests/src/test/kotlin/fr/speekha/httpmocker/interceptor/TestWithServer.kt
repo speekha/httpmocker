@@ -118,6 +118,7 @@ open class TestWithServer {
     companion object {
 
         @JvmStatic
+        @Suppress("unused")
         fun mappers(): Stream<Arguments> = Stream.of(
             Arguments.of("Jackson", JacksonMapper()),
             Arguments.of("Gson", GsonMapper()),
