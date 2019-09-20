@@ -40,7 +40,6 @@ jacocoTestReport {
             .filter { it.name == 'main' }
             .reduce(files()) { a, b ->
                 a + files(b.output.files.collect {
-                    println("file: " +it)
                     fileTree(dir: it, exclude: '**/*JsonAdapter.class')
                 })
             }
