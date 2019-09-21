@@ -24,12 +24,11 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @DisplayName("Dynamic Mocks")
 class DynamicMockTests : TestWithServer() {
@@ -66,28 +65,13 @@ class DynamicMockTests : TestWithServer() {
         }
 
         @Test
-        @DisplayName("When an error occurs while answering a request, then a 404 error should occur")
+        @DisplayName("When an error occurs while answering a request, then the exception should be let through")
         fun `should return a 404 error when an exception occurs`() {
             setupProvider(ENABLED) { error("Unexpected error") }
 
-            val response = executeGetRequest("/unknown")
-
-            assertResponseCode(response, NOT_FOUND_CODE, "Not Found")
-        }
-
-        @Test
-        @DisplayName("When an error occurs while answering a request, then the request body should be the error")
-        fun `should return the error message when an exception occurs`() {
-            setupProvider(ENABLED) { error("Unexpected error") }
-
-            val response = executeGetRequest("/unknown").body()?.string()
-
-            assertThat(
-                response, StringStartsWith(
-                    "java.lang.IllegalStateException: Unexpected error\n" +
-                            "\tat fr.speekha.httpmocker.interceptor.DynamicMockTests"
-                )
-            )
+            assertThrows<IllegalStateException> {
+                executeGetRequest("/unknown")
+            }
         }
 
         @Test
@@ -169,6 +153,31 @@ class DynamicMockTests : TestWithServer() {
 
             assertEquals(result1, response1.body()?.string())
             assertEquals(result2, response2.body()?.string())
+        }
+
+        @Test
+        @DisplayName(
+            "When the response is an error, then the proper exception should be thrown"
+        )
+        fun `should support exception results`() {
+
+            interceptor = MockResponseInterceptor.Builder()
+                .useDynamicMocks { request ->
+                    error("Should throw an error")
+                }
+                .setInterceptorStatus(ENABLED)
+                .build()
+
+            client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+
+            assertThrows<IllegalStateException> {
+                client.newCall(
+                    buildRequest(
+                        "http://www.test.fr/request1",
+                        method = "GET"
+                    )
+                ).execute()
+            }
         }
 
         private fun setupProvider(callback: RequestCallback) {
