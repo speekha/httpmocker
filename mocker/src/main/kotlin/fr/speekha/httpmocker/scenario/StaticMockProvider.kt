@@ -24,6 +24,7 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.readMatches
 import okhttp3.Request
+import java.io.FileNotFoundException
 
 internal class StaticMockProvider(
     private val filingPolicy: FilingPolicy,
@@ -35,13 +36,17 @@ internal class StaticMockProvider(
 
     private val matcher = RequestMatcher()
 
-    override fun loadResponse(request: Request): ResponseDescriptor? {
+    override fun loadResponse(request: Request): ResponseDescriptor? = try {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")
-        return loadFileContent(path)?.let { stream ->
+        loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
+    } catch (e: FileNotFoundException) {
+        logger.error("Scenario file could not be loaded", e)
+        val stackTrace = e.stackTrace.joinToString("\n\tat ")
+        ResponseDescriptor(code = 404, body = "${e.javaClass.name}: ${e.message}\n\tat $stackTrace")
     }
 
     private fun matchRequest(request: Request, list: List<Matcher>?): ResponseDescriptor? =

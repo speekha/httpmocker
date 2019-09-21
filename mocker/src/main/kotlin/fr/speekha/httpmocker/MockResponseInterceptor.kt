@@ -82,15 +82,7 @@ private constructor(
     private fun mockResponse(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
-            try {
-                provider.loadResponse(request)
-            } catch (e: Throwable) {
-                logger.error("Scenario file could not be loaded", e)
-                val exceptionType = e.javaClass.name
-                val message = e.message
-                val stackTrace = e.stackTrace.joinToString("\n\tat ")
-                responseNotFound("$exceptionType: $message\n\tat $stackTrace")
-            }?.let { response ->
+            provider.loadResponse(request)?.let { response ->
                 executeMockResponse(response, request, provider)
             }
         }

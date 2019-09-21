@@ -148,5 +148,6 @@ class InMemoryPolicyTest {
             assertEquals("first body", response1.body()?.string())
             assertEquals("second body", response2.body()?.string())
         }
+
     }
 }

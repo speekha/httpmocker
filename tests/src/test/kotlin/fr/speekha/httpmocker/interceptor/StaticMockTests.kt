@@ -31,12 +31,15 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.hamcrest.MatcherAssert
+import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.io.FileNotFoundException
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
@@ -98,7 +101,7 @@ class StaticMockTests : TestWithServer() {
             mapper: Mapper
         ) {
             whenever(loadingLambda.invoke(any())) doAnswer {
-                error("Loading error")
+                throw FileNotFoundException("Loading error")
             }
             setUpInterceptor(ENABLED, mapper)
 
@@ -115,13 +118,38 @@ class StaticMockTests : TestWithServer() {
         )
         fun `should return a 404 error when an exception occurs`(title: String, mapper: Mapper) {
             whenever(loadingLambda.invoke(any())) doAnswer {
-                error("Loading error")
+                throw FileNotFoundException("Loading error")
             }
             setUpInterceptor(ENABLED, mapper)
 
             val response = executeGetRequest("/unknown")
 
             assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
+            "When an error occurs while answering a request, " +
+                    "then the request body should be the error"
+        )
+        fun `should return the error message when an exception occurs`(
+            title: String,
+            mapper: Mapper
+        ) {
+            whenever(loadingLambda.invoke(any())) doAnswer {
+                throw FileNotFoundException("Loading error")
+            }
+            setUpInterceptor(ENABLED, mapper)
+
+            val response = executeGetRequest("/unknown").body()?.string()
+
+            MatcherAssert.assertThat(
+                response, StringStartsWith(
+                    "java.io.FileNotFoundException: Loading error\n" +
+                            "\tat fr.speekha.httpmocker.interceptor.StaticMockTests"
+                )
+            )
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
