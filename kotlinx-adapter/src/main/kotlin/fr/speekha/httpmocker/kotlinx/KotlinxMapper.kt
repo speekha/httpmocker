@@ -20,7 +20,10 @@ import fr.speekha.httpmocker.BODY
 import fr.speekha.httpmocker.BODY_FILE
 import fr.speekha.httpmocker.CODE
 import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.ERROR
 import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 import fr.speekha.httpmocker.HEADERS
 import fr.speekha.httpmocker.HOST
 import fr.speekha.httpmocker.MEDIA_TYPE
@@ -35,6 +38,7 @@ import fr.speekha.httpmocker.REQUEST
 import fr.speekha.httpmocker.RESPONSE
 import fr.speekha.httpmocker.VALUE
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import kotlinx.serialization.UnstableDefault
@@ -86,7 +90,8 @@ class KotlinxMapper(
 
 private fun JsonElement.toMatcher(): Matcher = Matcher(
     jsonObject[REQUEST]?.toRequest() ?: RequestDescriptor(),
-    jsonObject[RESPONSE].toResponse()
+    jsonObject[RESPONSE].toResponse(),
+    jsonObject[ERROR]?.toError()
 )
 
 private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
@@ -108,6 +113,11 @@ private fun JsonElement?.toResponse(): ResponseDescriptor = ResponseDescriptor()
     .update(this, HEADERS) { copy(headers = it.toHeaders()) }
     .update(this, BODY) { copy(body = it.asLiteral()) }
     .update(this, BODY_FILE) { copy(bodyFile = it.asNullableLiteral()) }
+
+private fun JsonElement.toError(): NetworkError = NetworkError(
+    jsonObject[EXCEPTION_TYPE]?.asNullableLiteral() ?: "",
+    jsonObject[EXCEPTION_MESSAGE]?.asNullableLiteral() ?: ""
+)
 
 private fun ResponseDescriptor.update(
     jsonElement: JsonElement?,

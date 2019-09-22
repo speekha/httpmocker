@@ -16,28 +16,23 @@
 
 package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import fr.speekha.httpmocker.model.Matcher as Model
+import fr.speekha.httpmocker.model.NetworkError as Model
 
 @Serializable
-internal data class Matcher(
+internal data class NetworkError(
 
-    @SerialName(REQUEST)
-    val request: RequestDescriptor? = null,
+    @SerialName(EXCEPTION_TYPE)
+    val mediaType: String = "",
 
-    @SerialName(RESPONSE)
-    val response: ResponseDescriptor,
-
-    @SerialName(ERROR)
-    val error: NetworkError? = null
+    @SerialName(EXCEPTION_MESSAGE)
+    val body: String? = null
 ) {
     constructor(model: Model) : this(
-        RequestDescriptor(model.request),
-        ResponseDescriptor(model.response),
-        model.error?.let { NetworkError(it) }
+        model.exceptionType,
+        model.message
     )
 }

@@ -18,6 +18,7 @@ package fr.speekha.httpmocker
 
 const val REQUEST = "request"
 const val RESPONSE = "response"
+const val ERROR = "error"
 const val EXACT_MATCH = "exact-match"
 const val PROTOCOL = "protocol"
 const val METHOD = "method"
@@ -33,6 +34,9 @@ const val BODY = "body"
 const val BODY_FILE = "body-file"
 const val NAME = "name"
 const val VALUE = "value"
+const val EXCEPTION_TYPE = "type"
+const val EXCEPTION_MESSAGE = "message"
 
 const val DEFAULT_MEDIA_TYPE = "text/plain"
 const val DEFAULT_RESPONSE_CODE = 200
+const val DEFAULT_EXCEPTION = "java.lang.RuntimeException"

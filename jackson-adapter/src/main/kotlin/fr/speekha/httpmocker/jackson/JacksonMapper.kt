@@ -23,10 +23,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.jackson.Header as JsonHeader
 import fr.speekha.httpmocker.jackson.Matcher as JsonMatcher
+import fr.speekha.httpmocker.jackson.NetworkError as JsonNetworkError
 import fr.speekha.httpmocker.jackson.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.jackson.ResponseDescriptor as JsonResponseDescriptor
 
@@ -49,9 +51,10 @@ class JacksonMapper : Mapper {
     private fun List<JsonMatcher>.toModel() = map { it.toModel() }
 }
 
-private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.fromModel())
+private fun Matcher.fromModel() =
+    JsonMatcher(request.fromModel(), response.fromModel(), error?.fromModel())
 
-private fun JsonMatcher.toModel() = Matcher(request.toModel(), response.toModel())
+private fun JsonMatcher.toModel() = Matcher(request.toModel(), response.toModel(), error?.toModel())
 
 private fun JsonRequestDescriptor.toModel() =
     RequestDescriptor(
@@ -88,3 +91,7 @@ private fun JsonResponseDescriptor.toModel() =
 
 private fun ResponseDescriptor.fromModel() =
     JsonResponseDescriptor(delay, code, mediaType, headers.map { it.fromModel() }, body, bodyFile)
+
+private fun NetworkError.fromModel() = JsonNetworkError(exceptionType, message)
+
+private fun JsonNetworkError.toModel() = NetworkError(exceptionType, message)
