@@ -90,7 +90,7 @@ class KotlinxMapper(
 
 private fun JsonElement.toMatcher(): Matcher = Matcher(
     jsonObject[REQUEST]?.toRequest() ?: RequestDescriptor(),
-    jsonObject[RESPONSE].toResponse(),
+    jsonObject[RESPONSE]?.toResponse(),
     jsonObject[ERROR]?.toError()
 )
 
@@ -106,7 +106,7 @@ private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
     jsonObject[BODY]?.asNullableLiteral()
 )
 
-private fun JsonElement?.toResponse(): ResponseDescriptor = ResponseDescriptor()
+private fun JsonElement.toResponse(): ResponseDescriptor = ResponseDescriptor()
     .update(this, DELAY) { copy(delay = it.primitive.long) }
     .update(this, CODE) { copy(code = it.primitive.int) }
     .update(this, MEDIA_TYPE) { copy(mediaType = it.asLiteral()) }

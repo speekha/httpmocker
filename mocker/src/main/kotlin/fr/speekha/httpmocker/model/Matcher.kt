@@ -29,7 +29,7 @@ data class Matcher(
     /**
      * The mocked response
      */
-    val response: ResponseDescriptor,
+    val response: ResponseDescriptor? = null,
 
     /**
      * The mocked error

@@ -27,7 +27,7 @@ internal data class Matcher(
     val request: RequestDescriptor? = null,
 
     @SerializedName(RESPONSE)
-    val response: ResponseDescriptor,
+    val response: ResponseDescriptor? = null,
 
     @SerializedName(ERROR)
     val error: NetworkError? = null

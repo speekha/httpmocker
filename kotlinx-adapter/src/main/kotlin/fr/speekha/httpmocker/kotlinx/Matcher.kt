@@ -30,14 +30,14 @@ internal data class Matcher(
     val request: RequestDescriptor? = null,
 
     @SerialName(RESPONSE)
-    val response: ResponseDescriptor,
+    val response: ResponseDescriptor? = null,
 
     @SerialName(ERROR)
     val error: NetworkError? = null
 ) {
     constructor(model: Model) : this(
         RequestDescriptor(model.request),
-        ResponseDescriptor(model.response),
+        model.response?.let { ResponseDescriptor(it) },
         model.error?.let { NetworkError(it) }
     )
 }

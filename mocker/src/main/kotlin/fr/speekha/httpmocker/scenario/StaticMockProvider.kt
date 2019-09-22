@@ -20,11 +20,12 @@ import fr.speekha.httpmocker.LoadFile
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.model.RequestResult
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.readMatches
 import okhttp3.Request
-import java.io.FileNotFoundException
 
 internal class StaticMockProvider(
     private val filingPolicy: FilingPolicy,
@@ -36,21 +37,29 @@ internal class StaticMockProvider(
 
     private val matcher = RequestMatcher()
 
-    override fun loadResponse(request: Request): ResponseDescriptor? = try {
+    override fun loadResponse(request: Request): ResponseDescriptor? =
+        when (val result = loadResult(request)) {
+            is ResponseDescriptor -> result
+            is NetworkError -> throwError(result)
+            else -> null
+        }
+
+    @SuppressWarnings("TooGenericExceptionCaught")
+    private fun loadResult(request: Request) = try {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")
         loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
-    } catch (e: FileNotFoundException) {
+    } catch (e: Exception) {
         logger.error("Scenario file could not be loaded", e)
         val stackTrace = e.stackTrace.joinToString("\n\tat ")
         ResponseDescriptor(code = 404, body = "${e.javaClass.name}: ${e.message}\n\tat $stackTrace")
     }
 
-    private fun matchRequest(request: Request, list: List<Matcher>?): ResponseDescriptor? =
-        list?.firstOrNull { matcher.matchRequest(it.request, request) }?.response
+    private fun matchRequest(request: Request, list: List<Matcher>?): RequestResult? =
+        list?.firstOrNull { matcher.matchRequest(it.request, request) }?.result
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
     override fun loadResponseBody(request: Request, path: String): ByteArray? =
@@ -64,6 +73,12 @@ internal class StaticMockProvider(
 
     private fun List<String>.cleanFolderList() = filterIndexed { index, segment ->
         segment != ".." && (index == size - 1 || get(index + 1) != "..")
+    }
+
+    private fun throwError(error: NetworkError): Nothing {
+        val exception = Class.forName(error.exceptionType)
+        val constructor = exception.getConstructor(String::class.java)
+        throw constructor.newInstance(error.message) as Throwable
     }
 
     override fun toString(): String = "static mock configuration"

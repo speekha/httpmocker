@@ -78,7 +78,6 @@ private constructor(
 
     private fun proceedWithNetworkCall(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
-    @SuppressWarnings("TooGenericExceptionCaught")
     private fun mockResponse(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")

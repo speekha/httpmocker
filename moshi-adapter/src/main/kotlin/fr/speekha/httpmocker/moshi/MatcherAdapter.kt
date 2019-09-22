@@ -31,20 +31,18 @@ import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
 
 internal class MatcherAdapter {
     @FromJson
-    fun matcherFromJson(matcher: JsonMatcher): Matcher =
-        Matcher(
-            matcher.request.fromJson(),
-            matcher.response.fromJson(),
-            matcher.error?.fromJson()
-        )
+    fun matcherFromJson(matcher: JsonMatcher): Matcher = Matcher(
+        matcher.request.fromJson(),
+        matcher.response?.fromJson(),
+        matcher.error?.fromJson()
+    )
 
     @ToJson
-    fun matcherToJson(matcher: Matcher): JsonMatcher =
-        JsonMatcher(
-            matcher.request.toJson(),
-            matcher.response.toJson(),
-            matcher.error?.toJson()
-        )
+    fun matcherToJson(matcher: Matcher): JsonMatcher = JsonMatcher(
+        matcher.request.toJson(),
+        matcher.response?.toJson(),
+        matcher.error?.toJson()
+    )
 
     private fun JsonRequestDescriptor.fromJson() = RequestDescriptor(
         exactMatch ?: false, protocol, method, host, port, path,

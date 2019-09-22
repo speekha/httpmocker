@@ -86,7 +86,7 @@ internal class RequestRecorder(
         matchers: List<Matcher>,
         requestFile: File,
         record: CallRecord
-    ) = matchers.last().response.bodyFile?.let { responseFile ->
+    ) = matchers.last().response?.bodyFile?.let { responseFile ->
         val storeFile = File(requestFile.parentFile, responseFile)
         record.body?.let { array ->
             saveBodyFile(storeFile, array)
