@@ -32,6 +32,10 @@
       },
       "body": "simple body",
       "body-file": "body_content.txt"
+    },
+    "error": {
+      "type": "java.io.IOException",
+      "message": "error message"
     }
   }
 ]

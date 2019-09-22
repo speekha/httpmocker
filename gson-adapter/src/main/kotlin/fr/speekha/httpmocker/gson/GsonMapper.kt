@@ -22,10 +22,12 @@ import com.google.gson.reflect.TypeToken
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.gson.Header as JsonHeader
 import fr.speekha.httpmocker.gson.Matcher as JsonMatcher
+import fr.speekha.httpmocker.gson.NetworkError as JsonNetworkError
 import fr.speekha.httpmocker.gson.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.gson.ResponseDescriptor as JsonResponseDescriptor
 
@@ -56,10 +58,11 @@ class GsonMapper : Mapper {
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()
 
-    private fun Matcher.fromModel() = JsonMatcher(request.fromModel(), response.fromModel())
+    private fun Matcher.fromModel() =
+        JsonMatcher(request.fromModel(), response.fromModel(), error?.fromModel())
 
     private fun JsonMatcher.toModel() =
-        Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel())
+        Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel(), error?.toModel())
 
     private fun JsonRequestDescriptor.toModel() =
         RequestDescriptor(
@@ -94,10 +97,10 @@ class GsonMapper : Mapper {
 
     private fun Header.fromModel() = JsonHeader(name, value)
 
+    private fun HeaderAdapter.HeaderList?.toModel() = this?.map { it.toModel() } ?: emptyList()
+
     private fun JsonResponseDescriptor.toModel() =
         ResponseDescriptor(delay, code, mediaType, headers.toModel(), body, bodyFile)
-
-    private fun HeaderAdapter.HeaderList?.toModel() = this?.map { it.toModel() } ?: emptyList()
 
     private fun ResponseDescriptor.fromModel() =
         JsonResponseDescriptor(
@@ -110,4 +113,8 @@ class GsonMapper : Mapper {
             body,
             bodyFile
         )
+
+    private fun JsonNetworkError.toModel() = NetworkError(exceptionType, message)
+
+    private fun NetworkError.fromModel() = JsonNetworkError(exceptionType, message)
 }

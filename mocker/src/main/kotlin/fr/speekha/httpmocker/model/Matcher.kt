@@ -29,5 +29,17 @@ data class Matcher(
     /**
      * The mocked response
      */
-    val response: ResponseDescriptor
-)
+    val response: ResponseDescriptor,
+
+    /**
+     * The mocked error
+     */
+    val error: NetworkError? = null
+) {
+    val result: RequestResult
+        get() = response ?: error!!
+//        ?: NetworkError(
+//            "java.io.IOException",
+//            "Incorrect response: no response or error associated with request $request"
+//        )
+}

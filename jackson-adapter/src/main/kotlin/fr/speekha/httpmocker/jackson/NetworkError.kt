@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.moshi
+package fr.speekha.httpmocker.jackson
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
+import fr.speekha.httpmocker.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 
-@JsonClass(generateAdapter = true)
-internal data class Matcher(
+@JsonInclude(JsonInclude.Include.NON_NULL)
+internal data class NetworkError
+@JsonCreator constructor(
 
-    @field:Json(name = REQUEST)
-    val request: RequestDescriptor = RequestDescriptor(),
+    @JsonProperty(EXCEPTION_TYPE)
+    val exceptionType: String = DEFAULT_EXCEPTION,
 
-    @field:Json(name = RESPONSE)
-    val response: ResponseDescriptor,
-
-    @field:Json(name = ERROR)
-    val error: NetworkError? = null
+    @JsonProperty(EXCEPTION_MESSAGE)
+    val message: String = ""
 )

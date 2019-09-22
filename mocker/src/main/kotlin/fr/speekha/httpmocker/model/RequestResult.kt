@@ -16,6 +16,8 @@
 
 package fr.speekha.httpmocker.model
 
+sealed class RequestResult
+
 /**
  * Describes all the elements of a mocked response.
  */
@@ -50,4 +52,20 @@ data class ResponseDescriptor(
      * File to use to load the response body
      */
     val bodyFile: String? = null
-)
+) : RequestResult()
+
+/**
+ * Describes a mocked error happening while answering a request.
+ */
+data class NetworkError(
+
+    /**
+     * The type of the exception to throw
+     */
+    val exceptionType: String = "java.lang.IllegalStateException",
+
+    /**
+     * The exception message
+     */
+    val message: String = ""
+) : RequestResult()

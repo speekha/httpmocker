@@ -16,8 +16,27 @@
 
 package fr.speekha.httpmocker.custom
 
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.BODY_FILE
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.ERROR
+import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.MEDIA_TYPE
+import fr.speekha.httpmocker.METHOD
+import fr.speekha.httpmocker.PARAMS
+import fr.speekha.httpmocker.PATH
+import fr.speekha.httpmocker.PORT
+import fr.speekha.httpmocker.PROTOCOL
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
@@ -32,22 +51,28 @@ internal fun compactJson(json: String): String =
 internal fun List<Matcher>.toJson() =
     joinToString(separator = ", ", prefix = "[\n", postfix = "]") { it.toJson() }
 
-internal fun Matcher.toJson(): String = """  {
-    "request": ${request.toJson()},
-    "response": ${response.toJson()}
-  }
-"""
+internal fun Matcher.toJson(): String = listOf(
+    REQUEST to request.toJson(),
+    RESPONSE to response?.toJson(),
+    ERROR to error?.toJson()
+)
+    .filter { it.second != null }
+    .joinToString(
+        separator = ",\n    ",
+        prefix = "  {\n    ",
+        postfix = "\n  }\n"
+    ) { (key, value) -> "      \"$key\": $value" }
 
 internal fun RequestDescriptor.toJson(): String = listOf(
-    "exact-match" to exactMatch.takeIf { it },
-    "protocol" to protocol.wrap(),
-    "method" to method.wrap(),
-    "host" to host.wrap(),
-    "port" to port.wrap(),
-    "path" to path.wrap(),
-    "headers" to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
-    "params" to params.toJson(),
-    "body" to body.wrap()
+    EXACT_MATCH to exactMatch.takeIf { it },
+    PROTOCOL to protocol.wrap(),
+    METHOD to method.wrap(),
+    HOST to host.wrap(),
+    PORT to port.wrap(),
+    PATH to path.wrap(),
+    HEADERS to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
+    PARAMS to params.toJson(),
+    BODY to body.wrap()
 )
     .filter { it.second != null }
     .joinToString(
@@ -66,14 +91,24 @@ internal fun Map<String, String?>.toJson(): String =
 internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
 
 internal fun ResponseDescriptor.toJson(): String = listOf(
-    "delay" to delay.toString(),
-    "code" to code.toString(),
-    "media-type" to mediaType.wrap(),
-    "headers" to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
-    "body" to body.wrap(),
-    "body-file" to bodyFile.wrap()
+    DELAY to delay.toString(),
+    CODE to code.toString(),
+    MEDIA_TYPE to mediaType.wrap(),
+    HEADERS to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
+    BODY to body.wrap(),
+    BODY_FILE to bodyFile.wrap()
 )
     .filter { it.second != null }
+    .joinToString(
+        separator = ",\n",
+        prefix = "{\n",
+        postfix = "\n    }"
+    ) { (key, value) -> "      \"$key\": $value" }
+
+internal fun NetworkError.toJson(): String = listOf(
+    EXCEPTION_TYPE to exceptionType.wrap(),
+    EXCEPTION_MESSAGE to message.wrap()
+)
     .joinToString(
         separator = ",\n",
         prefix = "{\n",

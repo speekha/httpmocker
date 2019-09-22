@@ -18,19 +18,16 @@ package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 
 @JsonClass(generateAdapter = true)
-internal data class Matcher(
+internal data class NetworkError(
 
-    @field:Json(name = REQUEST)
-    val request: RequestDescriptor = RequestDescriptor(),
+    @field:Json(name = EXCEPTION_TYPE)
+    val exceptionType: String = DEFAULT_EXCEPTION,
 
-    @field:Json(name = RESPONSE)
-    val response: ResponseDescriptor,
-
-    @field:Json(name = ERROR)
-    val error: NetworkError? = null
+    @field:Json(name = EXCEPTION_MESSAGE)
+    val message: String = ""
 )

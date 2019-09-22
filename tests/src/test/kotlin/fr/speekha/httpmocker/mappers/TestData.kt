@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readAsStringList
@@ -54,6 +55,10 @@ internal val completeData = listOf(
             ),
             body = "simple body",
             bodyFile = "body_content.txt"
+        ),
+        NetworkError(
+            exceptionType = "java.io.IOException",
+            message = "error message"
         )
     )
 )
