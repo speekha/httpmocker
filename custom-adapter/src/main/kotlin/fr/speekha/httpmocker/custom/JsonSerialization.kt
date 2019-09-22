@@ -60,32 +60,36 @@ internal fun Matcher.toJson(): String = listOf(
     .joinToString(
         separator = ",\n    ",
         prefix = "  {\n    ",
-        postfix = "\n  }\n"
-    ) { (key, value) -> "      \"$key\": $value" }
+        postfix = "\n  }\n",
+        transform = ::writePair
+    )
 
-internal fun RequestDescriptor.toJson(): String = listOf(
-    EXACT_MATCH to exactMatch.takeIf { it },
-    PROTOCOL to protocol.wrap(),
-    METHOD to method.wrap(),
-    HOST to host.wrap(),
-    PORT to port.wrap(),
-    PATH to path.wrap(),
-    HEADERS to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
-    PARAMS to params.toJson(),
-    BODY to body.wrap()
-)
-    .filter { it.second != null }
-    .joinToString(
-        separator = ",\n",
-        prefix = "{\n",
-        postfix = "\n    }"
-    ) { (key, value) -> "      \"$key\": $value" }
+internal fun RequestDescriptor.toJson(): String {
+    return listOf(
+        EXACT_MATCH to exactMatch.takeIf { it },
+        PROTOCOL to protocol.wrap(),
+        METHOD to method.wrap(),
+        HOST to host.wrap(),
+        PORT to port.wrap(),
+        PATH to path.wrap(),
+        HEADERS to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
+        PARAMS to params.toJson(),
+        BODY to body.wrap()
+    )
+        .filter { it.second != null }
+        .joinToString(
+            separator = COMMA,
+            prefix = OPENING_BRACE,
+            postfix = closingBrace(LEVEL2),
+            transform = ::writePair
+        )
+}
 
 internal fun Map<String, String?>.toJson(): String =
     entries.joinToString(
-        separator = ",\n",
-        prefix = "{\n",
-        postfix = "\n      }"
+        separator = COMMA,
+        prefix = OPENING_BRACE,
+        postfix = closingBrace(LEVEL3)
     ) { "        \"${it.key}\": ${it.value.wrap()}" }
 
 internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
@@ -100,24 +104,39 @@ internal fun ResponseDescriptor.toJson(): String = listOf(
 )
     .filter { it.second != null }
     .joinToString(
-        separator = ",\n",
-        prefix = "{\n",
-        postfix = "\n    }"
-    ) { (key, value) -> "      \"$key\": $value" }
+        separator = COMMA,
+        prefix = OPENING_BRACE,
+        postfix = closingBrace(LEVEL2),
+        transform = ::writePair
+    )
 
 internal fun NetworkError.toJson(): String = listOf(
     EXCEPTION_TYPE to exceptionType.wrap(),
     EXCEPTION_MESSAGE to message.wrap()
 )
     .joinToString(
-        separator = ",\n",
-        prefix = "{\n",
-        postfix = "\n    }"
-    ) { (key, value) -> "      \"$key\": $value" }
+        separator = COMMA,
+        prefix = OPENING_BRACE,
+        postfix = closingBrace(LEVEL2),
+        transform = ::writePair
+    )
 
 private fun String?.wrap() = this?.let { "\"${it.replace("\"", "\\\"")}\"" }
 
 private fun Int?.wrap() = this?.toString()
+
+private fun writePair(pair: Pair<String, Any?>): String {
+    val (key, value) = pair
+    return "      \"$key\": $value"
+}
+
+private fun closingBrace(indent: Int) = "\n${" ".repeat(indent)}}"
+
+private const val ELLIPSIS_LENGTH = 3
+private const val OPENING_BRACE = "{\n"
+private const val COMMA = ",\n"
+private const val LEVEL2 = 4
+private const val LEVEL3 = 6
 
 /**
  * Truncates a string and adds ... to show that the String is incomplete
@@ -126,5 +145,3 @@ private fun Int?.wrap() = this?.toString()
  */
 fun String.truncate(limit: Int): String =
     takeIf { length <= limit } ?: substring(0, limit - ELLIPSIS_LENGTH) + "..."
-
-private const val ELLIPSIS_LENGTH = 3
