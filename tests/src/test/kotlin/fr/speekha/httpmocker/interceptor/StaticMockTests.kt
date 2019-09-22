@@ -37,9 +37,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
@@ -130,6 +132,21 @@ class StaticMockTests : TestWithServer() {
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
+            "When an error is configured as an answer, " +
+                    "then the corresponding exception should be thrown"
+        )
+        fun `should throw a mocked exception`(title: String, mapper: Mapper) {
+            setUpInterceptor(ENABLED, mapper)
+
+            val exception = assertThrows<IOException> {
+                executeGetRequest("/exception")
+            }
+            assertEquals("An exception message", exception.message)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
             "When an error occurs while answering a request, " +
                     "then the request body should be the error"
         )
@@ -138,7 +155,7 @@ class StaticMockTests : TestWithServer() {
             mapper: Mapper
         ) {
             whenever(loadingLambda.invoke(any())) doAnswer {
-                throw FileNotFoundException("Loading error")
+                error("Loading error")
             }
             setUpInterceptor(ENABLED, mapper)
 
@@ -146,7 +163,7 @@ class StaticMockTests : TestWithServer() {
 
             MatcherAssert.assertThat(
                 response, StringStartsWith(
-                    "java.io.FileNotFoundException: Loading error\n" +
+                    "java.lang.IllegalStateException: Loading error\n" +
                             "\tat fr.speekha.httpmocker.interceptor.StaticMockTests"
                 )
             )

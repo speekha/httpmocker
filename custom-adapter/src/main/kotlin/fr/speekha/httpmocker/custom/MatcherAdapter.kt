@@ -20,11 +20,10 @@ import fr.speekha.httpmocker.ERROR
 import fr.speekha.httpmocker.REQUEST
 import fr.speekha.httpmocker.RESPONSE
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.ResponseDescriptor
 
 internal class MatcherAdapter : BaseObjectAdapter<Matcher>() {
 
-    override fun createObject(): Matcher = Matcher(response = ResponseDescriptor())
+    override fun createObject(): Matcher = Matcher()
 
     override fun updateObject(
         reader: JsonStringReader,

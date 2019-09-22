@@ -59,10 +59,10 @@ class GsonMapper : Mapper {
     private class MatcherType : TypeToken<List<JsonMatcher>>()
 
     private fun Matcher.fromModel() =
-        JsonMatcher(request.fromModel(), response.fromModel(), error?.fromModel())
+        JsonMatcher(request.fromModel(), response?.fromModel(), error?.fromModel())
 
     private fun JsonMatcher.toModel() =
-        Matcher(request?.toModel() ?: RequestDescriptor(), response.toModel(), error?.toModel())
+        Matcher(request?.toModel() ?: RequestDescriptor(), response?.toModel(), error?.toModel())
 
     private fun JsonRequestDescriptor.toModel() =
         RequestDescriptor(

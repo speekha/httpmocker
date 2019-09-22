@@ -29,7 +29,7 @@ internal data class Matcher
     val request: RequestDescriptor = RequestDescriptor(),
 
     @JsonProperty(RESPONSE)
-    val response: ResponseDescriptor,
+    val response: ResponseDescriptor? = null,
 
     @JsonProperty(ERROR)
     val error: NetworkError? = null

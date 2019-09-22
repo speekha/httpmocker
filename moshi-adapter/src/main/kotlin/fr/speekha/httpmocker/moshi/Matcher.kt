@@ -29,7 +29,7 @@ internal data class Matcher(
     val request: RequestDescriptor = RequestDescriptor(),
 
     @field:Json(name = RESPONSE)
-    val response: ResponseDescriptor,
+    val response: ResponseDescriptor? = null,
 
     @field:Json(name = ERROR)
     val error: NetworkError? = null
