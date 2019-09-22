@@ -75,6 +75,7 @@ internal class StaticMockProvider(
         segment != ".." && (index == size - 1 || get(index + 1) != "..")
     }
 
+    @SuppressWarnings("UnsafeCast")
     private fun throwError(error: NetworkError): Nothing {
         val exception = Class.forName(error.exceptionType)
         val constructor = exception.getConstructor(String::class.java)
