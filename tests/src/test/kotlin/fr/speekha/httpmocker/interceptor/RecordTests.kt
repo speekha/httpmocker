@@ -23,10 +23,12 @@ import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readMatches
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -345,6 +347,36 @@ class RecordTests : TestWithServer() {
 
             assertFileExists("$SAVE_FOLDER/record/request_body_0.png")
             assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
+            "When recording a request fails with an exception, " +
+                    "then the exception should be recorded"
+        )
+        fun `recording failure should save error in scenario`(title: String, mapper: Mapper) {
+            setUpInterceptor(mapper)
+
+            val exception = assertThrows<java.net.UnknownHostException> {
+                val request = Request.Builder().url("http://falseUrl.wrong/record/error").build()
+                client.newCall(request).execute()
+            }
+
+            assertFileExists("$SAVE_FOLDER/record/error.json")
+            withFile("$SAVE_FOLDER/record/error.json") {
+                val result = mapper.readMatches(it)
+                val expectedResult = Matcher(
+                    request = RequestDescriptor(
+                        method = "GET"
+                    ),
+                    error = NetworkError(
+                        exceptionType = exception.javaClass.canonicalName,
+                        message = exception.message
+                    )
+                )
+                assertEquals(listOf(expectedResult), result)
+            }
         }
 
         @AfterEach

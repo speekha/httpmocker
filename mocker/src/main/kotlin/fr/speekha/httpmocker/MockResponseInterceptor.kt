@@ -141,11 +141,19 @@ private constructor(
         ResponseDescriptor(code = 404, body = body)
 
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
-        val response = proceedWithNetworkCall(chain)
-        val body = response.body()?.bytes()
-        val record = CallRecord(chain.request(), response, body)
+        val record = try {
+            val response = proceedWithNetworkCall(chain)
+            val body = response.body()?.bytes()
+            CallRecord(chain.request(), response, body)
+        } catch (e: Throwable) {
+            CallRecord(chain.request(), error = e)
+        }
         saveFiles(record)
-        response.copyResponse(body)
+        when {
+            record.response != null -> record.response.copyResponse(record.body)
+            record.error != null -> throw record.error
+            else -> null
+        }
     } ?: error(RECORD_NOT_SUPPORTED_ERROR)
 
     private fun messageForHttpCode(httpCode: Int) =
