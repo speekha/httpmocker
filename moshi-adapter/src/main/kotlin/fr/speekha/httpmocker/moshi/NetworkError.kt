@@ -29,5 +29,5 @@ internal data class NetworkError(
     val exceptionType: String = DEFAULT_EXCEPTION,
 
     @field:Json(name = EXCEPTION_MESSAGE)
-    val message: String = ""
+    val message: String? = null
 )

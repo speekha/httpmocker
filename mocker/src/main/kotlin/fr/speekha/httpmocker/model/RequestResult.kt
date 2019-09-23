@@ -67,5 +67,5 @@ data class NetworkError(
     /**
      * The exception message
      */
-    val message: String = ""
+    val message: String? = null
 ) : RequestResult()

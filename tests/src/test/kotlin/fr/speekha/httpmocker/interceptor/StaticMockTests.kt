@@ -33,8 +33,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -140,6 +139,21 @@ class StaticMockTests : TestWithServer() {
 
             val exception = assertThrows<IOException> {
                 executeGetRequest("/exception")
+            }
+            assertNull(exception.message)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
+            "When an error with a message is configured as an answer, " +
+                    "then the corresponding exception with message should be thrown"
+        )
+        fun `should throw a mocked exception with message`(title: String, mapper: Mapper) {
+            setUpInterceptor(ENABLED, mapper)
+
+            val exception = assertThrows<IOException> {
+                executeGetRequest("/exception_with_message")
             }
             assertEquals("An exception message", exception.message)
         }
