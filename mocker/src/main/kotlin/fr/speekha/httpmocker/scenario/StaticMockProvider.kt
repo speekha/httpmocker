@@ -77,9 +77,13 @@ internal class StaticMockProvider(
 
     @SuppressWarnings("UnsafeCast")
     private fun throwError(error: NetworkError): Nothing {
-        val exception = Class.forName(error.exceptionType)
-        val constructor = exception.getConstructor(String::class.java)
-        throw constructor.newInstance(error.message) as Throwable
+        val exceptionType = Class.forName(error.exceptionType)
+        val exception = if (error.message == null) {
+            exceptionType.newInstance()
+        } else {
+            exceptionType.getConstructor(String::class.java).newInstance(error.message)
+        }
+        throw exception as Throwable
     }
 
     override fun toString(): String = "static mock configuration"

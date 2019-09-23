@@ -1,8 +1,7 @@
 [
   {
     "error": {
-      "type": "java.io.IOException",
-      "message": "An exception message"
+      "type": "java.io.IOException"
     }
   }
 ]

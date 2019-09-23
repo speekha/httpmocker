@@ -27,5 +27,5 @@ internal data class NetworkError(
     val exceptionType: String = DEFAULT_EXCEPTION,
 
     @SerializedName(EXCEPTION_MESSAGE)
-    val message: String = ""
+    val message: String? = null
 )

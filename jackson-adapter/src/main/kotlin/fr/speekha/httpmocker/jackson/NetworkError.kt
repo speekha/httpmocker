@@ -31,5 +31,5 @@ internal data class NetworkError
     val exceptionType: String = DEFAULT_EXCEPTION,
 
     @JsonProperty(EXCEPTION_MESSAGE)
-    val message: String = ""
+    val message: String? = null
 )

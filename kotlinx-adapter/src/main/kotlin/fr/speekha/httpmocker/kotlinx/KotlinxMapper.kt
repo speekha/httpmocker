@@ -116,7 +116,7 @@ private fun JsonElement.toResponse(): ResponseDescriptor = ResponseDescriptor()
 
 private fun JsonElement.toError(): NetworkError = NetworkError(
     jsonObject[EXCEPTION_TYPE]?.asNullableLiteral() ?: "",
-    jsonObject[EXCEPTION_MESSAGE]?.asNullableLiteral() ?: ""
+    jsonObject[EXCEPTION_MESSAGE]?.asNullableLiteral()
 )
 
 private fun ResponseDescriptor.update(
