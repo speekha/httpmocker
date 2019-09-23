@@ -40,7 +40,7 @@ import java.util.stream.Stream
 
 open class TestWithServer {
 
-    private val server = MockWebServer()
+    protected val server = MockWebServer()
 
     protected val mockServerBaseUrl: String
         get() = "http://127.0.0.1:${server.port}"

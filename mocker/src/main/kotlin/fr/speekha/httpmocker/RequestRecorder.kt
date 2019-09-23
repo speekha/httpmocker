@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.MediaType
 import okhttp3.Request
@@ -69,13 +70,16 @@ internal class RequestRecorder(
     private fun CallRecord.buildMatcher(previousRecords: List<Matcher>, record: CallRecord) =
         Matcher(
             request.toDescriptor(),
-            response.toDescriptor(
+            response?.toDescriptor(
                 previousRecords.size,
                 record.body
                     ?.takeIf { it.isNotEmpty() }
                     ?.let { getExtension(response.body()?.contentType()) }
-            )
+            ),
+            error?.toDescriptor()
         )
+
+    private fun Throwable.toDescriptor() = NetworkError(javaClass.canonicalName, message)
 
     private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) =
         writeFile(requestFile) {
@@ -130,7 +134,8 @@ internal class RequestRecorder(
 
     internal class CallRecord(
         val request: Request,
-        val response: Response,
-        val body: ByteArray?
+        val response: Response? = null,
+        val body: ByteArray? = null,
+        val error: Throwable? = null
     )
 }
