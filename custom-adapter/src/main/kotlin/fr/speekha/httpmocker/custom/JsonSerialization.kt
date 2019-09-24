@@ -40,14 +40,6 @@ import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-/**
- * Removes all unnecessary blanks from a JSON string.
- * @param json the JSON stream to clean
- * @return the JSON with all useless blanks removed
- */
-internal fun compactJson(json: String): String =
-    json.split("\n").joinToString("") { it.trim() }
-
 internal fun List<Matcher>.toJson() =
     joinToString(separator = ", ", prefix = "[\n  ", postfix = "\n]") { it.toJson(1) }
 
