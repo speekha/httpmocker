@@ -206,7 +206,6 @@ class JsonStringReader(
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
     private fun parseError(message: String, position: Int = index): Nothing {
-        println("Error to come")
         error("$message${extractAfterCurrentPosition(position)}")
     }
 

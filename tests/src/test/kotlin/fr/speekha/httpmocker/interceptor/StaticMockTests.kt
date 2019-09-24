@@ -131,6 +131,23 @@ class StaticMockTests : TestWithServer() {
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
+            "When loaded scenario has neither response nor error, " +
+                    "then a 404 error should occur"
+        )
+        fun `should return a 404 error when the matching request has no response or error`(
+            title: String,
+            mapper: Mapper
+        ) {
+            setUpInterceptor(ENABLED, mapper)
+
+            val response = executeGetRequest("/no_response_no_error")
+
+            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
             "When an error is configured as an answer, " +
                     "then the corresponding exception should be thrown"
         )
