@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
@@ -102,7 +101,7 @@ class StaticMockTests : TestWithServer() {
             mapper: Mapper
         ) {
             whenever(loadingLambda.invoke(any())) doAnswer {
-                throw FileNotFoundException("Loading error")
+                loadingError()
             }
             setUpInterceptor(ENABLED, mapper)
 
@@ -119,7 +118,7 @@ class StaticMockTests : TestWithServer() {
         )
         fun `should return a 404 error when an exception occurs`(title: String, mapper: Mapper) {
             whenever(loadingLambda.invoke(any())) doAnswer {
-                throw FileNotFoundException("Loading error")
+                loadingError()
             }
             setUpInterceptor(ENABLED, mapper)
 
@@ -186,7 +185,7 @@ class StaticMockTests : TestWithServer() {
             mapper: Mapper
         ) {
             whenever(loadingLambda.invoke(any())) doAnswer {
-                error("Loading error")
+                loadingError()
             }
             setUpInterceptor(ENABLED, mapper)
 
@@ -705,5 +704,9 @@ class StaticMockTests : TestWithServer() {
             .build()
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    }
+
+    private fun loadingError(): Nothing {
+        error("Loading error")
     }
 }
