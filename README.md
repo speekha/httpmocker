@@ -24,7 +24,7 @@ can be reused later.
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.6'
+httpmocker_version = '1.1.7'
 ```
 
 ## Gradle 
@@ -65,19 +65,19 @@ you need to add is the corresponding
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.6"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.1.7"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.6"
+implementation "fr.speekha.httpmocker:gson-adapter:1.1.7"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.6"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.1.7"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.6"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.7"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.6"
+implementation "fr.speekha.httpmocker:custom-adapter:1.1.7"
 ```
 
 If none of those options suits your needs or if you would prefer to only use dynamic mocks, you can add 
@@ -85,7 +85,7 @@ the main dependency to your project (using static mocks will require that you pr
 of the `Mapper` class):
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.6"
+implementation "fr.speekha.httpmocker:mocker:1.1.7"
 ```
 
 #### External dependencies
@@ -194,48 +194,66 @@ be omitted altogether (in this case, all requests match):
 
 Here is an example of scenario in JSON form:
  
- ```json
- [
-   {
-     "request": {
-       "method": "post",
-       "headers": {
-         "myHeader": "myHeaderValue"
-       },
-       "params": {
-         "myParam": "myParamValue"
-       },
-       "body": ".*1.*"
-     },
-     "response": {
-       "delay": 50,
-       "code": 200,
-       "media-type": "application/json",
-       "headers": {
-         "myHeader": "headerValue1"
-       },
-       "body-file": "body_content.txt"
-     }
-   }, {
-        "response": {
-          "delay": 50,
-          "code": 200,
-          "media-type": "application/json",
-          "headers": {
-            "myHeader": "headerValue2"
-          },
-          "body": "No body here"
-        }
-   }
- ]
- ```
+```json
+[
+  {
+    "request": {
+      "method": "post",
+      "headers": {
+        "myHeader": "myHeaderValue"
+      },
+      "params": {
+        "myParam": "myParamValue"
+      },
+      "body": ".*1.*"
+    },
+    "response": {
+      "delay": 50,
+      "code": 200,
+      "media-type": "application/json",
+      "headers": {
+        "myHeader": "headerValue1"
+      },
+      "body-file": "body_content.txt"
+    }
+  }, {
+       "response": {
+         "delay": 50,
+         "code": 200,
+         "media-type": "application/json",
+         "headers": {
+           "myHeader": "headerValue2"
+         },
+         "body": "No body here"
+       }
+  }
+]
+```
  
- In this example, a POST request on the corresponding URL, including a query param "myParam" with the value 
- "myParamValue", a header "myHeader" with the value "myHeaderValue" and a body containing the digit '1' (based on 
- the regex used as body) will match the first case: it will be answered a HTTP 200 response of type 
- "application/json", with a header "myHeader" of value "headerValue1". The body for this response will be found in 
- a nearby file name "body_content.txt". In any other cases, the request will be answered with the second response:
- a HTTP 200 response with "headerValue2" as header and a simple string "No body here" as body.
+In this example, a POST request on the corresponding URL, including a query param "myParam" with the value 
+"myParamValue", a header "myHeader" with the value "myHeaderValue" and a body containing the digit '1' (based on 
+the regex used as body) will match the first case: it will be answered a HTTP 200 response of type 
+"application/json", with a header "myHeader" of value "headerValue1". The body for this response will be found in 
+a nearby file name "body_content.txt". In any other cases, the request will be answered with the second response:
+a HTTP 200 response with "headerValue2" as header and a simple string "No body here" as body.
+
+Finally, in some cases, network connections might fail with an exception instead of a HTTP error code. This kind
+of scenario can also be mocked quite simply. All that is required is to replace the response section by an error 
+one, as in the example below:
+
+```json
+[
+  {
+    "request": {
+      "method": "get"
+    },
+    "error": {
+      "type": "java.io.IOException",
+      "message": "Connection was reset by server"
+    }
+  }
+]
+```
 
 ## Author
 
