@@ -70,13 +70,13 @@ private constructor(
     }
 
     private fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
-        Mode.DISABLED -> proceedWithNetworkCall(chain)
+        Mode.DISABLED -> executeNetworkCall(chain)
         Mode.ENABLED -> mockResponse(request) ?: buildResponse(request, responseNotFound(), null)
-        Mode.MIXED -> mockResponse(request) ?: proceedWithNetworkCall(chain)
+        Mode.MIXED -> mockResponse(request) ?: executeNetworkCall(chain)
         Mode.RECORD -> recordCall(chain)
     }
 
-    private fun proceedWithNetworkCall(chain: Interceptor.Chain) = chain.proceed(chain.request())
+    private fun executeNetworkCall(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
     private fun mockResponse(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
@@ -140,22 +140,26 @@ private constructor(
     private fun responseNotFound(body: String = "Page not found") =
         ResponseDescriptor(code = 404, body = body)
 
-    @SuppressWarnings("TooGenericExceptionCaught")
-    private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
-        val record = try {
-            val response = proceedWithNetworkCall(chain)
-            val body = response.body()?.bytes()
-            CallRecord(chain.request(), response, body)
-        } catch (e: Throwable) {
-            CallRecord(chain.request(), error = e)
-        }
-        saveFiles(record)
-        when {
-            record.response != null -> record.response.copyResponse(record.body)
-            record.error != null -> throw record.error
-            else -> null
-        }
+    private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.let { recorder ->
+        val record = convertCallResult(chain)
+        recorder.saveFiles(record)
+        proceedWithCallResult(record)
     } ?: error(RECORD_NOT_SUPPORTED_ERROR)
+
+    @SuppressWarnings("TooGenericExceptionCaught")
+    private fun convertCallResult(chain: Interceptor.Chain): CallRecord = try {
+        val response = executeNetworkCall(chain)
+        val body = response.body()?.bytes()
+        CallRecord(chain.request(), response, body)
+    } catch (e: Throwable) {
+        CallRecord(chain.request(), error = e)
+    }
+
+    private fun proceedWithCallResult(record: CallRecord): Response? = when {
+        record.response != null -> record.response.copyResponse(record.body)
+        record.error != null -> throw record.error
+        else -> null
+    }
 
     private fun messageForHttpCode(httpCode: Int) =
         HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
