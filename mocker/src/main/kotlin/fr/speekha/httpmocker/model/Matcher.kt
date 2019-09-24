@@ -36,10 +36,6 @@ data class Matcher(
      */
     val error: NetworkError? = null
 ) {
-    val result: RequestResult
-        get() = response ?: error!!
-//        ?: NetworkError(
-//            "java.io.IOException",
-//            "Incorrect response: no response or error associated with request $request"
-//        )
+    val result: RequestResult?
+        get() = response ?: error
 }
