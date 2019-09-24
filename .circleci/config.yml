@@ -11,7 +11,7 @@ references:
       JVM_OPTS: -Xmx3g
 
 commands:
-  restore_source_and_gradle_gradle:
+  restore_sources_and_gradle:
     description: "Restores previous build steps state"
     steps:
       - restore_cache:
@@ -34,7 +34,7 @@ commands:
       module:
         type: string
     steps:
-      - restore_source_and_gradle_gradle
+      - restore_sources_and_gradle
       - restore_cache:
           keys:
             - build-mocker-{{ .Branch }}-{{ .Revision }}
@@ -48,7 +48,7 @@ commands:
   restore_all_caches:
     description: "Restores previous build steps state"
     steps:
-      - restore_source_and_gradle_gradle
+      - restore_sources_and_gradle
       - restore_cache:
           keys:
             - build-mocker-{{ .Branch }}-{{ .Revision }}
@@ -72,10 +72,10 @@ orbs:
   codecov: codecov/codecov@1.0.2
 
 jobs:
-  build_core:
+  init_workspace:
     <<: *container_config
     steps:
-      - restore_source_and_gradle_gradle
+      - restore_sources_and_gradle
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies --stacktrace
@@ -94,6 +94,10 @@ jobs:
           key: source-{{ .Branch }}-{{ .Revision }}
           paths:
             - "."
+  build_core:
+    <<: *container_config
+    steps:
+      - restore_sources_and_gradle
       - run:
           name: Build
           command: ./gradlew mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
@@ -129,7 +133,7 @@ jobs:
   build_demo:
     <<: *container_config
     steps:
-      - restore_source_and_gradle_gradle
+      - restore_sources_and_gradle
       - restore_cache:
           keys:
             - build-mocker-{{ .Branch }}-{{ .Revision }}
@@ -179,7 +183,7 @@ jobs:
   quality:
     <<: *container_config
     steps:
-      - restore_all_caches
+      - restore_sources_and_gradle
       - run:
           name: Check quality
           command: ./gradlew detekt ktlintCheck lint --stacktrace
@@ -236,7 +240,10 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build_core
+      - init_workspace
+      - build_core:
+          requires:
+            - init_workspace
       - build_jackson:
           requires:
             - build_core
@@ -271,11 +278,7 @@ workflows:
             - build_kotlinx
       - quality:
           requires:
-            - build_jackson
-            - build_gson
-            - build_moshi
-            - build_custom
-            - build_kotlinx
+            - init_workspace
       - publish_snapshot:
           requires:
             - test
