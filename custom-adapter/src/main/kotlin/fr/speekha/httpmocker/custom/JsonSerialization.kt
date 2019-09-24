@@ -49,94 +49,78 @@ internal fun compactJson(json: String): String =
     json.split("\n").joinToString("") { it.trim() }
 
 internal fun List<Matcher>.toJson() =
-    joinToString(separator = ", ", prefix = "[\n", postfix = "]") { it.toJson() }
+    joinToString(separator = ", ", prefix = "[\n  ", postfix = "\n]") { it.toJson(1) }
 
-internal fun Matcher.toJson(): String = listOf(
-    REQUEST to request.toJson(),
-    RESPONSE to response?.toJson(),
-    ERROR to error?.toJson()
-)
-    .filter { it.second != null }
-    .joinToString(
-        separator = ",\n    ",
-        prefix = "  {\n    ",
-        postfix = "\n  }\n",
-        transform = ::writePair
+internal fun Matcher.toJson(indent: Int): String {
+    val incrementIndent = indent + 1
+    return writeObjectFields(
+        indent,
+        REQUEST to request.toJson(incrementIndent),
+        RESPONSE to response?.toJson(incrementIndent),
+        ERROR to error?.toJson(incrementIndent)
     )
-
-internal fun RequestDescriptor.toJson(): String {
-    return listOf(
-        EXACT_MATCH to exactMatch.takeIf { it },
-        PROTOCOL to protocol.wrap(),
-        METHOD to method.wrap(),
-        HOST to host.wrap(),
-        PORT to port.wrap(),
-        PATH to path.wrap(),
-        HEADERS to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
-        PARAMS to params.toJson(),
-        BODY to body.wrap()
-    )
-        .filter { it.second != null }
-        .joinToString(
-            separator = COMMA,
-            prefix = OPENING_BRACE,
-            postfix = closingBrace(LEVEL2),
-            transform = ::writePair
-        )
 }
 
-internal fun Map<String, String?>.toJson(): String =
-    entries.joinToString(
-        separator = COMMA,
-        prefix = OPENING_BRACE,
-        postfix = closingBrace(LEVEL3)
-    ) { "        \"${it.key}\": ${it.value.wrap()}" }
+internal fun RequestDescriptor.toJson(indent: Int): String = writeObjectFields(
+    indent,
+    EXACT_MATCH to exactMatch.takeIf { it },
+    PROTOCOL to protocol.wrap(),
+    METHOD to method.wrap(),
+    HOST to host.wrap(),
+    PORT to port.wrap(),
+    PATH to path.wrap(),
+    HEADERS to "{\n        ${headers.joinToString(separator = ",\n        ") { it.toJson() }}\n      }",
+    PARAMS to params.toJson(indent + 1),
+    BODY to body.wrap()
+)
 
-internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
-
-internal fun ResponseDescriptor.toJson(): String = listOf(
+internal fun ResponseDescriptor.toJson(indent: Int): String = writeObjectFields(
+    indent,
     DELAY to delay.toString(),
     CODE to code.toString(),
     MEDIA_TYPE to mediaType.wrap(),
-    HEADERS to "{${headers.joinToString(separator = ",") { it.toJson() }}}",
+    HEADERS to "{\n        ${headers.joinToString(separator = ",\n        ") { it.toJson() }}\n      }",
     BODY to body.wrap(),
     BODY_FILE to bodyFile.wrap()
 )
-    .filter { it.second != null }
-    .joinToString(
-        separator = COMMA,
-        prefix = OPENING_BRACE,
-        postfix = closingBrace(LEVEL2),
-        transform = ::writePair
-    )
 
-internal fun NetworkError.toJson(): String = listOf(
+internal fun NetworkError.toJson(indent: Int): String = writeObjectFields(
+    indent,
     EXCEPTION_TYPE to exceptionType.wrap(),
     EXCEPTION_MESSAGE to message.wrap()
 )
-    .joinToString(
+
+internal fun Map<String, String?>.toJson(indent: Int): String =
+    entries.joinToString(
         separator = COMMA,
         prefix = OPENING_BRACE,
-        postfix = closingBrace(LEVEL2),
-        transform = ::writePair
-    )
+        postfix = closingBrace(indent)
+    ) { writePair(indent + 1, it.key to it.value.wrap()) }
+
+internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
+
+private fun writeObjectFields(level: Int, vararg pairs: Pair<String, Any?>) =
+    pairs.filter { it.second != null }
+        .joinToString(
+            separator = COMMA,
+            prefix = OPENING_BRACE,
+            postfix = closingBrace(level)
+        ) { writePair(level + 1, it) }
 
 private fun String?.wrap() = this?.let { "\"${it.replace("\"", "\\\"")}\"" }
 
 private fun Int?.wrap() = this?.toString()
 
-private fun writePair(pair: Pair<String, Any?>): String {
+private fun writePair(indent: Int, pair: Pair<String, Any?>): String {
     val (key, value) = pair
-    return "      \"$key\": $value"
+    return "${" ".repeat(indent * 2)}\"$key\": $value"
 }
 
-private fun closingBrace(indent: Int) = "\n${" ".repeat(indent)}}"
+private fun closingBrace(indent: Int) = "\n${" ".repeat(indent * 2)}}"
 
 private const val ELLIPSIS_LENGTH = 3
 private const val OPENING_BRACE = "{\n"
 private const val COMMA = ",\n"
-private const val LEVEL2 = 4
-private const val LEVEL3 = 6
 
 /**
  * Truncates a string and adds ... to show that the String is incomplete

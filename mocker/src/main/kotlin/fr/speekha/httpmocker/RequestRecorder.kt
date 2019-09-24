@@ -64,20 +64,22 @@ internal class RequestRecorder(
             } else {
                 emptyList()
             }
-            return previousRecords + buildMatcher(previousRecords, record)
+            return previousRecords + buildMatcher(previousRecords)
         }
 
-    private fun CallRecord.buildMatcher(previousRecords: List<Matcher>, record: CallRecord) =
+    private fun CallRecord.buildMatcher(previousRecords: List<Matcher>) =
         Matcher(
             request.toDescriptor(),
             response?.toDescriptor(
                 previousRecords.size,
-                record.body
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.let { getExtension(response.body()?.contentType()) }
+                getExtension()
             ),
             error?.toDescriptor()
         )
+
+    private fun CallRecord.getExtension() =
+        body?.takeIf { it.isNotEmpty() }
+            ?.let { getExtension(response?.body()?.contentType()) }
 
     private fun Throwable.toDescriptor() = NetworkError(javaClass.canonicalName, message)
 
