@@ -19,6 +19,7 @@ package fr.speekha.httpmocker
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -51,21 +52,27 @@ internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.bo
 internal fun Request.toDescriptor() = RequestDescriptor(
     method = method(),
     body = body()?.readAsString(),
-    params = url().queryParameterNames().associate { it to (url().queryParameter(it) ?: "") },
-    headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
+    params = parseQueryParameters(),
+    headers = headers().parseHeaders { headers(it) }
 )
 
 /**
  * Converts an OkHttp Response to a mock entry
  * @return the response description
  */
-internal fun Response.toDescriptor(duplicates: Int, extension: String?) = ResponseDescriptor(
+internal fun Response.toDescriptor(duplicates: Int, fileExtension: String?) = ResponseDescriptor(
     code = code(),
-    bodyFile = extension?.let {
+    bodyFile = fileExtension?.let {
         request().url().toBodyFile() + "_body_$duplicates$it"
     },
-    headers = headers().names().flatMap { name -> headers(name).map { Header(name, it) } }
+    headers = headers().parseHeaders { headers(it) }
 )
+
+private fun Headers.parseHeaders(getHeaders: (String) -> List<String>) =
+    names().flatMap { name -> getHeaders(name).map { Header(name, it) } }
+
+private fun Request.parseQueryParameters() =
+    url().queryParameterNames().associateWith { (url().queryParameter(it) ?: "") }
 
 private fun HttpUrl.toBodyFile() = pathSegments().last().takeUnless { it.isNullOrBlank() } ?: "index"
 

@@ -1,0 +1,69 @@
+/*
+ * Copyright 2019 David Blanc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'jacoco'
+
+ext {
+    coverageSourceDirs = 'src/test/java'
+}
+
+jacoco {
+    toolVersion = "0.8.4"
+    reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+    dependsOn = subprojects.test
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports for Debug build"
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    def allClasses = parent.subprojects.stream()
+            .flatMap { project -> project.sourceSets.stream() }
+            .filter { it.name == 'main' }
+            .reduce(files()) { a, b ->
+                a + files(b.output.files.collect {
+                    fileTree(dir: it, exclude: '**/*JsonAdapter.class')
+                })
+            }
+
+    additionalSourceDirs.from = coverageSourceDirs
+    sourceDirectories.from = coverageSourceDirs
+    classDirectories.from = allClasses
+    executionData.from = files("$buildDir/jacoco/test.exec")
+}
+
+configurations { codacy }
+
+dependencies {
+    codacy 'com.codacy:codacy-coverage-reporter:6.0.4'
+}
+
+task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
+    main = "com.codacy.CodacyCoverageReporter"
+    classpath = configurations.codacy
+    args = [
+            "report",
+            "-l",
+            "Kotlin",
+            "-r",
+            "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+    ]
+}

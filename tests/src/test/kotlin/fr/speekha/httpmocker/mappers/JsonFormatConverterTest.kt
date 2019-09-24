@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
+import fr.speekha.httpmocker.JsonFormatConverter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest
@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
+@Suppress("UNUSED_PARAMETER")
 @DisplayName("JSON format conversion")
 class JsonFormatConverterTest {
 
@@ -31,14 +32,14 @@ class JsonFormatConverterTest {
     @MethodSource("dataImport")
     @DisplayName("Given a proper JSON stream to read")
     fun readConversionTest(title: String, input: String, output: String) {
-        assertEquals(output, JsonFormatConverter().import(input))
+        assertEquals(output, JsonFormatConverter().expand(input))
     }
 
     @ParameterizedTest(name = "When input {0}, then output should be properly formatted")
     @MethodSource("dataExport")
     @DisplayName("Given a proper JSON stream to write")
     fun writeConversionTest(title: String, input: String, output: String) {
-        assertEquals(output, JsonFormatConverter().export(input))
+        assertEquals(output, JsonFormatConverter().compact(input))
     }
 
     companion object {
@@ -56,7 +57,12 @@ class JsonFormatConverterTest {
             .stream()
 
         private val testTitles =
-            listOf("is a minimal JSON", "contains an empty header list", "contains one header", "contains duplicate headers")
+            listOf(
+                "is a minimal JSON",
+                "contains an empty header list",
+                "contains one header",
+                "contains duplicate headers"
+            )
 
         private val commonFormat = listOf(
             """

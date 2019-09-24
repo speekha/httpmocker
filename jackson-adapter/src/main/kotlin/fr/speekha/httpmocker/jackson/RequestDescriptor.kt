@@ -21,40 +21,49 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.EXACT_MATCH
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.METHOD
+import fr.speekha.httpmocker.PARAMS
+import fr.speekha.httpmocker.PATH
+import fr.speekha.httpmocker.PORT
+import fr.speekha.httpmocker.PROTOCOL
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 internal data class RequestDescriptor
 @JsonCreator
 constructor(
 
-    @JsonProperty("exact-match")
+    @JsonProperty(EXACT_MATCH)
     val exactMatch: Boolean? = null,
 
-    @JsonProperty("protocol")
+    @JsonProperty(PROTOCOL)
     val protocol: String? = null,
 
-    @JsonProperty("method")
+    @JsonProperty(METHOD)
     val method: String? = null,
 
-    @JsonProperty("host")
+    @JsonProperty(HOST)
     val host: String? = null,
 
-    @JsonProperty("port")
+    @JsonProperty(PORT)
     val port: Int? = null,
 
-    @JsonProperty("path")
+    @JsonProperty(PATH)
     val path: String? = null,
 
-    @JsonProperty("headers")
+    @JsonProperty(HEADERS)
     @JsonDeserialize(using = HeadersDeserializer::class)
     @JsonSerialize(using = HeadersSerializer::class)
     val headers: List<Header> = emptyList(),
 
-    @JsonProperty("params")
+    @JsonProperty(PARAMS)
     @JsonInclude(JsonInclude.Include.ALWAYS)
     val params: Map<String, String?> = emptyMap(),
 
-    @JsonProperty("body")
+    @JsonProperty(BODY)
     val body: String? = null
 
 )

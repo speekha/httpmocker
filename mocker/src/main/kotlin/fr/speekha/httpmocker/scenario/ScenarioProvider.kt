@@ -21,5 +21,4 @@ import okhttp3.Request
 internal interface ScenarioProvider : RequestCallback {
 
     fun loadResponseBody(request: Request, path: String): ByteArray?
-
 }

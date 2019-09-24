@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 David Blanc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package fr.speekha.httpmocker.demo.ui
 
 import androidx.lifecycle.Observer
@@ -7,13 +23,18 @@ import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.jackson.JacksonMapper
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerifyOrder
+import io.mockk.confirmVerified
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
-
 
 @ExperimentalCoroutinesApi
 class MainViewModelTest : ViewModelTest() {
@@ -24,7 +45,7 @@ class MainViewModelTest : ViewModelTest() {
     private val contributions = 1
     private val id = 0L
 
-    private val mockService = mockk<GithubApiEndpoints>()
+    private lateinit var mockService: GithubApiEndpoints
     private val mockResponseInterceptor = MockResponseInterceptor.Builder()
         .parseScenariosWith(JacksonMapper())
         .build()
@@ -33,20 +54,23 @@ class MainViewModelTest : ViewModelTest() {
 
     @Before
     fun setup() {
+        mockService = mockk()
         viewModel = MainViewModel(mockService, mockResponseInterceptor)
     }
 
     @Test
-    fun `should succeed repos and top contributors calls`() = runBlockingTest {
+    fun `should succeed repos and top contributors calls`() {
         val observer = spyk<Observer<Data>>()
-        viewModel.getData().observeForever(observer)
+        runBlocking {
+            viewModel.getData().observeForever(observer)
 
-        coEvery { mockService.listRepositoriesForOrganisation(org) } returns
-                listOf(Repo(id, repo, topContributor = contributor))
-        coEvery { mockService.listContributorsForRepository(org, repo) } returns
-                listOf(User(login = contributor, contributions = contributions))
+            coEvery { mockService.listRepositoriesForOrganisation(org) } returns
+                    listOf(Repo(id, repo, topContributor = contributor))
+            coEvery { mockService.listContributorsForRepository(org, repo) } returns
+                    listOf(User(login = contributor, contributions = contributions))
 
-        viewModel.callService()
+            viewModel.callService().join()
+        }
 
         coVerifyOrder {
             observer.onChanged(Data.Loading)
@@ -67,14 +91,21 @@ class MainViewModelTest : ViewModelTest() {
     }
 
     @Test
-    fun `should succeed repos call and fail top contributors call`() = runBlockingTest {
+    fun `should succeed repos call and fail top contributors call`() {
         val observer = spyk<Observer<Data>>()
-        viewModel.getData().observeForever(observer)
-        coEvery { mockService.listRepositoriesForOrganisation(org) } returns
-                listOf(Repo(id, repo, topContributor = contributor))
-        coEvery { mockService.listContributorsForRepository(org, repo) } throws IOException()
+        runBlocking {
+            viewModel.getData().observeForever(observer)
+            coEvery { mockService.listRepositoriesForOrganisation(org) } returns
+                    listOf(Repo(id, repo, topContributor = contributor))
+            coEvery {
+                mockService.listContributorsForRepository(
+                    org,
+                    repo
+                )
+            } throws IOException("Test exception")
 
-        viewModel.callService()
+            viewModel.callService().join()
+        }
 
         coVerifyOrder {
             observer.onChanged(Data.Loading)
@@ -84,15 +115,18 @@ class MainViewModelTest : ViewModelTest() {
         viewModel.getData().removeObserver(observer)
     }
 
-
     @Test
-    fun `should fail repos call`() = runBlockingTest {
+    fun `should fail repos call`() {
         val errorMessage = "error"
         val observer = spyk<Observer<Data>>()
-        viewModel.getData().observeForever(observer)
-        coEvery { mockService.listRepositoriesForOrganisation(org) } throws IOException(errorMessage)
+        runBlocking {
+            viewModel.getData().observeForever(observer)
+            coEvery { mockService.listRepositoriesForOrganisation(org) } throws IOException(
+                errorMessage
+            )
 
-        viewModel.callService()
+            viewModel.callService().join()
+        }
 
         coVerifyOrder {
             observer.onChanged(Data.Loading)

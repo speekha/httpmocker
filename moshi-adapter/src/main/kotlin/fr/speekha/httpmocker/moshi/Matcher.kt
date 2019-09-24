@@ -16,12 +16,21 @@
 
 package fr.speekha.httpmocker.moshi
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.ERROR
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
 
 @JsonClass(generateAdapter = true)
 internal data class Matcher(
 
+    @field:Json(name = REQUEST)
     val request: RequestDescriptor = RequestDescriptor(),
 
-    val response: ResponseDescriptor
+    @field:Json(name = RESPONSE)
+    val response: ResponseDescriptor? = null,
+
+    @field:Json(name = ERROR)
+    val error: NetworkError? = null
 )

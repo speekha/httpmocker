@@ -16,23 +16,32 @@
 
 package fr.speekha.httpmocker.moshi
 
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import fr.speekha.httpmocker.moshi.Header as JsonHeader
 
-internal class HeaderAdapter {
+internal fun JsonWriter.writeList(list: Iterable<Pair<String, String?>>) {
+    beginObject()
+    serializeNulls = true
+    list.forEach {
+        name(it.first)
+        value(it.second)
+    }
+    serializeNulls = false
+    endObject()
+}
 
-    @FromJson
-    fun headerFromJson(reader: JsonReader): List<JsonHeader> =
-        reader.readList(mutableListOf()) { name, value ->
-            add(
-                fr.speekha.httpmocker.moshi.Header(name, value)
-            )
-        }
+internal fun <T> JsonReader.readList(list: T, addObject: T.(String, String?) -> Unit): T {
+    beginObject()
+    while (hasNext()) {
+        list.addObject(nextName(), readStringOrNull())
+    }
+    endObject()
+    return list
+}
 
-    @ToJson
-    fun headerToJson(writer: JsonWriter, headers: List<JsonHeader>) =
-        writer.writeList(headers.map { it.name to it.value })
+internal fun JsonReader.readStringOrNull(): String? = if (peek() != JsonReader.Token.NULL) {
+    nextString()
+} else {
+    nextNull<Unit>()
+    null
 }

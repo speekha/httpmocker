@@ -18,13 +18,19 @@ package fr.speekha.httpmocker.jackson
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import fr.speekha.httpmocker.ERROR
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
 
 internal data class Matcher
 @JsonCreator constructor(
 
-    @JsonProperty("request")
+    @JsonProperty(REQUEST)
     val request: RequestDescriptor = RequestDescriptor(),
 
-    @JsonProperty("response")
-    val response: ResponseDescriptor
+    @JsonProperty(RESPONSE)
+    val response: ResponseDescriptor? = null,
+
+    @JsonProperty(ERROR)
+    val error: NetworkError? = null
 )

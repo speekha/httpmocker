@@ -16,19 +16,29 @@
 
 package fr.speekha.httpmocker.kotlinx
 
+import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.BODY_FILE
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.MEDIA_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.ResponseDescriptor as Model
 
 @Serializable
 internal data class ResponseDescriptor(
+    @SerialName(DELAY)
     val delay: Long? = null,
+    @SerialName(CODE)
     val code: Int? = null,
-    @SerialName("media-type")
+    @SerialName(MEDIA_TYPE)
     val mediaType: String? = null,
+    @SerialName(HEADERS)
     val headers: List<Header>? = null,
+    @SerialName(BODY)
     val body: String? = null,
-    @SerialName("body-file")
+    @SerialName(BODY_FILE)
     val bodyFile: String? = null
 ) {
     constructor(model: Model) : this(

@@ -47,7 +47,7 @@ private constructor(
      * An arbitrary delay to include when answering requests in order to have a realistic behavior (GUI can display
      * loaders, etc.)
      */
-    var delay: Long = 0
+    private var delay: Long = 0
 
     /**
      * Enables to set the interception mode. @see fr.speekha.httpmocker.MockResponseInterceptor.Mode
@@ -64,30 +64,25 @@ private constructor(
     private val logger = getLogger()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        logger.info("Intercepted request ${chain.request()}: Interceptor is $mode")
-        return when (mode) {
-            Mode.DISABLED -> proceedWithRequest(chain)
-            Mode.ENABLED -> mockResponse(chain.request()) ?: buildResponse(
-                chain.request(),
-                responseNotFound()
-            )
-            Mode.MIXED -> mockResponse(chain.request()) ?: proceedWithRequest(chain)
-            Mode.RECORD -> recordCall(chain)
-        }
+        val request = chain.request()
+        logger.info("Intercepted request $request: Interceptor is $mode")
+        return respondToRequest(chain, request)
     }
 
-    private fun proceedWithRequest(chain: Interceptor.Chain) = chain.proceed(chain.request())
+    private fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
+        Mode.DISABLED -> executeNetworkCall(chain)
+        Mode.ENABLED -> mockResponse(request) ?: buildResponse(request, responseNotFound(), null)
+        Mode.MIXED -> mockResponse(request) ?: executeNetworkCall(chain)
+        Mode.RECORD -> recordCall(chain)
+    }
+
+    private fun executeNetworkCall(chain: Interceptor.Chain) = chain.proceed(chain.request())
 
     private fun mockResponse(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
-            try {
-                provider.loadResponse(request)?.let { response ->
-                    executeMockResponse(response, request, provider)
-                }
-            } catch (e: Throwable) {
-                logger.error("Scenario file could not be loaded", e)
-                null
+            provider.loadResponse(request)?.let { response ->
+                executeMockResponse(response, request, provider)
             }
         }
         .firstOrNull()
@@ -112,7 +107,7 @@ private constructor(
     private fun buildResponse(
         request: Request,
         response: ResponseDescriptor,
-        provider: ScenarioProvider? = null
+        provider: ScenarioProvider?
     ): Response = Response.Builder()
         .request(request)
         .protocol(Protocol.HTTP_1_1)
@@ -134,7 +129,7 @@ private constructor(
     private fun loadResponseBody(
         request: Request,
         response: ResponseDescriptor,
-        provider: ScenarioProvider? = null
+        provider: ScenarioProvider?
     ) = ResponseBody.create(
         MediaType.parse(response.mediaType), response.bodyFile?.let {
             logger.info("Loading response body from file: $it")
@@ -142,21 +137,36 @@ private constructor(
         } ?: response.body.toByteArray()
     )
 
-    private fun responseNotFound() = ResponseDescriptor(code = 404, body = "Page not found")
+    private fun responseNotFound(body: String = "Page not found") =
+        ResponseDescriptor(code = 404, body = body)
 
-    private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
-        val response = proceedWithRequest(chain)
-        val body = response.body()?.bytes()
-        val record = CallRecord(chain.request(), response, body)
-        saveFiles(record)
-        response.copyResponse(body)
+    private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.let { recorder ->
+        val record = convertCallResult(chain)
+        recorder.saveFiles(record)
+        proceedWithCallResult(record)
     } ?: error(RECORD_NOT_SUPPORTED_ERROR)
+
+    @SuppressWarnings("TooGenericExceptionCaught")
+    private fun convertCallResult(chain: Interceptor.Chain): CallRecord = try {
+        val response = executeNetworkCall(chain)
+        val body = response.body()?.bytes()
+        CallRecord(chain.request(), response, body)
+    } catch (e: Throwable) {
+        CallRecord(chain.request(), error = e)
+    }
+
+    private fun proceedWithCallResult(record: CallRecord): Response? = when {
+        record.response != null -> record.response.copyResponse(record.body)
+        record.error != null -> throw record.error
+        else -> null
+    }
 
     private fun messageForHttpCode(httpCode: Int) =
         HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
 
     /**
-     * Defines the interceptor's state and how it is supposed to respond to requests (intercept them, let them through or record them)
+     * Defines the interceptor's state and how it is supposed to respond to requests (intercept
+     * them, let them through or record them)
      */
     enum class Mode(private val status: String) {
         /** lets every request through without interception. */
@@ -174,34 +184,31 @@ private constructor(
     /**
      * Builder to instantiate an interceptor.
      */
-    class Builder {
-
-        private var filingPolicy: FilingPolicy = MirrorPathPolicy()
-        private var openFile: LoadFile? = null
-        private var mapper: Mapper? = null
-        private var root: File? = null
-        private var simulatedDelay: Long = 0
-        private var interceptorMode: Mode = Mode.DISABLED
-        private val dynamicCallbacks = mutableListOf<RequestCallback>()
-        private var showSavingErrors = false
+    data class Builder(
+        private var filingPolicy: FilingPolicy = MirrorPathPolicy(),
+        private var openFile: LoadFile? = null,
+        private var mapper: Mapper? = null,
+        private var root: File? = null,
+        private var simulatedDelay: Long = 0,
+        private var interceptorMode: Mode = Mode.DISABLED,
+        private val dynamicCallbacks: MutableList<RequestCallback> = mutableListOf(),
+        private var showSavingErrors: Boolean = false
+    ) {
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
          * on the request being intercepted
          * @param policy the naming policy to use for scenario files
          */
-        fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply {
-            filingPolicy = policy
-        }
+        fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply { filingPolicy = policy }
 
         /**
          * For static mocks: Defines the policy used to retrieve the configuration files based
          * on the request being intercepted
          * @param policy a lambda to use as the naming policy for scenario files
          */
-        fun decodeScenarioPathWith(policy: (Request) -> String): Builder = apply {
-            filingPolicy = FilingPolicyBuilder(policy)
-        }
+        fun decodeScenarioPathWith(policy: (Request) -> String): Builder =
+            apply { filingPolicy = FilingPolicyBuilder(policy) }
 
         private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
             override fun getPath(request: Request): String = policy(request)
@@ -212,17 +219,14 @@ private constructor(
          * @param loading a function to load files by name and path as a stream (could use
          * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
          */
-        fun loadFileWith(loading: LoadFile): Builder = apply {
-            openFile = loading
-        }
+        fun loadFileWith(loading: LoadFile): Builder = apply { openFile = loading }
 
         /**
          * Uses dynamic mocks to answer network requests instead of file scenarios
          * @param callback A callback to invoke when a request in intercepted
          */
-        fun useDynamicMocks(callback: RequestCallback): Builder = apply {
-            dynamicCallbacks += callback
-        }
+        fun useDynamicMocks(callback: RequestCallback): Builder =
+            apply { dynamicCallbacks += callback }
 
         /**
          * Uses dynamic mocks to answer network requests instead of file scenarios
@@ -243,26 +247,21 @@ private constructor(
          * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
          * @param objectMapper A Mapper to parse scenario files.
          */
-        fun parseScenariosWith(objectMapper: Mapper): Builder = apply {
-            mapper = objectMapper
-        }
+        fun parseScenariosWith(objectMapper: Mapper): Builder = apply { mapper = objectMapper }
 
         /**
          * Defines the folder where scenarios should be stored when recording
          * @param folder the root folder where saved scenarios should be saved
          */
-        fun saveScenariosIn(folder: File): Builder = apply {
-            root = folder
-        }
+        fun saveScenariosIn(folder: File): Builder = apply { root = folder }
 
         /**
          * Allows to return an error if saving fails when recording.
          * @param failOnError if true, failure to save scenarios will throw an exception.
          * If false, saving exceptions will be ignored.
          */
-        fun failOnRecordingError(failOnError: Boolean): Builder = apply {
-            showSavingErrors = failOnError
-        }
+        fun failOnRecordingError(failOnError: Boolean): Builder =
+            apply { showSavingErrors = failOnError }
 
         /**
          * Allows to set a fake delay for every requests (can be overridden in a scenario) to
@@ -270,25 +269,22 @@ private constructor(
          * animations during your network calls).
          * @param delay default pause delay for network responses in ms
          */
-        fun addFakeNetworkDelay(delay: Long): Builder = apply {
-            simulatedDelay = delay
-        }
+        fun addFakeNetworkDelay(delay: Long): Builder = apply { simulatedDelay = delay }
 
         /**
          * Defines how the interceptor should initially behave (can be enabled, disable, record
          * requests...)
          * @param status The interceptor mode
          */
-        fun setInterceptorStatus(status: Mode): Builder = apply {
-            interceptorMode = status
-        }
+        fun setInterceptorStatus(status: Mode): Builder = apply { interceptorMode = status }
 
         /**
          * Builds the interceptor.
          */
         fun build(): MockResponseInterceptor = MockResponseInterceptor(
             buildProviders(),
-            mapper?.let { RequestRecorder(it, filingPolicy, root, showSavingErrors) }).apply {
+            mapper?.let { RequestRecorder(it, filingPolicy, root, showSavingErrors) }
+        ).apply {
             if (interceptorMode == Mode.RECORD && root == null) {
                 error(NO_ROOT_FOLDER_ERROR)
             }
@@ -304,28 +300,22 @@ private constructor(
         }
 
         private fun buildStaticProvider(): StaticMockProvider? = mapper?.let { jsonMapper ->
-            if (openFile != null) {
-                val loader = openFile ?: error(NO_LOADER_ERROR)
-                StaticMockProvider(filingPolicy, loader, jsonMapper)
-            } else null
+            openFile?.let { fileLoading ->
+                StaticMockProvider(filingPolicy, fileLoading, jsonMapper)
+            }
         }
-
     }
 }
 
 /**
- * A loading function that takes a path as input and returns an InputStream to read from. Typical implementations can use
- * FileInputStream instantiations, Classloader.getResourceAsStream call or use of the AssetManager on Android.
+ * A loading function that takes a path as input and returns an InputStream to read from. Typical
+ * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
+ * use of the AssetManager on Android.
  */
 typealias LoadFile = (String) -> InputStream?
 
 const val RECORD_NOT_SUPPORTED_ERROR =
     "Recording is not supported with the current parameters."
-
-const val NO_LOADER_ERROR = "No method has been provided to load the scenarios."
-
-const val NO_MAPPER_ERROR =
-    "No mapper has been provided to deserialize scenarios. Please specify a Mapper to decode the scenario files."
 
 const val NO_RECORDER_ERROR =
     "Recording configuration is not complete. Please add a Mapper."

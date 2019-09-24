@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.interceptor
 
+import fr.speekha.httpmocker.JsonFormatConverter
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.readAsString
@@ -40,7 +40,7 @@ import java.util.stream.Stream
 
 open class TestWithServer {
 
-    private val server = MockWebServer()
+    protected val server = MockWebServer()
 
     protected val mockServerBaseUrl: String
         get() = "http://127.0.0.1:${server.port}"
@@ -118,15 +118,21 @@ open class TestWithServer {
     companion object {
 
         @JvmStatic
-        fun mappers() : Stream<Arguments> = Stream.of(
-                Arguments.of("Jackson", JacksonMapper()),
-                Arguments.of("Gson", GsonMapper()),
-                Arguments.of("Moshi", MoshiMapper()),
-                Arguments.of("Custom mapper", CustomMapper()),
-                Arguments.of(
-                    "Kotlinx serialization",
-                    KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export)
-                )
+        @Suppress("unused")
+        fun mappers(): Stream<Arguments> = Stream.of(
+            Arguments.of("Jackson", JacksonMapper()),
+            Arguments.of("Gson", GsonMapper()),
+            Arguments.of("Moshi", MoshiMapper()),
+            Arguments.of("Custom mapper", CustomMapper()),
+            Arguments.of(
+                "Kotlinx serialization",
+                KotlinxMapper(JsonFormatConverter()::expand, JsonFormatConverter()::compact)
             )
+        )
+
+        const val REQUEST_OK_CODE = 200
+        const val REQUEST_OK_MESSAGE = "OK"
+        const val NOT_FOUND_CODE = 404
+        const val NOT_FOUND_MESSAGE = "Not Found"
     }
 }

@@ -24,32 +24,10 @@ import com.squareup.moshi.ToJson
 internal class ParamAdapter {
 
     @FromJson
-    fun paramFromJson(reader: JsonReader): Map<String, String?> {
-        val map = mutableMapOf<String, String?>()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            val name = reader.nextName()
-            val value = if (reader.peek() != JsonReader.Token.NULL) {
-                reader.nextString()
-            } else {
-                reader.nextNull<Unit>()
-                null
-            }
-            map += name to value
-        }
-        reader.endObject()
-        return map
-    }
+    fun paramFromJson(reader: JsonReader): Map<String, String?> =
+        reader.readList(mutableMapOf()) { name, value -> put(name, value) }
 
     @ToJson
-    fun paramToJson(writer: JsonWriter, headers: Map<String, String?>) {
-        writer.beginObject()
-        writer.serializeNulls = true
-        headers.forEach {
-            writer.name(it.key)
-            writer.value(it.value)
-        }
-        writer.serializeNulls = false
-        writer.endObject()
-    }
+    fun paramToJson(writer: JsonWriter, params: Map<String, String?>) =
+        writer.writeList(params.entries.map { it.key to it.value })
 }

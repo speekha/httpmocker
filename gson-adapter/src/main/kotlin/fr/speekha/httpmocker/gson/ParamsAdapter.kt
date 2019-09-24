@@ -18,40 +18,21 @@ package fr.speekha.httpmocker.gson
 
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 
 internal class ParamsAdapter : TypeAdapter<ParamsAdapter.ParamList>() {
 
-    class ParamList(map: Map<String, String?> = emptyMap()) : ArrayList<Pair<String, String?>>(map.entries.map { it.key to it.value })
+    internal class ParamList(
+        map: Map<String, String?> = emptyMap()
+    ) : ArrayList<Pair<String, String?>>(map.entries.map { it.key to it.value })
 
     override fun write(writer: JsonWriter?, params: ParamList?) {
-        writer?.run {
-            beginObject()
-            serializeNulls = true
-            params?.forEach {
-                name(it.first)
-                value(it.second)
-            }
-            serializeNulls = false
-            endObject()
-        }
+        writer?.writeList(params) { it }
     }
 
-    override fun read(reader: JsonReader?): ParamList = reader?.run {
-        val list = ParamList()
-        beginObject()
-        while (hasNext()) {
-            val name = nextName()
-            val value = if (peek() == JsonToken.NULL) {
-                nextNull()
-                null
-            } else {
-                nextString()
-            }
-            list += name to value
+    override fun read(reader: JsonReader?): ParamList = ParamList().also {
+        reader?.run {
+            readList(it) { name, value -> name to value }
         }
-        endObject()
-        list
-    } ?: ParamList()
+    }
 }

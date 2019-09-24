@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.mappers
+package fr.speekha.httpmocker.moshi
 
-import fr.speekha.httpmocker.gson.GsonMapper
-import org.junit.jupiter.api.DisplayName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 
-@DisplayName("GSON Adapter")
-class GsonMapperTest : AbstractJsonMapperTest(GsonMapper())
+@JsonClass(generateAdapter = true)
+internal data class NetworkError(
+
+    @field:Json(name = EXCEPTION_TYPE)
+    val exceptionType: String = DEFAULT_EXCEPTION,
+
+    @field:Json(name = EXCEPTION_MESSAGE)
+    val message: String? = null
+)

@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.mappers
+package fr.speekha.httpmocker.jackson
 
-import fr.speekha.httpmocker.custom.CustomMapper
-import org.junit.jupiter.api.DisplayName
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
+import fr.speekha.httpmocker.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 
-@DisplayName("Custom Adapter")
-class CustomAdapterTest : AbstractJsonMapperTest(CustomMapper())
+@JsonInclude(JsonInclude.Include.NON_NULL)
+internal data class NetworkError
+@JsonCreator constructor(
+
+    @JsonProperty(EXCEPTION_TYPE)
+    val exceptionType: String = DEFAULT_EXCEPTION,
+
+    @JsonProperty(EXCEPTION_MESSAGE)
+    val message: String? = null
+)

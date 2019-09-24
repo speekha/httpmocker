@@ -20,50 +20,57 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.moshi.Header as JsonHeader
 import fr.speekha.httpmocker.moshi.Matcher as JsonMatcher
+import fr.speekha.httpmocker.moshi.NetworkError as JsonNetworkError
 import fr.speekha.httpmocker.moshi.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.ResponseDescriptor as JsonResponseDescriptor
 
 internal class MatcherAdapter {
     @FromJson
-    fun matcherFromJson(matcher: JsonMatcher): Matcher {
-        return Matcher(requestFromJson(matcher.request), responseFromJson(matcher.response))
-    }
+    fun matcherFromJson(matcher: JsonMatcher): Matcher = Matcher(
+        matcher.request.fromJson(),
+        matcher.response?.fromJson(),
+        matcher.error?.fromJson()
+    )
 
     @ToJson
-    fun matcherToJson(matcher: Matcher): JsonMatcher {
-        return JsonMatcher(requestToJson(matcher.request), responseToJson(matcher.response))
-    }
-
-    private fun requestFromJson(request: JsonRequestDescriptor) =
-        RequestDescriptor(request.exactMatch ?: false, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerFromJson(it) }, request.params, request.body)
-
-    private fun requestToJson(request: RequestDescriptor) =
-        JsonRequestDescriptor(request.exactMatch.takeIf { it }, request.protocol, request.method, request.host, request.port, request.path, request.headers.map { headerToJson(it) }, request.params, request.body)
-
-    private fun responseFromJson(response: JsonResponseDescriptor) = ResponseDescriptor(
-        response.delay,
-        response.code,
-        response.mediaType,
-        response.headers.map { headerFromJson(it) },
-        response.body,
-        response.bodyFile
+    fun matcherToJson(matcher: Matcher): JsonMatcher = JsonMatcher(
+        matcher.request.toJson(),
+        matcher.response?.toJson(),
+        matcher.error?.toJson()
     )
 
-    private fun responseToJson(response: ResponseDescriptor) = JsonResponseDescriptor(
-        response.delay,
-        response.code,
-        response.mediaType,
-        response.headers.map { headerToJson(it) },
-        response.body,
-        response.bodyFile
+    private fun JsonRequestDescriptor.fromJson() = RequestDescriptor(
+        exactMatch ?: false, protocol, method, host, port, path,
+        headers.map { it.fromJson() }, params, body
     )
 
+    private fun RequestDescriptor.toJson() = JsonRequestDescriptor(
+        exactMatch.takeIf { it }, protocol, method, host, port, path,
+        headers.map { it.toJson() }, params, body
+    )
 
-    private fun headerFromJson(header: JsonHeader): Header = Header(header.name, header.value)
+    private fun JsonResponseDescriptor.fromJson() = ResponseDescriptor(
+        delay, code, mediaType, headers.map { it.fromJson() }, body, bodyFile
+    )
 
-    private fun headerToJson(header: Header) = JsonHeader(header.name, header.value)
+    private fun ResponseDescriptor.toJson() = JsonResponseDescriptor(
+        delay, code, mediaType, headers.map { it.toJson() }, body, bodyFile
+    )
+
+    private fun JsonNetworkError.fromJson() = NetworkError(
+        exceptionType, message
+    )
+
+    private fun NetworkError.toJson() = JsonNetworkError(
+        exceptionType, message
+    )
+
+    private fun JsonHeader.fromJson(): Header = Header(name, value)
+
+    private fun Header.toJson() = JsonHeader(name, value)
 }

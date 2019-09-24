@@ -1,10 +1,18 @@
 version: 2.1
+
+references:
+  container_config: &container_config
+    docker:
+      - image: circleci/android:api-29
+
+    working_directory: ~/data
+
+    environment:
+      JVM_OPTS: -Xmx3g
+
 commands:
-  build-module:
-    description: "Builds a specific module"
-    parameters:
-      module:
-        type: string
+  restore_sources_and_gradle:
+    description: "Restores previous build steps state"
     steps:
       - restore_cache:
           keys:
@@ -14,8 +22,19 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-
             - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  build_module:
+    description: "Builds a specific module"
+    parameters:
+      module:
+        type: string
+    steps:
+      - restore_sources_and_gradle
       - restore_cache:
           keys:
             - build-mocker-{{ .Branch }}-{{ .Revision }}
@@ -26,33 +45,44 @@ commands:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
             - << parameters.module >>/build
+  restore_all_caches:
+    description: "Restores previous build steps state"
+    steps:
+      - restore_sources_and_gradle
+      - restore_cache:
+          keys:
+            - build-mocker-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+
+orbs:
+  codecov: codecov/codecov@1.0.2
 
 jobs:
-  prepare_dependencies:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
-      #TERM: dumb
-
+  init_workspace:
+    <<: *container_config
     steps:
-      - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
-      - checkout
-      - restore_cache:
-          keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
-            - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_sources_and_gradle
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
       - save_cache:
           paths:
             - ~/.gradle/wrapper
@@ -65,69 +95,45 @@ jobs:
           paths:
             - "."
   build_core:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - build-module:
-          module: "mocker"
+      - restore_sources_and_gradle
+      - run:
+          name: Build
+          command: ./gradlew mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
+      - save_cache:
+          key: build-mocker-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - mocker/build
   build_jackson:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - build-module:
+      - build_module:
           module: "jackson-adapter"
   build_gson:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - build-module:
+      - build_module:
           module: "gson-adapter"
   build_moshi:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - build-module:
+      - build_module:
           module: "moshi-adapter"
   build_custom:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - build-module:
+      - build_module:
           module: "custom-adapter"
   build_kotlinx:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - build-module:
+      - build_module:
           module: "kotlinx-adapter"
   build_demo:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
-      - checkout
-      - restore_cache:
-          keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum  "demo/build.gradle" }}-{{ checksum  "mocker/build.gradle" }}-{{ checksum  "jackson-adapter/build.gradle" }}-{{ checksum  "gson-adapter/build.gradle" }}-{{ checksum  "moshi-adapter/build.gradle" }}-{{ checksum  "custom-adapter/build.gradle" }}
-            - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_sources_and_gradle
       - restore_cache:
           keys:
             - build-mocker-{{ .Branch }}-{{ .Revision }}
@@ -136,104 +142,81 @@ jobs:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew demo:clean demo:assemble --stacktrace
-      - save_cache:
-          key: build-demo-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - demo/build
+          command: ./gradlew demo:clean demo:assembleRelease demo:testReleaseUnitTest --stacktrace
+      - store_test_results:
+          path: demo/build/test-results
+      - store_artifacts:
+          path: demo/build/outputs/apk/
+          destination: apks
+      - store_artifacts:
+          path: demo/build/reports
+          destination: reports
   store_artifacts:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
-      - restore_cache:
-          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - checkout
-      - restore_cache:
-          keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-demo-{{ .Branch }}-{{ .Revision }}
+      - restore_all_caches
       - run:
           name: Gather libs
           command: ./prepareArtifacts.sh
       - store_artifacts:
           path: build/libs
           destination: libs
-      - store_artifacts:
-          path: demo/build/outputs/apk/
-          destination: apks
   test:
-    docker:
-      - image: circleci/android:api-29
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *container_config
     steps:
-      - restore_cache:
-          keys:
-            - source-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Branch }}-
-            - source-
-      - restore_cache:
-          key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-      - checkout
-      - restore_cache:
-          keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-gson-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-moshi-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-custom-adapter-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
-            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew tests:test demo:test --stacktrace
+          command: ./gradlew tests:test tests:jacocoTestReport test:sendCoverageToCodacy --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
       - store_test_results:
           path: tests/build/test-results
-      - store_test_results:
-          path: demo/build/test-results
+          format: junit
+      - codecov/upload:
+          file: tests/build/reports/jacoco/test/jacocoTestReport.xml
+      - save_cache:
+          key: build-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - "."
+  quality:
+    <<: *container_config
+    steps:
+      - restore_sources_and_gradle
+      - run:
+          name: Check quality
+          command: ./gradlew detekt ktlintCheck lint --stacktrace
+      - store_artifacts:
+          path: mocker/build/reports
+          destination: reports/mocker
+      - store_artifacts:
+          path: custom-adapter/build/reports
+          destination: reports/custom-adapter
+      - store_artifacts:
+          path: gson-adapter/build/reports
+          destination: reports/gson-adapter
+      - store_artifacts:
+          path: jackson-adapter/build/reports
+          destination: reports/jackson-adapter
+      - store_artifacts:
+          path: kotlinx-adapter/build/reports
+          destination: reports/kotlinx-adapter
+      - store_artifacts:
+          path: moshi-adapter/build/reports
+          destination: reports/moshi-adapter
+      - store_artifacts:
+          path: tests/build/reports
+          destination: reports/tests
+      - store_artifacts:
+          path: demo/build/reports
+          destination: reports/demo
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
             - "."
   publish_snapshot:
-    docker:
-      - image: circleci/android:api-29
+    <<: *container_config
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -243,8 +226,7 @@ jobs:
           name: Publish
           command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
   publish_release:
-    docker:
-      - image: circleci/android:api-29
+    <<: *container_config
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -258,10 +240,10 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - prepare_dependencies
+      - init_workspace
       - build_core:
           requires:
-            - prepare_dependencies
+            - init_workspace
       - build_jackson:
           requires:
             - build_core
@@ -287,7 +269,6 @@ workflows:
             - build_moshi
             - build_custom
             - build_kotlinx
-            - build_demo
       - test:
           requires:
             - build_jackson
@@ -295,9 +276,13 @@ workflows:
             - build_moshi
             - build_custom
             - build_kotlinx
+      - quality:
+          requires:
+            - init_workspace
       - publish_snapshot:
           requires:
             - test
+            - quality
           filters:
             branches:
               only: develop

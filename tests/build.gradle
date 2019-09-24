@@ -16,6 +16,7 @@
 
 apply plugin: 'kotlin'
 
+
 test {
     options {
         useJUnitPlatform()
@@ -56,5 +57,6 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
 
     testImplementation "org.slf4j:slf4j-simple:$slf4j_version"
-
 }
+
+apply from: '../gradle/coverage.gradle'

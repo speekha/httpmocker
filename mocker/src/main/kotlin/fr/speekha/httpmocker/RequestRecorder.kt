@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.policies.FilingPolicy
 import okhttp3.MediaType
 import okhttp3.Request
@@ -36,6 +37,7 @@ internal class RequestRecorder(
 
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     fun saveFiles(record: CallRecord) {
         try {
             val requestFile = getRequestFilePath(record)
@@ -57,22 +59,29 @@ internal class RequestRecorder(
 
     private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> =
         with(record) {
-            val previousRecords: List<Matcher> = if (requestFile.exists())
-                mapper.readMatches(requestFile).toMutableList()
-            else emptyList()
-            return previousRecords + buildMatcher(previousRecords, record)
+            val previousRecords: List<Matcher> = if (requestFile.exists()) {
+                mapper.readMatches(requestFile) ?: emptyList()
+            } else {
+                emptyList()
+            }
+            return previousRecords + buildMatcher(previousRecords)
         }
 
-    private fun CallRecord.buildMatcher(previousRecords: List<Matcher>, record: CallRecord) =
+    private fun CallRecord.buildMatcher(previousRecords: List<Matcher>) =
         Matcher(
             request.toDescriptor(),
-            response.toDescriptor(
+            response?.toDescriptor(
                 previousRecords.size,
-                record.body
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.let { getExtension(response.body()?.contentType()) }
-            )
+                getExtension()
+            ),
+            error?.toDescriptor()
         )
+
+    private fun CallRecord.getExtension() =
+        body?.takeIf { it.isNotEmpty() }
+            ?.let { getExtension(response?.body()?.contentType()) }
+
+    private fun Throwable.toDescriptor() = NetworkError(javaClass.canonicalName, message)
 
     private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) =
         writeFile(requestFile) {
@@ -83,7 +92,7 @@ internal class RequestRecorder(
         matchers: List<Matcher>,
         requestFile: File,
         record: CallRecord
-    ) = matchers.last().response.bodyFile?.let { responseFile ->
+    ) = matchers.last().response?.bodyFile?.let { responseFile ->
         val storeFile = File(requestFile.parentFile, responseFile)
         record.body?.let { array ->
             saveBodyFile(storeFile, array)
@@ -125,10 +134,10 @@ internal class RequestRecorder(
     private fun getExtension(contentType: MediaType?) =
         extensionMappings[contentType.toString()] ?: ".txt"
 
-    class CallRecord(
+    internal class CallRecord(
         val request: Request,
-        val response: Response,
-        val body: ByteArray?
+        val response: Response? = null,
+        val body: ByteArray? = null,
+        val error: Throwable? = null
     )
 }
-

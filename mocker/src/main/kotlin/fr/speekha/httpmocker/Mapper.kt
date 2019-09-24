@@ -23,46 +23,17 @@ import java.io.InputStream
 import java.io.OutputStream
 
 /**
- * Mapper object allowing to load and save mock scenarios.
+ * Mapper object allowing to load and save mock scenarios. It is basically a file parser,
+ * allowing to convert lists of Matcher objects to text file (JSON or other) and back
  */
-interface Mapper : Parser {
-
-    /**
-     * Reads possible matches from a JSON input stream
-     * @param stream the JSON data as an input stream
-     * @return the corresponding data objects
-     */
-    fun readMatches(stream: InputStream): List<Matcher> = deserialize(stream.readAsString())
-
-    /**
-     * Reads possible matches from a JSON input stream
-     * @param file the JSON data as a File
-     * @return the corresponding data objects
-     */
-    fun readMatches(file: File): List<Matcher> = readMatches(FileInputStream(file))
-
-    /**
-     * Writes possible matches in JSON in an output stream
-     * @param outputStream the stream in which the data will be saved
-     * @param matchers the list of Matchers to serialize
-     */
-    fun writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
-        it.write(serialize(matchers).toByteArray())
-    }
-
-}
-
-/**
- * A file parser, allowing to convert lists of Matcher objects to text file (JSON or other) and back
- */
-interface Parser {
+interface Mapper {
 
     /**
      * Parses a string as a list of Matchers
      * @param payload the serialized data to parse
      * @return the corresponding list
      */
-    fun deserialize(payload: String): List<Matcher>
+    fun deserialize(payload: String): List<Matcher>?
 
     /**
      * Serializes a list of matchers as a string (JSON, XML, CSV...)
@@ -70,4 +41,27 @@ interface Parser {
      * @return a text formatted string representing the list
      */
     fun serialize(matchers: List<Matcher>): String
+}
+
+/**
+ * Reads possible matches from a JSON input stream
+ * @param stream the JSON data as an input stream
+ * @return the corresponding data objects
+ */
+fun Mapper.readMatches(stream: InputStream): List<Matcher>? = deserialize(stream.readAsString())
+
+/**
+ * Reads possible matches from a JSON input stream
+ * @param file the JSON data as a File
+ * @return the corresponding data objects
+ */
+fun Mapper.readMatches(file: File): List<Matcher>? = readMatches(FileInputStream(file))
+
+/**
+ * Writes possible matches in JSON in an output stream
+ * @param outputStream the stream in which the data will be saved
+ * @param matchers the list of Matchers to serialize
+ */
+fun Mapper.writeValue(outputStream: OutputStream, matchers: List<Matcher>) = outputStream.use {
+    it.write(serialize(matchers).toByteArray())
 }

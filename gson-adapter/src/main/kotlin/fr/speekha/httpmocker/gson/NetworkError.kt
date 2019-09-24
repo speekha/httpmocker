@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.mappers
+package fr.speekha.httpmocker.gson
 
-import fr.speekha.httpmocker.kotlinx.JsonFormatConverter
-import fr.speekha.httpmocker.kotlinx.KotlinxMapper
-import org.junit.jupiter.api.DisplayName
+import com.google.gson.annotations.SerializedName
+import fr.speekha.httpmocker.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
 
-@DisplayName("Kotlinx serialization Adapter")
-class KotlinxMapperTest :
-    AbstractJsonMapperTest(KotlinxMapper(JsonFormatConverter()::import, JsonFormatConverter()::export))
+internal data class NetworkError(
+
+    @SerializedName(EXCEPTION_TYPE)
+    val exceptionType: String = DEFAULT_EXCEPTION,
+
+    @SerializedName(EXCEPTION_MESSAGE)
+    val message: String? = null
+)

@@ -18,12 +18,14 @@ package fr.speekha.httpmocker.jackson
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import fr.speekha.httpmocker.NAME
+import fr.speekha.httpmocker.VALUE
 
 internal data class Header
 @JsonCreator constructor(
-    @JsonProperty("name")
+    @JsonProperty(NAME)
     val name: String = "",
 
-    @JsonProperty("value")
+    @JsonProperty(VALUE)
     var value: String? = null
 )

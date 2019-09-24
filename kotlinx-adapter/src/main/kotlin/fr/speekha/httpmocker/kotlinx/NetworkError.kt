@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.mappers
+package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.jackson.JacksonMapper
-import org.junit.jupiter.api.DisplayName
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.NetworkError as Model
 
-@DisplayName("Jackson Adapter")
-class JacksonMapperTest : AbstractJsonMapperTest(JacksonMapper())
+@Serializable
+internal data class NetworkError(
+
+    @SerialName(EXCEPTION_TYPE)
+    val mediaType: String = "",
+
+    @SerialName(EXCEPTION_MESSAGE)
+    val body: String? = null
+) {
+    constructor(model: Model) : this(
+        model.exceptionType,
+        model.message
+    )
+}

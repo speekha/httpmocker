@@ -33,7 +33,10 @@ class JsonStringReader(
      * @return false if the unit being parsed has been completely processed, true if it still
      * contains elements
      */
-    fun hasNext(): Boolean = index < json.length && json[index] != '}' && json[index] != ']'
+    fun hasNext(): Boolean {
+        skipBlanks()
+        return index < json.length && json[index] != '}' && json[index] != ']'
+    }
 
     /**
      * Moves to the next element in an object or a list
@@ -42,7 +45,10 @@ class JsonStringReader(
         val comma = json.indexOf(',', index) + 1
         val brace = json.indexOf('}', index)
         val bracket = json.indexOf(']', index)
-        index = listOf(comma, brace, bracket).filter { it >= index }.min() ?: index
+        index = listOf(comma, brace, bracket)
+            .filter { it >= index && it < json.length }
+            .min()
+            ?: parseError(NO_MORE_TOKEN_ERROR)
     }
 
     /**
@@ -112,13 +118,13 @@ class JsonStringReader(
      * Reads an Integer field value
      * @return the field value as an Integer
      */
-    fun readInt(): Int = parseNumeric(String::toInt)
+    fun readInt(): Int = readNumeric(String::toInt)
 
     /**
      * Reads a Long field value
      * @return the field value as a Long
      */
-    fun readLong(): Long = parseNumeric(String::toLong)
+    fun readLong(): Long = readNumeric(String::toLong)
 
     /**
      * Reads a Boolean field value
@@ -146,11 +152,12 @@ class JsonStringReader(
         return adapter.fromJson(this)
     }
 
-    private fun <T : Number> parseNumeric(convert: String.() -> T): T =
+    private fun <T : Number> readNumeric(convert: String.() -> T): T =
         parseToken(numericPattern, INVALID_NUMBER_ERROR) {
             it.replace(" ", "").convert()
         }
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     private fun <T : Any?> parseToken(
         pattern: Regex,
         error: String,
@@ -201,12 +208,18 @@ class JsonStringReader(
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
-    private fun parseError(message: String, position: Int = index): Nothing =
+    private fun skipBlanks() {
+        while (index < json.length && json[index].isWhitespace()) {
+            index++
+        }
+    }
+
+    private fun parseError(message: String, position: Int = index): Nothing {
         error("$message${extractAfterCurrentPosition(position)}")
+    }
 
     private fun extractAfterCurrentPosition(position: Int) =
-        json.substring(position).truncate(10)
-
+        json.substring(position).truncate(DEFAULT_TRUCATE_LENGTH)
 }
 
 const val WRONG_START_OF_OBJECT_ERROR = "No object starts here: "
@@ -214,12 +227,15 @@ const val NO_FIELD_ID_ERROR = "No field starts here: "
 const val WRONG_END_OF_OBJECT_ERROR = "Object is not entirely processed: "
 const val WRONG_START_OF_LIST_ERROR = "No list starts here: "
 const val WRONG_END_OF_LIST_ERROR = "List is not entirely processed: "
-const val WRONG_START_OF_STRING_ERROR = "No string starts here: "
+const val WRONG_START_OF_STRING_ERROR = "No string starts here"
 const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value for a field: "
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
 const val INVALID_TOKEN_ERROR = "Invalid token value: "
 const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "
+const val NO_MORE_TOKEN_ERROR = "No more token available: "
 
 private val numericPattern = Regex("\\d[\\d ]*")
 private val alphanumericPattern = Regex("[^,}\\]\\s]+")
-private val stringPattern = Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")
+private val stringPattern =
+    Regex("(\"((?=\\\\)\\\\(\"|/|\\\\|b|f|n|r|t|u[0-9a-f]{4})|[^\\\\\"]*)*\")|null")
+private const val DEFAULT_TRUCATE_LENGTH = 10

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 buildscript {
 
@@ -24,13 +25,19 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_version"
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$artifactory_version"
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:8.2.0"
     }
+}
+
+plugins {
+    id "io.gitlab.arturbosch.detekt" version "1.0.0"
+    id "org.jlleitschuh.gradle.ktlint" version "8.2.0"
 }
 
 allprojects {
@@ -41,8 +48,42 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         maven { url "https://kotlin.bintray.com/kotlinx" }
         maven { url "https://dl.bintray.com/kotlin/kotlinx/" }
+    }
+
+    apply plugin:"org.jlleitschuh.gradle.ktlint"
+
+    // Ktlint configuration for sub-projects
+    ktlint {
+        version = "0.34.2"
+        verbose = true
+        android = false
+        reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
+        additionalEditorconfigFile = file("../.editorconfig")
+
+        filter {
+            exclude("**/generated/**")
+            include("**/kotlin/**")
+        }
+    }
+}
+
+subprojects {
+//    tasks.withType<Test> {
+//        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
+//    }
+
+    apply plugin: "io.gitlab.arturbosch.detekt"
+
+    detekt {
+        config = files("../detekt.yml")
+        parallel = true
+        reports {
+            xml { enabled = true }
+            html { enabled = true }
+        }
     }
 }
 

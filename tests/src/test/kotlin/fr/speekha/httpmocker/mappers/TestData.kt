@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readAsStringList
@@ -54,6 +55,10 @@ internal val completeData = listOf(
             ),
             body = "simple body",
             bodyFile = "body_content.txt"
+        ),
+        NetworkError(
+            exceptionType = "java.io.IOException",
+            message = "error message"
         )
     )
 )
@@ -63,11 +68,18 @@ internal val partialData = listOf(
     Matcher(RequestDescriptor(), ResponseDescriptor())
 )
 
+internal val partialDataError = listOf(
+    Matcher(error = NetworkError("SomeExceptionType"))
+)
+
 internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
 
 internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
+
+internal fun getPartialInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()
 
 internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     .map {
@@ -76,19 +88,27 @@ internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     }
 
 internal fun getMinimalOutput() = listOf(
-    ("[{" +
+    "[{" +
             "\"request\":{" +
             "\"headers\":{},\"params\":{}" +
             "}," +
             "\"response\":{" +
             "\"delay\":0,\"code\":200,\"media-type\":\"text/plain\",\"headers\":{},\"body\":\"\"" +
-            "}}]")
+            "}}]"
 )
 
+/**
+ * Check equality after removing all the format enhancement added by the different JSON parsers (
+ * indentation, line feeds, etc.).
+ */
 internal fun testStream(expectedResult: List<String>, actual: String) {
     val result = actual.split('\n')
         .joinToString("") {
-            it.trim().replace(Regex(":\\p{Space}+"), ":")
+            it.trim()
+                .replace(Regex("\\p{Space}*:\\p{Space}+"), ":")
+                .replace("[ ", "[")
+                .replace(" ]", "]")
+                .replace("{ ", "{")
         }
     val expected = expectedResult.joinToString("") { it.trim() }
     assertEquals(expected, result)

@@ -19,6 +19,8 @@ package fr.speekha.httpmocker.mappers
 import fr.speekha.httpmocker.custom.INVALID_BOOLEAN_ERROR
 import fr.speekha.httpmocker.custom.INVALID_NUMBER_ERROR
 import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.NO_FIELD_ID_ERROR
+import fr.speekha.httpmocker.custom.NO_MORE_TOKEN_ERROR
 import fr.speekha.httpmocker.custom.ObjectAdapter
 import fr.speekha.httpmocker.custom.WRONG_END_OF_LIST_ERROR
 import fr.speekha.httpmocker.custom.WRONG_END_OF_OBJECT_ERROR
@@ -26,6 +28,8 @@ import fr.speekha.httpmocker.custom.WRONG_START_OF_LIST_ERROR
 import fr.speekha.httpmocker.custom.WRONG_START_OF_OBJECT_ERROR
 import fr.speekha.httpmocker.custom.WRONG_START_OF_STRING_FIELD_ERROR
 import fr.speekha.httpmocker.custom.truncate
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -51,14 +55,17 @@ class JsonStringReaderTest {
 
         @Test
         fun `When reading an object, then an error should occur`() {
-            val exception = assertThrows<IllegalStateException> { reader.beginObject() }
-            assertEquals(WRONG_START_OF_OBJECT_ERROR, exception.message)
+            assertError<IllegalStateException>(WRONG_START_OF_OBJECT_ERROR) { reader.beginObject() }
         }
 
         @Test
         fun `When reading a list, then an error should occur`() {
-            val exception = assertThrows<IllegalStateException> { reader.beginList() }
-            assertEquals(WRONG_START_OF_LIST_ERROR, exception.message)
+            assertError<IllegalStateException>(WRONG_START_OF_LIST_ERROR) { reader.beginList() }
+        }
+
+        @Test
+        fun `When trying to iterate, then an error should occur`() {
+            assertError<IllegalStateException>(NO_MORE_TOKEN_ERROR) { reader.next() }
         }
     }
 
@@ -106,8 +113,8 @@ class JsonStringReaderTest {
     }
 
     @Nested
-    @DisplayName("Given an object with a numeric field as input")
-    inner class NumericField {
+    @DisplayName("Given an object with a single field as input")
+    inner class Field {
 
         @Test
         fun `When reading the field name, then the proper string should be returned`() {
@@ -116,6 +123,25 @@ class JsonStringReaderTest {
             reader.beginObject()
             assertEquals(result, reader.readFieldName())
         }
+
+        @Test
+        fun `When reading an incorrect field name, then an error should occur`() {
+            val reader = JsonStringReader("{\"field\" \"value\"}")
+            reader.beginObject()
+            assertError<IllegalStateException>(NO_FIELD_ID_ERROR) { reader.readFieldName() }
+        }
+
+        @Test
+        fun `When reading a null field name, then an error should occur`() {
+            val reader = JsonStringReader("{null: \"value\"}")
+            reader.beginObject()
+            assertError<IllegalStateException>(NO_FIELD_ID_ERROR) { reader.readFieldName() }
+        }
+    }
+
+    @Nested
+    @DisplayName("Given an object with a numeric field as input")
+    inner class NumericField {
 
         @Test
         fun `When field is an integer, then its value should be retrieved`() {
@@ -131,8 +157,7 @@ class JsonStringReaderTest {
             val reader = JsonStringReader("{\"field\": \"1 152\" }")
             reader.beginObject()
             reader.readFieldName()
-            val exception = assertThrows<IllegalStateException> { reader.readInt() }
-            assertEquals("$INVALID_NUMBER_ERROR \"1 152\" }", exception.message)
+            assertError<IllegalStateException>(INVALID_NUMBER_ERROR) { reader.readInt() }
         }
 
         @Test
@@ -167,10 +192,8 @@ class JsonStringReaderTest {
             val reader = JsonStringReader("{\"field\": error }")
             reader.beginObject()
             reader.readFieldName()
-            val exception = assertThrows<IllegalStateException> { reader.readBoolean() }
-            assertEquals("$INVALID_BOOLEAN_ERROR error }", exception.message)
+            assertError<IllegalStateException>(INVALID_BOOLEAN_ERROR) { reader.readBoolean() }
         }
-
     }
 
     @Nested
@@ -216,10 +239,8 @@ class JsonStringReaderTest {
         @MethodSource("fr.speekha.httpmocker.mappers.JsonStringReaderTest#stringErrors")
         fun `When String is incorrect, an error should occur`(input: String, output: String) {
             val reader = JsonStringReader(input)
-            val exception = assertThrows<IllegalStateException> { reader.readString() }
-            assertEquals(output, exception.message)
+            assertError<IllegalStateException>(output) { reader.readString() }
         }
-
     }
 
     @Nested
@@ -250,11 +271,7 @@ class JsonStringReaderTest {
                 readFieldName()
                 readString()
                 next()
-                val exception = assertThrows<IllegalStateException> { endObject() }
-                assertEquals(
-                    "$WRONG_END_OF_OBJECT_ERROR\n" +
-                            "  \"fie...", exception.message
-                )
+                assertError<IllegalStateException>(WRONG_END_OF_OBJECT_ERROR) { endObject() }
             }
         }
     }
@@ -286,13 +303,17 @@ class JsonStringReaderTest {
             with(JsonStringReader(complexObject)) {
                 beginObject()
                 readFieldName()
-                val exception = assertThrows<IllegalStateException> {
+                assertError<IllegalStateException>(WRONG_START_OF_OBJECT_ERROR) {
                     readObject(mapAdapter)
                 }
-                assertEquals(
-                    "$WRONG_START_OF_OBJECT_ERROR \"0\",\n" +
-                            " ...", exception.message
-                )
+            }
+        }
+
+        @Test
+        fun `When the object only contains white spaces, then the end of the object should be detected`() {
+            with(JsonStringReader("{\n  \t  \n}")) {
+                beginObject()
+                assertFalse(hasNext())
             }
         }
     }
@@ -301,9 +322,8 @@ class JsonStringReaderTest {
     @DisplayName("Given an object with an array field as input")
     inner class ArrayField {
 
-
         @Test
-        fun `should iterate through list of integers`() {
+        fun `When parsing a list of integers, then the correct list should be returned`() {
             val json = "[1, 2, 3]"
             val list = mutableListOf<Int>()
             with(JsonStringReader(json)) {
@@ -318,7 +338,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should iterate through list of strings`() {
+        fun `When parsing a list of Strings, then the correct list should be returned`() {
             val json = """["1", "2", "3"]"""
             val list = mutableListOf<String?>()
             with(JsonStringReader(json)) {
@@ -333,7 +353,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should iterate through list`() {
+        fun `When parsing a list of Objects, then the correct list should be returned`() {
             val list = mutableListOf<Map<String, String?>>()
             with(JsonStringReader(simpleList)) {
                 beginList()
@@ -361,7 +381,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should detect when list is not entirely processed`() {
+        fun `When finishing to parse a list before the end, then an error should occur`() {
             with(JsonStringReader(simpleList)) {
                 beginList()
                 val map = mutableMapOf<String, String?>()
@@ -373,17 +393,12 @@ class JsonStringReaderTest {
                     map[field] = value
                 }
                 endObject()
-                val exception = assertThrows<IllegalStateException> { endList() }
-                assertEquals(
-                    "$WRONG_END_OF_LIST_ERROR,\n" +
-                            "  {\n" +
-                            " ...", exception.message
-                )
+                assertError<IllegalStateException>(WRONG_END_OF_LIST_ERROR) { endList() }
             }
         }
 
         @Test
-        fun `should iterate through list of lists`() {
+        fun `When parsing a list of lists, then the correct list should be returned`() {
             val json = "[[1, 2, 3],[1, 2, 3]]"
             val list = mutableListOf<List<Int>>()
             with(JsonStringReader(json)) {
@@ -402,6 +417,14 @@ class JsonStringReaderTest {
                 endList()
             }
             assertEquals(listOf(listOf(1, 2, 3), listOf(1, 2, 3)), list)
+        }
+
+        @Test
+        fun `When the list only contains white spaces, then the end of the list should be detected`() {
+            with(JsonStringReader("[\n  \t  \n]")) {
+                beginList()
+                assertFalse(hasNext())
+            }
         }
     }
 
@@ -470,5 +493,13 @@ class JsonStringReaderTest {
             arrayOf("{a test string}", "$WRONG_START_OF_STRING_FIELD_ERROR{a test..."),
             arrayOf("{\"a test string\"}", "$WRONG_START_OF_STRING_FIELD_ERROR{\"a tes...")
         ).map { Arguments.of(*it) }.stream()
+
+        inline fun <reified E : Throwable> assertError(
+            message: String,
+            noinline block: () -> Unit
+        ) {
+            val exception = assertThrows<E>(block)
+            assertThat(exception.message, StringStartsWith(message))
+        }
     }
 }

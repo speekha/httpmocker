@@ -16,22 +16,20 @@
 
 package fr.speekha.httpmocker.custom
 
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
-import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.model.NetworkError
 
-internal class MatcherAdapter : BaseObjectAdapter<Matcher>() {
+internal class ErrorAdapter : BaseObjectAdapter<NetworkError>() {
 
-    override fun createObject(): Matcher = Matcher()
+    override fun createObject(): NetworkError = NetworkError()
 
     override fun updateObject(
         reader: JsonStringReader,
-        builder: Matcher
-    ): Matcher = when (val field = reader.readFieldName()) {
-        REQUEST -> builder.copy(request = reader.readObject(RequestAdapter()))
-        RESPONSE -> builder.copy(response = reader.readObject(ResponseAdapter()))
-        ERROR -> builder.copy(error = reader.readObject(ErrorAdapter()))
+        builder: NetworkError
+    ): NetworkError = when (val field = reader.readFieldName()) {
+        EXCEPTION_TYPE -> builder.copy(exceptionType = reader.readString() ?: "")
+        EXCEPTION_MESSAGE -> builder.copy(message = reader.readString() ?: "")
         else -> unknownFieldError(field)
     }
 }

@@ -16,18 +16,28 @@
 
 package fr.speekha.httpmocker.kotlinx
 
+import fr.speekha.httpmocker.ERROR
+import fr.speekha.httpmocker.REQUEST
+import fr.speekha.httpmocker.RESPONSE
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.Matcher as Model
 
 @Serializable
 internal data class Matcher(
 
+    @SerialName(REQUEST)
     val request: RequestDescriptor? = null,
 
-    val response: ResponseDescriptor
+    @SerialName(RESPONSE)
+    val response: ResponseDescriptor? = null,
+
+    @SerialName(ERROR)
+    val error: NetworkError? = null
 ) {
     constructor(model: Model) : this(
         RequestDescriptor(model.request),
-        ResponseDescriptor(model.response)
+        model.response?.let { ResponseDescriptor(it) },
+        model.error?.let { NetworkError(it) }
     )
 }

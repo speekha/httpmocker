@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @DisplayName("Dynamic Mocks")
 class DynamicMockTests : TestWithServer() {
@@ -40,11 +41,11 @@ class DynamicMockTests : TestWithServer() {
         @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() {
             setupProvider(DISABLED) { null }
-            enqueueServerResponse(200, "body")
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
 
             val response = executeGetRequest("")
 
-            assertResponseCode(response, 200, "OK")
+            assertResponseCode(response, REQUEST_OK_CODE, "OK")
             assertEquals("body", response.body()?.string())
         }
     }
@@ -60,24 +61,25 @@ class DynamicMockTests : TestWithServer() {
 
             val response = executeGetRequest("/unknown")
 
-            assertResponseCode(response, 404, "Not Found")
+            assertResponseCode(response, NOT_FOUND_CODE, "Not Found")
         }
 
         @Test
-        @DisplayName("When an error occurs while answering a request, then a 404 error should occur")
+        @DisplayName("When an error occurs while answering a request, then the exception should be let through")
         fun `should return a 404 error when an exception occurs`() {
             setupProvider(ENABLED) { error("Unexpected error") }
 
-            val response = executeGetRequest("/unknown")
-
-            assertResponseCode(response, 404, "Not Found")
+            assertThrows<IllegalStateException> {
+                executeGetRequest("/unknown")
+            }
         }
 
         @Test
         @DisplayName("When a lambda is provided, then it should be used to answer requests")
         fun `should reply with a dynamically generated response`() {
+            val resultCode = 202
             setupProvider {
-                ResponseDescriptor(code = 202, body = "some random body")
+                ResponseDescriptor(code = resultCode, body = "some random body")
             }
             val response = client.newCall(
                 buildRequest(
@@ -86,17 +88,18 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(202, response.code())
+            assertEquals(resultCode, response.code())
             assertEquals("some random body", response.body()?.string())
         }
 
         @Test
         @DisplayName("When a stateful callback is provided, then it should be used to answer requests")
         fun `should reply with a stateful callback`() {
+            val resultCode = 201
             val body = "Time: ${System.currentTimeMillis()}"
             val callback = object : RequestCallback {
                 override fun loadResponse(request: Request) =
-                    ResponseDescriptor(code = 202, body = body)
+                    ResponseDescriptor(code = resultCode, body = body)
             }
             setupProvider(callback)
 
@@ -107,21 +110,24 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(202, response.code())
+            assertEquals(resultCode, response.code())
             assertEquals(body, response.body()?.string())
         }
 
         @Test
-        @DisplayName("When several callbacks are provided, then they should be called in turn to find the appropriate response")
+        @DisplayName(
+            "When several callbacks are provided, " +
+                    "then they should be called in turn to find the appropriate response"
+        )
         fun `should support multiple callbacks`() {
             val result1 = "First mock"
             val result2 = "Second mock"
 
             interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks {
-                    if (it.url().toString().contains("1"))
-                        ResponseDescriptor(body = result1)
-                    else null
+                .useDynamicMocks { request ->
+                    ResponseDescriptor(body = result1).takeIf {
+                        request.url().toString().contains("1")
+                    }
                 }.useDynamicMocks {
                     ResponseDescriptor(body = result2)
                 }
@@ -149,6 +155,31 @@ class DynamicMockTests : TestWithServer() {
             assertEquals(result2, response2.body()?.string())
         }
 
+        @Test
+        @DisplayName(
+            "When the response is an error, then the proper exception should be thrown"
+        )
+        fun `should support exception results`() {
+
+            interceptor = MockResponseInterceptor.Builder()
+                .useDynamicMocks { request ->
+                    error("Should throw an error")
+                }
+                .setInterceptorStatus(ENABLED)
+                .build()
+
+            client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+
+            assertThrows<IllegalStateException> {
+                client.newCall(
+                    buildRequest(
+                        "http://www.test.fr/request1",
+                        method = "GET"
+                    )
+                ).execute()
+            }
+        }
+
         private fun setupProvider(callback: RequestCallback) {
             interceptor = MockResponseInterceptor.Builder()
                 .useDynamicMocks(callback)
@@ -156,9 +187,7 @@ class DynamicMockTests : TestWithServer() {
                 .build()
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-
         }
-
     }
 
     private fun setupProvider(
