@@ -56,6 +56,16 @@ class JsonMapperTest {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        fun `When input is a partial scenario with error, then default values should be used`(
+            title: String,
+            mapper: Mapper
+        ) {
+            val result = mapper.readMatches(getPartialInputWithError())
+            assertEquals(partialDataError, result)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         fun `When headers contain colons, then their value should be properly parsed`(
             title: String,
             mapper: Mapper
