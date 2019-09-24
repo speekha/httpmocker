@@ -43,7 +43,7 @@ class CustomMapper : Mapper {
             }
         }
 
-    override fun serialize(matchers: List<Matcher>): String = compactJson(matchers.toJson())
+    override fun serialize(matchers: List<Matcher>): String = matchers.toJson()
 }
 
 fun unknownFieldError(field: String): Nothing = error("Unknown field $field")

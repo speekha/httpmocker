@@ -33,7 +33,10 @@ class JsonStringReader(
      * @return false if the unit being parsed has been completely processed, true if it still
      * contains elements
      */
-    fun hasNext(): Boolean = index < json.length && json[index] != '}' && json[index] != ']'
+    fun hasNext(): Boolean {
+        skipBlanks()
+        return index < json.length && json[index] != '}' && json[index] != ']'
+    }
 
     /**
      * Moves to the next element in an object or a list
@@ -205,6 +208,12 @@ class JsonStringReader(
 
     private fun isBlank(start: Int, end: Int) = json.substring(start, end).isBlank()
 
+    private fun skipBlanks() {
+        while (index < json.length && json[index].isWhitespace()) {
+            index++
+        }
+    }
+
     private fun parseError(message: String, position: Int = index): Nothing {
         error("$message${extractAfterCurrentPosition(position)}")
     }
@@ -218,7 +227,7 @@ const val NO_FIELD_ID_ERROR = "No field starts here: "
 const val WRONG_END_OF_OBJECT_ERROR = "Object is not entirely processed: "
 const val WRONG_START_OF_LIST_ERROR = "No list starts here: "
 const val WRONG_END_OF_LIST_ERROR = "List is not entirely processed: "
-const val WRONG_START_OF_STRING_ERROR = "No string starts here: "
+const val WRONG_START_OF_STRING_ERROR = "No string starts here"
 const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value for a field: "
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
 const val INVALID_TOKEN_ERROR = "Invalid token value: "

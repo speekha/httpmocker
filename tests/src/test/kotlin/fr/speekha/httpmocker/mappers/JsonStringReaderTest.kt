@@ -308,6 +308,14 @@ class JsonStringReaderTest {
                 }
             }
         }
+
+        @Test
+        fun `When the object only contains white spaces, then the end of the object should be detected`() {
+            with(JsonStringReader("{\n  \t  \n}")) {
+                beginObject()
+                assertFalse(hasNext())
+            }
+        }
     }
 
     @Nested
@@ -315,7 +323,7 @@ class JsonStringReaderTest {
     inner class ArrayField {
 
         @Test
-        fun `should iterate through list of integers`() {
+        fun `When parsing a list of integers, then the correct list should be returned`() {
             val json = "[1, 2, 3]"
             val list = mutableListOf<Int>()
             with(JsonStringReader(json)) {
@@ -330,7 +338,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should iterate through list of strings`() {
+        fun `When parsing a list of Strings, then the correct list should be returned`() {
             val json = """["1", "2", "3"]"""
             val list = mutableListOf<String?>()
             with(JsonStringReader(json)) {
@@ -345,7 +353,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should iterate through list`() {
+        fun `When parsing a list of Objects, then the correct list should be returned`() {
             val list = mutableListOf<Map<String, String?>>()
             with(JsonStringReader(simpleList)) {
                 beginList()
@@ -373,7 +381,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should detect when list is not entirely processed`() {
+        fun `When finishing to parse a list before the end, then an error should occur`() {
             with(JsonStringReader(simpleList)) {
                 beginList()
                 val map = mutableMapOf<String, String?>()
@@ -390,7 +398,7 @@ class JsonStringReaderTest {
         }
 
         @Test
-        fun `should iterate through list of lists`() {
+        fun `When parsing a list of lists, then the correct list should be returned`() {
             val json = "[[1, 2, 3],[1, 2, 3]]"
             val list = mutableListOf<List<Int>>()
             with(JsonStringReader(json)) {
@@ -409,6 +417,14 @@ class JsonStringReaderTest {
                 endList()
             }
             assertEquals(listOf(listOf(1, 2, 3), listOf(1, 2, 3)), list)
+        }
+
+        @Test
+        fun `When the list only contains white spaces, then the end of the list should be detected`() {
+            with(JsonStringReader("[\n  \t  \n]")) {
+                beginList()
+                assertFalse(hasNext())
+            }
         }
     }
 
