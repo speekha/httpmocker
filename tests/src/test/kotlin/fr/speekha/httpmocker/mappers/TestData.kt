@@ -68,11 +68,18 @@ internal val partialData = listOf(
     Matcher(RequestDescriptor(), ResponseDescriptor())
 )
 
+internal val partialDataError = listOf(
+    Matcher(error = NetworkError("SomeExceptionType"))
+)
+
 internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
 
 internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
+
+internal fun getPartialInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()
 
 internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
     .map {

@@ -140,6 +140,7 @@ private constructor(
     private fun responseNotFound(body: String = "Page not found") =
         ResponseDescriptor(code = 404, body = body)
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.run {
         val record = try {
             val response = proceedWithNetworkCall(chain)
