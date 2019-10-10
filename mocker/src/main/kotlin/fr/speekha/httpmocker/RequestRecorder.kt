@@ -77,9 +77,9 @@ internal class RequestRecorder(
             error?.toDescriptor()
         )
 
-    private fun CallRecord.getExtension() =
-        body?.takeIf { it.isNotEmpty() }
-            ?.let { getExtension(response?.body()?.contentType()) }
+    private fun CallRecord.getExtension() = body?.takeIf { it.isNotEmpty() }
+        ?.let { response?.body()?.contentType() }
+        ?.let { getExtension(it) }
 
     private fun Throwable.toDescriptor() = NetworkError(javaClass.canonicalName, message)
 
@@ -131,8 +131,8 @@ internal class RequestRecorder(
                 mimeType to extension
             } ?: mapOf()
 
-    private fun getExtension(contentType: MediaType?) =
-        extensionMappings[contentType.toString()] ?: ".txt"
+    private fun getExtension(contentType: MediaType) =
+        extensionMappings["${contentType.type()}/${contentType.subtype()}"] ?: ".txt"
 
     internal class CallRecord(
         val request: Request,
