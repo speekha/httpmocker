@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
+package fr.speekha.httpmocker.sax
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "org.slf4j:slf4j-api:$slf4j_version"
+import fr.speekha.httpmocker.model.Matcher
+
+class ScenariosBuilder : Builder {
+
+    private val cases = mutableListOf<Matcher>()
+
+    override fun build(): List<Matcher> = cases
+
+    fun add(case: Matcher) {
+        cases += case
+    }
+
 }
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'

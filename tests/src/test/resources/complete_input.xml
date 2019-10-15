@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request exact-match="true">
+            <url protocol="https" method="post" host="test.com" port="15926" path="/path">
+                <param name="param1">1</param>
+                <param name="param2">2</param>
+                <param name="param3" />
+            </url>
+            <headers>
+                <header name="reqHeader1">1</header>
+                <header name="reqHeader1">2</header>
+                <header name="reqHeader2">3</header>
+                <header name="reqHeader3" />
+                <header name="Set-Cookie">"cookie"="value"</header>
+            </headers>
+            <body>.*1.*</body>
+        </request>
+        <response delay="50" code="201" media-type="application/json">
+            <headers>
+                <header name="resHeader1">4</header>
+                <header name="resHeader1">5</header>
+                <header name="resHeader2">6</header>
+            </headers>
+            <body file="body_content.txt">simple body</body>
+        </response>
+        <error type="java.io.IOException">error message</error>
+    </case>
+</scenarios>

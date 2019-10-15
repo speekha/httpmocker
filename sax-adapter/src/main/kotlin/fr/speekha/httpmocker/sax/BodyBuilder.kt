@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
+package fr.speekha.httpmocker.sax
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "org.slf4j:slf4j-api:$slf4j_version"
+import org.xml.sax.Attributes
+
+class BodyBuilder(
+    private val parent: NodeWithBody,
+    attributes: Attributes?
+) : Builder {
+
+    private var value = ""
+
+    private val file = attributes?.getValue("file")
+
+    override fun build() {
+        parent.body = value
+        file?.let {
+            parent.bodyFile = it
+        }
+    }
+
+    override fun addTextContent(text: String) {
+        value = text
+    }
 }
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'

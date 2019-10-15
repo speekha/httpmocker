@@ -72,16 +72,22 @@ internal val partialDataError = listOf(
     Matcher(error = NetworkError("SomeExceptionType"))
 )
 
-internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
+internal fun getCompleteJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("complete_input.xml") ?: "".byteInputStream()
 
-internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
+internal fun getPartialJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
 
-internal fun getPartialInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
+internal fun getPartialXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_input.xml") ?: "".byteInputStream()
+
+internal fun getPartialJsonInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()
 
-internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
+internal fun getPartialXmlInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()
+
+internal fun getExpectedOutput() = getCompleteJsonInput().readAsStringList()
     .map {
         it.trim()
             .replace(Regex(":[ ]+"), ":")
