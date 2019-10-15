@@ -36,5 +36,4 @@ class UrlBuilder(
     fun addQueryParam(key: String, value: String?) {
         parent.addQueryParam(key, value)
     }
-
 }
