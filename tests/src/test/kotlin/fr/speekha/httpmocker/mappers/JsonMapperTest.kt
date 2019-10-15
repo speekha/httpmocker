@@ -40,7 +40,7 @@ class JsonMapperTest {
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getCompleteInput())
+            val result = mapper.readMatches(getCompleteJsonInput())
             assertEquals(completeData, result)
         }
 
@@ -50,7 +50,7 @@ class JsonMapperTest {
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getPartialInput())
+            val result = mapper.readMatches(getPartialJsonInput())
             assertEquals(partialData, result)
         }
 
@@ -60,7 +60,7 @@ class JsonMapperTest {
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getPartialInputWithError())
+            val result = mapper.readMatches(getPartialJsonInputWithError())
             assertEquals(partialDataError, result)
         }
 

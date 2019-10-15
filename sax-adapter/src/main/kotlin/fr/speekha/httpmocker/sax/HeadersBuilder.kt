@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
+package fr.speekha.httpmocker.sax
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "org.slf4j:slf4j-api:$slf4j_version"
+import fr.speekha.httpmocker.model.Header
+
+class HeadersBuilder(
+    private val parent: NodeWithHeaders
+) : Builder {
+
+    private val headers = mutableListOf<Header>()
+
+    override fun build() {
+        parent.headers = headers
+    }
+
+    fun addHeader(header: Header) {
+        headers += header
+    }
 }
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'

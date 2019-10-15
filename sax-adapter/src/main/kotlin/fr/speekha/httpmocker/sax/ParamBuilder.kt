@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
+package fr.speekha.httpmocker.sax
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "org.slf4j:slf4j-api:$slf4j_version"
+import org.xml.sax.Attributes
+
+class ParamBuilder(
+    private val parent: UrlBuilder,
+    attributes: Attributes?
+) :
+    Builder {
+
+    private val key = attributes?.getValue("name")
+
+    private var value: String? = null
+
+    override fun build() {
+        parent.addQueryParam(key ?: "", value)
+    }
+
+    override fun addTextContent(text: String) {
+        value = text
+    }
 }
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
