@@ -34,7 +34,7 @@ class XmlMapperTest {
 
         @Test
         fun `When input is a comprehensive file, then a fully populated object should be returned`() {
-            val result = mapper.readMatches(getCompleteJsonInput())
+            val result = mapper.readMatches(getCompleteXmlInput())
             assertEquals(completeData, result)
         }
 

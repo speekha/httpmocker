@@ -47,7 +47,7 @@ class ScenarioHandler : DefaultHandler() {
     }
 
     @SuppressWarnings("UnsafeCast", "ComplexMethod")
-    private fun builder(qName: String?, parent: Builder, attributes: Attributes?): Builder = when (qName) {
+    private fun builder(qName: String?, parent: Builder?, attributes: Attributes?): Builder = when (qName) {
         "scenarios" -> scenarios
         "case" -> CaseBuilder(scenarios)
         "request" -> RequestBuilder(parent as CaseBuilder, attributes)
