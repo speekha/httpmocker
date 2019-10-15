@@ -73,6 +73,9 @@ internal val partialDataError = listOf(
 )
 
 internal fun getCompleteJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
+
+internal fun getCompleteXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("complete_input.xml") ?: "".byteInputStream()
 
 internal fun getPartialJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
