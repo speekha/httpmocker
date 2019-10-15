@@ -64,7 +64,7 @@ class XmlMapperTest {
 //      }
 //    }
 //  }
-//]"""
+// ]"""
 //
 //            assertEquals(
 //                listOf(
@@ -93,7 +93,7 @@ class XmlMapperTest {
 //      }
 //    }
 //  }
-//]"""
+// ]"""
 //
 //            assertEquals(
 //                listOf(
