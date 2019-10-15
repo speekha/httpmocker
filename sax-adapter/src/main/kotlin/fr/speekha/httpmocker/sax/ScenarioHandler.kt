@@ -34,33 +34,31 @@ class ScenarioHandler : DefaultHandler() {
         scenarios = ScenariosBuilder()
     }
 
-    override fun startElement(
-        uri: String?,
-        localName: String?,
-        qName: String?,
-        attributes: Attributes?
-    ) {
+    @SuppressWarnings("TooGenericExceptionCaught")
+    override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes?) {
         val parent = buildingStack.peek()
         try {
-
-            val builder = when (qName) {
-                "scenarios" -> scenarios
-                "case" -> CaseBuilder(scenarios)
-                "request" -> RequestBuilder(parent as CaseBuilder, attributes)
-                "response" -> ResponseBuilder(parent as CaseBuilder, attributes)
-                "error" -> ErrorBuilder(parent as CaseBuilder, attributes)
-                "url" -> UrlBuilder(parent as RequestBuilder, attributes)
-                "headers" -> HeadersBuilder(parent as NodeWithHeaders)
-                "header" -> HeaderBuilder(parent as HeadersBuilder, attributes)
-                "param" -> ParamBuilder(parent as UrlBuilder, attributes)
-                "body" -> BodyBuilder(parent as NodeWithBody, attributes)
-                else -> scenarios
-            }
+            val builder = builder(qName, parent, attributes)
             buildingStack.push(builder)
         } catch (e: Throwable) {
             logger.error("Invalid XML", e)
             throw IllegalStateException("Invalid XML input", e)
         }
+    }
+
+    @SuppressWarnings("UnsafeCast", "ComplexMethod")
+    private fun builder(qName: String?, parent: Builder, attributes: Attributes?): Builder = when (qName) {
+        "scenarios" -> scenarios
+        "case" -> CaseBuilder(scenarios)
+        "request" -> RequestBuilder(parent as CaseBuilder, attributes)
+        "response" -> ResponseBuilder(parent as CaseBuilder, attributes)
+        "error" -> ErrorBuilder(parent as CaseBuilder, attributes)
+        "url" -> UrlBuilder(parent as RequestBuilder, attributes)
+        "headers" -> HeadersBuilder(parent as NodeWithHeaders)
+        "header" -> HeaderBuilder(parent as HeadersBuilder, attributes)
+        "param" -> ParamBuilder(parent as UrlBuilder, attributes)
+        "body" -> BodyBuilder(parent as NodeWithBody, attributes)
+        else -> error("Unkown tag $qName")
     }
 
     override fun endElement(uri: String?, localName: String?, qName: String?) {

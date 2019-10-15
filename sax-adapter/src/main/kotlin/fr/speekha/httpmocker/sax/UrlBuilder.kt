@@ -18,7 +18,6 @@ package fr.speekha.httpmocker.sax
 
 import org.xml.sax.Attributes
 
-
 class UrlBuilder(
     private val parent: RequestBuilder,
     attributes: Attributes?

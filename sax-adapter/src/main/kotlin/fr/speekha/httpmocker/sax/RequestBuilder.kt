@@ -62,9 +62,7 @@ class RequestBuilder(
         )
     }
 
-    fun setUrlAttributes(
-        protocol: String?, method: String?, host: String?, port: Int?, path: String?
-    ) {
+    fun setUrlAttributes(protocol: String?, method: String?, host: String?, port: Int?, path: String?) {
         this.protocol = protocol
         this.method = method
         this.host = host
@@ -75,5 +73,4 @@ class RequestBuilder(
     fun addQueryParam(key: String, value: String?) {
         params[key] = value
     }
-
 }
