@@ -27,5 +27,4 @@ class ScenariosBuilder : Builder {
     fun add(case: Matcher) {
         cases += case
     }
-
 }

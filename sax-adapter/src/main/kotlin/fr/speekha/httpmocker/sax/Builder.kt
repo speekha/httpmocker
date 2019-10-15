@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.model.Header
 
 interface Builder {
     fun build(): Any
-    fun addTextContent(text: String) {}
+    fun addTextContent(text: String) = Unit
 }
 
 interface NodeWithHeaders {
