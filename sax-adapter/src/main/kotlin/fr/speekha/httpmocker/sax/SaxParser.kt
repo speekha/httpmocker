@@ -22,17 +22,13 @@ import javax.xml.parsers.SAXParserFactory
 
 class SaxParser : Mapper {
 
-    val factory = SAXParserFactory.newInstance()
-    val parser = factory.newSAXParser()
-
-    val handler: ScenarioHandler = ScenarioHandler()
+    private val parser = SAXParserFactory.newInstance().newSAXParser()
+    private val handler: ScenarioHandler = ScenarioHandler()
 
     override fun deserialize(payload: String): List<Matcher>? {
         parser.parse(payload.byteInputStream(), handler)
         return handler.getScenarios()
     }
 
-    override fun serialize(matchers: List<Matcher>): String {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-    }
+    override fun serialize(matchers: List<Matcher>): String = matchers.toXml()
 }

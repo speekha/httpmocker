@@ -19,6 +19,7 @@ package fr.speekha.httpmocker.mappers
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readMatches
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -133,8 +134,15 @@ class JsonMapperTest {
             title: String,
             mapper: Mapper
         ) {
-            val expected = getMinimalOutput()
-            testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
+            val expected = getMinimalJsonOutput()
+            testJsonStream(
+                expected, mapper.serialize(
+                    listOf(
+                        Matcher(response = ResponseDescriptor()),
+                        Matcher(error = NetworkError("error"))
+                    )
+                )
+            )
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -143,8 +151,8 @@ class JsonMapperTest {
             title: String,
             mapper: Mapper
         ) {
-            val expected = getExpectedOutput()
-            testStream(expected, mapper.serialize(listOf(completeData[0])))
+            val expected = getExpectedJsonOutput()
+            testJsonStream(expected, mapper.serialize(listOf(completeData[0])))
         }
     }
 }

@@ -16,6 +16,9 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readMatches
 import fr.speekha.httpmocker.sax.SaxParser
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,8 +32,8 @@ class XmlMapperTest {
     private val mapper = SaxParser()
 
     @Nested
-    @DisplayName("Given a JSON stream to parse")
-    inner class ParseJson {
+    @DisplayName("Given a XML stream to parse")
+    inner class ParseXml {
 
         @Test
         fun `When input is a comprehensive file, then a fully populated object should be returned`() {
@@ -49,88 +52,30 @@ class XmlMapperTest {
             val result = mapper.readMatches(getPartialXmlInputWithError())
             assertEquals(partialDataError, result)
         }
-
-//        @ParameterizedTest(name = "Mapper: {0}")
-//        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-//        fun `When headers contain colons, then their value should be properly parsed`(
-//            title: String,
-//            mapper: Mapper
-//        ) {
-//            val json = """[
-//  {
-//    "response": {
-//      "headers": {
-//        "Location": "http://www.google.com"
-//      }
-//    }
-//  }
-// ]"""
-//
-//            assertEquals(
-//                listOf(
-//                    Matcher(
-//                        response = ResponseDescriptor(
-//                            headers = listOf(
-//                                Header("Location", "http://www.google.com")
-//                            )
-//                        )
-//                    )
-//                ), mapper.readMatches(json.byteInputStream())
-//            )
-//        }
-//
-//        @ParameterizedTest(name = "Mapper: {0}")
-//        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-//        fun `When headers contain quotes, then their value should be properly parsed`(
-//            title: String,
-//            mapper: Mapper
-//        ) {
-//            val json = """[
-//  {
-//    "response": {
-//      "headers": {
-//        "Set-Cookie": "\"cookie\"=\"value\""
-//      }
-//    }
-//  }
-// ]"""
-//
-//            assertEquals(
-//                listOf(
-//                    Matcher(
-//                        response = ResponseDescriptor(
-//                            headers = listOf(
-//                                Header("Set-Cookie", "\"cookie\"=\"value\"")
-//                            )
-//                        )
-//                    )
-//                ), mapper.readMatches(json.byteInputStream())
-//            )
-//        }
     }
 
     @Nested
     @DisplayName("Given a scenario to write")
-    inner class WriteJson {
+    inner class WriteXml {
 
-//        @ParameterizedTest(name = "Mapper: {0}")
-//        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-//        fun `When input is minimal, then null fields should be omitted`(
-//            title: String,
-//            mapper: Mapper
-//        ) {
-//            val expected = getMinimalOutput()
-//            testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
-//        }
-//
-//        @ParameterizedTest(name = "Mapper: {0}")
-//        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
-//        fun `When input is a complete object, the all fields should be properly written`(
-//            title: String,
-//            mapper: Mapper
-//        ) {
-//            val expected = getExpectedOutput()
-//            testStream(expected, mapper.serialize(listOf(completeData[0])))
-//        }
+        @Test
+        fun `When input is minimal, then null fields should be omitted`() {
+            val expected = getMinimalXmlOutput()
+            testXmlStream(
+                expected,
+                mapper.serialize(
+                    listOf(
+                        Matcher(response = ResponseDescriptor()),
+                        Matcher(error = NetworkError("error"))
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `When input is a complete object, the all fields should be properly written`() {
+            val expected = getExpectedXmlOutput()
+            testXmlStream(expected, mapper.serialize(listOf(completeData[0])))
+        }
     }
 }
