@@ -90,34 +90,82 @@ internal fun getPartialJsonInputWithError(): InputStream = ClassLoader.getSystem
 internal fun getPartialXmlInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()
 
-internal fun getExpectedOutput() = getCompleteJsonInput().readAsStringList()
+internal fun getExpectedJsonOutput() = getCompleteJsonInput().readAsStringList()
     .map {
         it.trim()
             .replace(Regex(":[ ]+"), ":")
     }
 
-internal fun getMinimalOutput() = listOf(
-    "[{" +
-            "\"request\":{" +
-            "\"headers\":{},\"params\":{}" +
-            "}," +
-            "\"response\":{" +
-            "\"delay\":0,\"code\":200,\"media-type\":\"text/plain\",\"headers\":{},\"body\":\"\"" +
-            "}}]"
-)
+internal fun getExpectedXmlOutput() = getCompleteXmlInput().readAsStringList()
+    .map { it.trim() }
+
+internal fun getMinimalJsonOutput() =
+    """[
+        |  {
+        |    "request":{
+        |      "headers":{},
+        |      "params":{}
+        |    },
+        |    "response":{
+        |      "delay":0,
+        |      "code":200,
+        |      "media-type":"text/plain",
+        |      "headers":{},
+        |      "body":""
+        |    }
+        |  },
+        |  {
+        |    "request":{
+        |      "headers":{},"params":{}
+        |    },
+        |    "error":{
+        |      "type":"error"
+        |    }
+        |  }
+        |]"""
+        .trimMargin()
+        .split("\n")
+
+internal fun getMinimalXmlOutput() =
+    """<?xml version="1.0" encoding="UTF-8"?>
+        |
+        |<scenarios>
+        |    <case>
+        |        <request />
+        |        <response delay="0" code="200" media-type="text/plain">
+        |            <body></body>
+        |        </response>
+        |    </case>
+        |    <case>
+        |        <request />
+        |        <error type="error" />
+        |    </case>
+        |</scenarios>"""
+        .trimMargin()
+        .split("\n")
 
 /**
  * Check equality after removing all the format enhancement added by the different JSON parsers (
  * indentation, line feeds, etc.).
  */
-internal fun testStream(expectedResult: List<String>, actual: String) {
+internal fun testJsonStream(expectedResult: List<String>, actual: String) {
     val result = actual.split('\n')
         .joinToString("") {
             it.trim()
                 .replace(Regex("\\p{Space}*:\\p{Space}+"), ":")
+                .replace(Regex("\\p{Space}*,\\p{Space}+"), ",")
                 .replace("[ ", "[")
                 .replace(" ]", "]")
                 .replace("{ ", "{")
+        }
+    val expected = expectedResult.joinToString("") { it.trim() }
+    assertEquals(expected, result)
+}
+
+internal fun testXmlStream(expectedResult: List<String>, actual: String) {
+    val result = actual.split('\n')
+        .joinToString("") {
+            it.trim()
         }
     val expected = expectedResult.joinToString("") { it.trim() }
     assertEquals(expected, result)
