@@ -23,7 +23,7 @@ import org.xml.sax.Attributes
 class RequestBuilder(
     private val parent: CaseBuilder,
     attributes: Attributes?
-) : Builder, NodeWithHeaders, NodeWithBody {
+) : NodeBuilder(), NodeWithHeaders, NodeWithBody {
     override var headers: List<Header> = emptyList()
 
     override var body: String? = null

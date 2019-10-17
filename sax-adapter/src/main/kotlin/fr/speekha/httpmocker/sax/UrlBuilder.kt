@@ -21,7 +21,7 @@ import org.xml.sax.Attributes
 class UrlBuilder(
     private val parent: RequestBuilder,
     attributes: Attributes?
-) : Builder {
+) : NodeBuilder() {
 
     private val protocol = attributes?.getValue("protocol")
     private val method = attributes?.getValue("method")

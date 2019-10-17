@@ -18,9 +18,14 @@ package fr.speekha.httpmocker.sax
 
 import fr.speekha.httpmocker.model.Header
 
-interface Builder {
-    fun build(): Any
-    fun addTextContent(text: String) = Unit
+abstract class NodeBuilder {
+
+    protected var textContent: String? = null
+
+    abstract fun build(): Any
+    fun addTextContent(text: String) {
+        textContent = text
+    }
 }
 
 interface NodeWithHeaders {

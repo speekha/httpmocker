@@ -22,24 +22,18 @@ import org.xml.sax.Attributes
 class ErrorBuilder(
     private val parent: CaseBuilder,
     attributes: Attributes?
-) : Builder {
+) : NodeBuilder() {
 
     private val exception = attributes?.getValue("type")
-
-    private var value: String? = null
 
     override fun build() {
         var error = NetworkError()
         exception?.let {
             error = error.copy(
                 exceptionType = exception,
-                message = value
+                message = textContent
             )
         }
         parent.setError(error)
-    }
-
-    override fun addTextContent(text: String) {
-        value = text
     }
 }

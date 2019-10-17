@@ -22,17 +22,11 @@ import org.xml.sax.Attributes
 class HeaderBuilder(
     private val parent: HeadersBuilder,
     attributes: Attributes?
-) : Builder {
+) : NodeBuilder() {
 
     private val name = attributes?.getValue("name") ?: ""
 
-    private var value: String? = null
-
     override fun build() {
-        parent.addHeader(Header(name, value))
-    }
-
-    override fun addTextContent(text: String) {
-        value = text
+        parent.addHeader(Header(name, textContent))
     }
 }

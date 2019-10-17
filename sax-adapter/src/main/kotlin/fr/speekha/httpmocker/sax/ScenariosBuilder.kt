@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.sax
 
 import fr.speekha.httpmocker.model.Matcher
 
-class ScenariosBuilder : Builder {
+class ScenariosBuilder : NodeBuilder() {
 
     private val cases = mutableListOf<Matcher>()
 
