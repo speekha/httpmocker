@@ -21,7 +21,7 @@ import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-class CaseBuilder(val parent: ScenariosBuilder) : Builder {
+class CaseBuilder(val parent: ScenariosBuilder) : NodeBuilder() {
 
     private var request: RequestDescriptor? = null
     private var response: ResponseDescriptor? = null

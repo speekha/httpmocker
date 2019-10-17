@@ -21,18 +21,11 @@ import org.xml.sax.Attributes
 class ParamBuilder(
     private val parent: UrlBuilder,
     attributes: Attributes?
-) :
-    Builder {
+) : NodeBuilder() {
 
     private val key = attributes?.getValue("name")
 
-    private var value: String? = null
-
     override fun build() {
-        parent.addQueryParam(key ?: "", value)
-    }
-
-    override fun addTextContent(text: String) {
-        value = text
+        parent.addQueryParam(key ?: "", textContent)
     }
 }

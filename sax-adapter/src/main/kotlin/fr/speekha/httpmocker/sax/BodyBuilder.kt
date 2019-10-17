@@ -21,20 +21,14 @@ import org.xml.sax.Attributes
 class BodyBuilder(
     private val parent: NodeWithBody,
     attributes: Attributes?
-) : Builder {
-
-    private var value = ""
+) : NodeBuilder() {
 
     private val file = attributes?.getValue("file")
 
     override fun build() {
-        parent.body = value
+        parent.body = textContent
         file?.let {
             parent.bodyFile = it
         }
-    }
-
-    override fun addTextContent(text: String) {
-        value = text
     }
 }

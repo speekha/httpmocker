@@ -25,7 +25,7 @@ import org.xml.sax.Attributes
 class ResponseBuilder(
     private val parent: CaseBuilder,
     attributes: Attributes?
-) : Builder, NodeWithHeaders, NodeWithBody {
+) : NodeBuilder(), NodeWithHeaders, NodeWithBody {
 
     private val delay: Long = attributes?.getValue("delay")?.toLong() ?: 0
     private val code: Int = attributes?.getValue("code")?.toInt() ?: DEFAULT_RESPONSE_CODE

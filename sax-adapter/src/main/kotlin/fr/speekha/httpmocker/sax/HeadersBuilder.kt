@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.model.Header
 
 class HeadersBuilder(
     private val parent: NodeWithHeaders
-) : Builder {
+) : NodeBuilder() {
 
     private val headers = mutableListOf<Header>()
 
