@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <header name="header1">1</header>
+            <header name="header1">2</header>
+            <header name="header2">3</header>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>with headers</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <header name="header1">1</header>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>with header 1</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <header name="header2">2</header>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>with header 2</body>
+        </response>
+    </case>
+    <case>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>no header</body>
+        </response>
+    </case>
+</scenarios>

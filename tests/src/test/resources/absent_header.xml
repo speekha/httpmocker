@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <header name="header1">1</header>
+            <header name="header2" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>Body found</body>
+        </response>
+    </case>
+</scenarios>

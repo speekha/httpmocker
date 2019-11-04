@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request exact-match="true">
+            <header name="header1">1</header>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>Exact headers</body>
+        </response>
+    </case>
+    <case>
+        <request exact-match="true">
+            <url>
+                <param name="param1">1</param>
+            </url>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>Exact params</body>
+        </response>
+    </case>
+</scenarios>
