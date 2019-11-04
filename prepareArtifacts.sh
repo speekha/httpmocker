@@ -6,3 +6,4 @@ cp -r gson-adapter/build/* build
 cp -r moshi-adapter/build/* build
 cp -r custom-adapter/build/* build
 cp -r kotlinx-adapter/build/* build
+cp -r sax-adapter/build/* build
