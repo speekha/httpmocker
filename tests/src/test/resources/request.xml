@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <response delay="0" code="200" media-type="text/plain">
+            <header name="testHeader">simple header</header>
+            <body>simple body</body>
+        </response>
+    </case>
+</scenarios>

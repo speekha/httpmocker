@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url>
+                <param name="param1">1</param>
+                <param name="param2" />
+            </url>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>Body found</body>
+        </response>
+    </case>
+</scenarios>

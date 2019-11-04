@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url>
+                <param name="param1">a param</param>
+            </url>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>matched</body>
+        </response>
+    </case>
+</scenarios>

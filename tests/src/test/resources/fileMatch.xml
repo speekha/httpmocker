@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>file response</body>
+        </response>
+    </case>
+</scenarios>

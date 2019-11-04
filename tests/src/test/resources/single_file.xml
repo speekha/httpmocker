@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url path="/aTestUrl" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>based on URL</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url host="hostTest.com" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>based on host</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url port="45612" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>based on port</body>
+        </response>
+    </case>
+    <case>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>Default case</body>
+        </response>
+    </case>
+</scenarios>

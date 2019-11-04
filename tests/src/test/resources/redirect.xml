@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <response delay="0" code="302" media-type="text/plain">
+            <header name="Location">http://www.google.com</header>
+            <body></body>
+        </response>
+    </case>
+</scenarios>
