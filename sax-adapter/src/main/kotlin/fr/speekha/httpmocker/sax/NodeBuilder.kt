@@ -29,7 +29,12 @@ abstract class NodeBuilder {
 }
 
 interface NodeWithHeaders {
-    var headers: List<Header>
+
+    val headers: MutableList<Header>
+
+    fun addHeader(header: Header) {
+        headers += header
+    }
 }
 
 interface NodeWithBody {

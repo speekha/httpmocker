@@ -38,7 +38,7 @@ class ScenarioHandler : DefaultHandler() {
     override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes?) {
         val parent = buildingStack.peek()
         try {
-            val builder = builder(qName, parent, attributes)
+            val builder = getNodeBuilder(qName, parent, attributes)
             buildingStack.push(builder)
         } catch (e: Throwable) {
             logger.error("Invalid XML", e)
@@ -47,7 +47,7 @@ class ScenarioHandler : DefaultHandler() {
     }
 
     @SuppressWarnings("UnsafeCast", "ComplexMethod")
-    private fun builder(
+    private fun getNodeBuilder(
         qName: String?,
         parent: NodeBuilder?,
         attributes: Attributes?
@@ -58,8 +58,7 @@ class ScenarioHandler : DefaultHandler() {
         "response" -> ResponseBuilder(parent as CaseBuilder, attributes)
         "error" -> ErrorBuilder(parent as CaseBuilder, attributes)
         "url" -> UrlBuilder(parent as RequestBuilder, attributes)
-        "headers" -> HeadersBuilder(parent as NodeWithHeaders)
-        "header" -> HeaderBuilder(parent as HeadersBuilder, attributes)
+        "header" -> HeaderBuilder(parent as NodeWithHeaders, attributes)
         "param" -> ParamBuilder(parent as UrlBuilder, attributes)
         "body" -> BodyBuilder(parent as NodeWithBody, attributes)
         else -> error("Unkown tag $qName")

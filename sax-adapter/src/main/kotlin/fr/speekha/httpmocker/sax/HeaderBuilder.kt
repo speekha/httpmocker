@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.model.Header
 import org.xml.sax.Attributes
 
 class HeaderBuilder(
-    private val parent: HeadersBuilder,
+    private val parent: NodeWithHeaders,
     attributes: Attributes?
 ) : NodeBuilder() {
 

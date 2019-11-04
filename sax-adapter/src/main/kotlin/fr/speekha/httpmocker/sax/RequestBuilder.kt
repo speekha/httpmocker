@@ -24,7 +24,8 @@ class RequestBuilder(
     private val parent: CaseBuilder,
     attributes: Attributes?
 ) : NodeBuilder(), NodeWithHeaders, NodeWithBody {
-    override var headers: List<Header> = emptyList()
+
+    override var headers = mutableListOf<Header>()
 
     override var body: String? = null
 
@@ -62,7 +63,13 @@ class RequestBuilder(
         )
     }
 
-    fun setUrlAttributes(protocol: String?, method: String?, host: String?, port: Int?, path: String?) {
+    fun setUrlAttributes(
+        protocol: String?,
+        method: String?,
+        host: String?,
+        port: Int?,
+        path: String?
+    ) {
         this.protocol = protocol
         this.method = method
         this.host = host

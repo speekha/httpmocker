@@ -42,7 +42,7 @@ internal val completeData = listOf(
                 Header("Set-Cookie", "\"cookie\"=\"value\"")
             ),
             params = mapOf("param1" to "1", "param2" to "2", "param3" to null),
-            body = ".*1.*"
+            body = ".*<1>.*"
         ),
         ResponseDescriptor(
             delay = 50,
@@ -53,7 +53,7 @@ internal val completeData = listOf(
                 Header("resHeader1", "5"),
                 Header("resHeader2", "6")
             ),
-            body = "simple body",
+            body = "<simple body />",
             bodyFile = "body_content.txt"
         ),
         NetworkError(
