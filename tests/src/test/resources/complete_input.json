@@ -19,7 +19,7 @@
         "param2": "2",
         "param3": null
       },
-      "body": ".*1.*"
+      "body": ".*<1>.*"
     },
     "response": {
       "delay": 50,
@@ -30,7 +30,7 @@
         "resHeader1": "5",
         "resHeader2": "6"
       },
-      "body": "simple body",
+      "body": "<simple body />",
       "body-file": "body_content.txt"
     },
     "error": {

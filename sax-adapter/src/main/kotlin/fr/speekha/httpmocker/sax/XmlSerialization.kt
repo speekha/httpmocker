@@ -17,15 +17,22 @@
 package fr.speekha.httpmocker.sax
 
 import fr.speekha.httpmocker.BODY
+import fr.speekha.httpmocker.CODE
+import fr.speekha.httpmocker.DELAY
+import fr.speekha.httpmocker.ERROR
 import fr.speekha.httpmocker.EXACT_MATCH
-import fr.speekha.httpmocker.HEADERS
+import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.HEADER
 import fr.speekha.httpmocker.HOST
+import fr.speekha.httpmocker.MEDIA_TYPE
 import fr.speekha.httpmocker.METHOD
+import fr.speekha.httpmocker.PARAM
 import fr.speekha.httpmocker.PATH
 import fr.speekha.httpmocker.PORT
 import fr.speekha.httpmocker.PROTOCOL
 import fr.speekha.httpmocker.REQUEST
 import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.URL
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -56,25 +63,21 @@ private fun RequestDescriptor.toXml(indent: Int): String = writeTags(
     ) + writeHeaders(headers, indent) + if (body.isNullOrEmpty()) {
         ""
     } else {
-        writeTag(BODY, indent + 1, body = body)
+        writeCData(BODY, indent + 1, body = body)
     }
 }
 
 private fun ResponseDescriptor.toXml(indent: Int): String = writeTags(
     RESPONSE,
     indent,
-    listOf("delay" to delay, "code" to code, "media-type" to mediaType)
+    listOf(DELAY to delay, CODE to code, MEDIA_TYPE to mediaType)
 ) {
-    writeHeaders(headers, indent + 1) + writeTag(
-        "body",
-        indent + 1,
-        listOf("file" to bodyFile),
-        body
-    )
+    writeHeaders(headers, indent + 1) +
+            writeCData("body", indent + 1, listOf("file" to bodyFile), body)
 }
 
 private fun NetworkError.toXml(indent: Int): String =
-    writeTag("error", indent, listOf("type" to exceptionType), message)
+    writeCData(ERROR, indent, listOf(EXCEPTION_TYPE to exceptionType), message)
 
 private fun writeUrl(
     attributes: List<Pair<String, Any?>>,
@@ -82,7 +85,7 @@ private fun writeUrl(
     indent: Int
 ): String = if (attributes.any { it.second != null } || params.isNotEmpty()) {
     writeTags(
-        "url",
+        URL,
         indent,
         attributes
     ) { params.toXml(indent + 1) }
@@ -93,16 +96,14 @@ private fun writeUrl(
 private fun writeHeaders(headers: List<Header>, indent: Int): String = if (headers.isEmpty()) {
     ""
 } else {
-    writeTags(HEADERS, indent + 1) {
-        headers.writeTagList { it.toXml(indent + 2) }
-    }
+    headers.writeTagList { it.toXml(indent + 2) }
 }
 
 private fun Header.toXml(indent: Int): String =
-    writeTag("header", indent, listOf("name" to name), value)
+    writeCData(HEADER, indent, listOf("name" to name), value)
 
 private fun Map<String, String?>.toXml(indent: Int): String = entries.writeTagList {
-    writeTag("param", indent, listOf("name" to it.key), it.value)
+    writeCData(PARAM, indent, listOf("name" to it.key), it.value)
 }
 
 private fun writeTags(
@@ -132,6 +133,23 @@ private fun writeTag(
 
 private fun <T : Any> Iterable<T>.writeTagList(format: (T) -> String): String = joinToString("") {
     format(it)
+}
+
+private fun writeCData(
+    tag: String,
+    indent: Int,
+    attributes: List<Pair<String, Any?>> = emptyList(),
+    body: String? = null
+): String {
+    val formatBody = if (body?.contains("[<>]".toRegex()) == true) "<![CDATA[$body]]>" else body
+    return StringBuilder(" ".repeat(indent * SPACE_PER_TAB))
+        .append("<")
+        .append(tag)
+        .append(
+            attributes.filter { it.second != null }
+                .joinToString("") { (name, value) -> " $name=\"$value\"" }
+        )
+        .append(body?.let { ">$formatBody</$tag>\n" } ?: " />\n").toString()
 }
 
 private operator fun StringBuilder.plusAssign(obj: Any) {

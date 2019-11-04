@@ -32,8 +32,7 @@ class ResponseBuilder(
     private val mediatype: String = attributes?.getValue("media-type") ?: DEFAULT_MEDIA_TYPE
     override var body: String? = null
     override var bodyFile: String? = null
-
-    override var headers: List<Header> = emptyList()
+    override var headers = mutableListOf<Header>()
 
     override fun build() = parent.setResponse(
         ResponseDescriptor(
