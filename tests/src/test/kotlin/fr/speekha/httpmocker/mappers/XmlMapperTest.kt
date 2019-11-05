@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readMatches
-import fr.speekha.httpmocker.sax.SaxParser
+import fr.speekha.httpmocker.sax.SaxMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test
 @Suppress("UNUSED_PARAMETER")
 class XmlMapperTest {
 
-    private val mapper = SaxParser()
+    private val mapper = SaxMapper()
 
     @Nested
     @DisplayName("Given a XML stream to parse")
@@ -57,7 +57,6 @@ class XmlMapperTest {
     @Nested
     @DisplayName("Given a scenario to write")
     inner class WriteXml {
-
         @Test
         fun `When input is minimal, then null fields should be omitted`() {
             val expected = getMinimalXmlOutput()

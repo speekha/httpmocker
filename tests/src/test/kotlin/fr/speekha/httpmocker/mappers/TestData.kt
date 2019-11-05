@@ -97,7 +97,6 @@ internal fun getExpectedJsonOutput() = getCompleteJsonInput().readAsStringList()
     }
 
 internal fun getExpectedXmlOutput() = getCompleteXmlInput().readAsStringList()
-    .map { it.trim() }
 
 internal fun getMinimalJsonOutput() =
     """[
@@ -128,16 +127,13 @@ internal fun getMinimalJsonOutput() =
 
 internal fun getMinimalXmlOutput() =
     """<?xml version="1.0" encoding="UTF-8"?>
-        |
         |<scenarios>
         |    <case>
-        |        <request />
         |        <response delay="0" code="200" media-type="text/plain">
         |            <body></body>
         |        </response>
         |    </case>
         |    <case>
-        |        <request />
         |        <error type="error" />
         |    </case>
         |</scenarios>"""
@@ -163,10 +159,6 @@ internal fun testJsonStream(expectedResult: List<String>, actual: String) {
 }
 
 internal fun testXmlStream(expectedResult: List<String>, actual: String) {
-    val result = actual.split('\n')
-        .joinToString("") {
-            it.trim()
-        }
-    val expected = expectedResult.joinToString("") { it.trim() }
-    assertEquals(expected, result)
+    val expected = expectedResult.joinToString("\n")
+    assertEquals(expected, actual)
 }

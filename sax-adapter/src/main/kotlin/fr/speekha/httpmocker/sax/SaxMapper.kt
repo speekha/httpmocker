@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
 import javax.xml.parsers.SAXParserFactory
 
-class SaxParser : Mapper {
+class SaxMapper : Mapper {
 
     private val parser = SAXParserFactory.newInstance().newSAXParser()
     private val handler: ScenarioHandler = ScenarioHandler()
