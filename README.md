@@ -24,7 +24,7 @@ can be reused later.
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.7'
+httpmocker_version = '1.1.8'
 ```
 
 ## Gradle 
@@ -56,28 +56,31 @@ repositories {
 #### Adding HttpMocker
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
-files for static mocks. Currently, there are five possible options that are provided for parsing, based on some of the 
+files for static mocks. Currently, there are six possible options that are provided for parsing, based on some of the 
 most commonly used libraries for JSON parsing (Jackson, Gson, Moshi, Kotlinx serialization) and a custom implementation 
 (no third party dependency), so you can choose the one matching what you already use in your application (this will 
-help you prevent duplicate libraries in your classpath, like Jackson and GSON). If you choose one of these options, all 
-you need to add is the corresponding 
+help you prevent duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
+of JSON, a SAX-based parser allows to do it. If you choose one of these options, all you need to add is the corresponding 
 `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.7"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.1.8"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.7"
+implementation "fr.speekha.httpmocker:gson-adapter:1.1.8"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.7"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.1.8"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.7"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.8"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.7"
+implementation "fr.speekha.httpmocker:custom-adapter:1.1.8"
+
+// Parses XML scenarios using a custom SAX parser
+implementation "fr.speekha.httpmocker:sax-adapter:1.1.8"
 ```
 
 If none of those options suits your needs or if you would prefer to only use dynamic mocks, you can add 
@@ -85,15 +88,15 @@ the main dependency to your project (using static mocks will require that you pr
 of the `Mapper` class):
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.7"
+implementation "fr.speekha.httpmocker:mocker:1.1.8"
 ```
 
 #### External dependencies
 
-* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.2.
+* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.4.
 * It also depends on the SLF4J API for logging.
-* JSON parsers depend on their respective external libraries: Jackson 2.9.9, Gson 2.8.5, Moshi 
-1.8.0 or KotlinX serialization 0.11.0.
+* JSON parsers depend on their respective external libraries: Jackson 2.10.0, Gson 2.8.6, Moshi 
+1.9.1 or KotlinX serialization 0.13.0.
 
 ### Proguard rules
 
@@ -146,15 +149,15 @@ with). You also need to provide the `FilePolicy` you want to use: that policy de
 check to find a match for a request. A few policies are provided in the library, but you can also 
 define your own. 
 
-Additionally, you need to provide a Mapper to parse the JSON scenario files. In theory, 
-scenarios do not have to be stored as JSON: you could use XML if you prefered, or any other format, 
+Additionally, you need to provide a Mapper to parse the scenario files. Scenarios can be stored as 
+JSON or XML depending on your preference, or any other format, for that matter,
 as long as you provide your own `Mapper` class to serialize and deserialize the business objects. As 
-far as this lib is concerned though, a  few mappers are available out of the box, but they only 
-handle JSON format for the moment and are based on Jackson, Gson, Moshi and Kotlinx serialization. 
-They are provided in specific modules so you can choose one based on the JSON library you already 
-use, thus limiting the risk for duplicate libraries serving the same purpose in your app. An 
-implementation based on a custom JSON parser that does not need any other dependencies is also 
-available. 
+far as this lib is concerned though, a few mappers are available out of the box to handle JSON or 
+XML formats. The main mappers are based on Jackson, Gson, Moshi and Kotlinx serialization. They 
+are provided in specific modules so you can choose one based on the library you might already use 
+in your application, thus limiting the risk for duplicate libraries serving the same purpose in 
+your app. Two additional implementations, based on a custom JSON or XML parsers that do not need 
+any other dependencies are also available. 
 
 Static and dynamic scenarios can be used together. Several dynamic callbacks can be added to the 
 interceptor, but only one static configuration is allowed. Dynamic callbacks will be used first to 
@@ -229,7 +232,35 @@ Here is an example of scenario in JSON form:
   }
 ]
 ```
- 
+
+Here is the same example in XML format:
+
+```xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url method="post">
+                <param name="myParam">myParamValue</param>
+            </url>
+            <header name="myHeader">myHeaderValue</header>
+            <body>.*1.*</body>
+        </request>
+        <response delay="50" code="200" media-type="application/json">
+            <header name="myHeader">headerValue1</header>
+            <body file="body_content.txt" />
+        </response>
+    </case>
+    <case>
+        <response delay="50" code="200" media-type="application/json">
+            <header name="myHeader">headerValue2</header>
+            <body>No body here</body>
+        </response>
+    </case>
+</scenarios>
+```
+
 In this example, a POST request on the corresponding URL, including a query param "myParam" with the value 
 "myParamValue", a header "myHeader" with the value "myHeaderValue" and a body containing the digit '1' (based on 
 the regex used as body) will match the first case: it will be answered a HTTP 200 response of type 
@@ -253,6 +284,19 @@ one, as in the example below:
     }
   }
 ]
+```
+The corresponding XML version would go like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url method="get" />
+        </request>
+        <error type="java.io.IOException">Connection was reset by server</error>
+    </case>
+</scenarios>
 ```
 
 ## Author
