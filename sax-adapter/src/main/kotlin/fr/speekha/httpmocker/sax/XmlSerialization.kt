@@ -39,41 +39,50 @@ import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
-internal fun List<Matcher>.toXml() =
-    XML_PREFACE + writeTags("scenarios", 0) {
-        writeTagList { it.toXml(1) }
-    }
+internal fun List<Matcher>.toXml() = XML_PREFACE + writeTags("scenarios", 0) {
+    toXml { it.toXml(1) }
+}
 
 private fun Matcher.toXml(indent: Int): String = writeTags("case", indent) {
-    request.toXml(indent) + response?.toXml(indent).orEmpty() + error?.toXml(indent).orEmpty()
+    val subIndent = indent + 1
+    writeTagList(
+        request.toXml(subIndent),
+        response?.toXml(subIndent).orEmpty(),
+        error?.toXml(subIndent).orEmpty()
+    )
 }
 
-private fun RequestDescriptor.toXml(indent: Int): String = writeTags(
-    REQUEST,
-    indent,
-    listOf(EXACT_MATCH to true).takeIf { exactMatch } ?: emptyList()) {
-    writeUrl(
-        listOf(
-            PROTOCOL to protocol,
-            METHOD to method,
-            HOST to host,
-            PORT to port,
-            PATH to path
-        ), params, indent + 1
-    ) + writeHeaders(headers, indent) + if (body.isNullOrEmpty()) {
-        ""
-    } else {
-        writeCData(BODY, indent + 1, body = body)
+private fun RequestDescriptor.toXml(indentation: Int): String =
+    writeTags(REQUEST, indentation, exactMatchAttribute()) {
+        val subIndentation = indentation + 1
+        writeTagList(
+            writeUrl(getUrlAttributes(), params, subIndentation),
+            writeHeaders(headers, subIndentation),
+            if (body.isNullOrEmpty()) "" else writeCData(BODY, subIndentation, body = body)
+        )
     }
-}
 
-private fun ResponseDescriptor.toXml(indent: Int): String = writeTags(
+private fun RequestDescriptor.getUrlAttributes(): List<Pair<String, Any?>> = listOf(
+    PROTOCOL to protocol,
+    METHOD to method,
+    HOST to host,
+    PORT to port,
+    PATH to path
+)
+
+private fun RequestDescriptor.exactMatchAttribute() =
+    listOf(EXACT_MATCH to true).takeIf { exactMatch } ?: emptyList()
+
+private fun ResponseDescriptor.toXml(indentation: Int): String = writeTags(
     RESPONSE,
-    indent,
+    indentation,
     listOf(DELAY to delay, CODE to code, MEDIA_TYPE to mediaType)
 ) {
-    writeHeaders(headers, indent + 1) +
-            writeCData("body", indent + 1, listOf("file" to bodyFile), body)
+    val subIndentation = indentation + 1
+    writeTagList(
+        writeHeaders(headers, subIndentation),
+        writeCData("body", subIndentation, listOf("file" to bodyFile), body)
+    )
 }
 
 private fun NetworkError.toXml(indent: Int): String =
@@ -84,11 +93,7 @@ private fun writeUrl(
     params: Map<String, String?>,
     indent: Int
 ): String = if (attributes.any { it.second != null } || params.isNotEmpty()) {
-    writeTags(
-        URL,
-        indent,
-        attributes
-    ) { params.toXml(indent + 1) }
+    writeTags(URL, indent, attributes) { params.toXml(indent + 1) }
 } else {
     ""
 }
@@ -96,61 +101,74 @@ private fun writeUrl(
 private fun writeHeaders(headers: List<Header>, indent: Int): String = if (headers.isEmpty()) {
     ""
 } else {
-    headers.writeTagList { it.toXml(indent + 2) }
+    headers.toXml { it.toXml(indent) }
 }
 
 private fun Header.toXml(indent: Int): String =
     writeCData(HEADER, indent, listOf("name" to name), value)
 
-private fun Map<String, String?>.toXml(indent: Int): String = entries.writeTagList {
+private fun Map<String, String?>.toXml(indent: Int): String = entries.toXml {
     writeCData(PARAM, indent, listOf("name" to it.key), it.value)
 }
 
 private fun writeTags(
     tag: String,
-    indent: Int,
+    indentation: Int,
     attributes: List<Pair<String, Any?>> = emptyList(),
     body: () -> String?
 ): String {
     val content = body()
-    val processedContent = if (content.isNullOrEmpty()) null else "\n$content\n"
-    return writeTag(tag, indent, attributes, processedContent)
+    val processedContent =
+        if (content.isNullOrEmpty()) null else "\n$content\n${indent(indentation)}"
+    return writeTag(tag, indentation, attributes, processedContent)
 }
 
 private fun writeTag(
     tag: String,
-    indent: Int,
+    indentation: Int,
     attributes: List<Pair<String, Any?>> = emptyList(),
     body: String? = null
-): String = StringBuilder(" ".repeat(indent * SPACE_PER_TAB))
-    .append("<")
-    .append(tag)
-    .append(
-        attributes.filter { it.second != null }
-            .joinToString("") { (name, value) -> " $name=\"$value\"" }
-    )
-    .append(body?.let { ">$it</$tag>\n" } ?: " />\n").toString()
-
-private fun <T : Any> Iterable<T>.writeTagList(format: (T) -> String): String = joinToString("") {
-    format(it)
-}
-
-private fun writeCData(
-    tag: String,
-    indent: Int,
-    attributes: List<Pair<String, Any?>> = emptyList(),
-    body: String? = null
-): String {
-    val formatBody = if (body?.contains("[<>]".toRegex()) == true) "<![CDATA[$body]]>" else body
-    return StringBuilder(" ".repeat(indent * SPACE_PER_TAB))
+): String = if (body != null || attributes.filter { it.second != null }.isNotEmpty()) {
+    StringBuilder(indent(indentation))
         .append("<")
         .append(tag)
         .append(
             attributes.filter { it.second != null }
                 .joinToString("") { (name, value) -> " $name=\"$value\"" }
         )
-        .append(body?.let { ">$formatBody</$tag>\n" } ?: " />\n").toString()
+        .append(body?.let { ">$it</$tag>" } ?: " />").toString()
+} else {
+    ""
 }
+
+private fun <T : Any?> Iterable<T>.toXml(format: (T) -> String? = { it?.toString() }): String =
+    mapNotNull(format)
+        .filter { it.isNotEmpty() }
+        .joinToString("\n")
+
+private fun <T : Any?> writeTagList(
+    vararg tags: T,
+    format: (T) -> String? = { it?.toString() }
+): String = tags.map { it }.toXml(format)
+
+private fun writeCData(
+    tag: String,
+    indentation: Int,
+    attributes: List<Pair<String, Any?>> = emptyList(),
+    body: String? = null
+): String {
+    val formatBody = if (body?.contains("[<>]".toRegex()) == true) "<![CDATA[$body]]>" else body
+    return StringBuilder(indent(indentation))
+        .append("<")
+        .append(tag)
+        .append(
+            attributes.filter { it.second != null }
+                .joinToString("") { (name, value) -> " $name=\"$value\"" }
+        )
+        .append(body?.let { ">$formatBody</$tag>" } ?: " />").toString()
+}
+
+private fun indent(spaces: Int) = " ".repeat(spaces * SPACE_PER_TAB)
 
 private operator fun StringBuilder.plusAssign(obj: Any) {
     append(obj)
@@ -158,5 +176,5 @@ private operator fun StringBuilder.plusAssign(obj: Any) {
 
 private fun String?.orEmpty() = this ?: ""
 
-private const val XML_PREFACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+private const val XML_PREFACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 private const val SPACE_PER_TAB: Int = 4
