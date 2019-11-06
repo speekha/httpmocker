@@ -162,7 +162,7 @@ class DynamicMockTests : TestWithServer() {
         fun `should support exception results`() {
 
             interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { request ->
+                .useDynamicMocks {
                     error("Should throw an error")
                 }
                 .setInterceptorStatus(ENABLED)
