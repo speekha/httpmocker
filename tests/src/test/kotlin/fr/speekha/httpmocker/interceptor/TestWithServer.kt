@@ -25,6 +25,7 @@ import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.readAsString
+import fr.speekha.httpmocker.sax.SaxMapper
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -119,15 +120,26 @@ open class TestWithServer {
 
         @JvmStatic
         @Suppress("unused")
-        fun mappers(): Stream<Arguments> = Stream.of(
-            Arguments.of("Jackson", JacksonMapper()),
-            Arguments.of("Gson", GsonMapper()),
-            Arguments.of("Moshi", MoshiMapper()),
-            Arguments.of("Custom mapper", CustomMapper()),
+        fun mappers(): Stream<Arguments> = Stream.concat(jsonMappers(), xmlMappers())
+
+        @JvmStatic
+        @Suppress("unused")
+        fun jsonMappers(): Stream<Arguments> = Stream.of(
+            Arguments.of("Jackson", JacksonMapper(), "json"),
+            Arguments.of("Gson", GsonMapper(), "json"),
+            Arguments.of("Moshi", MoshiMapper(), "json"),
+            Arguments.of("Custom mapper", CustomMapper(), "json"),
             Arguments.of(
                 "Kotlinx serialization",
-                KotlinxMapper(JsonFormatConverter()::expand, JsonFormatConverter()::compact)
+                KotlinxMapper(JsonFormatConverter()::expand, JsonFormatConverter()::compact),
+                "json"
             )
+        )
+
+        @JvmStatic
+        @Suppress("unused")
+        fun xmlMappers(): Stream<Arguments> = Stream.of(
+            Arguments.of("XML mapper", SaxMapper(), "xml")
         )
 
         const val REQUEST_OK_CODE = 200

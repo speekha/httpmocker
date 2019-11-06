@@ -19,6 +19,7 @@ package fr.speekha.httpmocker.mappers
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.readMatches
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,37 +36,37 @@ class JsonMapperTest {
     inner class ParseJson {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When input is a comprehensive file, then a fully populated object should be returned`(
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getCompleteInput())
+            val result = mapper.readMatches(getCompleteJsonInput())
             assertEquals(completeData, result)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When input is a partial scenario, then default values should be used`(
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getPartialInput())
+            val result = mapper.readMatches(getPartialJsonInput())
             assertEquals(partialData, result)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When input is a partial scenario with error, then default values should be used`(
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getPartialInputWithError())
+            val result = mapper.readMatches(getPartialJsonInputWithError())
             assertEquals(partialDataError, result)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When headers contain colons, then their value should be properly parsed`(
             title: String,
             mapper: Mapper
@@ -94,7 +95,7 @@ class JsonMapperTest {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When headers contain quotes, then their value should be properly parsed`(
             title: String,
             mapper: Mapper
@@ -128,23 +129,30 @@ class JsonMapperTest {
     inner class WriteJson {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When input is minimal, then null fields should be omitted`(
             title: String,
             mapper: Mapper
         ) {
-            val expected = getMinimalOutput()
-            testStream(expected, mapper.serialize(listOf(Matcher(response = ResponseDescriptor()))))
+            val expected = getMinimalJsonOutput()
+            testJsonStream(
+                expected, mapper.serialize(
+                    listOf(
+                        Matcher(response = ResponseDescriptor()),
+                        Matcher(error = NetworkError("error"))
+                    )
+                )
+            )
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
         fun `When input is a complete object, the all fields should be properly written`(
             title: String,
             mapper: Mapper
         ) {
-            val expected = getExpectedOutput()
-            testStream(expected, mapper.serialize(listOf(completeData[0])))
+            val expected = getExpectedJsonOutput()
+            testJsonStream(expected, mapper.serialize(listOf(completeData[0])))
         }
     }
 }

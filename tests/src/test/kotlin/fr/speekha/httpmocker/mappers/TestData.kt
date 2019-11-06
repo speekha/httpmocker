@@ -42,7 +42,7 @@ internal val completeData = listOf(
                 Header("Set-Cookie", "\"cookie\"=\"value\"")
             ),
             params = mapOf("param1" to "1", "param2" to "2", "param3" to null),
-            body = ".*1.*"
+            body = ".*<1>.*"
         ),
         ResponseDescriptor(
             delay = 50,
@@ -53,7 +53,7 @@ internal val completeData = listOf(
                 Header("resHeader1", "5"),
                 Header("resHeader2", "6")
             ),
-            body = "simple body",
+            body = "<simple body />",
             bodyFile = "body_content.txt"
         ),
         NetworkError(
@@ -72,44 +72,93 @@ internal val partialDataError = listOf(
     Matcher(error = NetworkError("SomeExceptionType"))
 )
 
-internal fun getCompleteInput(): InputStream = ClassLoader.getSystemClassLoader()
+internal fun getCompleteJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
 
-internal fun getPartialInput(): InputStream = ClassLoader.getSystemClassLoader()
+internal fun getCompleteXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("complete_input.xml") ?: "".byteInputStream()
+
+internal fun getPartialJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
 
-internal fun getPartialInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
+internal fun getPartialXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_input.xml") ?: "".byteInputStream()
+
+internal fun getPartialJsonInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()
 
-internal fun getExpectedOutput() = getCompleteInput().readAsStringList()
+internal fun getPartialXmlInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()
+
+internal fun getExpectedJsonOutput() = getCompleteJsonInput().readAsStringList()
     .map {
         it.trim()
             .replace(Regex(":[ ]+"), ":")
     }
 
-internal fun getMinimalOutput() = listOf(
-    "[{" +
-            "\"request\":{" +
-            "\"headers\":{},\"params\":{}" +
-            "}," +
-            "\"response\":{" +
-            "\"delay\":0,\"code\":200,\"media-type\":\"text/plain\",\"headers\":{},\"body\":\"\"" +
-            "}}]"
-)
+internal fun getExpectedXmlOutput() = getCompleteXmlInput().readAsStringList()
+
+internal fun getMinimalJsonOutput() =
+    """[
+        |  {
+        |    "request":{
+        |      "headers":{},
+        |      "params":{}
+        |    },
+        |    "response":{
+        |      "delay":0,
+        |      "code":200,
+        |      "media-type":"text/plain",
+        |      "headers":{},
+        |      "body":""
+        |    }
+        |  },
+        |  {
+        |    "request":{
+        |      "headers":{},"params":{}
+        |    },
+        |    "error":{
+        |      "type":"error"
+        |    }
+        |  }
+        |]"""
+        .trimMargin()
+        .split("\n")
+
+internal fun getMinimalXmlOutput() =
+    """<?xml version="1.0" encoding="UTF-8"?>
+        |<scenarios>
+        |    <case>
+        |        <response delay="0" code="200" media-type="text/plain">
+        |            <body></body>
+        |        </response>
+        |    </case>
+        |    <case>
+        |        <error type="error" />
+        |    </case>
+        |</scenarios>"""
+        .trimMargin()
+        .split("\n")
 
 /**
  * Check equality after removing all the format enhancement added by the different JSON parsers (
  * indentation, line feeds, etc.).
  */
-internal fun testStream(expectedResult: List<String>, actual: String) {
+internal fun testJsonStream(expectedResult: List<String>, actual: String) {
     val result = actual.split('\n')
         .joinToString("") {
             it.trim()
                 .replace(Regex("\\p{Space}*:\\p{Space}+"), ":")
+                .replace(Regex("\\p{Space}*,\\p{Space}+"), ",")
                 .replace("[ ", "[")
                 .replace(" ]", "]")
                 .replace("{ ", "{")
         }
     val expected = expectedResult.joinToString("") { it.trim() }
     assertEquals(expected, result)
+}
+
+internal fun testXmlStream(expectedResult: List<String>, actual: String) {
+    val expected = expectedResult.joinToString("\n")
+    assertEquals(expected, actual)
 }

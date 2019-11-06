@@ -331,6 +331,36 @@ class RecordTests : TestWithServer() {
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
+            "When recording a response body with a mediatype charset, " +
+                    "then the file should have the proper extension"
+        )
+        fun `should handle proper extension for response files`(title: String, mapper: Mapper) {
+            enqueueServerResponse(200, "body", contentType = "application/json; charset=UTF-8")
+            setUpInterceptor(mapper)
+
+            executeGetRequest("record/request1")
+
+            assertFileExists("$SAVE_FOLDER/record/request1_body_0.json")
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
+            "When recording a response body with unknwown mediatype, " +
+                    "then the file should have the default extension"
+        )
+        fun `should handle default extension for response files`(title: String, mapper: Mapper) {
+            enqueueServerResponse(200, "body", contentType = "unknown/no-type")
+            setUpInterceptor(mapper)
+
+            executeGetRequest("record/request1")
+
+            assertFileExists("$SAVE_FOLDER/record/request1_body_0.txt")
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
             "When several matches exist for a request, " +
                     "then the body file should have the same index as the request in the scenario"
         )

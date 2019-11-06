@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url method="get" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>get</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url method="post" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>post</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url method="put" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>put</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url method="delete" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>delete</body>
+        </response>
+    </case>
+    <case>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>default</body>
+        </response>
+    </case>
+</scenarios>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url protocol="https" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>HTTPS</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url protocol="http" />
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>HTTP</body>
+        </response>
+    </case>
+</scenarios>

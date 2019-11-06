@@ -19,7 +19,7 @@ apply plugin: 'kotlin'
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "org.slf4j:slf4j-api:$slf4j_version"
+    api "org.slf4j:slf4j-api:$slf4j_version"
 }
 
 apply from: '../gradle/dokka.gradle'

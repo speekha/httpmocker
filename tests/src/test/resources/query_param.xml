@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios>
+    <case>
+        <request>
+            <url>
+                <param name="param">1</param>
+            </url>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>param A</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url>
+                <param name="param">2</param>
+            </url>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>param B</body>
+        </response>
+    </case>
+</scenarios>

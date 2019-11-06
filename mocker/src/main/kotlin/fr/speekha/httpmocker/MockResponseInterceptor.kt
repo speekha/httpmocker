@@ -150,15 +150,16 @@ private constructor(
     private fun convertCallResult(chain: Interceptor.Chain): CallRecord = try {
         val response = executeNetworkCall(chain)
         val body = response.body()?.bytes()
-        CallRecord(chain.request(), response, body)
+        val contentType = response.body()?.contentType()
+        CallRecord(chain.request(), response, body, contentType)
     } catch (e: Throwable) {
         CallRecord(chain.request(), error = e)
     }
 
-    private fun proceedWithCallResult(record: CallRecord): Response? = when {
-        record.response != null -> record.response.copyResponse(record.body)
-        record.error != null -> throw record.error
-        else -> null
+    private fun proceedWithCallResult(record: CallRecord): Response? = if (record.error != null) {
+        throw record.error
+    } else {
+        record.response?.copyResponse(record.body)
     }
 
     private fun messageForHttpCode(httpCode: Int) =

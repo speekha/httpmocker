@@ -22,8 +22,8 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-
             - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-
             - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-
             - jars-{{ checksum "build.gradle" }}-
@@ -67,6 +67,9 @@ commands:
       - restore_cache:
           keys:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-sax-adapter-{{ .Branch }}-{{ .Revision }}
 
 orbs:
   codecov: codecov/codecov@1.0.2
@@ -82,7 +85,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
       - save_cache:
           paths:
             - ~/.gradle/wrapper
@@ -130,6 +133,11 @@ jobs:
     steps:
       - build_module:
           module: "kotlinx-adapter"
+  build_sax:
+    <<: *container_config
+    steps:
+      - build_module:
+          module: "sax-adapter"
   build_demo:
     <<: *container_config
     steps:
@@ -203,6 +211,9 @@ jobs:
           path: kotlinx-adapter/build/reports
           destination: reports/kotlinx-adapter
       - store_artifacts:
+          path: sax-adapter/build/reports
+          destination: reports/sax-adapter
+      - store_artifacts:
           path: moshi-adapter/build/reports
           destination: reports/moshi-adapter
       - store_artifacts:
@@ -259,6 +270,9 @@ workflows:
       - build_kotlinx:
           requires:
             - build_core
+      - build_sax:
+          requires:
+            - build_core
       - build_demo:
           requires:
             - build_jackson
@@ -269,6 +283,7 @@ workflows:
             - build_moshi
             - build_custom
             - build_kotlinx
+            - build_sax
       - test:
           requires:
             - build_jackson
@@ -276,6 +291,7 @@ workflows:
             - build_moshi
             - build_custom
             - build_kotlinx
+            - build_sax
       - quality:
           requires:
             - init_workspace
@@ -289,6 +305,7 @@ workflows:
       - publish_release:
           requires:
             - test
+            - quality
           filters:
             branches:
               only: master
