@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.XML_FORMAT
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -41,6 +42,20 @@ class SingleFolderPolicyTest {
                 "body"
             )
             Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
+        }
+
+        @Test
+        @DisplayName("When scenarios are not in JSON, then resulting file should have" +
+                "the proper extension")
+        fun `should use the right extension`() {
+            val policy: FilingPolicy = SingleFolderPolicy("folder", XML_FORMAT)
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            Assertions.assertEquals("folder/test_with_path.xml", policy.getPath(request))
         }
 
         @Test

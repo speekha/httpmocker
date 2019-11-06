@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.XML_FORMAT
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -32,7 +33,7 @@ class MirrorPathPolicyTest {
     inner class TestPolicy {
         @Test
         @DisplayName("When processing a URL, then file path should be kept from the URL")
-        fun keepUrl() {
+        fun `should mirror URL`() {
             val request = buildRequest(
                 "http://www.somestuff.com/test/with/path",
                 listOf("header" to "value"),
@@ -45,7 +46,7 @@ class MirrorPathPolicyTest {
         @Test
         @DisplayName("When processing a URL ending with a '/', " +
                 "then index.json should be added in the last empty segment")
-        fun emptyFolder() {
+        fun `should add index to path`() {
             val request = buildRequest(
                 "http://www.somestuff.com/test/with/path/",
                 listOf("header" to "value"),
@@ -53,6 +54,21 @@ class MirrorPathPolicyTest {
                 "body"
             )
             assertEquals("test/with/path/index.json", policy.getPath(request))
+        }
+
+        @Test
+        @DisplayName("When file format is not JSON, " +
+                "then the proper extension should be used")
+        fun `should use proper extensions`() {
+            val xmlPolicy: FilingPolicy = MirrorPathPolicy(XML_FORMAT)
+
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path/",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            assertEquals("test/with/path/index.xml", xmlPolicy.getPath(request))
         }
     }
 }

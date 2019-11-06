@@ -16,13 +16,17 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.JSON_FORMAT
 import okhttp3.Request
 
 /**
  * Simple filing policy that stores all the configuration files in the same folder. Slashes in the URL are replaced
  * by underscores.
  */
-class SingleFolderPolicy(private val rootFolder: String = "") : FilingPolicy {
+class SingleFolderPolicy(
+    private val rootFolder: String = "",
+    private val fileType: String = JSON_FORMAT
+) : FilingPolicy {
 
     override fun getPath(request: Request): String {
         val prefix = if (rootFolder.isEmpty()) "" else "$rootFolder/"
@@ -32,6 +36,6 @@ class SingleFolderPolicy(private val rootFolder: String = "") : FilingPolicy {
             .joinToString("_")
             .takeIf { it.isNotBlank() }
             ?: "index"
-        return "$prefix$fileName.json"
+        return "$prefix$fileName.$fileType"
     }
 }
