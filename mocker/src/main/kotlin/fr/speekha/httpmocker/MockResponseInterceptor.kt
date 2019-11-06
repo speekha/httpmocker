@@ -156,10 +156,10 @@ private constructor(
         CallRecord(chain.request(), error = e)
     }
 
-    private fun proceedWithCallResult(record: CallRecord): Response? = when {
-        record.response != null -> record.response.copyResponse(record.body)
-        record.error != null -> throw record.error
-        else -> null
+    private fun proceedWithCallResult(record: CallRecord): Response? = if (record.error != null) {
+        throw record.error
+    } else {
+        record.response?.copyResponse(record.body)
     }
 
     private fun messageForHttpCode(httpCode: Int) =
