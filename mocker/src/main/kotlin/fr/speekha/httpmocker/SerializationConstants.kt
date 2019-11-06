@@ -43,3 +43,5 @@ const val EXCEPTION_MESSAGE = "message"
 const val DEFAULT_MEDIA_TYPE = "text/plain"
 const val DEFAULT_RESPONSE_CODE = 200
 const val DEFAULT_EXCEPTION = "java.lang.RuntimeException"
+const val JSON_FORMAT = "json"
+const val XML_FORMAT = "xml"
