@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.XML_FORMAT
 import fr.speekha.httpmocker.buildRequest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -56,6 +57,21 @@ class ServerSpecificPolicyTest {
                 "body"
             )
             assertEquals("www.somestuff.com/test/with/path/index.json", policy.getPath(request))
+        }
+
+        @Test
+        @DisplayName(
+            "When file format is not JSON, then the proper extension should be used"
+        )
+        fun `should use proper extension`() {
+            val xmlPolicy: FilingPolicy = ServerSpecificPolicy(XML_FORMAT)
+            val request = buildRequest(
+                "http://www.somestuff.com/test/with/path/",
+                listOf("header" to "value"),
+                "POST",
+                "body"
+            )
+            assertEquals("www.somestuff.com/test/with/path/index.xml", xmlPolicy.getPath(request))
         }
     }
 }

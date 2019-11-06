@@ -16,14 +16,17 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.JSON_FORMAT
 import okhttp3.Request
 
 /**
  * Simple filing policy discarding host name, and matching file path with url path.
  */
-class MirrorPathPolicy : FilingPolicy {
+class MirrorPathPolicy(
+    private val fileType: String = JSON_FORMAT
+) : FilingPolicy {
 
     override fun getPath(request: Request): String = with(request.url().pathSegments()) {
-        joinToString("/") + if (last() == "") "index.json" else ".json"
+        joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
     }
 }

@@ -16,14 +16,17 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.JSON_FORMAT
 import okhttp3.Request
 
 /**
  * Simple filing policy that uses the complete URL, including host name, to retrieve configuration files.
  */
-class ServerSpecificPolicy : FilingPolicy {
+class ServerSpecificPolicy(
+    private val fileType: String = JSON_FORMAT
+) : FilingPolicy {
     override fun getPath(request: Request): String =
         with(listOf(request.url().host()) + request.url().pathSegments()) {
-            joinToString("/") + if (last() == "") "index.json" else ".json"
+            joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
         }
 }
