@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply from:'../gradle/versions.gradle'
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    api project(':mocker')
-
-    api "com.fasterxml.jackson.core:jackson-core:$jackson_version"
-    api "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
-    api "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
-    api "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+plugins {
+    id(BuildPlugins.PluginsId.kotlin)
 }
 
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
+dependencies {
+    implementation(kotlin(module = "stdlib-jdk7", version = kotlinVersion))
+
+    api(project(":mocker"))
+    api(Libraries.jacksonCore)
+    api(Libraries.jacksonKotlin)
+    api(Libraries.jacksonAnnotations)
+    api(Libraries.jacksonDatabind)
+}
+
+apply(from = "../gradle/dokka.gradle")
+apply(from = "../gradle/publish.gradle")

@@ -71,6 +71,7 @@ object LibVersions {
     const val coroutines = "1.3.0"
     const val retrofit = "2.6.0"
     const val slf4j = "1.7.26"
+    const val jackson = "2.10.0"
     const val gson = "2.8.6"
 }
 
@@ -83,6 +84,15 @@ object Libraries {
     // GSON adapter
     const val gson = "com.google.code.gson:gson:${LibVersions.gson}"
 
+    // Jackson adapter
+    const val jacksonCore = "com.fasterxml.jackson.core:jackson-core:${LibVersions.jackson}"
+    const val jacksonKotlin =
+        "com.fasterxml.jackson.module:jackson-module-kotlin:${LibVersions.jackson}"
+    const val jacksonAnnotations =
+        "com.fasterxml.jackson.core:jackson-annotations:${LibVersions.jackson}"
+    const val jacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:${LibVersions.jackson}"
+
+    // Android dependencies for demo app
     const val appCompat = "androidx.appcompat:appcompat:${LibVersions.jetpack}"
     const val constraintLayout =
         "androidx.constraintlayout:constraintlayout:${LibVersions.constraintLayout}"
