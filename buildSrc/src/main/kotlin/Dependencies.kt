@@ -82,6 +82,7 @@ object LibVersions {
 object Libraries {
     // Common
     const val slf4jApi = "org.slf4j:slf4j-api:${LibVersions.slf4j}"
+    const val slf4jSimple = "org.slf4j:slf4j-simple:${LibVersions.slf4j}"
     const val slf4jAndroid = "org.slf4j:slf4j-android:${LibVersions.slf4j}"
     const val okHttp = "com.squareup.okhttp3:okhttp:${LibVersions.okhttp}"
 
@@ -124,11 +125,19 @@ object TestLibraries {
         const val junit4 = "4.12"
         const val junit5 = "5.4.2"
         const val testRunner = "1.1.0"
+        const val mockk = "1.9.3"
+        const val mockito = "2.27.0"
+        const val mockitoKotlin = "2.1.0"
     }
 
     const val junit4 = "junit:junit:${Versions.junit4}"
-    const val junit5 = "junit:junit:${Versions.junit5}"
-    const val mockk = "io.mockk:mockk:1.9.3"
+    const val junit5api = "org.junit.jupiter:junit-jupiter-api:${Versions.junit5}"
+    const val junit5params = "org.junit.jupiter:junit-jupiter-params:${Versions.junit5}"
+    const val junit5engine = "org.junit.jupiter:junit-jupiter-engine:${Versions.junit5}"
+    const val mockServer = "com.squareup.okhttp3:mockwebserver:${LibVersions.okhttp}"
+    const val mockk = "io.mockk:mockk:${Versions.mockk}"
+    const val mockitoCore = "org.mockito:mockito-core:${Versions.mockito}"
+    const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoKotlin}"
     const val archCore = "androidx.arch.core:core-testing:${LibVersions.arch}"
     const val testRunner = "androidx.test:runner:${Versions.testRunner}"
 }
