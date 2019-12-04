@@ -31,6 +31,7 @@ object BuildPlugins {
 
     object PluginsId {
         const val kotlin = "kotlin"
+        const val kotlinSerialization = "kotlinx-serialization"
         const val androidApplication = "com.android.application"
         const val kotlinAndroid = "kotlin-android"
         const val kotlinAndroidExtensions = "kotlin-android-extensions"
@@ -73,6 +74,7 @@ object LibVersions {
     const val slf4j = "1.7.26"
     const val jackson = "2.10.0"
     const val gson = "2.8.6"
+    const val kotlinxSerialization = "0.13.0"
 }
 
 object Libraries {
@@ -91,6 +93,10 @@ object Libraries {
     const val jacksonAnnotations =
         "com.fasterxml.jackson.core:jackson-annotations:${LibVersions.jackson}"
     const val jacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:${LibVersions.jackson}"
+
+    // Kotlinx serialization
+    const val kotlinSerialization =
+        "org.jetbrains.kotlinx:kotlinx-serialization-runtime:${LibVersions.kotlinxSerialization}"
 
     // Android dependencies for demo app
     const val appCompat = "androidx.appcompat:appcompat:${LibVersions.jetpack}"

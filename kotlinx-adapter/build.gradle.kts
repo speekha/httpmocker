@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlinx-serialization'
-apply from:'../gradle/versions.gradle'
-
-test {
-    options {
-        useJUnitPlatform()
-    }
+plugins {
+    id(BuildPlugins.PluginsId.kotlin)
+    id(BuildPlugins.PluginsId.kotlinSerialization)
 }
 
 repositories {
-    jcenter()
-    maven { url "https://kotlin.bintray.com/kotlinx" }
+    maven("https://kotlin.bintray.com/kotlinx")
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
+    implementation(kotlin(module = "stdlib-jdk7", version = kotlinVersion))
 
-    api project(':mocker')
+    api(project(":mocker"))
+
+    implementation(Libraries.kotlinSerialization)
 }
 
-ext {
-    pom_name = "mocker-kotlinx-adapter"
-}
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
+apply(from = "../gradle/dokka.gradle")
+apply(from = "../gradle/publish.gradle")
