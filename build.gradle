@@ -74,19 +74,10 @@ subprojects {
 //    tasks.withType<Test> {
 //        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
 //    }
-
-    apply plugin: "io.gitlab.arturbosch.detekt"
-
-    detekt {
-        config = files("../detekt.yml")
-        parallel = true
-        reports {
-            xml { enabled = true }
-            html { enabled = true }
-        }
-    }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+apply from: 'gradle/detekt.gradle'
