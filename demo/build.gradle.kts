@@ -92,7 +92,7 @@ dependencies {
     implementation(Libraries.retrofit)
     implementation("com.squareup.retrofit2:converter-jackson:${LibVersions.retrofit}")
     implementation("org.koin:koin-androidx-viewmodel:2.0.1")
-    implementation(Libraries.slf4j)
+    implementation(Libraries.slf4jAndroid)
     //implementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
     implementation(project(":jackson-adapter"))
 

@@ -63,6 +63,7 @@ object AndroidSdk {
 }
 
 object LibVersions {
+    const val okhttp = "3.14.4"
     const val jetpack = "1.0.0"
     const val ktx = "1.1.0"
     const val constraintLayout = "1.1.3"
@@ -74,8 +75,12 @@ object LibVersions {
 }
 
 object Libraries {
+    // Common
+    const val slf4jApi = "org.slf4j:slf4j-api:${LibVersions.slf4j}"
+    const val slf4jAndroid = "org.slf4j:slf4j-android:${LibVersions.slf4j}"
+    const val okHttp = "com.squareup.okhttp3:okhttp:${LibVersions.okhttp}"
 
-    const val slf4j = "org.slf4j:slf4j-android:${LibVersions.slf4j}"
+    // GSON adapter
     const val gson = "com.google.code.gson:gson:${LibVersions.gson}"
 
     const val appCompat = "androidx.appcompat:appcompat:${LibVersions.jetpack}"

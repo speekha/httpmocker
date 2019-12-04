@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply from:'../gradle/versions.gradle'
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "org.slf4j:slf4j-api:$slf4j_version"
+plugins {
+    id(BuildPlugins.PluginsId.kotlin)
 }
 
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
+dependencies {
+    implementation(kotlin(module = "stdlib-jdk7", version = kotlinVersion))
+    implementation (Libraries.okHttp)
+    api (Libraries.slf4jApi)
+}
+
+apply(from = "../gradle/dokka.gradle")
+apply(from = "../gradle/publish.gradle")
