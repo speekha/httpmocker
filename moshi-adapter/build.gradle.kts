@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
-apply from:'../gradle/versions.gradle'
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    api project(':mocker')
-
-    api "com.squareup.moshi:moshi:$moshi_version"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
+plugins {
+    id(BuildPlugins.PluginsId.kotlin)
+    id(BuildPlugins.PluginsId.kotlinKapt)
 }
 
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
+dependencies {
+    implementation(kotlin(module = "stdlib-jdk7", version = kotlinVersion))
+
+    api(project(":mocker"))
+
+    api(Libraries.moshi)
+    kapt(Libraries.moshiCodegen)
+}
+
+apply(from = "../gradle/dokka.gradle")
+apply(from = "../gradle/publish.gradle")

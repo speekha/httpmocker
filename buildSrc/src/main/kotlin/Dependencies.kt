@@ -31,6 +31,7 @@ object BuildPlugins {
 
     object PluginsId {
         const val kotlin = "kotlin"
+        const val kotlinKapt = "kotlin-kapt"
         const val kotlinSerialization = "kotlinx-serialization"
         const val androidApplication = "com.android.application"
         const val kotlinAndroid = "kotlin-android"
@@ -65,16 +66,17 @@ object AndroidSdk {
 
 object LibVersions {
     const val okhttp = "3.14.4"
+    const val slf4j = "1.7.26"
+    const val jackson = "2.10.0"
+    const val gson = "2.8.6"
+    const val kotlinxSerialization = "0.13.0"
+    const val moshi = "1.8.0"
     const val jetpack = "1.0.0"
     const val ktx = "1.1.0"
     const val constraintLayout = "1.1.3"
     const val arch = "2.1.0"
     const val coroutines = "1.3.0"
     const val retrofit = "2.6.0"
-    const val slf4j = "1.7.26"
-    const val jackson = "2.10.0"
-    const val gson = "2.8.6"
-    const val kotlinxSerialization = "0.13.0"
 }
 
 object Libraries {
@@ -97,6 +99,10 @@ object Libraries {
     // Kotlinx serialization
     const val kotlinSerialization =
         "org.jetbrains.kotlinx:kotlinx-serialization-runtime:${LibVersions.kotlinxSerialization}"
+
+    // Moshi
+    const val moshi = "com.squareup.moshi:moshi:${LibVersions.moshi}"
+    const val moshiCodegen = "com.squareup.moshi:moshi-kotlin-codegen:${LibVersions.moshi}"
 
     // Android dependencies for demo app
     const val appCompat = "androidx.appcompat:appcompat:${LibVersions.jetpack}"
