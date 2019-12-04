@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-apply plugin: "org.jlleitschuh.gradle.ktlint"
-
-// Ktlint configuration for sub-projects
-ktlint {
-    version = "0.34.2"
-    verbose = true
-    android = false
-//    reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
-    additionalEditorconfigFile = file("../.editorconfig")
-
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
-    }
+repositories {
+    jcenter()
 }
+
+plugins {
+    `kotlin-dsl`
+}
+
+//kotlinDslPluginOptions {
+//    experimentalWarning.set(false)
+//}

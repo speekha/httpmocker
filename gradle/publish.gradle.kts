@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.jfrog.artifactory'
-
-apply from:'../gradle/versions.gradle'
+plugins {
+    id(BuildPlugins.PluginsId.maven)
+    id(BuildPlugins.PluginsId.mavenPublish)
+    id(BuildPlugins.PluginsId.bintray)
+    id(BuildPlugins.PluginsId.artifactory)
+}
 
 // custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+val sourceJar by tasks.registering(Jar::class) {
+    dependsOn(tasks["classes"])
+    classifier = "sources"
+    from(sourceSets.main.get().allSource)
 }
 
 artifacts {
-    archives sourcesJar, dokkaJar
+    archives(sourcesJar, dokkaJar)
 }
 
-def pomConfig = {
+val pomConfig = {
     licenses {
         license {
             name "The Apache Software License, Version 2.0"
@@ -55,16 +56,16 @@ def pomConfig = {
 publishing {
     publications {
         mavenPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact dokkaJar
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'A simple mocking lib for OkHttp')
-                root.appendNode('name', 'HTTP Mocker')
-                root.appendNode('url', 'https://github.com/speekha/httpmocker.git')
-                root.children().last() + pomConfig
-            }
+            from components . java
+                    artifact sourcesJar
+                    artifact dokkaJar
+                    pom.withXml {
+                        def root = asNode ()
+                        root.appendNode('description', 'A simple mocking lib for OkHttp')
+                        root.appendNode('name', 'HTTP Mocker')
+                        root.appendNode('url', 'https://github.com/speekha/httpmocker.git')
+                        root.children().last() + pomConfig
+                    }
         }
     }
 }
@@ -86,7 +87,7 @@ bintray {
         version {
             name = "$httpmock_version"
             desc = "$httpmock_version"
-            released = new Date()
+            released = new Date ()
         }
     }
 }

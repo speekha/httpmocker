@@ -17,7 +17,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
+apply from:'../gradle/versions.gradle'
 
 android {
     compileSdkVersion 29

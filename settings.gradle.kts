@@ -14,5 +14,14 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter', ':sax-adapter'
-
+include(
+    ":demo",
+    ":mocker",
+    ":tests",
+    ":jackson-adapter",
+    ":moshi-adapter",
+    ":gson-adapter",
+    ":custom-adapter",
+    ":kotlinx-adapter",
+    ":sax-adapter"
+)

@@ -15,7 +15,7 @@
  */
 
 apply plugin: 'kotlin'
-
+apply from:'../gradle/versions.gradle'
 
 test {
     options {
