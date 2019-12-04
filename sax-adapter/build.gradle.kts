@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply from:'../gradle/versions.gradle'
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    api project(':mocker')
+plugins {
+    id(BuildPlugins.PluginsId.kotlin)
 }
 
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'
+dependencies {
+    implementation(kotlin(module = "stdlib-jdk7", version = kotlinVersion))
+
+    api(project(":mocker"))
+}
+
+apply(from = "../gradle/dokka.gradle")
+apply(from = "../gradle/publish.gradle")
