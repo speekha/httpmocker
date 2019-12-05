@@ -22,11 +22,11 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle.kts" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/versions.gradle" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-
             - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
   build_module:
     description: "Builds a specific module"
@@ -85,7 +85,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
       - save_cache:
           paths:
             - ~/.gradle/wrapper
