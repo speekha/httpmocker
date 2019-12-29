@@ -40,15 +40,15 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 @DisplayName("Java API")
-class JavaApiTest {
+public class JavaApiTest {
 
     @Nested
     @DisplayName("Given a Java code base, When using the Kotlin API")
-    class WithJavaCode extends TestWithServer {
+    public class WithJavaCode extends TestWithServer {
 
         @Test
         @DisplayName("Then dynamic mocks should work properly")
-        void shouldUseDynamicMocksWithJavaApi() throws IOException {
+        public void shouldUseDynamicMocksWithJavaApi() throws IOException {
             initInterceptor(getFilingPolicy());
             Response response = executeRequest("/dynamic");
             Assertions.assertEquals("dynamic", response.body().string());
@@ -56,7 +56,7 @@ class JavaApiTest {
 
         @Test
         @DisplayName("Then static mocks should work properly")
-        void shouldUseStaticMocksWithJavaApi() throws IOException {
+        public void shouldUseStaticMocksWithJavaApi() throws IOException {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             Request request = initRequest("/static");
