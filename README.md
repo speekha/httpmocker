@@ -110,10 +110,10 @@ The custom and moshi parsers are immune to obfuscation because they do not use a
 ## Quickstart
 
 Mocking http calls relies on a simple Interceptor: MockResponseInterceptor. All you need to set it up
-is to add it to your OkHttp client. Here's an example with minimal configuration using dynamic mocks:
-
+is to add it to your OkHttp client. Here's an example with minimal configuration of dynamic mocks
+using the Java-friendly builder syntax:
 ```kotlin
-    val interceptor = MockResponseInterceptor.Builder()
+    val interceptor = Builder()
         .useDynamicMocks{
             ResponseDescriptor(code = 200, body = "Fake response body")
         }
@@ -123,6 +123,20 @@ is to add it to your OkHttp client. Here's an example with minimal configuration
         .addInterceptor(interceptor)
         .build()
 ```
+
+You can write the same thing in a more Kotlin-friendly style:
+```kotlin
+    val interceptor = mockInterceptor {
+        useDynamicMocks{
+            ResponseDescriptor(code = 200, body = "Fake response body")
+        }
+        setInterceptorStatus(ENABLED)
+    }
+    val client = OkHttpClient.Builder()
+        .addInterceptor(interceptor)
+        .build()
+```
+
 If your interceptor is disabled, it will not interfere with actual network calls. If it is enabled, 
 it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that you have to 
 provide the response for each request programmatically, which allows you to define stateful 
@@ -133,19 +147,22 @@ you can simply provide a lambda function to do the computation.
 Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
 an example for an Android app using static mocks, with a few more options:
 ```kotlin
-    val interceptor = MockResponseInterceptor.Builder()
-        .parseScenariosWith(mapper)
-        .decodeScenarioPathWith(filingPolicy)
-        .loadFileWith { context.assets.open(it) }
-        .setInterceptorStatus(ENABLED)
-        .saveScenariosIn(File(rootFolder))
-        .addFakeNetworkDelay(50L)
-        .build()
+    val interceptor = mockInterceptor {
+            parseScenariosWith(mapper)
+            decodeScenarioPathWith(filingPolicy)
+            loadFileWith { 
+                context.assets.open(it) 
+            }
+            setInterceptorStatus(ENABLED)
+            saveScenariosIn(File(rootFolder))
+            addFakeNetworkDelay(50L)
+        }
 ```
+
 In this example, we decided to store the scenarios in the assets folder of the app (but you 
 could also have them as resources in your classpath and use the `Classloader` to access them or 
 even store them in a certain folder and access that folder with any File API you're comfortable 
-with). You also need to provide the `FilePolicy` you want to use: that policy defines which file to 
+with). You also need to provide the `FilingPolicy` you want to use: that policy defines which file to 
 check to find a match for a request. A few policies are provided in the library, but you can also 
 define your own. 
 
