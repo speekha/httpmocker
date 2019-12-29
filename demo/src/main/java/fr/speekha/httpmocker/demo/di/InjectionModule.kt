@@ -22,6 +22,7 @@ import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.mockInterceptor
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -33,15 +34,15 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 val injectionModule: Module = module {
 
     single {
-        MockResponseInterceptor.Builder()
-            .decodeScenarioPathWith(MirrorPathPolicy())
-            .loadFileWith(get<Context>().assets::open)
-            .parseScenariosWith(JacksonMapper())
-            .saveScenariosIn(
+        mockInterceptor {
+            decodeScenarioPathWith(MirrorPathPolicy())
+            loadFileWith(get<Context>().assets::open)
+            parseScenariosWith(JacksonMapper())
+            saveScenariosIn(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             )
-            .addFakeNetworkDelay(500)
-            .build()
+            addFakeNetworkDelay(500)
+        }
     }
 
     single<OkHttpClient> {

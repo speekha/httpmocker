@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.util.stream.Stream
 
 open class TestWithServer {
@@ -91,16 +92,23 @@ open class TestWithServer {
     ): Response =
         executeRequest(url, "GET", null, headers)
 
+    @JvmOverloads
     protected fun executeRequest(
         url: String,
-        method: String,
-        body: String?,
+        method: String = "GET",
+        body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
     ): Response {
         val request = initRequest(url, headers, method, body)
         return client.newCall(request).execute()
     }
 
+    @Throws(IOException::class)
+    protected fun executeRequest(request: Request) {
+        client.newCall(request).execute()
+    }
+
+    @JvmOverloads
     protected fun initRequest(
         url: String,
         headers: List<Pair<String, String>> = emptyList(),
