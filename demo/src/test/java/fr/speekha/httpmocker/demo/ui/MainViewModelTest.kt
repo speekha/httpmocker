@@ -17,12 +17,13 @@
 package fr.speekha.httpmocker.demo.ui
 
 import androidx.lifecycle.Observer
-import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.mockInterceptor
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
@@ -46,9 +47,9 @@ class MainViewModelTest : ViewModelTest() {
     private val id = 0L
 
     private lateinit var mockService: GithubApiEndpoints
-    private val mockResponseInterceptor = MockResponseInterceptor.Builder()
-        .parseScenariosWith(JacksonMapper())
-        .build()
+    private val mockResponseInterceptor = mockInterceptor {
+        parseScenariosWith(JacksonMapper())
+    }
 
     private lateinit var viewModel: MainViewModel
 
@@ -141,9 +142,9 @@ class MainViewModelTest : ViewModelTest() {
         val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
-        viewModel.setMode(MockResponseInterceptor.Mode.DISABLED)
+        viewModel.setMode(Mode.DISABLED)
 
-        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.DISABLED)
+        assertEquals(mockResponseInterceptor.mode, Mode.DISABLED)
         verify { observer.onChanged(State.Message(R.string.disabled_description)) }
     }
 
@@ -152,9 +153,9 @@ class MainViewModelTest : ViewModelTest() {
         val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
-        viewModel.setMode(MockResponseInterceptor.Mode.ENABLED)
+        viewModel.setMode(Mode.ENABLED)
 
-        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.ENABLED)
+        assertEquals(mockResponseInterceptor.mode, Mode.ENABLED)
         verify { observer.onChanged(State.Message(R.string.enabled_description)) }
     }
 
@@ -163,9 +164,9 @@ class MainViewModelTest : ViewModelTest() {
         val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
-        viewModel.setMode(MockResponseInterceptor.Mode.MIXED)
+        viewModel.setMode(Mode.MIXED)
 
-        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.MIXED)
+        assertEquals(mockResponseInterceptor.mode, Mode.MIXED)
         verify { observer.onChanged(State.Message(R.string.mixed_description)) }
     }
 
@@ -174,9 +175,9 @@ class MainViewModelTest : ViewModelTest() {
         val observer = spyk<Observer<State>>()
         viewModel.getState().observeForever(observer)
 
-        viewModel.setMode(MockResponseInterceptor.Mode.RECORD)
+        viewModel.setMode(Mode.RECORD)
 
-        assertEquals(mockResponseInterceptor.mode, MockResponseInterceptor.Mode.RECORD)
+        assertEquals(mockResponseInterceptor.mode, Mode.RECORD)
         verify { observer.onChanged(State.Permission) }
         verify { observer.onChanged(State.Message(R.string.record_description)) }
     }

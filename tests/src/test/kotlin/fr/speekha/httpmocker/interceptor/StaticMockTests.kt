@@ -22,10 +22,11 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import fr.speekha.httpmocker.Mapper
-import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.MIXED
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.Mode.ENABLED
+import fr.speekha.httpmocker.Mode.MIXED
 import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
@@ -261,17 +262,17 @@ class StaticMockTests : TestWithServer() {
 
             initFilingPolicy(type)
 
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { request ->
+            interceptor = mockInterceptor {
+                useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
                         request.url().toString().contains("dynamic")
                     }
                 }
-                .decodeScenarioPathWith(filingPolicy)
-                .loadFileWith(loadingLambda)
-                .parseScenariosWith(mapper)
-                .setInterceptorStatus(ENABLED)
-                .build()
+                decodeScenarioPathWith(filingPolicy)
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
@@ -467,12 +468,12 @@ class StaticMockTests : TestWithServer() {
 
         fun setupInterceptor(scenarioFile: String, mapper: Mapper, type: String) {
             initFilingPolicy(type)
-            interceptor = MockResponseInterceptor.Builder()
-                .decodeScenarioPathWith(SingleFilePolicy("$scenarioFile.$type"))
-                .loadFileWith(loadingLambda)
-                .parseScenariosWith(mapper)
-                .setInterceptorStatus(ENABLED)
-                .build()
+            interceptor = mockInterceptor {
+                decodeScenarioPathWith(SingleFilePolicy("$scenarioFile.$type"))
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
 
             client = OkHttpClient.Builder()
                 .addInterceptor(interceptor)
@@ -713,23 +714,23 @@ class StaticMockTests : TestWithServer() {
 
             enqueueServerResponse(REQUEST_OK_CODE, "server response")
 
-            val inMemoryInterceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { request ->
+            val inMemoryInterceptor = mockInterceptor {
+                useDynamicMocks { request ->
                     ResponseDescriptor(
                         code = REQUEST_OK_CODE,
                         body = "in memory response",
                         mediaType = "text/plain"
                     ).takeIf { request.url().encodedPath() == "/inMemory" && request.method() == "GET" }
                 }
-                .setInterceptorStatus(MIXED)
-                .build()
+                setInterceptorStatus(MIXED)
+            }
 
-            val fileBasedInterceptor = MockResponseInterceptor.Builder()
-                .decodeScenarioPathWith(filingPolicy)
-                .loadFileWith(loadingLambda)
-                .parseScenariosWith(mapper)
-                .setInterceptorStatus(MIXED)
-                .build()
+            val fileBasedInterceptor = mockInterceptor {
+                decodeScenarioPathWith(filingPolicy)
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(MIXED)
+            }
 
             client = OkHttpClient.Builder()
                 .addInterceptor(inMemoryInterceptor)
@@ -743,22 +744,20 @@ class StaticMockTests : TestWithServer() {
     }
 
     private fun setUpInterceptor(
-        mode: MockResponseInterceptor.Mode,
+        mode: Mode,
         mapper: Mapper,
         type: String,
         delay: Long? = null
     ) {
         initFilingPolicy(type)
 
-        interceptor = MockResponseInterceptor.Builder()
-            .decodeScenarioPathWith(filingPolicy)
-            .loadFileWith(loadingLambda)
-            .parseScenariosWith(mapper)
-            .setInterceptorStatus(mode)
-            .apply {
-                delay?.let { addFakeNetworkDelay(it) }
-            }
-            .build()
+        interceptor = mockInterceptor {
+            decodeScenarioPathWith(filingPolicy)
+            loadFileWith(loadingLambda)
+            parseScenariosWith(mapper)
+            setInterceptorStatus(mode)
+            delay?.let { addFakeNetworkDelay(it) }
+        }
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }

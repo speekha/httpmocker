@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 buildscript {
 
@@ -25,13 +24,13 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.2'
+        classpath 'com.android.tools.build:gradle:3.5.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_version"
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$artifactory_version"
-        classpath "org.jlleitschuh.gradle:ktlint-gradle:8.2.0"
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:9.1.1"
     }
 }
 
@@ -60,7 +59,10 @@ allprojects {
         version = "0.34.2"
         verbose = true
         android = false
-        reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
+        reporters {
+            reporter "plain"
+            reporter "checkstyle"
+        }
         additionalEditorconfigFile = file("../.editorconfig")
 
         filter {

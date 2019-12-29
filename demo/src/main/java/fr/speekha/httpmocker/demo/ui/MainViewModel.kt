@@ -23,6 +23,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.onFailure
@@ -61,18 +62,18 @@ class MainViewModel(
             }
     }
 
-    fun setMode(mode: MockResponseInterceptor.Mode) {
+    fun setMode(mode: Mode) {
         mocker.mode = mode
-        if (mocker.mode == MockResponseInterceptor.Mode.RECORD) {
+        if (mocker.mode == Mode.RECORD) {
             state.postValue(State.Permission)
         }
         state.postValue(
             State.Message(
                 when (mocker.mode) {
-                    MockResponseInterceptor.Mode.DISABLED -> R.string.disabled_description
-                    MockResponseInterceptor.Mode.ENABLED -> R.string.enabled_description
-                    MockResponseInterceptor.Mode.MIXED -> R.string.mixed_description
-                    MockResponseInterceptor.Mode.RECORD -> R.string.record_description
+                    Mode.DISABLED -> R.string.disabled_description
+                    Mode.ENABLED -> R.string.enabled_description
+                    Mode.MIXED -> R.string.mixed_description
+                    Mode.RECORD -> R.string.record_description
                 }
             )
         )
@@ -80,7 +81,7 @@ class MainViewModel(
 
     private suspend fun loadRepos(org: String) = withContext(Dispatchers.IO) {
         resultOf {
-            apiService.listRepositoriesForOrganisation(org).also { }
+            apiService.listRepositoriesForOrganisation(org)
         }
     }
 

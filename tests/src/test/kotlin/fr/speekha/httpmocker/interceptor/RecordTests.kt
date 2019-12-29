@@ -18,9 +18,11 @@ package fr.speekha.httpmocker.interceptor
 
 import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.RECORD
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.Mode.RECORD
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
+import fr.speekha.httpmocker.mockInterceptor
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -71,12 +73,12 @@ class RecordTests : TestWithServer() {
         }
 
         private fun setupProvider(
-            status: MockResponseInterceptor.Mode = MockResponseInterceptor.Mode.ENABLED
+            status: Mode = Mode.ENABLED
         ) {
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { null }
-                .setInterceptorStatus(status)
-                .build()
+            interceptor = mockInterceptor {
+                useDynamicMocks { null }
+                setInterceptorStatus(status)
+            }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         }
@@ -426,17 +428,17 @@ class RecordTests : TestWithServer() {
         rootFolder: String = SAVE_FOLDER,
         failOnError: Boolean = false
     ) {
-        interceptor = MockResponseInterceptor.Builder()
-            .decodeScenarioPathWith {
+        interceptor = mockInterceptor {
+            decodeScenarioPathWith {
                 val path = it.url().encodedPath()
                 (path + if (path.endsWith("/")) "index.json" else ".json")
                     .drop(1)
             }
-            .parseScenariosWith(mapper)
-            .saveScenariosIn(File(rootFolder))
-            .failOnRecordingError(failOnError)
-            .setInterceptorStatus(RECORD)
-            .build()
+            parseScenariosWith(mapper)
+            saveScenariosIn(File(rootFolder))
+            failOnRecordingError(failOnError)
+            setInterceptorStatus(RECORD)
+        }
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }

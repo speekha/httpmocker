@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-ext {
-    httpmock_version = '1.2.0'
+package fr.speekha.httpmocker
 
-    kotlin_version = '1.3.61'
-    coroutines_version = '1.3.0'
-    support_version = '1.1.0'
-    jackson_version = '2.10.0'
-    gson_version = '2.8.6'
-    moshi_version = '1.8.0'
-    kotlinx_serialization_version = '0.13.0'
-    okhttp_version = '3.14.4'
-    retrofit_version = '2.6.0'
-    dokka_version = '0.9.18'
-    bintray_version = '1.8.4'
-    artifactory_version = '4.9.6'
-    slf4j_version = '1.7.26'
-    junit_version = '5.4.2'
-    mockito_version = '2.27.0'
-    mockito_kotlin_version = '2.1.0'
+import java.io.InputStream
+
+/**
+ * A loading function that takes a path as input and returns an InputStream to read from. Typical
+ * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
+ * use of the AssetManager on Android.
+ */
+interface FileLoader {
+    /**
+     * The method to load scenario files.
+     */
+    fun load(file: String): InputStream?
 }

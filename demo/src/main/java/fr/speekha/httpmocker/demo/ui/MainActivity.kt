@@ -28,7 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import kotlinx.android.synthetic.main.activity_main.*
@@ -62,10 +62,10 @@ class MainActivity : AppCompatActivity() {
             if (isChecked) {
                 viewModel.setMode(
                     when (checkedId) {
-                        R.id.stateEnabled -> MockResponseInterceptor.Mode.ENABLED
-                        R.id.stateMixed -> MockResponseInterceptor.Mode.MIXED
-                        R.id.stateRecord -> MockResponseInterceptor.Mode.RECORD
-                        else -> MockResponseInterceptor.Mode.DISABLED
+                        R.id.stateEnabled -> Mode.ENABLED
+                        R.id.stateMixed -> Mode.MIXED
+                        R.id.stateRecord -> Mode.RECORD
+                        else -> Mode.DISABLED
                     }
                 )
             } else {
