@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.io
 
 import fr.speekha.httpmocker.getLogger
+import fr.speekha.httpmocker.io.Recorder.CallRecord
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.policies.FilingPolicy
@@ -24,13 +25,11 @@ import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import fr.speekha.httpmocker.serialization.writeValue
 import okhttp3.MediaType
-import okhttp3.Request
-import okhttp3.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-internal class RequestRecorder(
+internal class RequestWriter(
     private val mapper: Mapper,
     private val filingPolicy: FilingPolicy,
     private val rootFolder: File?,
@@ -135,12 +134,4 @@ internal class RequestRecorder(
             } ?: mapOf()
 
     private fun MediaType.getExtension() = extensionMappings["${type()}/${subtype()}"] ?: ".txt"
-
-    internal class CallRecord(
-        val request: Request,
-        val response: Response? = null,
-        val body: ByteArray? = null,
-        val contentType: MediaType? = null,
-        val error: Throwable? = null
-    )
 }

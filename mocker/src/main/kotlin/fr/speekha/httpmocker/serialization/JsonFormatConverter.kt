@@ -101,11 +101,10 @@ class JsonFormatConverter {
         append("{$headers}")
     }
 
-    private fun mapOutputHeaders(headers: String) =
-        headers
-            .replace(Regex("\\{\\p{Space}*\"name\"\\p{Space}*:\\p{Space}*"), "")
-            .replace(Regex(",\\p{Space}*\"value\""), "")
-            .replace(Regex("\\p{Space}*}\\p{Blank}*"), "")
+    private fun mapOutputHeaders(headers: String) = headers
+        .replace(Regex("\\{\\p{Space}*\"name\"\\p{Space}*:\\p{Space}*"), "")
+        .replace(Regex(",\\p{Space}*\"value\""), "")
+        .replace(Regex("\\p{Space}*}\\p{Blank}*"), "")
 
     private fun StringBuilder.importHeaderBlock(json: String, matcher: Matcher, startAt: Int) {
         val openingBrace = json.indexOf("{", matcher.start())

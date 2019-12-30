@@ -21,6 +21,7 @@ import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Headers
 import okhttp3.HttpUrl
+import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
@@ -67,6 +68,8 @@ internal fun Response.toDescriptor(duplicates: Int, fileExtension: String?) = Re
     },
     headers = headers().parseHeaders { headers(it) }
 )
+
+internal fun Interceptor.Chain.execute() = proceed(request())
 
 private fun Headers.parseHeaders(getHeaders: (String) -> List<String>) =
     names().flatMap { name -> getHeaders(name).map { Header(name, it) } }
