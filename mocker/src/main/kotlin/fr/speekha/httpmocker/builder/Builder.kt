@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.builder
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
-import fr.speekha.httpmocker.io.RequestRecorder
+import fr.speekha.httpmocker.io.RequestWriter
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
@@ -159,18 +159,18 @@ data class Builder internal constructor(
     fun build(): MockResponseInterceptor = MockResponseInterceptor(
         buildProviders(),
         mapper?.let {
-            RequestRecorder(
+            RequestWriter(
                 it,
                 filingPolicy,
                 root,
                 showSavingErrors
             )
-        }
+        },
+        simulatedDelay
     ).apply {
         if (interceptorMode == Mode.RECORD && root == null) {
             error(NO_ROOT_FOLDER_ERROR)
         }
-        delay = simulatedDelay
         mode = interceptorMode
     }
 
