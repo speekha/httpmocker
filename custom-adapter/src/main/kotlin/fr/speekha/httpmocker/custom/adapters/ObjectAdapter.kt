@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.custom.adapters
 
-import java.io.InputStream
-
-fun mockInterceptor(assemble: Builder.() -> Unit) = with(Builder()) {
-    assemble()
-    build()
-}
+import fr.speekha.httpmocker.custom.JsonStringReader
 
 /**
- * A loading function that takes a path as input and returns an InputStream to read from. Typical
- * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
- * use of the AssetManager on Android.
+ * Adapter to convert a JSON snippet to an object of type T. That adapter must implement all
+ * the necessary steps to decode the JSON string into the corresponding object.
+ * @param T type of the object to return when parsing JSON
  */
-typealias LoadFile = (String) -> InputStream?
+interface ObjectAdapter<T : Any> {
+
+    /**
+     * Parses the JSON block to instantiate an object
+     * @param reader the JSON reader to use to access the JSON data
+     * @return the concrete object for that JSON
+     */
+    fun fromJson(reader: JsonStringReader): T
+}

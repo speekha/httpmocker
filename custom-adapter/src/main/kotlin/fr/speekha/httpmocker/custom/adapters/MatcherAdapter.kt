@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.adapters
 
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
 
 internal class MatcherAdapter : BaseObjectAdapter<Matcher>() {
 

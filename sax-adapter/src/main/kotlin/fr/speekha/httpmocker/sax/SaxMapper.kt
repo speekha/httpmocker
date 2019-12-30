@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.Mapper
 import javax.xml.parsers.SAXParserFactory
 
 class SaxMapper : Mapper {

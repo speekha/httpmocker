@@ -24,11 +24,8 @@ import org.koin.core.context.startKoin
 class DemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // start Koin!
         startKoin {
-            // declare used Android context
             androidContext(this@DemoApplication)
-            // declare modules
             modules(injectionModule)
         }
     }

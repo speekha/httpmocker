@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.custom.adapters
 
-import java.io.InputStream
+import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.model.Header
 
-/**
- * A loading function that takes a path as input and returns an InputStream to read from. Typical
- * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
- * use of the AssetManager on Android.
- */
-interface FileLoader {
-    /**
-     * The method to load scenario files.
-     */
-    fun load(file: String): InputStream?
+internal class HeaderListAdapter : BaseObjectAdapter<List<Header>>() {
+
+    override fun createObject(): List<Header> = listOf()
+
+    override fun updateObject(reader: JsonStringReader, builder: List<Header>): List<Header> =
+        builder + Header(
+            reader.readFieldName(),
+            reader.readString()
+        )
 }

@@ -16,15 +16,15 @@
 
 package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.LoadFile
-import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.builder.LoadFile
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestResult
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
-import fr.speekha.httpmocker.readMatches
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.readMatches
 import okhttp3.Request
 
 internal class StaticMockProvider(

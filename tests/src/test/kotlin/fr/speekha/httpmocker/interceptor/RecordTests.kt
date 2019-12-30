@@ -16,19 +16,19 @@
 
 package fr.speekha.httpmocker.interceptor
 
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.RECORD
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
-import fr.speekha.httpmocker.mockInterceptor
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.readMatches
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.readMatches
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.AfterEach

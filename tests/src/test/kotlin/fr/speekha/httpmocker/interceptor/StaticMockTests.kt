@@ -21,15 +21,15 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
 import fr.speekha.httpmocker.buildRequest
-import fr.speekha.httpmocker.mockInterceptor
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
+import fr.speekha.httpmocker.serialization.Mapper
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.hamcrest.MatcherAssert
@@ -714,23 +714,25 @@ class StaticMockTests : TestWithServer() {
 
             enqueueServerResponse(REQUEST_OK_CODE, "server response")
 
-            val inMemoryInterceptor = mockInterceptor {
-                useDynamicMocks { request ->
-                    ResponseDescriptor(
-                        code = REQUEST_OK_CODE,
-                        body = "in memory response",
-                        mediaType = "text/plain"
-                    ).takeIf { request.url().encodedPath() == "/inMemory" && request.method() == "GET" }
+            val inMemoryInterceptor =
+                mockInterceptor {
+                    useDynamicMocks { request ->
+                        ResponseDescriptor(
+                            code = REQUEST_OK_CODE,
+                            body = "in memory response",
+                            mediaType = "text/plain"
+                        ).takeIf { request.url().encodedPath() == "/inMemory" && request.method() == "GET" }
+                    }
+                    setInterceptorStatus(MIXED)
                 }
-                setInterceptorStatus(MIXED)
-            }
 
-            val fileBasedInterceptor = mockInterceptor {
-                decodeScenarioPathWith(filingPolicy)
-                loadFileWith(loadingLambda)
-                parseScenariosWith(mapper)
-                setInterceptorStatus(MIXED)
-            }
+            val fileBasedInterceptor =
+                mockInterceptor {
+                    decodeScenarioPathWith(filingPolicy)
+                    loadFileWith(loadingLambda)
+                    parseScenariosWith(mapper)
+                    setInterceptorStatus(MIXED)
+                }
 
             client = OkHttpClient.Builder()
                 .addInterceptor(inMemoryInterceptor)

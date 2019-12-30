@@ -17,15 +17,15 @@
 package fr.speekha.httpmocker.gson
 
 import com.google.gson.annotations.SerializedName
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.EXACT_MATCH
-import fr.speekha.httpmocker.HEADERS
-import fr.speekha.httpmocker.HOST
-import fr.speekha.httpmocker.METHOD
-import fr.speekha.httpmocker.PARAMS
-import fr.speekha.httpmocker.PATH
-import fr.speekha.httpmocker.PORT
-import fr.speekha.httpmocker.PROTOCOL
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.EXACT_MATCH
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.HOST
+import fr.speekha.httpmocker.serialization.METHOD
+import fr.speekha.httpmocker.serialization.PARAMS
+import fr.speekha.httpmocker.serialization.PATH
+import fr.speekha.httpmocker.serialization.PORT
+import fr.speekha.httpmocker.serialization.PROTOCOL
 
 internal data class RequestDescriptor(
 

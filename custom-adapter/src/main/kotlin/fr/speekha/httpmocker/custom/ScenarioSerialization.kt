@@ -16,29 +16,29 @@
 
 package fr.speekha.httpmocker.custom
 
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.BODY_FILE
-import fr.speekha.httpmocker.CODE
-import fr.speekha.httpmocker.DELAY
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.EXACT_MATCH
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
-import fr.speekha.httpmocker.HEADERS
-import fr.speekha.httpmocker.HOST
-import fr.speekha.httpmocker.MEDIA_TYPE
-import fr.speekha.httpmocker.METHOD
-import fr.speekha.httpmocker.PARAMS
-import fr.speekha.httpmocker.PATH
-import fr.speekha.httpmocker.PORT
-import fr.speekha.httpmocker.PROTOCOL
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.EXACT_MATCH
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.HOST
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.METHOD
+import fr.speekha.httpmocker.serialization.PARAMS
+import fr.speekha.httpmocker.serialization.PATH
+import fr.speekha.httpmocker.serialization.PORT
+import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
 
 internal fun List<Matcher>.toJson() =
     joinToString(separator = ", ", prefix = "[\n  ", postfix = "\n]") { it.toJson(1) }
@@ -90,34 +90,3 @@ internal fun Map<String, String?>.toJson(indent: Int): String =
     ) { writePair(indent + 1, it.key to it.value.wrap()) }
 
 internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
-
-private fun writeObjectFields(level: Int, vararg pairs: Pair<String, Any?>) =
-    pairs.filter { it.second != null }
-        .joinToString(
-            separator = COMMA,
-            prefix = OPENING_BRACE,
-            postfix = closingBrace(level)
-        ) { writePair(level + 1, it) }
-
-private fun String?.wrap() = this?.let { "\"${it.replace("\"", "\\\"")}\"" }
-
-private fun Int?.wrap() = this?.toString()
-
-private fun writePair(indent: Int, pair: Pair<String, Any?>): String {
-    val (key, value) = pair
-    return "${" ".repeat(indent * 2)}\"$key\": $value"
-}
-
-private fun closingBrace(indent: Int) = "\n${" ".repeat(indent * 2)}}"
-
-private const val ELLIPSIS_LENGTH = 3
-private const val OPENING_BRACE = "{\n"
-private const val COMMA = ",\n"
-
-/**
- * Truncates a string and adds ... to show that the String is incomplete
- * @param limit the maximum length for the String
- * @return the truncated version of the String
- */
-fun String.truncate(limit: Int): String =
-    takeIf { length <= limit } ?: substring(0, limit - ELLIPSIS_LENGTH) + "..."

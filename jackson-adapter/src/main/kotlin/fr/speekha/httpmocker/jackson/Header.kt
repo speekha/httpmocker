@@ -18,8 +18,8 @@ package fr.speekha.httpmocker.jackson
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import fr.speekha.httpmocker.NAME
-import fr.speekha.httpmocker.VALUE
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.VALUE
 
 internal data class Header
 @JsonCreator constructor(

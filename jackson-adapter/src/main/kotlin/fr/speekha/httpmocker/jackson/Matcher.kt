@@ -18,9 +18,9 @@ package fr.speekha.httpmocker.jackson
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
 
 internal data class Matcher
 @JsonCreator constructor(

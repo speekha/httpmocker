@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.XML_FORMAT
 import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

@@ -18,12 +18,12 @@ package fr.speekha.httpmocker.demo.ui
 
 import androidx.lifecycle.Observer
 import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.mockInterceptor
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
@@ -47,9 +47,10 @@ class MainViewModelTest : ViewModelTest() {
     private val id = 0L
 
     private lateinit var mockService: GithubApiEndpoints
-    private val mockResponseInterceptor = mockInterceptor {
-        parseScenariosWith(JacksonMapper())
-    }
+    private val mockResponseInterceptor =
+        mockInterceptor {
+            parseScenariosWith(JacksonMapper())
+        }
 
     private lateinit var viewModel: MainViewModel
 

@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.builder
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.InputStream
 
-/**
- * Reads the content of an input stream and returns it as a list of strings.
- * @return the data as a list, line by line
- */
-fun InputStream.readAsStringList(): List<String> =
-    bufferedReader().use { reader -> reader.readLines() }
+fun mockInterceptor(assemble: Builder.() -> Unit) = with(
+    Builder()
+) {
+    assemble()
+    build()
+}
 
 /**
- * Reads the content of an input stream and returns it as a string.
- * @return the data as a single String
+ * A loading function that takes a path as input and returns an InputStream to read from. Typical
+ * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
+ * use of the AssetManager on Android.
  */
-fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }
-
-inline fun <reified T : Any> T.getLogger(): Logger = LoggerFactory.getLogger(javaClass)
+typealias LoadFile = (String) -> InputStream?

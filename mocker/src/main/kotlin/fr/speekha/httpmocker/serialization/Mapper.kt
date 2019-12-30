@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.serialization
 
+import fr.speekha.httpmocker.io.readAsString
 import fr.speekha.httpmocker.model.Matcher
 import java.io.File
 import java.io.FileInputStream

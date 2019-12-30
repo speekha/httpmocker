@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.JsonFormatConverter
+import fr.speekha.httpmocker.serialization.JsonFormatConverter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest

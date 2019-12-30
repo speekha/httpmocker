@@ -21,14 +21,14 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.BODY_FILE
-import fr.speekha.httpmocker.CODE
-import fr.speekha.httpmocker.DEFAULT_MEDIA_TYPE
-import fr.speekha.httpmocker.DEFAULT_RESPONSE_CODE
-import fr.speekha.httpmocker.DELAY
-import fr.speekha.httpmocker.HEADERS
-import fr.speekha.httpmocker.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_RESPONSE_CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 internal data class ResponseDescriptor

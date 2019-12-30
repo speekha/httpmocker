@@ -18,9 +18,9 @@ package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.DEFAULT_EXCEPTION
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
 
 @JsonClass(generateAdapter = true)
 internal data class NetworkError(

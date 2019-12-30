@@ -16,6 +16,8 @@
 
 package fr.speekha.httpmocker
 
+import fr.speekha.httpmocker.model.ResponseDescriptor
+
 const val RECORD_NOT_SUPPORTED_ERROR =
     "Recording is not supported with the current parameters."
 
@@ -106,3 +108,6 @@ internal val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     526 to "Invalid SSL Certificate",
     527 to "Railgun Error"
 )
+
+internal fun responseNotFound(body: String = "Page not found") =
+    ResponseDescriptor(code = 404, body = body)

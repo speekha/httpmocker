@@ -16,9 +16,9 @@
 
 package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.Matcher as Model

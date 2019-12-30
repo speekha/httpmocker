@@ -17,9 +17,9 @@
 package fr.speekha.httpmocker.gson
 
 import com.google.gson.annotations.SerializedName
-import fr.speekha.httpmocker.DEFAULT_EXCEPTION
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
 
 internal data class NetworkError(
 

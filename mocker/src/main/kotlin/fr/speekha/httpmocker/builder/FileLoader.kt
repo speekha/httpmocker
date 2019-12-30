@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.builder
 
-internal class MapAdapter : BaseObjectAdapter<Map<String, String?>>() {
+import java.io.InputStream
 
-    override fun createObject(): Map<String, String> = mapOf()
-
-    override fun updateObject(
-        reader: JsonStringReader,
-        builder: Map<String, String?>
-    ): Map<String, String?> = builder + (reader.readFieldName() to reader.readString())
+/**
+ * A loading function that takes a path as input and returns an InputStream to read from. Typical
+ * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
+ * use of the AssetManager on Android.
+ */
+interface FileLoader {
+    /**
+     * The method to load scenario files.
+     */
+    fun load(file: String): InputStream?
 }

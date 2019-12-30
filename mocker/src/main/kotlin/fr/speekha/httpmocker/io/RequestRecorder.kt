@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.io
 
+import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.readMatches
+import fr.speekha.httpmocker.serialization.writeValue
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.Response
