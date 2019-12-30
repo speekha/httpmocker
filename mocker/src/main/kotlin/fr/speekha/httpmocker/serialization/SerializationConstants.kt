@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.serialization
 
 const val REQUEST = "request"
 const val RESPONSE = "response"

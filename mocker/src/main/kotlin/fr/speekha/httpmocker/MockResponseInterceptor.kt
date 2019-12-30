@@ -16,15 +16,15 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.RequestRecorder.CallRecord
+import fr.speekha.httpmocker.io.RequestRecorder
+import fr.speekha.httpmocker.io.RequestRecorder.CallRecord
+import fr.speekha.httpmocker.io.ResponseBuilder
+import fr.speekha.httpmocker.io.copyResponse
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.ScenarioProvider
 import okhttp3.Interceptor
-import okhttp3.MediaType
-import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.ResponseBody
 
 /**
  * A OkHTTP interceptor that can let requests through or block them and answer them with predefined responses.
@@ -64,7 +64,9 @@ internal constructor(
 
     private fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
         Mode.DISABLED -> executeNetworkCall(chain)
-        Mode.ENABLED -> mockResponse(request) ?: buildResponse(request, responseNotFound(), null)
+        Mode.ENABLED -> mockResponse(request) ?: ResponseBuilder(
+            request
+        ).buildResponse()
         Mode.MIXED -> mockResponse(request) ?: executeNetworkCall(chain)
         Mode.RECORD -> recordCall(chain)
     }
@@ -87,7 +89,11 @@ internal constructor(
     ): Response {
         logger.info("Response was found: $response")
         simulateDelay(response)
-        return buildResponse(request, response, provider)
+        return ResponseBuilder(
+            request,
+            response,
+            provider
+        ).buildResponse()
     }
 
     private fun simulateDelay(response: ResponseDescriptor) {
@@ -96,42 +102,6 @@ internal constructor(
             delay > 0 -> Thread.sleep(delay)
         }
     }
-
-    private fun buildResponse(
-        request: Request,
-        response: ResponseDescriptor,
-        provider: ScenarioProvider?
-    ): Response = Response.Builder()
-        .request(request)
-        .protocol(Protocol.HTTP_1_1)
-        .code(response.code)
-        .message(messageForHttpCode(response.code))
-        .addHeaders(response)
-        .body(loadResponseBody(request, response, provider))
-        .build()
-
-    private fun Response.Builder.addHeaders(response: ResponseDescriptor) = apply {
-        header("Content-type", response.mediaType)
-        response.headers.forEach {
-            if (it.value != null) {
-                header(it.name, it.value)
-            }
-        }
-    }
-
-    private fun loadResponseBody(
-        request: Request,
-        response: ResponseDescriptor,
-        provider: ScenarioProvider?
-    ) = ResponseBody.create(
-        MediaType.parse(response.mediaType), response.bodyFile?.let {
-            logger.info("Loading response body from file: $it")
-            provider?.loadResponseBody(request, it)
-        } ?: response.body.toByteArray()
-    )
-
-    private fun responseNotFound(body: String = "Page not found") =
-        ResponseDescriptor(code = 404, body = body)
 
     private fun recordCall(chain: Interceptor.Chain): Response = requestRecorder?.let { recorder ->
         val record = convertCallResult(chain)
@@ -154,7 +124,4 @@ internal constructor(
     } else {
         record.response?.copyResponse(record.body)
     }
-
-    private fun messageForHttpCode(httpCode: Int) =
-        HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
 }

@@ -19,12 +19,12 @@ package fr.speekha.httpmocker.gson
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.gson.Header as JsonHeader
 import fr.speekha.httpmocker.gson.Matcher as JsonMatcher
 import fr.speekha.httpmocker.gson.NetworkError as JsonNetworkError

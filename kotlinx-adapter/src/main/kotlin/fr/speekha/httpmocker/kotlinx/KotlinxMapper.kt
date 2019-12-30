@@ -16,31 +16,31 @@
 
 package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.BODY_FILE
-import fr.speekha.httpmocker.CODE
-import fr.speekha.httpmocker.DELAY
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.EXACT_MATCH
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
-import fr.speekha.httpmocker.HEADERS
-import fr.speekha.httpmocker.HOST
-import fr.speekha.httpmocker.MEDIA_TYPE
-import fr.speekha.httpmocker.METHOD
-import fr.speekha.httpmocker.Mapper
-import fr.speekha.httpmocker.NAME
-import fr.speekha.httpmocker.PARAMS
-import fr.speekha.httpmocker.PATH
-import fr.speekha.httpmocker.PORT
-import fr.speekha.httpmocker.PROTOCOL
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
-import fr.speekha.httpmocker.VALUE
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.EXACT_MATCH
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.HOST
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.METHOD
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.PARAMS
+import fr.speekha.httpmocker.serialization.PATH
+import fr.speekha.httpmocker.serialization.PORT
+import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
+import fr.speekha.httpmocker.serialization.VALUE
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -56,7 +56,7 @@ import fr.speekha.httpmocker.model.Header as ModelHeader
  * The common JSON format available with other mappers is not compatible with Kotlinx Serialization,
  * so this mapper accepts transformation functions to handle the conversion between the common
  * compact format and the one supported by Kotlinx Serialization.
- * @see fr.speekha.httpmocker.JsonFormatConverter
+ * @see fr.speekha.httpmocker.serialization.JsonFormatConverter
  * @param formatInput transformation function to apply when reading JSON
  * @param formatOutput transformation function to apply when writing JSON
  */

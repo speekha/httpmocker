@@ -18,8 +18,8 @@ package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.NAME
-import fr.speekha.httpmocker.VALUE
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.VALUE
 
 @JsonClass(generateAdapter = true)
 internal data class Header(

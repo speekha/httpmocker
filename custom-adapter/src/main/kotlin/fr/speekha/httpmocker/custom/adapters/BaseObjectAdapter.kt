@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.adapters
 
-internal abstract class BaseObjectAdapter<T : Any> : ObjectAdapter<T> {
+import fr.speekha.httpmocker.custom.JsonStringReader
+
+internal abstract class BaseObjectAdapter<T : Any> :
+    ObjectAdapter<T> {
 
     override fun fromJson(reader: JsonStringReader): T {
         reader.beginObject()

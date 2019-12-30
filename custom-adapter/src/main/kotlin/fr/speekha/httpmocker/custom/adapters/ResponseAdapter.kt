@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.adapters
 
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.BODY_FILE
-import fr.speekha.httpmocker.CODE
-import fr.speekha.httpmocker.DELAY
-import fr.speekha.httpmocker.HEADERS
-import fr.speekha.httpmocker.MEDIA_TYPE
+import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
 
 internal class ResponseAdapter : BaseObjectAdapter<ResponseDescriptor>() {
 

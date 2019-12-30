@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.builder
 
+import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
+import fr.speekha.httpmocker.io.RequestRecorder
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
@@ -23,6 +27,7 @@ import fr.speekha.httpmocker.scenario.DynamicMockProvider
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.scenario.ScenarioProvider
 import fr.speekha.httpmocker.scenario.StaticMockProvider
+import fr.speekha.httpmocker.serialization.Mapper
 import okhttp3.Request
 import java.io.File
 
@@ -64,7 +69,10 @@ data class Builder internal constructor(
      * @param policy a lambda to use as the naming policy for scenario files
      */
     fun decodeScenarioPathWith(policy: (Request) -> String): Builder =
-        apply { filingPolicy = FilingPolicyBuilder(policy) }
+        apply {
+            filingPolicy =
+                FilingPolicyBuilder(policy)
+        }
 
     private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
         override fun getPath(request: Request): String = policy(request)
@@ -98,7 +106,11 @@ data class Builder internal constructor(
      * computed
      */
     fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?): Builder =
-        useDynamicMocks(CallBackBuilder(callback))
+        useDynamicMocks(
+            CallBackBuilder(
+                callback
+            )
+        )
 
     private class CallBackBuilder(
         private val block: (Request) -> ResponseDescriptor?
@@ -146,7 +158,14 @@ data class Builder internal constructor(
      */
     fun build(): MockResponseInterceptor = MockResponseInterceptor(
         buildProviders(),
-        mapper?.let { RequestRecorder(it, filingPolicy, root, showSavingErrors) }
+        mapper?.let {
+            RequestRecorder(
+                it,
+                filingPolicy,
+                root,
+                showSavingErrors
+            )
+        }
     ).apply {
         if (interceptorMode == Mode.RECORD && root == null) {
             error(NO_ROOT_FOLDER_ERROR)

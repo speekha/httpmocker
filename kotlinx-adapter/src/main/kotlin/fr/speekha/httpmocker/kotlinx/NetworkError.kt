@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.NetworkError as Model

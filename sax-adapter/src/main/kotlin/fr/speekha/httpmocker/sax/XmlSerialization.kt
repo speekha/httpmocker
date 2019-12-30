@@ -16,28 +16,28 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.CODE
-import fr.speekha.httpmocker.DELAY
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.EXACT_MATCH
-import fr.speekha.httpmocker.EXCEPTION_TYPE
-import fr.speekha.httpmocker.HEADER
-import fr.speekha.httpmocker.HOST
-import fr.speekha.httpmocker.MEDIA_TYPE
-import fr.speekha.httpmocker.METHOD
-import fr.speekha.httpmocker.PARAM
-import fr.speekha.httpmocker.PATH
-import fr.speekha.httpmocker.PORT
-import fr.speekha.httpmocker.PROTOCOL
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
-import fr.speekha.httpmocker.URL
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.EXACT_MATCH
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.HEADER
+import fr.speekha.httpmocker.serialization.HOST
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.METHOD
+import fr.speekha.httpmocker.serialization.PARAM
+import fr.speekha.httpmocker.serialization.PATH
+import fr.speekha.httpmocker.serialization.PORT
+import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
+import fr.speekha.httpmocker.serialization.URL
 
 internal fun List<Matcher>.toXml() = XML_PREFACE + writeTags("scenarios", 0) {
     toXml { it.toXml(1) }
@@ -86,7 +86,11 @@ private fun ResponseDescriptor.toXml(indentation: Int): String = writeTags(
 }
 
 private fun NetworkError.toXml(indent: Int): String =
-    writeCData(ERROR, indent, listOf(EXCEPTION_TYPE to exceptionType), message)
+    writeCData(
+        ERROR, indent, listOf(
+            EXCEPTION_TYPE to exceptionType
+        ), message
+    )
 
 private fun writeUrl(
     attributes: List<Pair<String, Any?>>,

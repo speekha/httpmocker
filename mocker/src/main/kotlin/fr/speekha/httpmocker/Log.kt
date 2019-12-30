@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.model.Header
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-internal class HeaderListAdapter : BaseObjectAdapter<List<Header>>() {
-
-    override fun createObject(): List<Header> = listOf()
-
-    override fun updateObject(reader: JsonStringReader, builder: List<Header>): List<Header> =
-        builder + Header(
-            reader.readFieldName(),
-            reader.readString()
-        )
-}
+inline fun <reified T : Any> T.getLogger(): Logger = LoggerFactory.getLogger(javaClass)

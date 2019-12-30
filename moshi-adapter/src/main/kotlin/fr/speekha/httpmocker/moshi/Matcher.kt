@@ -18,9 +18,9 @@ package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.ERROR
-import fr.speekha.httpmocker.REQUEST
-import fr.speekha.httpmocker.RESPONSE
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
 
 @JsonClass(generateAdapter = true)
 internal data class Matcher(

@@ -16,16 +16,16 @@
 
 package fr.speekha.httpmocker.interceptor
 
-import fr.speekha.httpmocker.JsonFormatConverter
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
+import fr.speekha.httpmocker.io.readAsString
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
-import fr.speekha.httpmocker.readAsString
 import fr.speekha.httpmocker.sax.SaxMapper
+import fr.speekha.httpmocker.serialization.JsonFormatConverter
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response

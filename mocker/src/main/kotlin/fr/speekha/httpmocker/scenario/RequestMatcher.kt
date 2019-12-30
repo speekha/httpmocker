@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.matchBody
+import fr.speekha.httpmocker.io.matchBody
 import fr.speekha.httpmocker.model.RequestDescriptor
 import okhttp3.Request
 

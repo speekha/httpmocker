@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.NAME
-import fr.speekha.httpmocker.VALUE
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.VALUE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.Header as Model

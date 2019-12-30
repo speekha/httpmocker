@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.serialization
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -61,7 +61,10 @@ class JsonFormatConverter {
      * Converts Kotlinx compatible JSON to common JSON format.
      */
     fun compact(input: String): String =
-        convertJsonBlock(input, outputHeaderPattern) { json, matcher, position ->
+        convertJsonBlock(
+            input,
+            outputHeaderPattern
+        ) { json, matcher, position ->
             exportHeaderBlock(json, matcher, position)
         }
 
@@ -69,7 +72,10 @@ class JsonFormatConverter {
      * Converts common format JSON to Kotlinx compatible one.
      */
     fun expand(input: String): String =
-        convertJsonBlock(input, inputHeaderPattern) { json, matcher, position ->
+        convertJsonBlock(
+            input,
+            inputHeaderPattern
+        ) { json, matcher, position ->
             importHeaderBlock(json, matcher, position)
         }
 

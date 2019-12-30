@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.adapters
 
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
 
 internal class ErrorAdapter : BaseObjectAdapter<NetworkError>() {
 

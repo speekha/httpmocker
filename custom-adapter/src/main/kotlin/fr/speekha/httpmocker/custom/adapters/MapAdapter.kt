@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.policies
+package fr.speekha.httpmocker.custom.adapters
 
-import fr.speekha.httpmocker.serialization.JSON_FORMAT
-import okhttp3.Request
+import fr.speekha.httpmocker.custom.JsonStringReader
 
-/**
- * Simple filing policy discarding host name, and matching file path with url path.
- */
-class MirrorPathPolicy(
-    private val fileType: String = JSON_FORMAT
-) : FilingPolicy {
+internal class MapAdapter : BaseObjectAdapter<Map<String, String?>>() {
 
-    override fun getPath(request: Request): String = with(request.url().pathSegments()) {
-        joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
-    }
+    override fun createObject(): Map<String, String> = mapOf()
+
+    override fun updateObject(
+        reader: JsonStringReader,
+        builder: Map<String, String?>
+    ): Map<String, String?> = builder + (reader.readFieldName() to reader.readString())
 }

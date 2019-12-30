@@ -19,10 +19,10 @@ package fr.speekha.httpmocker.demo.di
 import android.content.Context
 import android.os.Environment
 import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.mockInterceptor
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel

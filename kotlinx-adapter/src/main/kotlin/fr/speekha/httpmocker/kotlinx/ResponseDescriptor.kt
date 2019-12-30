@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.kotlinx
 
-import fr.speekha.httpmocker.BODY
-import fr.speekha.httpmocker.BODY_FILE
-import fr.speekha.httpmocker.CODE
-import fr.speekha.httpmocker.DELAY
-import fr.speekha.httpmocker.HEADERS
-import fr.speekha.httpmocker.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.ResponseDescriptor as Model

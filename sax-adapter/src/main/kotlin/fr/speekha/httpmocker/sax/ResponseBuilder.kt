@@ -16,10 +16,10 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.DEFAULT_MEDIA_TYPE
-import fr.speekha.httpmocker.DEFAULT_RESPONSE_CODE
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_RESPONSE_CODE
 import org.xml.sax.Attributes
 
 class ResponseBuilder(

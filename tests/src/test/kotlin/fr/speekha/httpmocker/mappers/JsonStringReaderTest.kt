@@ -21,12 +21,12 @@ import fr.speekha.httpmocker.custom.INVALID_NUMBER_ERROR
 import fr.speekha.httpmocker.custom.JsonStringReader
 import fr.speekha.httpmocker.custom.NO_FIELD_ID_ERROR
 import fr.speekha.httpmocker.custom.NO_MORE_TOKEN_ERROR
-import fr.speekha.httpmocker.custom.ObjectAdapter
 import fr.speekha.httpmocker.custom.WRONG_END_OF_LIST_ERROR
 import fr.speekha.httpmocker.custom.WRONG_END_OF_OBJECT_ERROR
 import fr.speekha.httpmocker.custom.WRONG_START_OF_LIST_ERROR
 import fr.speekha.httpmocker.custom.WRONG_START_OF_OBJECT_ERROR
 import fr.speekha.httpmocker.custom.WRONG_START_OF_STRING_FIELD_ERROR
+import fr.speekha.httpmocker.custom.adapters.ObjectAdapter
 import fr.speekha.httpmocker.custom.truncate
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.StringStartsWith
@@ -435,7 +435,8 @@ class JsonStringReaderTest {
         assertEquals(output, input.truncate(10))
     }
 
-    private val mapAdapter = object : ObjectAdapter<Map<String, String?>> {
+    private val mapAdapter = object :
+        ObjectAdapter<Map<String, String?>> {
         override fun fromJson(reader: JsonStringReader): Map<String, String?> {
             val map = mutableMapOf<String, String?>()
             reader.beginObject()

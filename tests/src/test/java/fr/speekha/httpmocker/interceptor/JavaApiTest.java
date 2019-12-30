@@ -27,14 +27,14 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import fr.speekha.httpmocker.Builder;
-import fr.speekha.httpmocker.FileLoader;
-import fr.speekha.httpmocker.Mapper;
 import fr.speekha.httpmocker.Mode;
+import fr.speekha.httpmocker.builder.Builder;
+import fr.speekha.httpmocker.builder.FileLoader;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
 import fr.speekha.httpmocker.policies.FilingPolicy;
 import fr.speekha.httpmocker.scenario.RequestCallback;
+import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -64,7 +64,6 @@ public class JavaApiTest {
             Mockito.verify(filingPolicy).getPath(request);
         }
 
-        @NotNull
         private void initInterceptor(FilingPolicy policy) {
             Mapper mapper = new JacksonMapper();
             interceptor = new Builder()

@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.DISABLED
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.buildRequest
-import fr.speekha.httpmocker.mockInterceptor
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient

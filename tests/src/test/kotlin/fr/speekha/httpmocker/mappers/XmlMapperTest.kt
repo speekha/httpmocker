@@ -19,8 +19,8 @@ package fr.speekha.httpmocker.mappers
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.readMatches
 import fr.speekha.httpmocker.sax.SaxMapper
+import fr.speekha.httpmocker.serialization.readMatches
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.readMatches
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.readMatches
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

@@ -19,9 +19,9 @@ package fr.speekha.httpmocker.jackson
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import fr.speekha.httpmocker.DEFAULT_EXCEPTION
-import fr.speekha.httpmocker.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 internal data class NetworkError

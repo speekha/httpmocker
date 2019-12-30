@@ -16,11 +16,11 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.readMatches
 import fr.speekha.httpmocker.sax.SaxMapper
-import fr.speekha.httpmocker.writeValue
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.readMatches
+import fr.speekha.httpmocker.serialization.writeValue
 import java.io.File
 import java.io.FileOutputStream
 

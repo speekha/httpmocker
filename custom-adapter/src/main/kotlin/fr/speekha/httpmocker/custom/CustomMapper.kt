@@ -16,8 +16,9 @@
 
 package fr.speekha.httpmocker.custom
 
-import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.custom.adapters.MatcherAdapter
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.Mapper
 
 /**
  * A mapper using custom JSON parsing to serialize/deserialize scenarios.

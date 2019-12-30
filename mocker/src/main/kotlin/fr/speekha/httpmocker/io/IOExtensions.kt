@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.io
+
+import java.io.InputStream
 
 /**
- * Adapter to convert a JSON snippet to an object of type T. That adapter must implement all
- * the necessary steps to decode the JSON string into the corresponding object.
- * @param T type of the object to return when parsing JSON
+ * Reads the content of an input stream and returns it as a list of strings.
+ * @return the data as a list, line by line
  */
-interface ObjectAdapter<T : Any> {
+fun InputStream.readAsStringList(): List<String> =
+    bufferedReader().use { reader -> reader.readLines() }
 
-    /**
-     * Parses the JSON block to instantiate an object
-     * @param reader the JSON reader to use to access the JSON data
-     * @return the concrete object for that JSON
-     */
-    fun fromJson(reader: JsonStringReader): T
-}
+/**
+ * Reads the content of an input stream and returns it as a string.
+ * @return the data as a single String
+ */
+fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }

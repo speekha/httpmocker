@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.JSON_FORMAT
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import okhttp3.Request
 
 /**
