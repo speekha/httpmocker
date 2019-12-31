@@ -57,11 +57,17 @@ repositories {
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
 files for static mocks. Currently, there are six possible options that are provided for parsing, based on some of the 
-most commonly used libraries for JSON parsing (Jackson, Gson, Moshi, Kotlinx serialization) and a custom implementation 
-(no third party dependency), so you can choose the one matching what you already use in your application (this will 
-help you prevent duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
-of JSON, a SAX-based parser allows to do it. If you choose one of these options, all you need to add is the corresponding 
-`implementation` line in your gradle file:
+most commonly used serialization libraries and on a custom implementations (no third party dependency): 
+* Jackson
+* Gson
+* Moshi
+* Kotlinx serialization)
+* Custom JSON implementation
+* Custom Sax-based implementation
+This should allow you to choose one matching what you already use in your application (in order to prevent 
+duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
+of JSON, the SAX-based parser allows to do it. If you choose one of these options, all you need to add is the 
+corresponding `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
@@ -83,7 +89,7 @@ implementation "fr.speekha.httpmocker:custom-adapter:1.1.8"
 implementation "fr.speekha.httpmocker:sax-adapter:1.1.8"
 ```
 
-If none of those options suits your needs or if you would prefer to only use dynamic mocks, you can add 
+If none of those options suit your needs or if you would prefer to only use dynamic mocks, you can add 
 the main dependency to your project (using static mocks will require that you provide your own implementation 
 of the `Mapper` class):
 
