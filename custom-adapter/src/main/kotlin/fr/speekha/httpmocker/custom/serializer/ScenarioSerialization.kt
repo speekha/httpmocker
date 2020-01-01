@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.serializer
 
+import fr.speekha.httpmocker.custom.parser.COMMA
+import fr.speekha.httpmocker.custom.parser.OPENING_BRACE
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -53,40 +55,48 @@ internal fun Matcher.toJson(indent: Int): String {
     )
 }
 
-internal fun RequestDescriptor.toJson(indent: Int): String = writeObjectFields(
-    indent,
-    EXACT_MATCH to exactMatch.takeIf { it },
-    PROTOCOL to protocol.wrap(),
-    METHOD to method.wrap(),
-    HOST to host.wrap(),
-    PORT to port.wrap(),
-    PATH to path.wrap(),
-    HEADERS to "{\n        ${headers.joinToString(separator = ",\n        ") { it.toJson() }}\n      }",
-    PARAMS to params.toJson(indent + 1),
-    BODY to body.wrap()
-)
+internal fun RequestDescriptor.toJson(indent: Int): String =
+    writeObjectFields(
+        indent,
+        EXACT_MATCH to exactMatch.takeIf { it },
+        PROTOCOL to protocol.wrap(),
+        METHOD to method.wrap(),
+        HOST to host.wrap(),
+        PORT to port.wrap(),
+        PATH to path.wrap(),
+        HEADERS to "{\n        ${headers.joinToString(separator = ",\n        ") { it.toJson() }}\n      }",
+        PARAMS to params.toJson(indent + 1),
+        BODY to body.wrap()
+    )
 
-internal fun ResponseDescriptor.toJson(indent: Int): String = writeObjectFields(
-    indent,
-    DELAY to delay.toString(),
-    CODE to code.toString(),
-    MEDIA_TYPE to mediaType.wrap(),
-    HEADERS to "{\n        ${headers.joinToString(separator = ",\n        ") { it.toJson() }}\n      }",
-    BODY to body.wrap(),
-    BODY_FILE to bodyFile.wrap()
-)
+internal fun ResponseDescriptor.toJson(indent: Int): String =
+    writeObjectFields(
+        indent,
+        DELAY to delay.toString(),
+        CODE to code.toString(),
+        MEDIA_TYPE to mediaType.wrap(),
+        HEADERS to "{\n        ${headers.joinToString(separator = ",\n        ") { it.toJson() }}\n      }",
+        BODY to body.wrap(),
+        BODY_FILE to bodyFile.wrap()
+    )
 
-internal fun NetworkError.toJson(indent: Int): String = writeObjectFields(
-    indent,
-    EXCEPTION_TYPE to exceptionType.wrap(),
-    EXCEPTION_MESSAGE to message.wrap()
-)
+internal fun NetworkError.toJson(indent: Int): String =
+    writeObjectFields(
+        indent,
+        EXCEPTION_TYPE to exceptionType.wrap(),
+        EXCEPTION_MESSAGE to message.wrap()
+    )
 
 internal fun Map<String, String?>.toJson(indent: Int): String =
     entries.joinToString(
         separator = COMMA,
         prefix = OPENING_BRACE,
         postfix = closingBrace(indent)
-    ) { writePair(indent + 1, it.key to it.value.wrap()) }
+    ) {
+        writePair(
+            indent + 1,
+            it.key to it.value.wrap()
+        )
+    }
 
 internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"

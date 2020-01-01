@@ -69,8 +69,6 @@ internal fun Response.toDescriptor(duplicates: Int, fileExtension: String?) = Re
     headers = headers().parseHeaders { headers(it) }
 )
 
-internal fun Interceptor.Chain.execute() = proceed(request())
-
 private fun Headers.parseHeaders(getHeaders: (String) -> List<String>) =
     names().flatMap { name -> getHeaders(name).map { Header(name, it) } }
 
@@ -78,6 +76,11 @@ private fun Request.parseQueryParameters() =
     url().queryParameterNames().associateWith { (url().queryParameter(it) ?: "") }
 
 private fun HttpUrl.toBodyFile() = pathSegments().last().takeUnless { it.isNullOrBlank() } ?: "index"
+
+/**
+ * Executes a request and returns the corresponding response
+ */
+internal fun Interceptor.Chain.execute() = proceed(request())
 
 /**
  * Duplicates a response and creates a new body for the duplicate (response body is a stream and

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.model.Header
 
 internal class HeaderListAdapter : BaseObjectAdapter<List<Header>>() {
 
     override fun createObject(): List<Header> = listOf()
 
-    override fun updateObject(reader: JsonStringReader, builder: List<Header>): List<Header> =
+    override fun updateObject(reader: JsonParser, builder: List<Header>): List<Header> =
         builder + Header(
             reader.readFieldName(),
             reader.readString()

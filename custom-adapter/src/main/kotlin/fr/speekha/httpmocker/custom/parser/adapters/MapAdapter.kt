@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 
 internal class MapAdapter : BaseObjectAdapter<Map<String, String?>>() {
 
     override fun createObject(): Map<String, String> = mapOf()
 
     override fun updateObject(
-        reader: JsonStringReader,
+        reader: JsonParser,
         builder: Map<String, String?>
     ): Map<String, String?> = builder + (reader.readFieldName() to reader.readString())
 }

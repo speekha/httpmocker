@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.serializer
+
+import fr.speekha.httpmocker.custom.parser.COMMA
+import fr.speekha.httpmocker.custom.parser.ELLIPSIS
+import fr.speekha.httpmocker.custom.parser.OPENING_BRACE
 
 internal fun writeObjectFields(level: Int, vararg pairs: Pair<String, Any?>) =
     pairs.filter { it.second != null }
