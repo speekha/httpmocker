@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 
 internal abstract class BaseObjectAdapter<T : Any> :
     ObjectAdapter<T> {
 
-    override fun fromJson(reader: JsonStringReader): T {
-        reader.beginObject()
-        val builder = readFields(reader, createObject())
-        reader.endObject()
+    override fun fromJson(parser: JsonParser): T {
+        parser.beginObject()
+        val builder = readFields(parser, createObject())
+        parser.endObject()
         return builder
     }
 
-    private fun readFields(reader: JsonStringReader, builder: T): T {
+    private fun readFields(reader: JsonParser, builder: T): T {
         var updateObject = builder
         while (reader.hasNext()) {
             updateObject = updateObject(reader, updateObject)
@@ -39,5 +39,5 @@ internal abstract class BaseObjectAdapter<T : Any> :
 
     abstract fun createObject(): T
 
-    abstract fun updateObject(reader: JsonStringReader, builder: T): T
+    abstract fun updateObject(reader: JsonParser, builder: T): T
 }

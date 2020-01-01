@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 
 /**
  * Adapter to convert a JSON snippet to an object of type T. That adapter must implement all
@@ -27,8 +27,8 @@ interface ObjectAdapter<T : Any> {
 
     /**
      * Parses the JSON block to instantiate an object
-     * @param reader the JSON reader to use to access the JSON data
+     * @param parser the JSON reader to use to access the JSON data
      * @return the concrete object for that JSON
      */
-    fun fromJson(reader: JsonStringReader): T
+    fun fromJson(parser: JsonParser): T
 }

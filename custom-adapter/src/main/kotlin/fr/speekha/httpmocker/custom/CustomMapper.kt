@@ -16,7 +16,9 @@
 
 package fr.speekha.httpmocker.custom
 
-import fr.speekha.httpmocker.custom.adapters.MatcherAdapter
+import fr.speekha.httpmocker.custom.parser.JsonParser
+import fr.speekha.httpmocker.custom.parser.adapters.MatcherAdapter
+import fr.speekha.httpmocker.custom.serializer.toJson
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.serialization.Mapper
 
@@ -25,18 +27,21 @@ import fr.speekha.httpmocker.serialization.Mapper
  */
 class CustomMapper : Mapper {
 
-    private val adapter = MatcherAdapter()
+    private val adapter =
+        MatcherAdapter()
 
-    override fun deserialize(payload: String): List<Matcher> = JsonStringReader(payload).parseJson(adapter)
+    override fun deserialize(payload: String): List<Matcher> = JsonParser(
+        payload
+    ).parseJson(adapter)
 
-    private fun JsonStringReader.parseJson(matcherMapper: MatcherAdapter): List<Matcher> {
+    private fun JsonParser.parseJson(matcherMapper: MatcherAdapter): List<Matcher> {
         beginList()
         val list = populateList(matcherMapper)
         endList()
         return list
     }
 
-    private fun JsonStringReader.populateList(matcherMapper: MatcherAdapter): List<Matcher> =
+    private fun JsonParser.populateList(matcherMapper: MatcherAdapter): List<Matcher> =
         mutableListOf<Matcher>().also { list ->
             while (hasNext()) {
                 list += matcherMapper.fromJson(this)

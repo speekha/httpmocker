@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom
+package fr.speekha.httpmocker.custom.parser
 
 const val WRONG_START_OF_OBJECT_ERROR = "No object starts here: "
-const val NO_FIELD_ID_ERROR = "No field starts here: "
 const val WRONG_END_OF_OBJECT_ERROR = "Object is not entirely processed: "
 const val WRONG_START_OF_LIST_ERROR = "No list starts here: "
 const val WRONG_END_OF_LIST_ERROR = "List is not entirely processed: "
-const val WRONG_START_OF_STRING_ERROR = "No string starts here"
+const val WRONG_START_OF_FIELD_NAME_ERROR = "Not ready to read a field name: "
 const val WRONG_START_OF_STRING_FIELD_ERROR = "Not ready to read a string value for a field: "
+const val INCORRECT_FIELD = "Incorrect field due to missing colon: "
+const val NULL_STRING_VALUE = "(null string value) "
 const val INVALID_NUMBER_ERROR = "Invalid numeric value: "
 const val INVALID_TOKEN_ERROR = "Invalid token value: "
 const val INVALID_BOOLEAN_ERROR = "Invalid boolean value: "

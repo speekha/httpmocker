@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.serialization.BODY
@@ -35,7 +35,7 @@ internal class RequestAdapter : BaseObjectAdapter<RequestDescriptor>() {
 
     @SuppressWarnings("ComplexMethod")
     override fun updateObject(
-        reader: JsonStringReader,
+        reader: JsonParser,
         builder: RequestDescriptor
     ): RequestDescriptor = when (val field = reader.readFieldName()) {
         EXACT_MATCH -> builder.copy(exactMatch = reader.readBoolean())

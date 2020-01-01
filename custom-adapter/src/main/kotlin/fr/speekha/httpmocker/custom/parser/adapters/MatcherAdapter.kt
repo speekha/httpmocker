@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.serialization.ERROR
@@ -28,7 +28,7 @@ internal class MatcherAdapter : BaseObjectAdapter<Matcher>() {
     override fun createObject(): Matcher = Matcher()
 
     override fun updateObject(
-        reader: JsonStringReader,
+        reader: JsonParser,
         builder: Matcher
     ): Matcher = when (val field = reader.readFieldName()) {
         REQUEST -> builder.copy(request = reader.readObject(RequestAdapter()))

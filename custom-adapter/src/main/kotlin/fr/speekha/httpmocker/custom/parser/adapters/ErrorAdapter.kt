@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
@@ -27,7 +27,7 @@ internal class ErrorAdapter : BaseObjectAdapter<NetworkError>() {
     override fun createObject(): NetworkError = NetworkError()
 
     override fun updateObject(
-        reader: JsonStringReader,
+        reader: JsonParser,
         builder: NetworkError
     ): NetworkError = when (val field = reader.readFieldName()) {
         EXCEPTION_TYPE -> builder.copy(exceptionType = reader.readString() ?: "")

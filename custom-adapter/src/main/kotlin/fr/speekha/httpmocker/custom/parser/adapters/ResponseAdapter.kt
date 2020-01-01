@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.adapters
+package fr.speekha.httpmocker.custom.parser.adapters
 
-import fr.speekha.httpmocker.custom.JsonStringReader
+import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.BODY
@@ -31,7 +31,7 @@ internal class ResponseAdapter : BaseObjectAdapter<ResponseDescriptor>() {
     override fun createObject(): ResponseDescriptor = ResponseDescriptor()
 
     override fun updateObject(
-        reader: JsonStringReader,
+        reader: JsonParser,
         builder: ResponseDescriptor
     ): ResponseDescriptor = when (val field = reader.readFieldName()) {
         DELAY -> builder.copy(delay = reader.readLong())
