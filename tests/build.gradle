@@ -23,7 +23,7 @@ test {
     }
     def processors = Runtime.getRuntime().availableProcessors()
     if (processors > 1) {
-        maxParallelForks = processors - 1
+        maxParallelForks = processors / 2
     }
 }
 
