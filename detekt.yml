@@ -190,7 +190,7 @@ formatting:
         active: true
         autoCorrect: true
     ImportOrdering:
-        active: true
+      active: false
     Indentation:
         active: true
         indentSize: 4
@@ -237,8 +237,7 @@ formatting:
         active: true
         autoCorrect: true
     NoWildcardImports:
-        active: true
-        autoCorrect: true
+      active: false
     PackageName:
         active: true
         autoCorrect: true
