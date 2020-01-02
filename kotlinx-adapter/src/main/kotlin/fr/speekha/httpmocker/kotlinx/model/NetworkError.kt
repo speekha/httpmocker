@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.sax
+package fr.speekha.httpmocker.kotlinx.model
 
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.serialization.Mapper
-import javax.xml.parsers.SAXParserFactory
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.NetworkError as Model
 
-class SaxMapper : Mapper {
+@Serializable
+internal data class NetworkError(
 
-    private val parser = SAXParserFactory.newInstance().newSAXParser()
+    @SerialName(EXCEPTION_TYPE)
+    val mediaType: String = "",
 
-    private val handler: ScenarioHandler = ScenarioHandler()
-
-    override fun deserialize(payload: String): List<Matcher>? {
-        parser.parse(payload.byteInputStream(), handler)
-        return handler.getScenarios()
-    }
-
-    override fun serialize(matchers: List<Matcher>): String = matchers.toXml()
+    @SerialName(EXCEPTION_MESSAGE)
+    val body: String? = null
+) {
+    constructor(model: Model) : this(
+        model.exceptionType,
+        model.message
+    )
 }

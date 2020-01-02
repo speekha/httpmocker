@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.sax
+package fr.speekha.httpmocker.jackson.model
 
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.serialization.Mapper
-import javax.xml.parsers.SAXParserFactory
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.VALUE
 
-class SaxMapper : Mapper {
+internal data class Header
+@JsonCreator constructor(
+    @JsonProperty(NAME)
+    val name: String = "",
 
-    private val parser = SAXParserFactory.newInstance().newSAXParser()
-
-    private val handler: ScenarioHandler = ScenarioHandler()
-
-    override fun deserialize(payload: String): List<Matcher>? {
-        parser.parse(payload.byteInputStream(), handler)
-        return handler.getScenarios()
-    }
-
-    override fun serialize(matchers: List<Matcher>): String = matchers.toXml()
-}
+    @JsonProperty(VALUE)
+    var value: String? = null
+)

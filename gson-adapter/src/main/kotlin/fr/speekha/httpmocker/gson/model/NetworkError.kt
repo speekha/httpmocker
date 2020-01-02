@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.sax
+package fr.speekha.httpmocker.gson.model
 
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.serialization.Mapper
-import javax.xml.parsers.SAXParserFactory
+import com.google.gson.annotations.SerializedName
+import fr.speekha.httpmocker.serialization.DEFAULT_EXCEPTION
+import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
 
-class SaxMapper : Mapper {
+internal data class NetworkError(
 
-    private val parser = SAXParserFactory.newInstance().newSAXParser()
+    @SerializedName(EXCEPTION_TYPE)
+    val exceptionType: String = DEFAULT_EXCEPTION,
 
-    private val handler: ScenarioHandler = ScenarioHandler()
-
-    override fun deserialize(payload: String): List<Matcher>? {
-        parser.parse(payload.byteInputStream(), handler)
-        return handler.getScenarios()
-    }
-
-    override fun serialize(matchers: List<Matcher>): String = matchers.toXml()
-}
+    @SerializedName(EXCEPTION_MESSAGE)
+    val message: String? = null
+)

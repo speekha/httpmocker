@@ -17,38 +17,13 @@
 package fr.speekha.httpmocker.kotlinx
 
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
-import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.BODY_FILE
-import fr.speekha.httpmocker.serialization.CODE
-import fr.speekha.httpmocker.serialization.DELAY
-import fr.speekha.httpmocker.serialization.ERROR
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.MEDIA_TYPE
-import fr.speekha.httpmocker.serialization.METHOD
 import fr.speekha.httpmocker.serialization.Mapper
-import fr.speekha.httpmocker.serialization.NAME
-import fr.speekha.httpmocker.serialization.PARAMS
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
-import fr.speekha.httpmocker.serialization.REQUEST
-import fr.speekha.httpmocker.serialization.RESPONSE
-import fr.speekha.httpmocker.serialization.VALUE
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonLiteral
 import kotlinx.serialization.list
 import kotlinx.serialization.modules.EmptyModule
-import fr.speekha.httpmocker.kotlinx.Matcher as JsonMatcher
-import fr.speekha.httpmocker.model.Header as ModelHeader
+import fr.speekha.httpmocker.kotlinx.model.Matcher as JsonMatcher
 
 @UnstableDefault
 /**
@@ -87,54 +62,3 @@ class KotlinxMapper(
         adapter.stringify(JsonMatcher.serializer().list, matchers.map { JsonMatcher(it) })
     )
 }
-
-private fun JsonElement.toMatcher(): Matcher = Matcher(
-    jsonObject[REQUEST]?.toRequest() ?: RequestDescriptor(),
-    jsonObject[RESPONSE]?.toResponse(),
-    jsonObject[ERROR]?.toError()
-)
-
-private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
-    jsonObject[EXACT_MATCH]?.primitive?.boolean ?: false,
-    jsonObject[PROTOCOL]?.asNullableLiteral(),
-    jsonObject[METHOD]?.asNullableLiteral(),
-    jsonObject[HOST]?.asNullableLiteral(),
-    jsonObject[PORT]?.primitive?.int,
-    jsonObject[PATH]?.asNullableLiteral(),
-    jsonObject[HEADERS].toHeaders(),
-    jsonObject[PARAMS].toParams(),
-    jsonObject[BODY]?.asNullableLiteral()
-)
-
-private fun JsonElement.toResponse(): ResponseDescriptor = ResponseDescriptor()
-    .update(this, DELAY) { copy(delay = it.primitive.long) }
-    .update(this, CODE) { copy(code = it.primitive.int) }
-    .update(this, MEDIA_TYPE) { copy(mediaType = it.asLiteral()) }
-    .update(this, HEADERS) { copy(headers = it.toHeaders()) }
-    .update(this, BODY) { copy(body = it.asLiteral()) }
-    .update(this, BODY_FILE) { copy(bodyFile = it.asNullableLiteral()) }
-
-private fun JsonElement.toError(): NetworkError = NetworkError(
-    jsonObject[EXCEPTION_TYPE]?.asNullableLiteral() ?: "",
-    jsonObject[EXCEPTION_MESSAGE]?.asNullableLiteral()
-)
-
-private fun ResponseDescriptor.update(
-    jsonElement: JsonElement?,
-    field: String,
-    updateObject: ResponseDescriptor.(JsonElement) -> ResponseDescriptor
-): ResponseDescriptor =
-    jsonElement?.jsonObject?.get(field)?.let { updateObject(it) } ?: this
-
-private fun JsonElement?.toParams(): Map<String, String?> =
-    this?.jsonObject?.mapValues { it.value.asNullableLiteral() } ?: mapOf()
-
-private fun JsonElement?.toHeaders(): List<ModelHeader> = this?.jsonArray?.map {
-    ModelHeader(
-        it.jsonObject[NAME].asNullableLiteral() ?: error("Incorrect header name"),
-        it.jsonObject[VALUE].asNullableLiteral()
-    )
-} ?: listOf()
-
-private fun JsonElement?.asLiteral(): String = (this as? JsonLiteral)?.body?.toString() ?: ""
-private fun JsonElement?.asNullableLiteral(): String? = (this as? JsonLiteral)?.body?.toString()

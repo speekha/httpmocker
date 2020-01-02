@@ -19,6 +19,7 @@ package fr.speekha.httpmocker.jackson
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
+import fr.speekha.httpmocker.jackson.model.Header
 import java.io.IOException
 
 /**

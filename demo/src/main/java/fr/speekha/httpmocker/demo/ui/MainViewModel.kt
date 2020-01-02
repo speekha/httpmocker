@@ -47,19 +47,19 @@ class MainViewModel(
 
     fun callService() = viewModelScope.launch {
         data.postValue(Data.Loading)
-        val org = "kotlin"
-        loadRepos(org)
-            .onSuccess { repos ->
-                repos?.map { repo ->
-                    val contributor =
-                        loadTopContributor(org, repo.name).getOrNull()?.firstOrNull()
-                    repo.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
-                }?.also {
-                    data.postValue(Data.Success(it))
-                }
-            }.onFailure {
-                data.postValue(Data.Error(it.message))
+        resultOf {
+            loadRepos("kotlin")
+        } onSuccess { repos ->
+            repos?.map { repo ->
+                val contributor =
+                    loadTopContributor("kotlin", repo.name).getOrNull()?.firstOrNull()
+                repo.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
+            }?.also {
+                data.postValue(Data.Success(it))
             }
+        } onFailure {
+            data.postValue(Data.Error(it.message))
+        }
     }
 
     fun setMode(mode: Mode) {
@@ -80,16 +80,14 @@ class MainViewModel(
     }
 
     private suspend fun loadRepos(org: String) = withContext(Dispatchers.IO) {
-        resultOf {
-            apiService.listRepositoriesForOrganisation(org)
-        }
+        apiService.listRepositoriesForOrganisation(org)
     }
 
     private suspend fun loadTopContributor(org: String, repo: String) =
         withContext(Dispatchers.IO) {
             resultOf {
                 apiService.listContributorsForRepository(org, repo)
-            }.onFailure {
+            } onFailure {
                 Log.e("ViewModel", it.message, it)
             }
         }
