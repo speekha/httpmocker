@@ -181,4 +181,5 @@ private operator fun StringBuilder.plusAssign(obj: Any) {
 private fun String?.orEmpty() = this ?: ""
 
 private const val XML_PREFACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+
 private const val SPACE_PER_TAB: Int = 4

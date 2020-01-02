@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.sax
+package fr.speekha.httpmocker.sax.builders
 
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.serialization.Mapper
-import javax.xml.parsers.SAXParserFactory
 
-class SaxMapper : Mapper {
+class ScenariosBuilder : NodeBuilder() {
 
-    private val parser = SAXParserFactory.newInstance().newSAXParser()
+    private val cases = mutableListOf<Matcher>()
 
-    private val handler: ScenarioHandler = ScenarioHandler()
+    override fun build(): List<Matcher> = cases
 
-    override fun deserialize(payload: String): List<Matcher>? {
-        parser.parse(payload.byteInputStream(), handler)
-        return handler.getScenarios()
+    fun add(case: Matcher) {
+        cases += case
     }
-
-    override fun serialize(matchers: List<Matcher>): String = matchers.toXml()
 }

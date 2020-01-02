@@ -18,6 +18,18 @@ package fr.speekha.httpmocker.sax
 
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.sax.builders.BodyBuilder
+import fr.speekha.httpmocker.sax.builders.CaseBuilder
+import fr.speekha.httpmocker.sax.builders.ErrorBuilder
+import fr.speekha.httpmocker.sax.builders.HeaderBuilder
+import fr.speekha.httpmocker.sax.builders.NodeBuilder
+import fr.speekha.httpmocker.sax.builders.NodeWithBody
+import fr.speekha.httpmocker.sax.builders.NodeWithHeaders
+import fr.speekha.httpmocker.sax.builders.ParamBuilder
+import fr.speekha.httpmocker.sax.builders.RequestBuilder
+import fr.speekha.httpmocker.sax.builders.ResponseBuilder
+import fr.speekha.httpmocker.sax.builders.ScenariosBuilder
+import fr.speekha.httpmocker.sax.builders.UrlBuilder
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
 import java.util.LinkedList
@@ -35,15 +47,17 @@ class ScenarioHandler : DefaultHandler() {
     }
 
     @SuppressWarnings("TooGenericExceptionCaught")
-    override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes?) {
-        val parent = buildingStack.peek()
-        try {
-            val builder = getNodeBuilder(qName, parent, attributes)
-            buildingStack.push(builder)
-        } catch (e: Throwable) {
-            logger.error("Invalid XML", e)
-            throw IllegalStateException("Invalid XML input", e)
-        }
+    override fun startElement(
+        uri: String?,
+        localName: String?,
+        qName: String?,
+        attributes: Attributes?
+    ) = try {
+        val builder = getNodeBuilder(qName, buildingStack.peek(), attributes)
+        buildingStack.push(builder)
+    } catch (e: Throwable) {
+        logger.error("Invalid XML", e)
+        throw IllegalStateException("Invalid XML input", e)
     }
 
     @SuppressWarnings("UnsafeCast", "ComplexMethod")

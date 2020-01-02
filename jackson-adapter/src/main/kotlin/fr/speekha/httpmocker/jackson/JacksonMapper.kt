@@ -20,17 +20,9 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
-import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.Mapper
-import fr.speekha.httpmocker.jackson.Header as JsonHeader
-import fr.speekha.httpmocker.jackson.Matcher as JsonMatcher
-import fr.speekha.httpmocker.jackson.NetworkError as JsonNetworkError
-import fr.speekha.httpmocker.jackson.RequestDescriptor as JsonRequestDescriptor
-import fr.speekha.httpmocker.jackson.ResponseDescriptor as JsonResponseDescriptor
+import fr.speekha.httpmocker.jackson.model.Matcher as JsonMatcher
 
 /**
  * A mapper using Jackson to serialize/deserialize scenarios.
@@ -50,49 +42,3 @@ class JacksonMapper : Mapper {
 
     private fun List<JsonMatcher>.toModel() = map { it.toModel() }
 }
-
-private fun Matcher.fromModel() =
-    JsonMatcher(request.fromModel(), response?.fromModel(), error?.fromModel())
-
-private fun JsonMatcher.toModel() =
-    Matcher(request.toModel(), response?.toModel(), error?.toModel())
-
-private fun JsonRequestDescriptor.toModel() =
-    RequestDescriptor(
-        exactMatch ?: false,
-        protocol,
-        method,
-        host,
-        port,
-        path,
-        headers.map { it.toModel() },
-        params,
-        body
-    )
-
-private fun RequestDescriptor.fromModel() =
-    JsonRequestDescriptor(
-        exactMatch.takeIf { it },
-        protocol,
-        method,
-        host,
-        port,
-        path,
-        headers.map { it.fromModel() },
-        params,
-        body
-    )
-
-private fun JsonHeader.toModel() = Header(name, value)
-
-private fun Header.fromModel() = JsonHeader(name, value)
-
-private fun JsonResponseDescriptor.toModel() =
-    ResponseDescriptor(delay, code, mediaType, headers.map { it.toModel() }, body, bodyFile)
-
-private fun ResponseDescriptor.fromModel() =
-    JsonResponseDescriptor(delay, code, mediaType, headers.map { it.fromModel() }, body, bodyFile)
-
-private fun NetworkError.fromModel() = JsonNetworkError(exceptionType, message)
-
-private fun JsonNetworkError.toModel() = NetworkError(exceptionType, message)

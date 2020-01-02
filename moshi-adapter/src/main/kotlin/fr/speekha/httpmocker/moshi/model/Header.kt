@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.sax
+package fr.speekha.httpmocker.moshi.model
 
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.serialization.Mapper
-import javax.xml.parsers.SAXParserFactory
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.VALUE
 
-class SaxMapper : Mapper {
+@JsonClass(generateAdapter = true)
+internal data class Header(
+    @field:Json(name = NAME)
+    val name: String = "",
 
-    private val parser = SAXParserFactory.newInstance().newSAXParser()
-
-    private val handler: ScenarioHandler = ScenarioHandler()
-
-    override fun deserialize(payload: String): List<Matcher>? {
-        parser.parse(payload.byteInputStream(), handler)
-        return handler.getScenarios()
-    }
-
-    override fun serialize(matchers: List<Matcher>): String = matchers.toXml()
-}
+    @field:Json(name = VALUE)
+    var value: String? = null
+)

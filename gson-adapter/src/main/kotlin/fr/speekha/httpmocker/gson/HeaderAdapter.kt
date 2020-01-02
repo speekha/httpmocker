@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
-import fr.speekha.httpmocker.gson.Header as JsonHeader
+import fr.speekha.httpmocker.gson.model.Header as JsonHeader
 
 internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
 

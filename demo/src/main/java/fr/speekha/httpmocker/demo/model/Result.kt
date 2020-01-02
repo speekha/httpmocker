@@ -35,10 +35,10 @@ inline fun <T : Any> resultOf(block: () -> T): Result<T> = try {
     Failure(e)
 }
 
-inline fun <T : Any> Result<T>.onFailure(block: (Throwable) -> Unit): Result<T> = also {
+inline infix fun <T : Any> Result<T>.onFailure(block: (Throwable) -> Unit): Result<T> = also {
     if (it is Failure) block(it.error)
 }
 
-inline fun <T : Any> Result<T>.onSuccess(block: (T?) -> Unit): Result<T> = also {
+inline infix fun <T : Any> Result<T>.onSuccess(block: (T?) -> Unit): Result<T> = also {
     if (it is Success) block(it.value)
 }
