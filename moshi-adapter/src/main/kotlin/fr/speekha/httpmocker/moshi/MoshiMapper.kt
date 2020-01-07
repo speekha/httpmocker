@@ -20,12 +20,15 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types.newParameterizedType
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
 
 /**
  * A mapper using Moshi to serialize/deserialize scenarios.
  */
 class MoshiMapper : Mapper {
+
+    override val supportedFormat: String = JSON_FORMAT
 
     private val moshi = Moshi.Builder()
         .add(HeaderAdapter())

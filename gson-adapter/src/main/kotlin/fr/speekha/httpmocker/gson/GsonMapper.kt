@@ -20,6 +20,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.gson.model.Matcher as JsonMatcher
 
@@ -27,6 +28,8 @@ import fr.speekha.httpmocker.gson.model.Matcher as JsonMatcher
  * A mapper using Gson to serialize/deserialize scenarios.
  */
 class GsonMapper : Mapper {
+
+    override val supportedFormat: String = JSON_FORMAT
 
     private val gson: Gson = GsonBuilder()
         .setPrettyPrinting()

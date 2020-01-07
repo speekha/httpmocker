@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.jackson.model.Matcher as JsonMatcher
 
@@ -28,6 +29,8 @@ import fr.speekha.httpmocker.jackson.model.Matcher as JsonMatcher
  * A mapper using Jackson to serialize/deserialize scenarios.
  */
 class JacksonMapper : Mapper {
+
+    override val supportedFormat: String = JSON_FORMAT
 
     private val mapper: ObjectMapper = jacksonObjectMapper()
         .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT)
