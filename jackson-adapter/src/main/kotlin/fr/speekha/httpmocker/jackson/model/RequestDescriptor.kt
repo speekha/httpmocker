@@ -21,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import fr.speekha.httpmocker.jackson.HeadersDeserializer
-import fr.speekha.httpmocker.jackson.HeadersSerializer
+import fr.speekha.httpmocker.jackson.serialization.HeadersDeserializer
+import fr.speekha.httpmocker.jackson.serialization.HeadersSerializer
 import fr.speekha.httpmocker.serialization.BODY
 import fr.speekha.httpmocker.serialization.EXACT_MATCH
 import fr.speekha.httpmocker.serialization.HEADERS

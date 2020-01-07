@@ -20,12 +20,15 @@ import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.parser.adapters.MatcherAdapter
 import fr.speekha.httpmocker.custom.serializer.toJson
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
 
 /**
  * A mapper using custom JSON parsing to serialize/deserialize scenarios.
  */
 class CustomMapper : Mapper {
+
+    override val supportedFormat: String = JSON_FORMAT
 
     private val adapter =
         MatcherAdapter()

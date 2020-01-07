@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test
 @DisplayName("Mirror Path Policy")
 class MirrorPathPolicyTest {
 
-    val policy: FilingPolicy = MirrorPathPolicy()
+    val policy: FilingPolicy = MirrorPathPolicy(JSON_FORMAT)
 
     @Nested
     @DisplayName("Given a path mirroring policy")

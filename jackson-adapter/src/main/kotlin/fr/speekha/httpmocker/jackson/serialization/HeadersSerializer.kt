@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.jackson
+package fr.speekha.httpmocker.jackson.serialization
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer

@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.kotlinx
 
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
@@ -39,6 +40,8 @@ class KotlinxMapper(
     private val formatInput: (String) -> String = { it },
     private val formatOutput: (String) -> String = { it }
 ) : Mapper {
+
+    override val supportedFormat: String = JSON_FORMAT
 
     private val adapter = Json {
         encodeDefaults = false

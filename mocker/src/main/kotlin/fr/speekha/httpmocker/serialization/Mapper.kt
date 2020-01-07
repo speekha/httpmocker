@@ -29,6 +29,8 @@ import java.io.OutputStream
  */
 interface Mapper {
 
+    val supportedFormat: String
+
     /**
      * Parses a string as a list of Matchers
      * @param payload the serialized data to parse

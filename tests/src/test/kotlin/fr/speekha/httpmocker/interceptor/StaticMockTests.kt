@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.interceptor
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -463,11 +464,42 @@ class StaticMockTests : TestWithServer() {
     }
 
     @Nested
+    @DisplayName("Given an enabled mock interceptor and no filing policy")
+    inner class DefaultPolicy {
+
+        private fun setupInterceptor(mapper: Mapper, type: String) {
+            interceptor = mockInterceptor {
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
+
+            client = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build()
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When a request is answered, then it should use a MirrorPathPolicy as default")
+        fun `should use mirror path as default file policy`(
+            title: String,
+            mapper: Mapper,
+            type: String
+        ) {
+            setupInterceptor(mapper, type)
+
+            val get = executeGetRequest("/request").body()?.string()
+
+            assertEquals("simple body", get)
+        }
+    }
+
+    @Nested
     @DisplayName("Given an enabled mock interceptor and a single file policy")
     inner class UrlMatching {
 
         fun setupInterceptor(scenarioFile: String, mapper: Mapper, type: String) {
-            initFilingPolicy(type)
             interceptor = mockInterceptor {
                 decodeScenarioPathWith(SingleFilePolicy("$scenarioFile.$type"))
                 loadFileWith(loadingLambda)
@@ -526,6 +558,65 @@ class StaticMockTests : TestWithServer() {
             val request = buildRequest("http://someHost.com:12345/aTestUrl")
 
             assertEquals("based on URL", client.newCall(request).execute().body()?.string())
+        }
+    }
+
+    @Nested
+    @DisplayName("Given an enabled mock interceptor with multiple file policies")
+    inner class MultiplePolicies {
+
+        private lateinit var policy1: FilingPolicy
+        private lateinit var policy2: FilingPolicy
+
+        private fun setupInterceptor(mapper: Mapper, type: String) {
+            policy1 = mock {
+                on { this.getPath(any()) } doReturn "incorrect"
+            }
+            policy2 = mock {
+                on { this.getPath(any()) } doReturn "incorrect"
+            }
+
+            interceptor = mockInterceptor {
+                decodeScenarioPathWith(policy1)
+                decodeScenarioPathWith(policy2)
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
+
+            client = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build()
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When the first policy provides a match, then it should be used")
+        fun `should use first policy if possible`(title: String, mapper: Mapper, type: String) {
+            setupInterceptor(mapper, type)
+            whenever(policy1.getPath(any())).thenReturn("request.$type")
+
+            val get = executeGetRequest("/request").body()?.string()
+            assertEquals("simple body", get)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When the first policy does not provide a match, then the second one should be used")
+        fun `should use second policy as fallback`(title: String, mapper: Mapper, type: String) {
+            setupInterceptor(mapper, type)
+            whenever(policy2.getPath(any())).thenReturn("request.$type")
+            val get = executeGetRequest("/request").body()?.string()
+            assertEquals("simple body", get)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When none of the policies provide a match, then an 404 error should occur")
+        fun `should handle all policy failure`(title: String, mapper: Mapper, type: String) {
+            setupInterceptor(mapper, type)
+            val get = executeGetRequest("/request")
+            assertEquals(404, get.code())
         }
     }
 

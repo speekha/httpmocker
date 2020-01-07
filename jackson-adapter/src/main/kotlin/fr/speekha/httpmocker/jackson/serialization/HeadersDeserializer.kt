@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.jackson
+package fr.speekha.httpmocker.jackson.serialization
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException

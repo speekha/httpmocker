@@ -35,7 +35,7 @@ import java.io.File
  * Builder to instantiate an interceptor.
  */
 data class Builder internal constructor(
-    private var filingPolicy: FilingPolicy,
+    private val filingPolicy: MutableList<FilingPolicy>,
     private var openFile: LoadFile?,
     private var mapper: Mapper?,
     private var root: File?,
@@ -46,7 +46,7 @@ data class Builder internal constructor(
 ) {
 
     constructor() : this(
-        MirrorPathPolicy(),
+        mutableListOf(),
         openFile = null,
         mapper = null,
         root = null,
@@ -61,7 +61,7 @@ data class Builder internal constructor(
      * on the request being intercepted
      * @param policy the naming policy to use for scenario files
      */
-    fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply { filingPolicy = policy }
+    fun decodeScenarioPathWith(policy: FilingPolicy): Builder = apply { filingPolicy += policy }
 
     /**
      * For static mocks: Defines the policy used to retrieve the configuration files based
@@ -69,10 +69,7 @@ data class Builder internal constructor(
      * @param policy a lambda to use as the naming policy for scenario files
      */
     fun decodeScenarioPathWith(policy: (Request) -> String): Builder =
-        apply {
-            filingPolicy =
-                FilingPolicyBuilder(policy)
-        }
+        apply { filingPolicy += FilingPolicyBuilder(policy) }
 
     private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
         override fun getPath(request: Request): String = policy(request)
@@ -161,7 +158,7 @@ data class Builder internal constructor(
         mapper?.let {
             RequestWriter(
                 it,
-                filingPolicy,
+                filingPolicy[0],
                 root,
                 showSavingErrors
             )
@@ -178,12 +175,17 @@ data class Builder internal constructor(
         val dynamicMockProvider =
             dynamicCallbacks.takeIf { it.isNotEmpty() }?.let { DynamicMockProvider(it) }
         val staticMockProvider = buildStaticProvider()
-        return listOfNotNull(dynamicMockProvider, staticMockProvider)
+        return listOfNotNull(dynamicMockProvider) + staticMockProvider
     }
 
-    private fun buildStaticProvider(): StaticMockProvider? = mapper?.let { jsonMapper ->
+    private fun buildStaticProvider(): List<StaticMockProvider> = mapper?.let { scenarioMapper ->
         openFile?.let { fileLoading ->
-            StaticMockProvider(filingPolicy, fileLoading, jsonMapper)
+            if (filingPolicy.isEmpty()) {
+                filingPolicy += MirrorPathPolicy(scenarioMapper.supportedFormat)
+            }
+            filingPolicy.map {
+                StaticMockProvider(it, fileLoading, scenarioMapper)
+            }
         }
-    }
+    } ?: emptyList()
 }
