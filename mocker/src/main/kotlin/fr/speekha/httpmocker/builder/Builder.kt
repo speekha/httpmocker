@@ -158,7 +158,7 @@ data class Builder internal constructor(
         mapper?.let {
             RequestWriter(
                 it,
-                filingPolicy[0],
+                filingPolicy.getOrNull(0) ?: MirrorPathPolicy(it.supportedFormat),
                 root,
                 showSavingErrors
             )
