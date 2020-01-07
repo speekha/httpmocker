@@ -150,7 +150,7 @@ jobs:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testReleaseUnitTest --stacktrace
+          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testReleaseUnitTest demo:lint --stacktrace
       - store_test_results:
           path: demo/build/test-results
       - store_artifacts:
@@ -194,7 +194,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Check quality
-          command: ./gradlew --no-daemon detekt ktlintCheck lint --stacktrace
+          command: ./gradlew --no-daemon detekt ktlintCheck --stacktrace
       - store_artifacts:
           path: mocker/build/reports
           destination: reports/mocker
