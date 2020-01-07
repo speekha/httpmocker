@@ -24,6 +24,7 @@ import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -35,7 +36,7 @@ val injectionModule: Module = module {
 
     single {
         mockInterceptor {
-            decodeScenarioPathWith(MirrorPathPolicy())
+            decodeScenarioPathWith(MirrorPathPolicy(JSON_FORMAT))
             loadFileWith(get<Context>().assets::open)
             parseScenariosWith(JacksonMapper())
             saveScenariosIn(
