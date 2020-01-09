@@ -16,14 +16,21 @@
 
 package fr.speekha.httpmocker.builder
 
+import java.io.File
 import java.io.InputStream
 
-fun mockInterceptor(assemble: Builder.() -> Unit) = with(
-    Builder()
+fun mockInterceptor(assemble: InterceptorBuilder.() -> Unit) = with(
+    InterceptorBuilder()
 ) {
     assemble()
     build()
 }
+
+fun InterceptorBuilder.recordScenariosIn(folder: File): RecorderBuilder =
+    RecorderBuilder(folder).also { recorder = it }
+
+fun InterceptorBuilder.recordScenariosIn(folder: String): RecorderBuilder =
+    recordScenariosIn(File(folder))
 
 /**
  * A loading function that takes a path as input and returns an InputStream to read from. Typical

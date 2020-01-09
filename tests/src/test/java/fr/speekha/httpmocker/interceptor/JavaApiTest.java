@@ -18,18 +18,20 @@ package fr.speekha.httpmocker.interceptor;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import fr.speekha.httpmocker.Mode;
-import fr.speekha.httpmocker.builder.Builder;
 import fr.speekha.httpmocker.builder.FileLoader;
+import fr.speekha.httpmocker.builder.InterceptorBuilder;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
 import fr.speekha.httpmocker.policies.FilingPolicy;
@@ -40,7 +42,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 @DisplayName("Java API")
-public class JavaApiTest {
+public class JavaApiTest extends TestWithServer {
 
     @Nested
     @DisplayName("Given a Java code base, When using the Kotlin API")
@@ -64,14 +66,34 @@ public class JavaApiTest {
             Mockito.verify(filingPolicy).getPath(request);
         }
 
+
+        @Test
+        @DisplayName("Then recording should work properly")
+        public void shouldRecordWithJavaApi() throws IOException {
+            enqueueServerResponse(200, "body", new ArrayList<>(), null);
+            FilingPolicy filingPolicy = getFilingPolicy();
+            initInterceptor(filingPolicy);
+            getInterceptor().setMode(Mode.RECORD);
+            Request request = initRequest("record/request");
+            executeRequest(request);
+            assertFileExists(RecordTests.SAVE_FOLDER + "/request.json");
+            assertFileExists(RecordTests.SAVE_FOLDER + "/request_body_0.txt");
+        }
+
+        @AfterEach
+        public void clearFolder() {
+            clearTestFolder(RecordTests.SAVE_FOLDER);
+        }
+
         private void initInterceptor(FilingPolicy policy) {
             Mapper mapper = new JacksonMapper();
-            interceptor = new Builder()
+            interceptor = new InterceptorBuilder()
                     .useDynamicMocks((RequestCallback) this::getResponseDescriptor)
                     .decodeScenarioPathWith(policy)
                     .loadFileWith((FileLoader) file -> getClass().getClassLoader().getResourceAsStream(file))
                     .parseScenariosWith(mapper)
                     .setInterceptorStatus(Mode.ENABLED)
+                    .saveScenarios(new File(RecordTests.SAVE_FOLDER), policy)
                     .build();
             client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
         }
