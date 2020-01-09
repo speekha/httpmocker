@@ -38,6 +38,9 @@ import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.Collections
 import java.util.stream.Stream
 
 open class TestWithServer {
@@ -122,6 +125,16 @@ open class TestWithServer {
             method,
             body
         )
+    }
+
+    protected fun clearTestFolder(path: String) {
+        val folder = File(path)
+        if (folder.exists()) {
+            Files.walk(folder.toPath())
+                .sorted(Collections.reverseOrder<Any>())
+                .map(Path::toFile)
+                .forEach { it.delete() }
+        }
     }
 
     companion object {

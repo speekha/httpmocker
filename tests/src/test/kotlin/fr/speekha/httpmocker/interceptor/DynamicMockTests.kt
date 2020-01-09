@@ -133,7 +133,7 @@ class DynamicMockTests : TestWithServer() {
                 useDynamicMocks {
                     ResponseDescriptor(body = result2)
                 }
-                setInterceptorStatus(ENABLED)
+                mode = ENABLED
             }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()

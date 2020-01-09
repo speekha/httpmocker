@@ -22,11 +22,13 @@ import fr.speekha.httpmocker.Mode.RECORD
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.builder.mockInterceptor
+import fr.speekha.httpmocker.builder.recordScenariosIn
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import okhttp3.OkHttpClient
@@ -40,11 +42,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import java.io.File
 import java.io.FileNotFoundException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.Collections
 
 @Suppress("UNUSED_PARAMETER")
 class RecordTests : TestWithServer() {
@@ -90,11 +88,15 @@ class RecordTests : TestWithServer() {
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When a request is recorded, then it should not be blocked")
-        fun `should let requests through when recording`(title: String, mapper: Mapper) {
+        fun `should let requests through when recording`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
-            val response = executeGetRequest("record/request")
+            val response = executeGetRequest(recordRequestUrl)
 
             assertResponseCode(response, 200, "OK")
             assertEquals("body", response.body()?.string())
@@ -105,12 +107,13 @@ class RecordTests : TestWithServer() {
         @DisplayName("When recording a request fails, then it should not interfere with the request")
         fun `should let requests through when recording even if saving fails`(
             title: String,
-            mapper: Mapper
+            mapper: Mapper,
+            fileType: String
         ) {
             enqueueServerResponse(200, "body")
-            setUpInterceptor(mapper, "", false)
+            setUpInterceptor(mapper, "", false, fileType)
 
-            val response = executeGetRequest("record/request")
+            val response = executeGetRequest(recordRequestUrl)
 
             assertResponseCode(response, 200, "OK")
             assertEquals("body", response.body()?.string())
@@ -122,12 +125,16 @@ class RecordTests : TestWithServer() {
             "When recording a request fails and errors are expected, " +
                     "then the error should be returned"
         )
-        fun `recording failure should return an error if desired`(title: String, mapper: Mapper) {
+        fun `recording failure should return an error if desired`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body")
-            setUpInterceptor(mapper, "", true)
+            setUpInterceptor(mapper, "", true, fileType)
 
             assertThrows<FileNotFoundException> {
-                executeGetRequest("record/request")
+                executeGetRequest(recordRequestUrl)
             }
         }
     }
@@ -144,14 +151,15 @@ class RecordTests : TestWithServer() {
         )
         fun `should store requests and responses in the proper locations when recording`(
             title: String,
-            mapper: Mapper
+            mapper: Mapper,
+            fileType: String
         ) {
             enqueueServerResponse(200, "body")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
-            executeGetRequest("record/request")
+            executeGetRequest(recordRequestUrl)
 
-            assertFileExists("$SAVE_FOLDER/record/request.json")
+            assertFileExists("$SAVE_FOLDER/record/request.$fileType")
             assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
         }
 
@@ -163,23 +171,28 @@ class RecordTests : TestWithServer() {
         )
         fun `should name body file correctly when last path segment is empty`(
             title: String,
-            mapper: Mapper
+            mapper: Mapper,
+            fileType: String
         ) {
             enqueueServerResponse(200, "body")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
             executeGetRequest("record/")
 
-            assertFileExists("$SAVE_FOLDER/record/index.json")
+            assertFileExists("$SAVE_FOLDER/record/index.$fileType")
             assertFileExists("$SAVE_FOLDER/record/index_body_0.txt")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When recording a request, then content of scenario files should be correct")
-        fun `should store requests and responses when recording`(title: String, mapper: Mapper) {
+        fun `should store requests and responses when recording`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(
                 "request?param1=value1",
@@ -188,26 +201,9 @@ class RecordTests : TestWithServer() {
                 listOf("someHeader" to "someValue")
             )
 
-            withFile("$SAVE_FOLDER/request.json") {
+            withFile(fileName(requestUrl, fileType)) {
                 val result = mapper.readMatches(it)
-                val expectedResult = Matcher(
-                    RequestDescriptor(
-                        method = "POST",
-                        body = "requestBody",
-                        params = mapOf("param1" to "value1"),
-                        headers = listOf(Header("someHeader", "someValue"))
-                    ),
-                    ResponseDescriptor(
-                        code = 200,
-                        bodyFile = "request_body_0.txt",
-                        mediaType = "text/plain",
-                        headers = listOf(
-                            Header("Content-Length", "4"),
-                            Header("Content-Type", "text/plain"),
-                            Header("someKey", "someValue")
-                        )
-                    )
-                )
+                val expectedResult = requestWithParams()
                 assertEquals(listOf(expectedResult), result)
             }
 
@@ -224,14 +220,15 @@ class RecordTests : TestWithServer() {
         )
         fun `should handle null request and response bodies when recording`(
             title: String,
-            mapper: Mapper
+            mapper: Mapper,
+            fileType: String
         ) {
             enqueueServerResponse(200, null)
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest("request", "GET", null)
+            executeRequest(requestUrl, "GET", null)
 
-            withFile("$SAVE_FOLDER/request.json") {
+            withFile(fileName(requestUrl, fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     RequestDescriptor(method = "GET"),
@@ -254,10 +251,14 @@ class RecordTests : TestWithServer() {
             "When a scenario already exists for a request, " +
                     "then the scenario should be completed with the new one"
         )
-        fun `should update existing descriptors when recording`(title: String, mapper: Mapper) {
+        fun `should update existing descriptors when recording`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
             enqueueServerResponse(200, "second body")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(
                 "request?param1=value1",
@@ -265,41 +266,13 @@ class RecordTests : TestWithServer() {
                 "requestBody",
                 listOf("someHeader" to "someValue")
             )
-            executeGetRequest("request")
+            executeGetRequest(requestUrl)
 
-            withFile("$SAVE_FOLDER/request.json") {
+            withFile(fileName(requestUrl, fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = listOf(
-                    Matcher(
-                        RequestDescriptor(
-                            method = "POST",
-                            body = "requestBody",
-                            params = mapOf("param1" to "value1"),
-                            headers = listOf(Header("someHeader", "someValue"))
-                        ),
-                        ResponseDescriptor(
-                            code = 200,
-                            bodyFile = "request_body_0.txt",
-                            mediaType = "text/plain",
-                            headers = listOf(
-                                Header("Content-Length", "4"),
-                                Header("Content-Type", "text/plain"),
-                                Header("someKey", "someValue")
-                            )
-                        )
-                    ),
-                    Matcher(
-                        RequestDescriptor(method = "GET"),
-                        ResponseDescriptor(
-                            code = 200,
-                            bodyFile = "request_body_1.txt",
-                            mediaType = "text/plain",
-                            headers = listOf(
-                                Header("Content-Length", "11"),
-                                Header("Content-Type", "text/plain")
-                            )
-                        )
-                    )
+                    requestWithParams(),
+                    requestWithNoParams()
                 )
                 assertEquals(expectedResult, result)
             }
@@ -318,10 +291,14 @@ class RecordTests : TestWithServer() {
             "When recording a response body, " +
                     "then the file should have the proper extension"
         )
-        fun `should add proper extension to response files`(title: String, mapper: Mapper) {
+        fun `should add proper extension to response files`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body", contentType = "image/png")
             enqueueServerResponse(200, "body", contentType = "application/json")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
             executeGetRequest("record/request1")
             executeGetRequest("record/request2")
@@ -336,9 +313,13 @@ class RecordTests : TestWithServer() {
             "When recording a response body with a mediatype charset, " +
                     "then the file should have the proper extension"
         )
-        fun `should handle proper extension for response files`(title: String, mapper: Mapper) {
+        fun `should handle proper extension for response files`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body", contentType = "application/json; charset=UTF-8")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
             executeGetRequest("record/request1")
 
@@ -351,9 +332,13 @@ class RecordTests : TestWithServer() {
             "When recording a response body with unknwown mediatype, " +
                     "then the file should have the default extension"
         )
-        fun `should handle default extension for response files`(title: String, mapper: Mapper) {
+        fun `should handle default extension for response files`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
             enqueueServerResponse(200, "body", contentType = "unknown/no-type")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
             executeGetRequest("record/request1")
 
@@ -368,14 +353,15 @@ class RecordTests : TestWithServer() {
         )
         fun `should match indexes in descriptor file and actual response file name`(
             title: String,
-            mapper: Mapper
+            mapper: Mapper,
+            fileType: String
         ) {
             enqueueServerResponse(200, "body", contentType = "image/png")
             enqueueServerResponse(200, "body", contentType = "application/json")
-            setUpInterceptor(mapper)
+            setUpInterceptor(mapper, fileType = fileType)
 
-            executeGetRequest("record/request")
-            executeGetRequest("record/request")
+            executeGetRequest(recordRequestUrl)
+            executeGetRequest(recordRequestUrl)
 
             assertFileExists("$SAVE_FOLDER/record/request_body_0.png")
             assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
@@ -387,16 +373,20 @@ class RecordTests : TestWithServer() {
             "When recording a request fails with an exception, " +
                     "then the exception should be recorded"
         )
-        fun `recording failure should save error in scenario`(title: String, mapper: Mapper) {
-            setUpInterceptor(mapper)
+        fun `recording failure should save error in scenario`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
+            setUpInterceptor(mapper, fileType = fileType)
 
             val exception = assertThrows<java.net.UnknownHostException> {
                 val request = Request.Builder().url("http://falseUrl.wrong/record/error").build()
                 client.newCall(request).execute()
             }
 
-            assertFileExists("$SAVE_FOLDER/record/error.json")
-            withFile("$SAVE_FOLDER/record/error.json") {
+            assertFileExists(fileName("record/error", fileType))
+            withFile(fileName("record/error", fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     request = RequestDescriptor(
@@ -413,20 +403,19 @@ class RecordTests : TestWithServer() {
 
         @AfterEach
         fun clearFolder() {
-            val folder = File(SAVE_FOLDER)
-            if (folder.exists()) {
-                Files.walk(folder.toPath())
-                    .sorted(Collections.reverseOrder<Any>())
-                    .map(Path::toFile)
-                    .forEach { it.delete() }
-            }
+            clearTestFolder(SAVE_FOLDER)
         }
     }
+
+    private val requestUrl = "request"
+
+    private val recordRequestUrl = "record/request"
 
     private fun setUpInterceptor(
         mapper: Mapper,
         rootFolder: String = SAVE_FOLDER,
-        failOnError: Boolean = false
+        failOnError: Boolean = false,
+        fileType: String
     ) {
         interceptor = mockInterceptor {
             decodeScenarioPathWith {
@@ -435,7 +424,7 @@ class RecordTests : TestWithServer() {
                     .drop(1)
             }
             parseScenariosWith(mapper)
-            saveScenariosIn(File(rootFolder))
+            recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
             failOnRecordingError(failOnError)
             setInterceptorStatus(RECORD)
         }
@@ -443,7 +432,41 @@ class RecordTests : TestWithServer() {
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
+    private fun fileName(path: String, fileType: String) = "$SAVE_FOLDER/$path.$fileType"
+
+    private fun requestWithNoParams() = Matcher(
+        RequestDescriptor(method = "GET"),
+        ResponseDescriptor(
+            code = 200,
+            bodyFile = "request_body_1.txt",
+            mediaType = "text/plain",
+            headers = listOf(
+                Header("Content-Length", "11"),
+                Header("Content-Type", "text/plain")
+            )
+        )
+    )
+
+    private fun requestWithParams() = Matcher(
+        RequestDescriptor(
+            method = "POST",
+            body = "requestBody",
+            params = mapOf("param1" to "value1"),
+            headers = listOf(Header("someHeader", "someValue"))
+        ),
+        ResponseDescriptor(
+            code = 200,
+            bodyFile = "request_body_0.txt",
+            mediaType = "text/plain",
+            headers = listOf(
+                Header("Content-Length", "4"),
+                Header("Content-Type", "text/plain"),
+                Header("someKey", "someValue")
+            )
+        )
+    )
+
     companion object {
-        private const val SAVE_FOLDER = "testFolder"
+        internal const val SAVE_FOLDER = "testFolder"
     }
 }

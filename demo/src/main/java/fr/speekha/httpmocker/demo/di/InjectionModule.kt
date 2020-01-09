@@ -23,6 +23,7 @@ import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import okhttp3.OkHttpClient
@@ -34,13 +35,18 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 
 val injectionModule: Module = module {
 
+    single<FilingPolicy> {
+        MirrorPathPolicy(JSON_FORMAT)
+    }
+
     single {
         mockInterceptor {
-            decodeScenarioPathWith(MirrorPathPolicy(JSON_FORMAT))
+            decodeScenarioPathWith(get<FilingPolicy>())
             loadFileWith(get<Context>().assets::open)
             parseScenariosWith(JacksonMapper())
-            saveScenariosIn(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            saveScenarios(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                get()
             )
             addFakeNetworkDelay(500)
         }
