@@ -46,11 +46,11 @@ class JavaApiTest extends TestWithServer {
 
     @Nested
     @DisplayName("Given a Java code base, When using the Kotlin API")
-    class WithJavaCode extends TestWithServer {
+    public class WithJavaCode extends TestWithServer {
 
         @Test
         @DisplayName("Then dynamic mocks should work properly")
-        void shouldUseDynamicMocksWithJavaApi() throws IOException {
+        public void shouldUseDynamicMocksWithJavaApi() throws IOException {
             initInterceptor(getFilingPolicy());
             Response response = executeRequest("/dynamic");
             Assertions.assertEquals("dynamic", response.body().string());
@@ -58,7 +58,7 @@ class JavaApiTest extends TestWithServer {
 
         @Test
         @DisplayName("Then static mocks should work properly")
-        void shouldUseStaticMocksWithJavaApi() throws IOException {
+        public void shouldUseStaticMocksWithJavaApi() throws IOException {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             Request request = initRequest("/static");
@@ -69,7 +69,7 @@ class JavaApiTest extends TestWithServer {
 
         @Test
         @DisplayName("Then recording should work properly")
-        void shouldRecordWithJavaApi() throws IOException {
+        public void shouldRecordWithJavaApi() throws IOException {
             enqueueServerResponse(200, "body", new ArrayList<>(), null);
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
@@ -81,7 +81,7 @@ class JavaApiTest extends TestWithServer {
         }
 
         @AfterEach
-        void clearFolder() {
+        public void clearFolder() {
             RecordTestsKt.clearTestFolder();
         }
 

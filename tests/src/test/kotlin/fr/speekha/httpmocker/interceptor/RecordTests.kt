@@ -95,6 +95,7 @@ class RecordTests : TestWithServer() {
     @Nested
     @DisplayName("Given an mock interceptor")
     inner class PolicyTest : RecorderTestSuite {
+
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When a recording policy is set, then it should be used")
@@ -118,10 +119,7 @@ class RecordTests : TestWithServer() {
                     setInterceptorStatus(RECORD)
                 }
             }
-            assertFilesExist(
-                "$SAVE_FOLDER/record_policy.$fileType",
-                "$SAVE_FOLDER/request_body_0.txt"
-            )
+            assertFilesExist("$SAVE_FOLDER/record_policy.$fileType", requestBodyFile)
             verify(policy).getPath(any())
         }
 
@@ -144,10 +142,7 @@ class RecordTests : TestWithServer() {
                     setInterceptorStatus(RECORD)
                 }
             }
-            assertFilesExist(
-                "$SAVE_FOLDER/lambda_policy.$fileType",
-                "$SAVE_FOLDER/request_body_0.txt"
-            )
+            assertFilesExist("$SAVE_FOLDER/lambda_policy.$fileType", requestBodyFile)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -170,10 +165,7 @@ class RecordTests : TestWithServer() {
                     setInterceptorStatus(RECORD)
                 }
             }
-            assertFilesExist(
-                "$SAVE_FOLDER/read_policy.$fileType",
-                "$SAVE_FOLDER/request_body_0.txt"
-            )
+            assertFilesExist("$SAVE_FOLDER/read_policy.$fileType", requestBodyFile)
             verify(policy).getPath(any())
         }
 
@@ -193,7 +185,7 @@ class RecordTests : TestWithServer() {
                     setInterceptorStatus(RECORD)
                 }
             }
-            assertFilesExist("$SAVE_FOLDER/request.$fileType", "$SAVE_FOLDER/request_body_0.txt")
+            assertFilesExist("$SAVE_FOLDER/request.$fileType", requestBodyFile)
         }
 
         private fun testInterceptor(buildInterceptor: () -> MockResponseInterceptor) {
@@ -202,6 +194,8 @@ class RecordTests : TestWithServer() {
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
             executeGetRequest(requestUrl)
         }
+
+        private val requestBodyFile = "$SAVE_FOLDER/request_body_0.txt"
     }
 
     @Nested
