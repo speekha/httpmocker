@@ -38,9 +38,6 @@ import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.Collections
 import java.util.stream.Stream
 
 open class TestWithServer {
@@ -81,6 +78,8 @@ open class TestWithServer {
     protected fun assertFileExists(path: String) = withFile(path) {
         assertTrue(it.exists(), "File $path does not exist")
     }
+
+    protected fun assertFilesExist(vararg path: String) = path.forEach { assertFileExists(it) }
 
     protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
 
@@ -125,16 +124,6 @@ open class TestWithServer {
             method,
             body
         )
-    }
-
-    protected fun clearTestFolder(path: String) {
-        val folder = File(path)
-        if (folder.exists()) {
-            Files.walk(folder.toPath())
-                .sorted(Collections.reverseOrder<Any>())
-                .map(Path::toFile)
-                .forEach { it.delete() }
-        }
     }
 
     companion object {

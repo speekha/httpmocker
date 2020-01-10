@@ -72,10 +72,6 @@ data class InterceptorBuilder internal constructor(
     fun decodeScenarioPathWith(policy: (Request) -> String): InterceptorBuilder =
         apply { filingPolicy += FilingPolicyBuilder(policy) }
 
-    private class FilingPolicyBuilder(private val policy: (Request) -> String) : FilingPolicy {
-        override fun getPath(request: Request): String = policy(request)
-    }
-
     /**
      * For static mocks: Defines a loading function to retrieve the scenario files as a stream
      * @param loading a function to load files by name and path as a stream (could use
@@ -124,8 +120,10 @@ data class InterceptorBuilder internal constructor(
         apply { mapper = objectMapper }
 
     /**
-     * Defines the folder where scenarios should be stored when recording
+     * Defines the folder where and how scenarios should be stored when recording. This method is
+     * for Java compatibility. For Kotlin users, prefer the recordScenariosIn() extension.
      * @param folder the root folder where saved scenarios should be saved
+     * @param policy the naming policy to use for scenario files
      */
     fun saveScenarios(folder: File, policy: FilingPolicy?): InterceptorBuilder =
         apply { recorder = RecorderBuilder(folder, policy) }

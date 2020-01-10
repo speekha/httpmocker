@@ -16,6 +16,10 @@
 
 package fr.speekha.httpmocker.interceptor
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.RECORD
@@ -28,6 +32,7 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestDescriptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
@@ -42,7 +47,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.io.File
 import java.io.FileNotFoundException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.ArrayList
+import java.util.Collections
 
 @Suppress("UNUSED_PARAMETER")
 class RecordTests : TestWithServer() {
@@ -83,8 +93,120 @@ class RecordTests : TestWithServer() {
     }
 
     @Nested
+    @DisplayName("Given an mock interceptor")
+    inner class PolicyTest : RecorderTestSuite {
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When a recording policy is set, then it should be used")
+        fun `should use recording policy`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
+            val policy: FilingPolicy = mock {
+                on { getPath(any()) } doReturn "record_policy.$fileType"
+            }
+
+            testInterceptor {
+                mockInterceptor {
+                    decodeScenarioPathWith {
+                        "wrongPolicy.$fileType"
+                    }
+                    parseScenariosWith(mapper)
+                    recordScenariosIn(SAVE_FOLDER) with policy
+                    failOnRecordingError(true)
+                    setInterceptorStatus(RECORD)
+                }
+            }
+            assertFilesExist(
+                "$SAVE_FOLDER/record_policy.$fileType",
+                "$SAVE_FOLDER/request_body_0.txt"
+            )
+            verify(policy).getPath(any())
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When a recording policy is set as lambda, then it should be used")
+        fun `should use recording policy as lambda`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
+            testInterceptor {
+                mockInterceptor {
+                    decodeScenarioPathWith {
+                        "wrongPolicy.$fileType"
+                    }
+                    parseScenariosWith(mapper)
+                    recordScenariosIn(SAVE_FOLDER) with { "lambda_policy.$fileType" }
+                    failOnRecordingError(true)
+                    setInterceptorStatus(RECORD)
+                }
+            }
+            assertFilesExist(
+                "$SAVE_FOLDER/lambda_policy.$fileType",
+                "$SAVE_FOLDER/request_body_0.txt"
+            )
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When no recording policy is set, then the read policy should be used")
+        fun `should use read policy`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
+            val policy: FilingPolicy = mock {
+                on { getPath(any()) } doReturn "read_policy.$fileType"
+            }
+            testInterceptor {
+                mockInterceptor {
+                    decodeScenarioPathWith(policy)
+                    parseScenariosWith(mapper)
+                    recordScenariosIn(SAVE_FOLDER)
+                    failOnRecordingError(true)
+                    setInterceptorStatus(RECORD)
+                }
+            }
+            assertFilesExist(
+                "$SAVE_FOLDER/read_policy.$fileType",
+                "$SAVE_FOLDER/request_body_0.txt"
+            )
+            verify(policy).getPath(any())
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When no policy is set at all, then a default Mirror path policy should be used")
+        fun `should use default policy`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
+            testInterceptor {
+                mockInterceptor {
+                    parseScenariosWith(mapper)
+                    recordScenariosIn(SAVE_FOLDER)
+                    failOnRecordingError(true)
+                    setInterceptorStatus(RECORD)
+                }
+            }
+            assertFilesExist("$SAVE_FOLDER/request.$fileType", "$SAVE_FOLDER/request_body_0.txt")
+        }
+
+        private fun testInterceptor(buildInterceptor: () -> MockResponseInterceptor) {
+            enqueueServerResponse(200, "body", ArrayList(), null)
+            interceptor = buildInterceptor()
+            client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+            executeGetRequest(requestUrl)
+        }
+    }
+
+    @Nested
     @DisplayName("Given an mock interceptor in record mode")
-    inner class InterceptionTest {
+    inner class InterceptionTest : RecorderTestSuite {
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName("When a request is recorded, then it should not be blocked")
@@ -141,7 +263,7 @@ class RecordTests : TestWithServer() {
 
     @Nested
     @DisplayName("Given an mock interceptor in record mode with a root folder")
-    inner class RecordTest {
+    inner class RecordTest : RecorderTestSuite {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
@@ -400,11 +522,6 @@ class RecordTests : TestWithServer() {
                 assertEquals(listOf(expectedResult), result)
             }
         }
-
-        @AfterEach
-        fun clearFolder() {
-            clearTestFolder(SAVE_FOLDER)
-        }
     }
 
     private val requestUrl = "request"
@@ -466,7 +583,22 @@ class RecordTests : TestWithServer() {
         )
     )
 
-    companion object {
-        internal const val SAVE_FOLDER = "testFolder"
+    interface RecorderTestSuite {
+        @AfterEach
+        fun clearFolder() {
+            clearTestFolder()
+        }
+    }
+}
+
+internal const val SAVE_FOLDER = "testFolder"
+
+fun clearTestFolder() {
+    val folder = File(SAVE_FOLDER)
+    if (folder.exists()) {
+        Files.walk(folder.toPath())
+            .sorted(Collections.reverseOrder<Any>())
+            .map(Path::toFile)
+            .forEach { it.delete() }
     }
 }
