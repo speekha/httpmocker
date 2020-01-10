@@ -42,15 +42,15 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 @DisplayName("Java API")
-public class JavaApiTest extends TestWithServer {
+class JavaApiTest extends TestWithServer {
 
     @Nested
     @DisplayName("Given a Java code base, When using the Kotlin API")
-    public class WithJavaCode extends TestWithServer {
+    class WithJavaCode extends TestWithServer {
 
         @Test
         @DisplayName("Then dynamic mocks should work properly")
-        public void shouldUseDynamicMocksWithJavaApi() throws IOException {
+        void shouldUseDynamicMocksWithJavaApi() throws IOException {
             initInterceptor(getFilingPolicy());
             Response response = executeRequest("/dynamic");
             Assertions.assertEquals("dynamic", response.body().string());
@@ -58,7 +58,7 @@ public class JavaApiTest extends TestWithServer {
 
         @Test
         @DisplayName("Then static mocks should work properly")
-        public void shouldUseStaticMocksWithJavaApi() throws IOException {
+        void shouldUseStaticMocksWithJavaApi() throws IOException {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             Request request = initRequest("/static");
@@ -69,20 +69,20 @@ public class JavaApiTest extends TestWithServer {
 
         @Test
         @DisplayName("Then recording should work properly")
-        public void shouldRecordWithJavaApi() throws IOException {
+        void shouldRecordWithJavaApi() throws IOException {
             enqueueServerResponse(200, "body", new ArrayList<>(), null);
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             getInterceptor().setMode(Mode.RECORD);
             Request request = initRequest("record/request");
             executeRequest(request);
-            assertFileExists(RecordTests.SAVE_FOLDER + "/request.json");
-            assertFileExists(RecordTests.SAVE_FOLDER + "/request_body_0.txt");
+            assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request.json");
+            assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request_body_0.txt");
         }
 
         @AfterEach
-        public void clearFolder() {
-            clearTestFolder(RecordTests.SAVE_FOLDER);
+        void clearFolder() {
+            RecordTestsKt.clearTestFolder();
         }
 
         private void initInterceptor(FilingPolicy policy) {
@@ -93,7 +93,7 @@ public class JavaApiTest extends TestWithServer {
                     .loadFileWith((FileLoader) file -> getClass().getClassLoader().getResourceAsStream(file))
                     .parseScenariosWith(mapper)
                     .setInterceptorStatus(Mode.ENABLED)
-                    .saveScenarios(new File(RecordTests.SAVE_FOLDER), policy)
+                    .saveScenarios(new File(RecordTestsKt.SAVE_FOLDER), policy)
                     .build();
             client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
         }

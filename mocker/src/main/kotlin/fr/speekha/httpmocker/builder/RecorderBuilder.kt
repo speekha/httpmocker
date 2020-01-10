@@ -17,13 +17,27 @@
 package fr.speekha.httpmocker.builder
 
 import fr.speekha.httpmocker.policies.FilingPolicy
+import okhttp3.Request
 import java.io.File
 
 class RecorderBuilder(
     internal var rootFolder: File?,
     internal var policy: FilingPolicy? = null
 ) {
+
+    /**
+     * Defines the policy used to name the scenario files based on the request being intercepted
+     * @param filingPolicy the naming policy to use for scenario files
+     */
     infix fun with(filingPolicy: FilingPolicy) = apply {
         policy = filingPolicy
+    }
+
+    /**
+     * Defines the policy used to name the scenario files based on the request being intercepted
+     * @param filingPolicy a lambda to use as the naming policy for scenario files
+     */
+    infix fun with(filingPolicy: (Request) -> String) = apply {
+        policy = FilingPolicyBuilder(filingPolicy)
     }
 }
