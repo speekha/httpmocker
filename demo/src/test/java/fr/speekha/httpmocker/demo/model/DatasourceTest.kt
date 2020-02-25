@@ -70,5 +70,4 @@ class DatasourceTest {
             assertEquals(listOf(Repo(8856204, "kotlin-examples")), repos)
         }
     }
-
 }
