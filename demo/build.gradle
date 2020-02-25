@@ -63,10 +63,10 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$support_version"
     implementation "androidx.core:core-ktx:$support_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'com.google.android.material:material:1.2.0-alpha02'
+    implementation 'com.google.android.material:material:1.2.0-alpha04'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
@@ -77,8 +77,9 @@ dependencies {
     //implementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
     implementation project(':jackson-adapter')
 
-    testImplementation "junit:junit:4.12"
+    testImplementation "junit:junit:4.13"
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
+    testImplementation "org.slf4j:slf4j-simple:$slf4j_version"
 }
