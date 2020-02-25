@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.demo.model
 
+import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
@@ -34,25 +35,6 @@ import retrofit2.converter.jackson.JacksonConverterFactory
  */
 class DatasourceTest {
 
-    private fun setupService(folder: String): GithubApiEndpoints {
-        val policy = SingleFolderPolicy(folder)
-        val interceptor = mockInterceptor {
-            decodeScenarioPathWith(policy)
-            loadFileWith { javaClass.classLoader?.getResourceAsStream(it) }
-            parseScenariosWith(JacksonMapper())
-            setInterceptorStatus(Mode.ENABLED)
-        }
-        val client = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .build()
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.github.com")
-            .client(client)
-            .addConverterFactory(JacksonConverterFactory.create())
-            .build()
-        return retrofit.create(GithubApiEndpoints::class.java)
-    }
-
     @Test
     fun `should return an empty list`() {
         val service = setupService("test1")
@@ -70,4 +52,31 @@ class DatasourceTest {
             assertEquals(listOf(Repo(8856204, "kotlin-examples")), repos)
         }
     }
+
+    private fun setupService(folder: String): GithubApiEndpoints {
+        val policy = SingleFolderPolicy(folder)
+        val interceptor = setupInterceptor(policy)
+        val client = setupClient(interceptor)
+        val retrofit = setupRetrofit(client)
+        return retrofit.create(GithubApiEndpoints::class.java)
+    }
+
+    private fun setupInterceptor(policy: SingleFolderPolicy): MockResponseInterceptor =
+        mockInterceptor {
+            decodeScenarioPathWith(policy)
+            loadFileWith { javaClass.classLoader?.getResourceAsStream(it) }
+            parseScenariosWith(JacksonMapper())
+            setInterceptorStatus(Mode.ENABLED)
+        }
+
+    private fun setupClient(interceptor: MockResponseInterceptor): OkHttpClient =
+        OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+    private fun setupRetrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
+        .baseUrl("https://api.github.com")
+        .client(client)
+        .addConverterFactory(JacksonConverterFactory.create())
+        .build()
 }
