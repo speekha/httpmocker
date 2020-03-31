@@ -20,9 +20,9 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
 import kotlinx.serialization.UnstableDefault
+import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.list
 import kotlinx.serialization.modules.EmptyModule
 import fr.speekha.httpmocker.kotlinx.model.Matcher as JsonMatcher
 
@@ -46,8 +46,9 @@ class KotlinxMapper(
     private val adapter = Json {
         encodeDefaults = false
         prettyPrint = true
-        strictMode = true
-        unquoted = false
+        ignoreUnknownKeys = false
+        isLenient = true
+        unquotedPrint = false
         indent = " "
         useArrayPolymorphism = false
         classDiscriminator = "type"
