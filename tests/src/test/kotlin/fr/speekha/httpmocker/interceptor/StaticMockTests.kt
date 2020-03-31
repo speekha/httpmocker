@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
@@ -792,6 +793,23 @@ class StaticMockTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When mocked file does not exist, then the request should go to the server")
+        fun `should support mixed mode to execute request when response file is not found locally`(
+            title: String,
+            mapper: Mapper,
+            type: String
+        ) {
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
+            setUpInterceptor(MIXED, mapper, type)
+            whenever(loadingLambda.invoke(any())).then { throw FileNotFoundException("File does not exist") }
+            val serverResponse = executeGetRequest("")
+
+            assertResponseCode(serverResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
+            assertEquals("body", serverResponse.body()?.string())
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When several interceptors are stacked, " +
                     "then each should delegate to the next one requests it can't answer"
@@ -812,7 +830,9 @@ class StaticMockTests : TestWithServer() {
                             code = REQUEST_OK_CODE,
                             body = "in memory response",
                             mediaType = "text/plain"
-                        ).takeIf { request.url().encodedPath() == "/inMemory" && request.method() == "GET" }
+                        ).takeIf {
+                            request.url().encodedPath() == "/inMemory" && request.method() == "GET"
+                        }
                     }
                     setInterceptorStatus(MIXED)
                 }
