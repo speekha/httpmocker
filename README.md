@@ -99,10 +99,10 @@ implementation "fr.speekha.httpmocker:mocker:1.2.0"
 
 #### External dependencies
 
-* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.4.
+* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.7.
 * It also depends on the SLF4J API for logging.
-* JSON parsers depend on their respective external libraries: Jackson 2.10.0, Gson 2.8.6, Moshi 
-1.9.1 or KotlinX serialization 0.13.0.
+* JSON parsers depend on their respective external libraries: Jackson 2.10.3, Gson 2.8.6, Moshi 
+1.9.2 or KotlinX serialization 0.20.0.
 
 ### Proguard rules
 
