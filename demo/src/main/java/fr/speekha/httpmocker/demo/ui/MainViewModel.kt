@@ -23,6 +23,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.onFailure
@@ -46,49 +47,47 @@ class MainViewModel(
 
     fun callService() = viewModelScope.launch {
         data.postValue(Data.Loading)
-        val org = "kotlin"
-        loadRepos(org)
-            .onSuccess { repos ->
-                repos?.map { repo ->
-                    val contributor =
-                        loadTopContributor(org, repo.name).getOrNull()?.firstOrNull()
-                    repo.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
-                }?.also {
-                    data.postValue(Data.Success(it))
-                }
-            }.onFailure {
-                data.postValue(Data.Error(it.message))
+        resultOf {
+            loadRepos("kotlin")
+        } onSuccess { repos ->
+            repos?.map { repo ->
+                val contributor =
+                    loadTopContributor("kotlin", repo.name).getOrNull()?.firstOrNull()
+                repo.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
+            }?.also {
+                data.postValue(Data.Success(it))
             }
+        } onFailure {
+            data.postValue(Data.Error(it.message))
+        }
     }
 
-    fun setMode(mode: MockResponseInterceptor.Mode) {
+    fun setMode(mode: Mode) {
         mocker.mode = mode
-        if (mocker.mode == MockResponseInterceptor.Mode.RECORD) {
+        if (mocker.mode == Mode.RECORD) {
             state.postValue(State.Permission)
         }
         state.postValue(
             State.Message(
                 when (mocker.mode) {
-                    MockResponseInterceptor.Mode.DISABLED -> R.string.disabled_description
-                    MockResponseInterceptor.Mode.ENABLED -> R.string.enabled_description
-                    MockResponseInterceptor.Mode.MIXED -> R.string.mixed_description
-                    MockResponseInterceptor.Mode.RECORD -> R.string.record_description
+                    Mode.DISABLED -> R.string.disabled_description
+                    Mode.ENABLED -> R.string.enabled_description
+                    Mode.MIXED -> R.string.mixed_description
+                    Mode.RECORD -> R.string.record_description
                 }
             )
         )
     }
 
     private suspend fun loadRepos(org: String) = withContext(Dispatchers.IO) {
-        resultOf {
-            apiService.listRepositoriesForOrganisation(org).also { }
-        }
+        apiService.listRepositoriesForOrganisation(org)
     }
 
     private suspend fun loadTopContributor(org: String, repo: String) =
         withContext(Dispatchers.IO) {
             resultOf {
                 apiService.listContributorsForRepository(org, repo)
-            }.onFailure {
+            } onFailure {
                 Log.e("ViewModel", it.message, it)
             }
         }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 buildscript {
 
@@ -25,13 +24,13 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:3.6.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_version"
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$artifactory_version"
-        classpath "org.jlleitschuh.gradle:ktlint-gradle:8.2.0"
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_version"
     }
 }
 
@@ -60,7 +59,10 @@ allprojects {
         version = "0.34.2"
         verbose = true
         android = false
-        reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
+        reporters {
+            reporter "plain"
+            reporter "checkstyle"
+        }
         additionalEditorconfigFile = file("../.editorconfig")
 
         filter {
@@ -70,23 +72,8 @@ allprojects {
     }
 }
 
-subprojects {
-//    tasks.withType<Test> {
-//        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
-//    }
-
-    apply plugin: "io.gitlab.arturbosch.detekt"
-
-    detekt {
-        config = files("../detekt.yml")
-        parallel = true
-        reports {
-            xml { enabled = true }
-            html { enabled = true }
-        }
-    }
-}
-
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+apply from: 'gradle/detekt.gradle'

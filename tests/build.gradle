@@ -21,6 +21,10 @@ test {
     options {
         useJUnitPlatform()
     }
+//    def processors = Runtime.getRuntime().availableProcessors()
+//    if (processors > 1) {
+//        maxParallelForks = processors - 1
+//    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

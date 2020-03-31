@@ -16,13 +16,17 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.Mapper
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.XML_FORMAT
 import javax.xml.parsers.SAXParserFactory
 
 class SaxMapper : Mapper {
 
+    override val supportedFormat: String = XML_FORMAT
+
     private val parser = SAXParserFactory.newInstance().newSAXParser()
+
     private val handler: ScenarioHandler = ScenarioHandler()
 
     override fun deserialize(payload: String): List<Matcher>? {

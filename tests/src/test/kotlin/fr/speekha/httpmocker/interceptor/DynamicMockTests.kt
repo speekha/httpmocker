@@ -16,10 +16,11 @@
 
 package fr.speekha.httpmocker.interceptor
 
-import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.DISABLED
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.Mode.DISABLED
+import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
@@ -123,16 +124,17 @@ class DynamicMockTests : TestWithServer() {
             val result1 = "First mock"
             val result2 = "Second mock"
 
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { request ->
+            interceptor = mockInterceptor {
+                useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
                         request.url().toString().contains("1")
                     }
-                }.useDynamicMocks {
+                }
+                useDynamicMocks {
                     ResponseDescriptor(body = result2)
                 }
-                .setInterceptorStatus(ENABLED)
-                .build()
+                mode = ENABLED
+            }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
@@ -161,12 +163,12 @@ class DynamicMockTests : TestWithServer() {
         )
         fun `should support exception results`() {
 
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks {
+            interceptor = mockInterceptor {
+                useDynamicMocks {
                     error("Should throw an error")
                 }
-                .setInterceptorStatus(ENABLED)
-                .build()
+                setInterceptorStatus(ENABLED)
+            }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
@@ -181,23 +183,23 @@ class DynamicMockTests : TestWithServer() {
         }
 
         private fun setupProvider(callback: RequestCallback) {
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks(callback)
-                .setInterceptorStatus(ENABLED)
-                .build()
+            interceptor = mockInterceptor {
+                useDynamicMocks(callback)
+                setInterceptorStatus(ENABLED)
+            }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         }
     }
 
     private fun setupProvider(
-        status: MockResponseInterceptor.Mode = ENABLED,
+        status: Mode = ENABLED,
         callback: (Request) -> ResponseDescriptor?
     ) {
-        interceptor = MockResponseInterceptor.Builder()
-            .useDynamicMocks(callback)
-            .setInterceptorStatus(status)
-            .build()
+        interceptor = mockInterceptor {
+            useDynamicMocks(callback)
+            setInterceptorStatus(status)
+        }
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }

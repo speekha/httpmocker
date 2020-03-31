@@ -19,10 +19,13 @@ package fr.speekha.httpmocker.demo.di
 import android.content.Context
 import android.os.Environment
 import fr.speekha.httpmocker.MockResponseInterceptor
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -32,16 +35,21 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 
 val injectionModule: Module = module {
 
+    single<FilingPolicy> {
+        MirrorPathPolicy(JSON_FORMAT)
+    }
+
     single {
-        MockResponseInterceptor.Builder()
-            .decodeScenarioPathWith(MirrorPathPolicy())
-            .loadFileWith(get<Context>().assets::open)
-            .parseScenariosWith(JacksonMapper())
-            .saveScenariosIn(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        mockInterceptor {
+            decodeScenarioPathWith(get<FilingPolicy>())
+            loadFileWith(get<Context>().assets::open)
+            parseScenariosWith(JacksonMapper())
+            saveScenarios(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                get()
             )
-            .addFakeNetworkDelay(500)
-            .build()
+            addFakeNetworkDelay(500)
+        }
     }
 
     single<OkHttpClient> {

@@ -18,17 +18,19 @@ package fr.speekha.httpmocker.interceptor
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import fr.speekha.httpmocker.Mapper
-import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.ENABLED
-import fr.speekha.httpmocker.MockResponseInterceptor.Mode.MIXED
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.Mode.ENABLED
+import fr.speekha.httpmocker.Mode.MIXED
 import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
+import fr.speekha.httpmocker.serialization.Mapper
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.hamcrest.MatcherAssert
@@ -39,6 +41,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
@@ -261,17 +264,17 @@ class StaticMockTests : TestWithServer() {
 
             initFilingPolicy(type)
 
-            interceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { request ->
+            interceptor = mockInterceptor {
+                useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
                         request.url().toString().contains("dynamic")
                     }
                 }
-                .decodeScenarioPathWith(filingPolicy)
-                .loadFileWith(loadingLambda)
-                .parseScenariosWith(mapper)
-                .setInterceptorStatus(ENABLED)
-                .build()
+                decodeScenarioPathWith(filingPolicy)
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
@@ -462,17 +465,48 @@ class StaticMockTests : TestWithServer() {
     }
 
     @Nested
+    @DisplayName("Given an enabled mock interceptor and no filing policy")
+    inner class DefaultPolicy {
+
+        private fun setupInterceptor(mapper: Mapper, type: String) {
+            interceptor = mockInterceptor {
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
+
+            client = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build()
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When a request is answered, then it should use a MirrorPathPolicy as default")
+        fun `should use mirror path as default file policy`(
+            title: String,
+            mapper: Mapper,
+            type: String
+        ) {
+            setupInterceptor(mapper, type)
+
+            val get = executeGetRequest("/request").body()?.string()
+
+            assertEquals("simple body", get)
+        }
+    }
+
+    @Nested
     @DisplayName("Given an enabled mock interceptor and a single file policy")
     inner class UrlMatching {
 
         fun setupInterceptor(scenarioFile: String, mapper: Mapper, type: String) {
-            initFilingPolicy(type)
-            interceptor = MockResponseInterceptor.Builder()
-                .decodeScenarioPathWith(SingleFilePolicy("$scenarioFile.$type"))
-                .loadFileWith(loadingLambda)
-                .parseScenariosWith(mapper)
-                .setInterceptorStatus(ENABLED)
-                .build()
+            interceptor = mockInterceptor {
+                decodeScenarioPathWith(SingleFilePolicy("$scenarioFile.$type"))
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
 
             client = OkHttpClient.Builder()
                 .addInterceptor(interceptor)
@@ -525,6 +559,65 @@ class StaticMockTests : TestWithServer() {
             val request = buildRequest("http://someHost.com:12345/aTestUrl")
 
             assertEquals("based on URL", client.newCall(request).execute().body()?.string())
+        }
+    }
+
+    @Nested
+    @DisplayName("Given an enabled mock interceptor with multiple file policies")
+    inner class MultiplePolicies {
+
+        private lateinit var policy1: FilingPolicy
+        private lateinit var policy2: FilingPolicy
+
+        private fun setupInterceptor(mapper: Mapper, type: String) {
+            policy1 = mock {
+                on { this.getPath(any()) } doReturn "incorrect"
+            }
+            policy2 = mock {
+                on { this.getPath(any()) } doReturn "incorrect"
+            }
+
+            interceptor = mockInterceptor {
+                decodeScenarioPathWith(policy1)
+                decodeScenarioPathWith(policy2)
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                setInterceptorStatus(ENABLED)
+            }
+
+            client = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build()
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When the first policy provides a match, then it should be used")
+        fun `should use first policy if possible`(title: String, mapper: Mapper, type: String) {
+            setupInterceptor(mapper, type)
+            whenever(policy1.getPath(any())).thenReturn("request.$type")
+
+            val get = executeGetRequest("/request").body()?.string()
+            assertEquals("simple body", get)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When the first policy does not provide a match, then the second one should be used")
+        fun `should use second policy as fallback`(title: String, mapper: Mapper, type: String) {
+            setupInterceptor(mapper, type)
+            whenever(policy2.getPath(any())).thenReturn("request.$type")
+            val get = executeGetRequest("/request").body()?.string()
+            assertEquals("simple body", get)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When none of the policies provide a match, then an 404 error should occur")
+        fun `should handle all policy failure`(title: String, mapper: Mapper, type: String) {
+            setupInterceptor(mapper, type)
+            val get = executeGetRequest("/request")
+            assertEquals(404, get.code())
         }
     }
 
@@ -700,6 +793,23 @@ class StaticMockTests : TestWithServer() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName("When mocked file does not exist, then the request should go to the server")
+        fun `should support mixed mode to execute request when response file is not found locally`(
+            title: String,
+            mapper: Mapper,
+            type: String
+        ) {
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
+            setUpInterceptor(MIXED, mapper, type)
+            whenever(loadingLambda.invoke(any())).then { throw FileNotFoundException("File does not exist") }
+            val serverResponse = executeGetRequest("")
+
+            assertResponseCode(serverResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
+            assertEquals("body", serverResponse.body()?.string())
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When several interceptors are stacked, " +
                     "then each should delegate to the next one requests it can't answer"
@@ -713,23 +823,27 @@ class StaticMockTests : TestWithServer() {
 
             enqueueServerResponse(REQUEST_OK_CODE, "server response")
 
-            val inMemoryInterceptor = MockResponseInterceptor.Builder()
-                .useDynamicMocks { request ->
-                    ResponseDescriptor(
-                        code = REQUEST_OK_CODE,
-                        body = "in memory response",
-                        mediaType = "text/plain"
-                    ).takeIf { request.url().encodedPath() == "/inMemory" && request.method() == "GET" }
+            val inMemoryInterceptor =
+                mockInterceptor {
+                    useDynamicMocks { request ->
+                        ResponseDescriptor(
+                            code = REQUEST_OK_CODE,
+                            body = "in memory response",
+                            mediaType = "text/plain"
+                        ).takeIf {
+                            request.url().encodedPath() == "/inMemory" && request.method() == "GET"
+                        }
+                    }
+                    setInterceptorStatus(MIXED)
                 }
-                .setInterceptorStatus(MIXED)
-                .build()
 
-            val fileBasedInterceptor = MockResponseInterceptor.Builder()
-                .decodeScenarioPathWith(filingPolicy)
-                .loadFileWith(loadingLambda)
-                .parseScenariosWith(mapper)
-                .setInterceptorStatus(MIXED)
-                .build()
+            val fileBasedInterceptor =
+                mockInterceptor {
+                    decodeScenarioPathWith(filingPolicy)
+                    loadFileWith(loadingLambda)
+                    parseScenariosWith(mapper)
+                    setInterceptorStatus(MIXED)
+                }
 
             client = OkHttpClient.Builder()
                 .addInterceptor(inMemoryInterceptor)
@@ -743,22 +857,20 @@ class StaticMockTests : TestWithServer() {
     }
 
     private fun setUpInterceptor(
-        mode: MockResponseInterceptor.Mode,
+        mode: Mode,
         mapper: Mapper,
         type: String,
         delay: Long? = null
     ) {
         initFilingPolicy(type)
 
-        interceptor = MockResponseInterceptor.Builder()
-            .decodeScenarioPathWith(filingPolicy)
-            .loadFileWith(loadingLambda)
-            .parseScenariosWith(mapper)
-            .setInterceptorStatus(mode)
-            .apply {
-                delay?.let { addFakeNetworkDelay(it) }
-            }
-            .build()
+        interceptor = mockInterceptor {
+            decodeScenarioPathWith(filingPolicy)
+            loadFileWith(loadingLambda)
+            parseScenariosWith(mapper)
+            setInterceptorStatus(mode)
+            delay?.let { addFakeNetworkDelay(it) }
+        }
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }

@@ -16,16 +16,16 @@
 
 package fr.speekha.httpmocker.interceptor
 
-import fr.speekha.httpmocker.JsonFormatConverter
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
+import fr.speekha.httpmocker.io.readAsString
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
-import fr.speekha.httpmocker.readAsString
 import fr.speekha.httpmocker.sax.SaxMapper
+import fr.speekha.httpmocker.serialization.JsonFormatConverter
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.util.stream.Stream
 
 open class TestWithServer {
@@ -78,6 +79,8 @@ open class TestWithServer {
         assertTrue(it.exists(), "File $path does not exist")
     }
 
+    protected fun assertFilesExist(vararg path: String) = path.forEach { assertFileExists(it) }
+
     protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
 
     protected fun assertResponseCode(response: Response, code: Int, message: String) {
@@ -91,16 +94,23 @@ open class TestWithServer {
     ): Response =
         executeRequest(url, "GET", null, headers)
 
+    @JvmOverloads
     protected fun executeRequest(
         url: String,
-        method: String,
-        body: String?,
+        method: String = "GET",
+        body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
     ): Response {
         val request = initRequest(url, headers, method, body)
         return client.newCall(request).execute()
     }
 
+    @Throws(IOException::class)
+    protected fun executeRequest(request: Request) {
+        client.newCall(request).execute()
+    }
+
+    @JvmOverloads
     protected fun initRequest(
         url: String,
         headers: List<Pair<String, String>> = emptyList(),

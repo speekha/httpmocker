@@ -1,6 +1,6 @@
 # HttpMocker
 
-[![Kotlin](https://img.shields.io/badge/kotlin-1.3.50-blue.svg)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.3.61-blue.svg)](http://kotlinlang.org)
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
@@ -24,7 +24,7 @@ can be reused later.
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.8'
+httpmocker_version = '1.2.0'
 ```
 
 ## Gradle 
@@ -57,46 +57,52 @@ repositories {
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
 files for static mocks. Currently, there are six possible options that are provided for parsing, based on some of the 
-most commonly used libraries for JSON parsing (Jackson, Gson, Moshi, Kotlinx serialization) and a custom implementation 
-(no third party dependency), so you can choose the one matching what you already use in your application (this will 
-help you prevent duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
-of JSON, a SAX-based parser allows to do it. If you choose one of these options, all you need to add is the corresponding 
-`implementation` line in your gradle file:
+most commonly used serialization libraries and on a custom implementations (no third party dependency): 
+* Jackson
+* Gson
+* Moshi
+* Kotlinx serialization)
+* Custom JSON implementation
+* Custom Sax-based implementation
+This should allow you to choose one matching what you already use in your application (in order to prevent 
+duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
+of JSON, the SAX-based parser allows to do it. If you choose one of these options, all you need to add is the 
+corresponding `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.2.0"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:gson-adapter:1.2.0"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.2.0"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:1.2.0"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:custom-adapter:1.2.0"
 
 // Parses XML scenarios using a custom SAX parser
-implementation "fr.speekha.httpmocker:sax-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:sax-adapter:1.2.0"
 ```
 
-If none of those options suits your needs or if you would prefer to only use dynamic mocks, you can add 
+If none of those options suit your needs or if you would prefer to only use dynamic mocks, you can add 
 the main dependency to your project (using static mocks will require that you provide your own implementation 
 of the `Mapper` class):
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.8"
+implementation "fr.speekha.httpmocker:mocker:1.2.0"
 ```
 
 #### External dependencies
 
-* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.4.
+* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp 3.14.7.
 * It also depends on the SLF4J API for logging.
-* JSON parsers depend on their respective external libraries: Jackson 2.10.0, Gson 2.8.6, Moshi 
-1.9.1 or KotlinX serialization 0.13.0.
+* JSON parsers depend on their respective external libraries: Jackson 2.10.3, Gson 2.8.6, Moshi 
+1.9.2 or KotlinX serialization 0.20.0.
 
 ### Proguard rules
 
@@ -110,10 +116,10 @@ The custom and moshi parsers are immune to obfuscation because they do not use a
 ## Quickstart
 
 Mocking http calls relies on a simple Interceptor: MockResponseInterceptor. All you need to set it up
-is to add it to your OkHttp client. Here's an example with minimal configuration using dynamic mocks:
-
+is to add it to your OkHttp client. Here's an example with minimal configuration of dynamic mocks
+using the Java-friendly builder syntax:
 ```kotlin
-    val interceptor = MockResponseInterceptor.Builder()
+    val interceptor = Builder()
         .useDynamicMocks{
             ResponseDescriptor(code = 200, body = "Fake response body")
         }
@@ -123,6 +129,20 @@ is to add it to your OkHttp client. Here's an example with minimal configuration
         .addInterceptor(interceptor)
         .build()
 ```
+
+You can write the same thing in a more Kotlin-friendly style:
+```kotlin
+    val interceptor = mockInterceptor {
+        useDynamicMocks{
+            ResponseDescriptor(code = 200, body = "Fake response body")
+        }
+        setInterceptorStatus(ENABLED)
+    }
+    val client = OkHttpClient.Builder()
+        .addInterceptor(interceptor)
+        .build()
+```
+
 If your interceptor is disabled, it will not interfere with actual network calls. If it is enabled, 
 it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that you have to 
 provide the response for each request programmatically, which allows you to define stateful 
@@ -133,19 +153,22 @@ you can simply provide a lambda function to do the computation.
 Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
 an example for an Android app using static mocks, with a few more options:
 ```kotlin
-    val interceptor = MockResponseInterceptor.Builder()
-        .parseScenariosWith(mapper)
-        .decodeScenarioPathWith(filingPolicy)
-        .loadFileWith { context.assets.open(it) }
-        .setInterceptorStatus(ENABLED)
-        .saveScenariosIn(File(rootFolder))
-        .addFakeNetworkDelay(50L)
-        .build()
+    val interceptor = mockInterceptor {
+            parseScenariosWith(mapper)
+            decodeScenarioPathWith(filingPolicy)
+            loadFileWith { 
+                context.assets.open(it) 
+            }
+            setInterceptorStatus(ENABLED)
+            saveScenariosIn(File(rootFolder))
+            addFakeNetworkDelay(50L)
+        }
 ```
+
 In this example, we decided to store the scenarios in the assets folder of the app (but you 
 could also have them as resources in your classpath and use the `Classloader` to access them or 
 even store them in a certain folder and access that folder with any File API you're comfortable 
-with). You also need to provide the `FilePolicy` you want to use: that policy defines which file to 
+with). You also need to provide the `FilingPolicy` you want to use: that policy defines which file to 
 check to find a match for a request. A few policies are provided in the library, but you can also 
 define your own. 
 

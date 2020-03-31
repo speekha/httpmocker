@@ -16,16 +16,17 @@
 
 package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.LoadFile
-import fr.speekha.httpmocker.Mapper
+import fr.speekha.httpmocker.builder.LoadFile
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestResult
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
-import fr.speekha.httpmocker.readMatches
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.serialization.readMatches
 import okhttp3.Request
+import java.io.FileNotFoundException
 
 internal class StaticMockProvider(
     private val filingPolicy: FilingPolicy,
@@ -48,15 +49,21 @@ internal class StaticMockProvider(
     private fun loadResult(request: Request) = try {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")
-        loadFileContent(path)?.let { stream ->
-            val list = mapper.readMatches(stream)
-            matchRequest(request, list)
-        }
+        loadAndMatchResponse(path, request)
+    } catch (e: FileNotFoundException) {
+        logger.error("Scenario file could not be loaded. Returning null.")
+        null
     } catch (e: Exception) {
         logger.error("Scenario file could not be loaded", e)
         val stackTrace = e.stackTrace.joinToString("\n\tat ")
         ResponseDescriptor(code = 404, body = "${e.javaClass.name}: ${e.message}\n\tat $stackTrace")
     }
+
+    private fun loadAndMatchResponse(path: String, request: Request) =
+        loadFileContent(path)?.let { stream ->
+            val list = mapper.readMatches(stream)
+            matchRequest(request, list)
+        }
 
     private fun matchRequest(request: Request, list: List<Matcher>?): RequestResult? =
         list?.firstOrNull { matcher.matchRequest(it.request, request) }?.result

@@ -19,22 +19,17 @@ package fr.speekha.httpmocker.gson
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import fr.speekha.httpmocker.Mapper
-import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
-import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.gson.Header as JsonHeader
-import fr.speekha.httpmocker.gson.Matcher as JsonMatcher
-import fr.speekha.httpmocker.gson.NetworkError as JsonNetworkError
-import fr.speekha.httpmocker.gson.RequestDescriptor as JsonRequestDescriptor
-import fr.speekha.httpmocker.gson.ResponseDescriptor as JsonResponseDescriptor
+import fr.speekha.httpmocker.serialization.JSON_FORMAT
+import fr.speekha.httpmocker.serialization.Mapper
+import fr.speekha.httpmocker.gson.model.Matcher as JsonMatcher
 
 /**
  * A mapper using Gson to serialize/deserialize scenarios.
  */
 class GsonMapper : Mapper {
+
+    override val supportedFormat: String = JSON_FORMAT
 
     private val gson: Gson = GsonBuilder()
         .setPrettyPrinting()
@@ -45,76 +40,16 @@ class GsonMapper : Mapper {
 
     private val dataType = MatcherType().type
 
-    override fun deserialize(payload: String): List<Matcher> =
-        gson.parse(payload).map {
-            it.toModel()
-        }
+    override fun deserialize(payload: String): List<Matcher> = gson.parse(payload).map {
+        it.toModel()
+    }
 
     private fun Gson.parse(json: String) =
         fromJson<List<JsonMatcher>>(json, dataType) ?: emptyList()
 
-    override fun serialize(matchers: List<Matcher>): String =
-        gson.toJson(matchers.map { it.fromModel() })
+    override fun serialize(matchers: List<Matcher>): String = gson.toJson(matchers.map {
+        it.fromModel()
+    })
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()
-
-    private fun Matcher.fromModel() =
-        JsonMatcher(request.fromModel(), response?.fromModel(), error?.fromModel())
-
-    private fun JsonMatcher.toModel() =
-        Matcher(request?.toModel() ?: RequestDescriptor(), response?.toModel(), error?.toModel())
-
-    private fun JsonRequestDescriptor.toModel() =
-        RequestDescriptor(
-            exactMatch ?: false,
-            protocol,
-            method,
-            host,
-            port,
-            path,
-            headers.toModel(),
-            params.associate { it },
-            body
-        )
-
-    private fun RequestDescriptor.fromModel() =
-        JsonRequestDescriptor(
-            exactMatch.takeIf { it },
-            protocol,
-            method,
-            host,
-            port,
-            path,
-            getHeaders(),
-            ParamsAdapter.ParamList(params),
-            body
-        )
-
-    private fun RequestDescriptor.getHeaders() =
-        HeaderAdapter.HeaderList(headers.map { it.fromModel() })
-
-    private fun JsonHeader.toModel() = Header(name, value)
-
-    private fun Header.fromModel() = JsonHeader(name, value)
-
-    private fun HeaderAdapter.HeaderList?.toModel() = this?.map { it.toModel() } ?: emptyList()
-
-    private fun JsonResponseDescriptor.toModel() =
-        ResponseDescriptor(delay, code, mediaType, headers.toModel(), body, bodyFile)
-
-    private fun ResponseDescriptor.fromModel() =
-        JsonResponseDescriptor(
-            delay,
-            code,
-            mediaType,
-            HeaderAdapter.HeaderList().apply {
-                addAll(headers.map { it.fromModel() })
-            },
-            body,
-            bodyFile
-        )
-
-    private fun JsonNetworkError.toModel() = NetworkError(exceptionType, message)
-
-    private fun NetworkError.fromModel() = JsonNetworkError(exceptionType, message)
 }

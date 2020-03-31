@@ -40,7 +40,7 @@ commands:
             - build-mocker-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -81,7 +81,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Download Dependencies
-          command: ./gradlew androidDependencies --stacktrace
+          command: ./gradlew --no-daemon androidDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
@@ -103,7 +103,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
       - save_cache:
           key: build-mocker-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -150,7 +150,7 @@ jobs:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew demo:clean demo:assembleRelease demo:testReleaseUnitTest --stacktrace
+          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testReleaseUnitTest demo:lint --stacktrace
       - store_test_results:
           path: demo/build/test-results
       - store_artifacts:
@@ -175,7 +175,7 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew tests:test tests:jacocoTestReport test:sendCoverageToCodacy --stacktrace
+          command: ./gradlew --no-daemon tests:test tests:jacocoTestReport test:sendCoverageToCodacy --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
@@ -194,7 +194,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Check quality
-          command: ./gradlew detekt ktlintCheck lint --stacktrace
+          command: ./gradlew --no-daemon detekt ktlintCheck --stacktrace
       - store_artifacts:
           path: mocker/build/reports
           destination: reports/mocker
