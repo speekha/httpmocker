@@ -24,7 +24,7 @@ can be reused later.
 ## Current Version
 
 ```gradle
-httpmocker_version = '1.1.8'
+httpmocker_version = '1.2.0'
 ```
 
 ## Gradle 
@@ -71,22 +71,22 @@ corresponding `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:jackson-adapter:1.2.0"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:gson-adapter:1.2.0"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:moshi-adapter:1.2.0"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:1.2.0"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:custom-adapter:1.2.0"
 
 // Parses XML scenarios using a custom SAX parser
-implementation "fr.speekha.httpmocker:sax-adapter:1.1.8"
+implementation "fr.speekha.httpmocker:sax-adapter:1.2.0"
 ```
 
 If none of those options suit your needs or if you would prefer to only use dynamic mocks, you can add 
@@ -94,7 +94,7 @@ the main dependency to your project (using static mocks will require that you pr
 of the `Mapper` class):
 
 ```gradle
-implementation "fr.speekha.httpmocker:mocker:1.1.8"
+implementation "fr.speekha.httpmocker:mocker:1.2.0"
 ```
 
 #### External dependencies
