@@ -47,7 +47,7 @@ class KotlinxMapper(
         encodeDefaults = false
         prettyPrint = true
         ignoreUnknownKeys = false
-        isLenient = true
+        isLenient = false
         unquotedPrint = false
         indent = " "
         useArrayPolymorphism = false
