@@ -24,7 +24,7 @@
 
 # For Jackson adapter
 -keep class kotlin.Metadata { *; }
--keep class fr.speekha.httpmocker.jackson.* { *; }
+-keep class fr.speekha.httpmocker.jackson.** { *; }
 
 # For GSON adapter
--keep class fr.speekha.httpmocker.gson.* { *; }
+-keep class fr.speekha.httpmocker.gson.** { *; }
