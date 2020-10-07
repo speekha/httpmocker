@@ -19,14 +19,14 @@ package fr.speekha.httpmocker.kotlinx
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
-import kotlinx.serialization.UnstableDefault
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.modules.EmptyModule
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.modules.EmptySerializersModule
 import fr.speekha.httpmocker.kotlinx.model.Matcher as JsonMatcher
 
-@UnstableDefault
 /**
  * A mapper using Kotlinx serialization to serialize/deserialize scenarios.
  * The common JSON format available with other mappers is not compatible with Kotlinx Serialization,
@@ -36,6 +36,7 @@ import fr.speekha.httpmocker.kotlinx.model.Matcher as JsonMatcher
  * @param formatInput transformation function to apply when reading JSON
  * @param formatOutput transformation function to apply when writing JSON
  */
+@ExperimentalSerializationApi
 class KotlinxMapper(
     private val formatInput: (String) -> String = { it },
     private val formatOutput: (String) -> String = { it }
@@ -48,21 +49,21 @@ class KotlinxMapper(
         prettyPrint = true
         ignoreUnknownKeys = false
         isLenient = false
-        unquotedPrint = false
-        indent = " "
+        prettyPrint = true
+        prettyPrintIndent = " "
         useArrayPolymorphism = false
         classDiscriminator = "type"
-        serialModule = EmptyModule
+        serializersModule = EmptySerializersModule
     }
 
     override fun deserialize(payload: String): List<Matcher> =
-        parseMatcherList(adapter.parseJson(formatInput(payload)))
+        parseMatcherList(adapter.parseToJsonElement(formatInput(payload)))
 
     private fun parseMatcherList(json: JsonElement): List<Matcher> = json.jsonArray.map {
         it.toMatcher()
     }
 
     override fun serialize(matchers: List<Matcher>): String = formatOutput(
-        adapter.stringify(JsonMatcher.serializer().list, matchers.map { JsonMatcher(it) })
+        adapter.encodeToString(ListSerializer(JsonMatcher.serializer()), matchers.map { JsonMatcher(it) })
     )
 }
