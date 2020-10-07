@@ -41,7 +41,14 @@ import fr.speekha.httpmocker.serialization.REQUEST
 import fr.speekha.httpmocker.serialization.RESPONSE
 import fr.speekha.httpmocker.serialization.VALUE
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonLiteral
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import fr.speekha.httpmocker.model.Header as ModelHeader
 
 internal fun JsonElement.toMatcher(): Matcher = Matcher(
@@ -51,11 +58,11 @@ internal fun JsonElement.toMatcher(): Matcher = Matcher(
 )
 
 private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
-    jsonObject[EXACT_MATCH]?.primitive?.boolean ?: false,
+    jsonObject[EXACT_MATCH]?.jsonPrimitive?.boolean ?: false,
     jsonObject[PROTOCOL]?.asNullableLiteral(),
     jsonObject[METHOD]?.asNullableLiteral(),
     jsonObject[HOST]?.asNullableLiteral(),
-    jsonObject[PORT]?.primitive?.int,
+    jsonObject[PORT]?.jsonPrimitive?.int,
     jsonObject[PATH]?.asNullableLiteral(),
     jsonObject[HEADERS].toHeaders(),
     jsonObject[PARAMS].toParams(),
@@ -63,8 +70,8 @@ private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
 )
 
 private fun JsonElement.toResponse(): ResponseDescriptor = ResponseDescriptor()
-    .update(this, DELAY) { copy(delay = it.primitive.long) }
-    .update(this, CODE) { copy(code = it.primitive.int) }
+    .update(this, DELAY) { copy(delay = it.jsonPrimitive.long) }
+    .update(this, CODE) { copy(code = it.jsonPrimitive.int) }
     .update(this, MEDIA_TYPE) { copy(mediaType = it.asLiteral()) }
     .update(this, HEADERS) { copy(headers = it.toHeaders()) }
     .update(this, BODY) { copy(body = it.asLiteral()) }
@@ -92,6 +99,6 @@ private fun JsonElement?.toHeaders(): List<ModelHeader> = this?.jsonArray?.map {
     )
 } ?: listOf()
 
-private fun JsonElement?.asLiteral(): String = (this as? JsonLiteral)?.body?.toString() ?: ""
+private fun JsonElement?.asLiteral(): String = (this as? JsonPrimitive)?.contentOrNull ?: ""
 
-private fun JsonElement?.asNullableLiteral(): String? = (this as? JsonLiteral)?.body?.toString()
+private fun JsonElement?.asNullableLiteral(): String? = (this as? JsonPrimitive)?.contentOrNull
