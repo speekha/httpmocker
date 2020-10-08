@@ -42,9 +42,9 @@ import java.util.stream.Stream
 
 open class TestWithServer {
 
-    protected val server = MockWebServer()
+    private val server = MockWebServer()
 
-    protected val mockServerBaseUrl: String
+    private val mockServerBaseUrl: String
         get() = "http://127.0.0.1:${server.port}"
 
     protected lateinit var interceptor: MockResponseInterceptor
@@ -84,8 +84,8 @@ open class TestWithServer {
     protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
 
     protected fun assertResponseCode(response: Response, code: Int, message: String) {
-        Assertions.assertEquals(code, response.code())
-        Assertions.assertEquals(message, response.message())
+        Assertions.assertEquals(code, response.code)
+        Assertions.assertEquals(message, response.message)
     }
 
     protected fun executeGetRequest(

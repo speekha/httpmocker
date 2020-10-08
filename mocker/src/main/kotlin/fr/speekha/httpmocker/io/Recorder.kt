@@ -34,8 +34,8 @@ internal class Recorder(
     @SuppressWarnings("TooGenericExceptionCaught")
     private fun convertCallResult(chain: Interceptor.Chain): CallRecord = try {
         val response = chain.execute()
-        val body = response.body()?.bytes()
-        val contentType = response.body()?.contentType()
+        val body = response.body?.bytes()
+        val contentType = response.body?.contentType()
         CallRecord(chain.request(), response, body, contentType)
     } catch (e: Throwable) {
         CallRecord(chain.request(), error = e)

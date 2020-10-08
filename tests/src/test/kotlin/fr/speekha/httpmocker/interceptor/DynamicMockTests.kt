@@ -47,7 +47,7 @@ class DynamicMockTests : TestWithServer() {
             val response = executeGetRequest("")
 
             assertResponseCode(response, REQUEST_OK_CODE, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
     }
 
@@ -89,8 +89,8 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(resultCode, response.code())
-            assertEquals("some random body", response.body()?.string())
+            assertEquals(resultCode, response.code)
+            assertEquals("some random body", response.body?.string())
         }
 
         @Test
@@ -111,8 +111,8 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(resultCode, response.code())
-            assertEquals(body, response.body()?.string())
+            assertEquals(resultCode, response.code)
+            assertEquals(body, response.body?.string())
         }
 
         @Test
@@ -127,7 +127,7 @@ class DynamicMockTests : TestWithServer() {
             interceptor = mockInterceptor {
                 useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
-                        request.url().toString().contains("1")
+                        request.url.toString().contains("1")
                     }
                 }
                 useDynamicMocks {
@@ -153,8 +153,8 @@ class DynamicMockTests : TestWithServer() {
                     )
                 ).execute()
 
-            assertEquals(result1, response1.body()?.string())
-            assertEquals(result2, response2.body()?.string())
+            assertEquals(result1, response1.body?.string())
+            assertEquals(result2, response2.body?.string())
         }
 
         @Test

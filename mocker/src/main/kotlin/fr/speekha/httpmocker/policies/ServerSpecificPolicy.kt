@@ -27,7 +27,7 @@ class ServerSpecificPolicy(
 ) : FilingPolicy {
 
     override fun getPath(request: Request): String =
-        with(listOf(request.url().host()) + request.url().pathSegments()) {
+        with(listOf(request.url.host) + request.url.pathSegments) {
             joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
         }
 }

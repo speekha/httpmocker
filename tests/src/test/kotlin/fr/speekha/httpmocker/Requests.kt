@@ -16,10 +16,10 @@
 
 package fr.speekha.httpmocker
 
-import okhttp3.Headers
-import okhttp3.MediaType
+import okhttp3.Headers.Companion.headersOf
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 @JvmOverloads
 fun buildRequest(
@@ -30,7 +30,7 @@ fun buildRequest(
 ): Request {
     return Request.Builder()
         .url(url)
-        .headers(Headers.of(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
-        .method(method, body?.let { RequestBody.create(MediaType.parse("text/plain"), it) })
+        .headers(headersOf(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
+        .method(method, body?.toRequestBody("text/plain".toMediaTypeOrNull()))
         .build()
 }
