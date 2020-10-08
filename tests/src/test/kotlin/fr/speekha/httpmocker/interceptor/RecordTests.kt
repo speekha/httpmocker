@@ -218,7 +218,7 @@ class RecordTests : TestWithServer() {
             val response = executeGetRequest(recordRequestUrl)
 
             assertResponseCode(response, 200, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -235,7 +235,7 @@ class RecordTests : TestWithServer() {
             val response = executeGetRequest(recordRequestUrl)
 
             assertResponseCode(response, 200, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -545,7 +545,7 @@ class RecordTests : TestWithServer() {
                 body = """{"some Json content": "some random value"}"""
             )
             assertResponseCode(response, 200, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
     }
 
@@ -565,7 +565,7 @@ class RecordTests : TestWithServer() {
 
         interceptor = mockInterceptor {
             decodeScenarioPathWith {
-                val path = it.url().encodedPath()
+                val path = it.url.encodedPath
                 (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
                     .drop(1)
             }

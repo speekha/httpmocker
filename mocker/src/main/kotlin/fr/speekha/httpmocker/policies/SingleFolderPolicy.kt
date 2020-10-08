@@ -30,8 +30,8 @@ class SingleFolderPolicy(
 
     override fun getPath(request: Request): String {
         val prefix = if (rootFolder.isEmpty()) "" else "$rootFolder/"
-        val fileName = request.url()
-            .pathSegments()
+        val fileName = request.url
+            .pathSegments
             .filter { it.isNotEmpty() }
             .joinToString("_")
             .takeIf { it.isNotBlank() }

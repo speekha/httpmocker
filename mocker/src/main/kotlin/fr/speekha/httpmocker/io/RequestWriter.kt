@@ -133,5 +133,5 @@ internal class RequestWriter(
                 mimeType to extension
             } ?: mapOf()
 
-    private fun MediaType.getExtension() = extensionMappings["${type()}/${subtype()}"] ?: ".txt"
+    private fun MediaType.getExtension() = extensionMappings["$type/$subtype"] ?: ".txt"
 }
