@@ -28,7 +28,7 @@ internal fun writeObjectFields(level: Int, vararg pairs: Pair<String, Any?>) =
             postfix = closingBrace(level)
         ) { writePair(level + 1, it) }
 
-internal fun String?.wrap() = this?.let { "\"${it.replace("\"", "\\\"")}\"" }
+internal fun String?.wrap() = this?.let { "\"${it.replace("\\", "\\\\").replace("\"", "\\\"")}\"" }
 
 internal fun Int?.wrap() = this?.toString()
 

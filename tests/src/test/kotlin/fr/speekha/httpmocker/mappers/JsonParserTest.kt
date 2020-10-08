@@ -50,6 +50,7 @@ class JsonParserTest {
     inner class EmptyInput {
 
         val reader = JsonParser("")
+
         @Test
         fun `When parsing input, then no new token should be found`() {
             assertFalse(reader.hasNext())
@@ -214,29 +215,35 @@ class JsonParserTest {
 
         @Test
         fun `When String is simple, then its value should be retrieved`() =
-            testParser("{\"field\":\"a test string\"}") {
+            testFieldContent("{\"field\":\"a test string\"}") {
                 assertEquals("a test string", it.readString())
             }
 
         @Test
         fun `When String contains quotes, then its value should be retrieved`() =
-            testParser("""{"field":"a test \"string\""}""") {
+            testFieldContent("""{"field":"a test \"string\""}""") {
                 assertEquals("""a test "string"""", it.readString())
             }
 
         @Test
         fun `When String is null, then null should be retrieved`() =
-            testParser("{\"field\": null }") {
+            testFieldContent("{\"field\": null }") {
                 assertNull(it.readString())
             }
 
         @Test
         fun `When String contains JSON special characters, then its value should be retrieved`() =
-            testParser("""{"field":" { [ \" , } ] "}""") {
+            testFieldContent("""{"field":" { [ \" , } ] "}""") {
                 assertEquals(""" { [ " , } ] """, it.readString())
             }
 
-        private fun testParser(input: String, assert: (JsonParser) -> Unit) {
+        @Test
+        fun `When String contains backslashes, then its value should be retrieved`() =
+            testFieldContent("""{"field":"\\Q{ }\\E"}""") {
+                assertEquals("""\Q{ }\E""", it.readString())
+            }
+
+        private fun testFieldContent(input: String, assert: (JsonParser) -> Unit) {
             val reader = JsonParser(input)
             reader.beginObject()
             reader.readFieldName()

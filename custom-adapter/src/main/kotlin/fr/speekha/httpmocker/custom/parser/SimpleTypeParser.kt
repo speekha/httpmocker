@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.custom.parser
 
-import java.util.Locale
+import java.util.*
 
 internal class SimpleTypeParser(
     private val handler: StringReader
@@ -47,6 +47,7 @@ internal class SimpleTypeParser(
     private fun decodeString(value: String): String = value.drop(1)
         .dropLast(1)
         .replace("\\\"", "\"")
+        .replace("\\\\", "\\")
 
     private fun parseBoolean(value: String): Boolean = when (value.toLowerCase(Locale.ROOT)) {
         "true" -> true

@@ -52,10 +52,12 @@ internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.bo
  */
 internal fun Request.toDescriptor() = RequestDescriptor(
     method = method(),
-    body = body()?.readAsString(),
+    body = body()?.readAsString().asLiteralRegex(),
     params = parseQueryParameters(),
     headers = headers().parseHeaders { headers(it) }
 )
+
+private fun String?.asLiteralRegex(): String? = this?.let { Regex.escape(it) }
 
 /**
  * Converts an OkHttp Response to a mock entry
