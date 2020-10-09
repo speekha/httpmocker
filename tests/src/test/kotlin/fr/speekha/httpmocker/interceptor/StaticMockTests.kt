@@ -62,7 +62,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered with a scenario, " +
-                    "then its path should be computed by the file policy"
+                "then its path should be computed by the file policy"
         )
         fun `should delegate path resolutions`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
@@ -77,7 +77,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When no scenario file is provided, " +
-                    "then a 404 error should occur"
+                "then a 404 error should occur"
         )
         fun `should return a 404 error when response is not found`(
             title: String,
@@ -95,7 +95,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When no requests in the file matches, " +
-                    "then a 404 error should occur"
+                "then a 404 error should occur"
         )
         fun `should return a 404 error when no request matches the criteria`(
             title: String,
@@ -116,7 +116,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while loading scenarios, " +
-                    "then a 404 error should occur"
+                "then a 404 error should occur"
         )
         fun `should return a 404 error when an exception occurs`(
             title: String,
@@ -137,7 +137,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When loaded scenario has neither response nor error, " +
-                    "then a 404 error should occur"
+                "then a 404 error should occur"
         )
         fun `should return a 404 error when the matching request has no response or error`(
             title: String,
@@ -155,7 +155,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When an error is configured as an answer, " +
-                    "then the corresponding exception should be thrown"
+                "then the corresponding exception should be thrown"
         )
         fun `should throw a mocked exception`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
@@ -170,7 +170,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When an error with a message is configured as an answer, " +
-                    "then the corresponding exception with message should be thrown"
+                "then the corresponding exception with message should be thrown"
         )
         fun `should throw a mocked exception with message`(
             title: String,
@@ -189,7 +189,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while answering a request, " +
-                    "then the request body should be the error"
+                "then the request body should be the error"
         )
         fun `should return the error message when an exception occurs`(
             title: String,
@@ -204,9 +204,10 @@ class StaticMockTests : TestWithServer() {
             val response = executeGetRequest("/unknown").body?.string()
 
             MatcherAssert.assertThat(
-                response, StringStartsWith(
+                response,
+                StringStartsWith(
                     "java.lang.IllegalStateException: Loading error\n" +
-                            "\tat fr.speekha.httpmocker.interceptor.StaticMockTests"
+                        "\tat fr.speekha.httpmocker.interceptor.StaticMockTests"
                 )
             )
         }
@@ -230,7 +231,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a response is found and response body is in JSON scenario, " +
-                    "then it should be loaded from scenario"
+                "then it should be loaded from scenario"
         )
         fun `should return a predefined response body from json descriptor`(
             title: String,
@@ -252,7 +253,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
-                    "then dynamic mocks should be tried first before static ones"
+                "then dynamic mocks should be tried first before static ones"
         )
         fun `should support dynamic and static mocks together`(
             title: String,
@@ -296,7 +297,7 @@ class StaticMockTests : TestWithServer() {
         @ParameterizedTest(name = "Mapper: {0}")
         @DisplayName(
             "When a response is found, " +
-                    "then the body should be loaded from the file next to it"
+                "then the body should be loaded from the file next to it"
         )
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         fun `should return a predefined response body from separate file`(
@@ -315,7 +316,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When scenario file path is not empty, " +
-                    "then response body should be in the same folder by default"
+                "then response body should be in the same folder by default"
         )
         fun `should return a predefined response body from separate file in the same folder`(
             title: String,
@@ -334,7 +335,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a child folder, " +
-                    "then response body path should be read from that folder"
+                "then response body path should be read from that folder"
         )
         fun `should return a predefined response body from separate file in a different folder`(
             title: String,
@@ -353,7 +354,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a parent folder, " +
-                    "then response body path should be read from that folder"
+                "then response body path should be read from that folder"
         )
         fun `should return a predefined response body from separate file in a parent folder`(
             title: String,
@@ -377,7 +378,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, then the proper " +
-                    "headers should be set in the response"
+                "headers should be set in the response"
         )
         fun `should return proper headers`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
@@ -392,7 +393,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When the response is a redirect, " +
-                    "then the response should have a HTTP code 302 and a location"
+                "then the response should have a HTTP code 302 and a location"
         )
         fun `should handle redirects`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
@@ -407,7 +408,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
-                    "then the proper content type should be set in the response"
+                "then the proper content type should be set in the response"
         )
         fun `should handle media type`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
@@ -424,7 +425,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request with no specific delay is answered, " +
-                    "then default delay should be used"
+                "then default delay should be used"
         )
         fun `should allow to delay all responses`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type, 50)
@@ -441,7 +442,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request with a specific delay is answered, " +
-                    "then that delay should be used"
+                "then that delay should be used"
         )
         fun `should allow to delay responses based on configuration`(
             title: String,
@@ -745,7 +746,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a request with exact match is answered, " +
-                    "then match should not allow extra headers or parameters"
+                "then match should not allow extra headers or parameters"
         )
         fun `should select response based on exact matches`(
             title: String,
@@ -812,7 +813,7 @@ class StaticMockTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When several interceptors are stacked, " +
-                    "then each should delegate to the next one requests it can't answer"
+                "then each should delegate to the next one requests it can't answer"
         )
         fun `should allow to stack several interceptors thanks to mixed mode`(
             title: String,

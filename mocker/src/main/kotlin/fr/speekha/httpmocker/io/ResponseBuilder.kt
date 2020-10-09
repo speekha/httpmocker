@@ -25,6 +25,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 
 internal class ResponseBuilder(
@@ -53,11 +54,13 @@ internal class ResponseBuilder(
         }
     }
 
-    private fun loadResponseBody(response: ResponseDescriptor) = (response.bodyFile?.let {
-        logger.info("Loading response body from file: $it")
-        provider?.loadResponseBody(request, it)
-    } ?: response.body.toByteArray()
-        ).toResponseBody(response.mediaType.toMediaTypeOrNull())
+    private fun loadResponseBody(response: ResponseDescriptor): ResponseBody {
+        val body = response.bodyFile?.let {
+            logger.info("Loading response body from file: $it")
+            provider?.loadResponseBody(request, it)
+        } ?: response.body.toByteArray()
+        return body.toResponseBody(response.mediaType.toMediaTypeOrNull())
+    }
 
     private fun messageForHttpCode(httpCode: Int) =
         HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
