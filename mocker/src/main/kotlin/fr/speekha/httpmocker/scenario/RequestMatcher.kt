@@ -24,13 +24,13 @@ class RequestMatcher {
 
     fun matchRequest(descriptor: RequestDescriptor, request: Request): Boolean = with(descriptor) {
         matchProtocol(request) &&
-                matchMethod(request) &&
-                matchHost(request) &&
-                matchPort(request) &&
-                matchPath(request) &&
-                matchHeaders(request) &&
-                matchParams(request) &&
-                matchBody(request)
+            matchMethod(request) &&
+            matchHost(request) &&
+            matchPort(request) &&
+            matchPath(request) &&
+            matchHeaders(request) &&
+            matchParams(request) &&
+            matchBody(request)
     }
 
     private fun RequestDescriptor.matchBody(request: Request) =
