@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.scenario
 
 import fr.speekha.httpmocker.builder.LoadFile
 import fr.speekha.httpmocker.getLogger
+import fr.speekha.httpmocker.io.readAsString
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestResult
@@ -67,10 +68,18 @@ internal class StaticMockProvider(
 
     private fun matchRequest(request: Request, list: List<Matcher>?): RequestResult? =
         list?.firstOrNull { matcher.matchRequest(it.request, request) }?.result
+            ?.buildResponseBody(request)
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
-    override fun loadResponseBody(request: Request, path: String): ByteArray? =
-        loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readBytes()
+    private fun RequestResult.buildResponseBody(request: Request): RequestResult = if (this is ResponseDescriptor) {
+        val body = bodyFile?.let { loadResponseFromFile(request, bodyFile) } ?: body
+        copy(body = body, bodyFile = null)
+    } else this
+
+    private fun loadResponseFromFile(request: Request, path: String): String? {
+        logger.info("Loading response body from file: $path")
+        return loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readAsString()
+    }
 
     private fun getRelativePath(base: String, child: String): String =
         concatenatePaths(base, child).cleanFolderList().joinToString("/")
