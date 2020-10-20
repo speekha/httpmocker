@@ -396,7 +396,8 @@ class JsonParserTest {
                 listOf(
                     mapOf("field1" to "1", "field2" to "2"),
                     mapOf("field1" to "1", "field2" to "2")
-                ), list
+                ),
+                list
             )
         }
 
@@ -473,34 +474,34 @@ class JsonParserTest {
 
     companion object {
         val simpleObject = """
-            {
-              "field1": "1",
-              "field2": "2"
-            }
-            """.trimIndent()
+        {
+          "field1": "1",
+          "field2": "2"
+        }
+        """.trimIndent()
 
         val simpleList = """
-          [
-            {
+        [
+          {
+            "field1": "1",
+            "field2": "2"
+          },
+          {
               "field1": "1",
-              "field2": "2"
-            },
-            {
-              "field1": "1",
-              "field2": "2"
-            }
-          ]
-            """.trimIndent()
+            "field2": "2"
+          }
+        ]
+        """.trimIndent()
 
         val complexObject = """
-            {
-              "field0" : "0",
-              "object" : {
-                "field1": "1",
-                "field2": "2"
-              }
-            }
-            """.trimIndent()
+        {
+          "field0" : "0",
+          "object" : {
+            "field1": "1",
+            "field2": "2"
+          }
+        }
+        """.trimIndent()
 
         @JvmStatic
         fun truncateData(): Stream<Arguments> = listOf(

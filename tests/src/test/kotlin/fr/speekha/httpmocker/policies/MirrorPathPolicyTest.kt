@@ -45,8 +45,10 @@ class MirrorPathPolicyTest {
         }
 
         @Test
-        @DisplayName("When processing a URL ending with a '/', " +
-                "then index.json should be added in the last empty segment")
+        @DisplayName(
+            "When processing a URL ending with a '/', " +
+                "then index.json should be added in the last empty segment"
+        )
         fun `should add index to path`() {
             val request = buildRequest(
                 "http://www.somestuff.com/test/with/path/",
@@ -58,8 +60,10 @@ class MirrorPathPolicyTest {
         }
 
         @Test
-        @DisplayName("When file format is not JSON, " +
-                "then the proper extension should be used")
+        @DisplayName(
+            "When file format is not JSON, " +
+                "then the proper extension should be used"
+        )
         fun `should use proper extensions`() {
             val xmlPolicy: FilingPolicy = MirrorPathPolicy(XML_FORMAT)
 

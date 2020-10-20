@@ -56,7 +56,7 @@ allprojects {
 
     // Ktlint configuration for sub-projects
     ktlint {
-        version = "0.34.2"
+        version = "0.39.0"
         verbose = true
         android = false
         reporters {

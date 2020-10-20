@@ -90,7 +90,8 @@ class JsonMapperTest {
                             )
                         )
                     )
-                ), mapper.readMatches(json.byteInputStream())
+                ),
+                mapper.readMatches(json.byteInputStream())
             )
         }
 
@@ -119,7 +120,8 @@ class JsonMapperTest {
                             )
                         )
                     )
-                ), mapper.readMatches(json.byteInputStream())
+                ),
+                mapper.readMatches(json.byteInputStream())
             )
         }
     }
@@ -136,7 +138,8 @@ class JsonMapperTest {
         ) {
             val expected = getMinimalJsonOutput()
             testJsonStream(
-                expected, mapper.serialize(
+                expected,
+                mapper.serialize(
                     listOf(
                         Matcher(response = ResponseDescriptor()),
                         Matcher(error = NetworkError("error"))
