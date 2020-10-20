@@ -147,8 +147,12 @@ If your interceptor is disabled, it will not interfere with actual network calls
 it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that you have to 
 provide the response for each request programmatically, which allows you to define stateful 
 responses (identical calls could lead to different answers based on what the user did in between 
-these calls). The response can be provided by implementing the `RequestCallback` interface or 
-you can simply provide a lambda function to do the computation. 
+these calls). The response can be provided as a `ResponseDescriptor` by implementing the 
+`RequestCallback` interface, or you can simply provide a lambda function to do the computation. 
+
+NB: If you use dynamic mocks, the `bodyFile` attribute of your `ResponseDescriptor` is not needed (it 
+will be ignored). Its only use is for static scenarios that could save the response body in a separate 
+file.
 
 Another option is to use static mocks. Static mocks are scenarios stored as static files. Here is 
 an example for an Android app using static mocks, with a few more options:

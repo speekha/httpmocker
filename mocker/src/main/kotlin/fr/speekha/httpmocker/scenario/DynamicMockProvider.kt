@@ -18,26 +18,15 @@ package fr.speekha.httpmocker.scenario
 
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Request
-import java.util.*
 
 internal class DynamicMockProvider(
     private val callbacks: List<RequestCallback>
 ) : ScenarioProvider {
 
-    private val body: MutableMap<Request, ByteArray> = Collections.synchronizedMap(mutableMapOf())
-
-    override fun loadResponse(request: Request): ResponseDescriptor? =
-        callbacks.asSequence()
-            .mapNotNull {
-                it.loadResponse(request)?.let { result ->
-                    body[request] = result.body.toByteArray()
-                    result.copy(body = "", bodyFile = computeKey(request))
-                }
-            }.firstOrNull()
-
-    override fun loadResponseBody(request: Request, path: String): ByteArray? = body[request]
-
-    private fun computeKey(request: Request): String = request.hashCode().toString()
+    override fun loadResponse(request: Request): ResponseDescriptor? = callbacks
+        .asSequence()
+        .mapNotNull { it.loadResponse(request)?.copy(bodyFile = null) }
+        .firstOrNull()
 
     override fun toString(): String = "dynamic mock configuration"
 }

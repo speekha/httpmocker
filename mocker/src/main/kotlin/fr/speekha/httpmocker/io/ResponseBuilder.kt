@@ -17,10 +17,8 @@
 package fr.speekha.httpmocker.io
 
 import fr.speekha.httpmocker.HTTP_RESPONSES_CODE
-import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.responseNotFound
-import fr.speekha.httpmocker.scenario.ScenarioProvider
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
 import okhttp3.Request
@@ -30,11 +28,8 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 
 internal class ResponseBuilder(
     private val request: Request,
-    private val response: ResponseDescriptor = responseNotFound(),
-    private val provider: ScenarioProvider? = null
+    private val response: ResponseDescriptor = responseNotFound()
 ) {
-
-    private val logger = getLogger()
 
     fun buildResponse(): Response = Response.Builder()
         .request(request)
@@ -54,13 +49,8 @@ internal class ResponseBuilder(
         }
     }
 
-    private fun loadResponseBody(response: ResponseDescriptor): ResponseBody {
-        val body = response.bodyFile?.let {
-            logger.info("Loading response body from file: $it")
-            provider?.loadResponseBody(request, it)
-        } ?: response.body.toByteArray()
-        return body.toResponseBody(response.mediaType.toMediaTypeOrNull())
-    }
+    private fun loadResponseBody(response: ResponseDescriptor): ResponseBody =
+        response.body.toResponseBody(response.mediaType.toMediaTypeOrNull())
 
     private fun messageForHttpCode(httpCode: Int) =
         HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"

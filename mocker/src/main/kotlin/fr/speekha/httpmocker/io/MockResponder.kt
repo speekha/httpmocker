@@ -37,19 +37,18 @@ internal class MockResponder(
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
             provider.loadResponse(request)?.let { response ->
-                executeMockResponse(response, request, provider)
+                executeMockResponse(response, request)
             }
         }
         .firstOrNull()
 
     private fun executeMockResponse(
         response: ResponseDescriptor,
-        request: Request,
-        provider: ScenarioProvider
+        request: Request
     ): Response {
         logger.info("Response was found: $response")
         simulateDelay(response)
-        return ResponseBuilder(request, response, provider).buildResponse()
+        return ResponseBuilder(request, response).buildResponse()
     }
 
     private fun simulateDelay(response: ResponseDescriptor) {
