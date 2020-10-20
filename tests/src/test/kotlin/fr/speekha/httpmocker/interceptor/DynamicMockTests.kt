@@ -206,7 +206,7 @@ class DynamicMockTests : TestWithServer() {
                     else -> null
                 }
             }
-            repeat(1000){
+            repeat(1000) {
                 println(it)
                 testSimultaneousRequests()
             }
