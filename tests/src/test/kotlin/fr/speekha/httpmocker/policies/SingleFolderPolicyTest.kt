@@ -31,8 +31,10 @@ class SingleFolderPolicyTest {
     inner class TestPolicy {
 
         @Test
-        @DisplayName("When processing a URL, then resulting file should be " +
-                "in the predefined folder and filename should match URL path")
+        @DisplayName(
+            "When processing a URL, then resulting file should be " +
+                "in the predefined folder and filename should match URL path"
+        )
         fun `should store configuration files in a single folder`() {
             val policy: FilingPolicy = SingleFolderPolicy("folder")
             val request = buildRequest(
@@ -45,8 +47,10 @@ class SingleFolderPolicyTest {
         }
 
         @Test
-        @DisplayName("When scenarios are not in JSON, then resulting file should have" +
-                "the proper extension")
+        @DisplayName(
+            "When scenarios are not in JSON, then resulting file should have" +
+                "the proper extension"
+        )
         fun `should use the right extension`() {
             val policy: FilingPolicy = SingleFolderPolicy(
                 "folder",
