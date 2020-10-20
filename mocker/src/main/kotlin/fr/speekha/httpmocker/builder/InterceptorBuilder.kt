@@ -20,7 +20,6 @@ import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.io.RequestWriter
-import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.DynamicMockProvider
@@ -88,29 +87,12 @@ data class InterceptorBuilder internal constructor(
 
     /**
      * Uses dynamic mocks to answer network requests instead of file scenarios
-     * @param callback A callback to invoke when a request in intercepted
-     */
-    fun useDynamicMocks(callback: RequestCallback): InterceptorBuilder =
-        apply { dynamicCallbacks += callback }
-
-    /**
-     * Uses dynamic mocks to answer network requests instead of file scenarios
      * @param callback A callback to invoke when a request in intercepted: must return a
      * ResponseDescriptor for the current Request or null if not suitable Response could be
      * computed
      */
-    fun useDynamicMocks(callback: (Request) -> ResponseDescriptor?): InterceptorBuilder =
-        useDynamicMocks(
-            CallBackBuilder(
-                callback
-            )
-        )
-
-    private class CallBackBuilder(
-        private val block: (Request) -> ResponseDescriptor?
-    ) : RequestCallback {
-        override fun loadResponse(request: Request): ResponseDescriptor? = block(request)
-    }
+    fun useDynamicMocks(callback: RequestCallback): InterceptorBuilder =
+        apply { dynamicCallbacks += callback }
 
     /**
      * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
@@ -159,8 +141,9 @@ data class InterceptorBuilder internal constructor(
         mapper?.let {
             RequestWriter(
                 it,
-                recorder?.policy ?: filingPolicy.getOrNull(0)
-                ?: MirrorPathPolicy(it.supportedFormat),
+                recorder?.policy
+                    ?: filingPolicy.getOrNull(0)
+                    ?: MirrorPathPolicy(it.supportedFormat),
                 recorder?.rootFolder,
                 showSavingErrors
             )

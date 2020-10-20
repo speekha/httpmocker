@@ -22,12 +22,12 @@ import okhttp3.Request
 /**
  * A callback to provide a dynamic mock response.
  */
-interface RequestCallback {
+fun interface RequestCallback {
 
     /**
      * Computes the appropriate response for a request
      * @param request the request to answer
      * @return the description of the mock response
      */
-    fun loadResponse(request: Request): ResponseDescriptor?
+    fun processRequest(request: Request): ResponseDescriptor?
 }

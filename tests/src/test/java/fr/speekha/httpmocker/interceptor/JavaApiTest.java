@@ -18,11 +18,7 @@ package fr.speekha.httpmocker.interceptor;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -35,7 +31,6 @@ import fr.speekha.httpmocker.builder.InterceptorBuilder;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
 import fr.speekha.httpmocker.policies.FilingPolicy;
-import fr.speekha.httpmocker.scenario.RequestCallback;
 import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -88,7 +83,7 @@ class JavaApiTest extends TestWithServer {
         private void initInterceptor(FilingPolicy policy) {
             Mapper mapper = new JacksonMapper();
             interceptor = new InterceptorBuilder()
-                    .useDynamicMocks((RequestCallback) this::getResponseDescriptor)
+                    .useDynamicMocks(this::getResponseDescriptor)
                     .decodeScenarioPathWith(policy)
                     .loadFileWith((FileLoader) file -> getClass().getClassLoader().getResourceAsStream(file))
                     .parseScenariosWith(mapper)

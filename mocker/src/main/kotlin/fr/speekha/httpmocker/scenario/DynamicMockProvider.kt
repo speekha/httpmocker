@@ -25,7 +25,7 @@ internal class DynamicMockProvider(
 
     override fun loadResponse(request: Request): ResponseDescriptor? = callbacks
         .asSequence()
-        .mapNotNull { it.loadResponse(request)?.copy(bodyFile = null) }
+        .mapNotNull { it.processRequest(request)?.copy(bodyFile = null) }
         .firstOrNull()
 
     override fun toString(): String = "dynamic mock configuration"
