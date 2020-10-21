@@ -35,7 +35,6 @@ import fr.speekha.httpmocker.builder.InterceptorBuilder;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
 import fr.speekha.httpmocker.policies.FilingPolicy;
-import fr.speekha.httpmocker.scenario.RequestCallback;
 import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -88,7 +87,7 @@ class JavaApiTest extends TestWithServer {
         private void initInterceptor(FilingPolicy policy) {
             Mapper mapper = new JacksonMapper();
             interceptor = new InterceptorBuilder()
-                    .useDynamicMocks((RequestCallback) this::getResponseDescriptor)
+                    .useDynamicMocks(this::getResponseDescriptor)
                     .decodeScenarioPathWith(policy)
                     .loadFileWith((FileLoader) file -> getClass().getClassLoader().getResourceAsStream(file))
                     .parseScenariosWith(mapper)

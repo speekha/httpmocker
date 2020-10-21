@@ -49,7 +49,7 @@ data class ResponseDescriptor(
     val body: String = "",
 
     /**
-     * File to use to load the response body
+     * File to use to load the response body (only used for static scenarios)
      */
     val bodyFile: String? = null
 ) : RequestResult()

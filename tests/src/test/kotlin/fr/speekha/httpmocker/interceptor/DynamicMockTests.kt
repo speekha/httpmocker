@@ -25,11 +25,14 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.concurrent.CountDownLatch
+import kotlin.concurrent.thread
 
 @DisplayName("Dynamic Mocks")
 class DynamicMockTests : TestWithServer() {
@@ -47,7 +50,7 @@ class DynamicMockTests : TestWithServer() {
             val response = executeGetRequest("")
 
             assertResponseCode(response, REQUEST_OK_CODE, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
     }
 
@@ -89,8 +92,8 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(resultCode, response.code())
-            assertEquals("some random body", response.body()?.string())
+            assertEquals(resultCode, response.code)
+            assertEquals("some random body", response.body?.string())
         }
 
         @Test
@@ -98,11 +101,7 @@ class DynamicMockTests : TestWithServer() {
         fun `should reply with a stateful callback`() {
             val resultCode = 201
             val body = "Time: ${System.currentTimeMillis()}"
-            val callback = object : RequestCallback {
-                override fun loadResponse(request: Request) =
-                    ResponseDescriptor(code = resultCode, body = body)
-            }
-            setupProvider(callback)
+            setupProvider { ResponseDescriptor(code = resultCode, body = body) }
 
             val response = client.newCall(
                 buildRequest(
@@ -111,14 +110,14 @@ class DynamicMockTests : TestWithServer() {
                 )
             ).execute()
 
-            assertEquals(resultCode, response.code())
-            assertEquals(body, response.body()?.string())
+            assertEquals(resultCode, response.code)
+            assertEquals(body, response.body?.string())
         }
 
         @Test
         @DisplayName(
             "When several callbacks are provided, " +
-                    "then they should be called in turn to find the appropriate response"
+                "then they should be called in turn to find the appropriate response"
         )
         fun `should support multiple callbacks`() {
             val result1 = "First mock"
@@ -127,7 +126,7 @@ class DynamicMockTests : TestWithServer() {
             interceptor = mockInterceptor {
                 useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
-                        request.url().toString().contains("1")
+                        request.url.toString().contains("1")
                     }
                 }
                 useDynamicMocks {
@@ -153,8 +152,8 @@ class DynamicMockTests : TestWithServer() {
                     )
                 ).execute()
 
-            assertEquals(result1, response1.body()?.string())
-            assertEquals(result2, response2.body()?.string())
+            assertEquals(result1, response1.body?.string())
+            assertEquals(result2, response2.body?.string())
         }
 
         @Test
@@ -189,6 +188,45 @@ class DynamicMockTests : TestWithServer() {
             }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+        }
+
+        @Test
+        @DisplayName(
+            "When 2 request are executed simultaneously then proper responses are returned"
+        )
+        fun `should synchronize loadResponse`() {
+            setupProvider(ENABLED) {
+                when {
+                    it.url.encodedPath.endsWith("request1") -> ResponseDescriptor(body = "body1")
+                    it.url.encodedPath.endsWith("request2") -> ResponseDescriptor(body = "body2")
+                    else -> null
+                }
+            }
+            repeat(1000) {
+                testSimultaneousRequests()
+            }
+        }
+
+        private fun testSimultaneousRequests() {
+            val latch1 = CountDownLatch(1)
+            val latch2 = CountDownLatch(2)
+            var response1: Response? = null
+            var response2: Response? = null
+            thread {
+                latch1.await()
+                response1 = executeGetRequest("/request1")
+                latch2.countDown()
+            }
+            thread {
+                latch1.await()
+                response2 = executeGetRequest("/request2")
+                latch2.countDown()
+            }
+            latch1.countDown()
+            latch2.await()
+
+            assertEquals("body1", response1?.body?.byteString()?.utf8())
+            assertEquals("body2", response2?.body?.byteString()?.utf8())
         }
     }
 

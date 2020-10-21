@@ -25,7 +25,7 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.Buffer
 
 /**
@@ -42,7 +42,7 @@ internal fun RequestBody.readAsString(): String? = Buffer().let {
  * @return true if the request matches the template, false if it doesn't
  */
 internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.body?.let { bodyPattern ->
-    val requestBody = body()?.readAsString()
+    val requestBody = body?.readAsString()
     requestBody != null && Regex(bodyPattern).matches(requestBody)
 } ?: true
 
@@ -51,31 +51,33 @@ internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.bo
  * @return the request description
  */
 internal fun Request.toDescriptor() = RequestDescriptor(
-    method = method(),
-    body = body()?.readAsString(),
+    method = method,
+    body = body?.readAsString().asLiteralRegex(),
     params = parseQueryParameters(),
-    headers = headers().parseHeaders { headers(it) }
+    headers = headers.parseHeaders { headers(it) }
 )
+
+private fun String?.asLiteralRegex(): String? = this?.let { Regex.escape(it) }
 
 /**
  * Converts an OkHttp Response to a mock entry
  * @return the response description
  */
 internal fun Response.toDescriptor(duplicates: Int, fileExtension: String?) = ResponseDescriptor(
-    code = code(),
+    code = code,
     bodyFile = fileExtension?.let {
-        request().url().toBodyFile() + "_body_$duplicates$it"
+        request.url.toBodyFile() + "_body_$duplicates$it"
     },
-    headers = headers().parseHeaders { headers(it) }
+    headers = headers.parseHeaders { headers(it) }
 )
 
 private fun Headers.parseHeaders(getHeaders: (String) -> List<String>) =
     names().flatMap { name -> getHeaders(name).map { Header(name, it) } }
 
 private fun Request.parseQueryParameters() =
-    url().queryParameterNames().associateWith { (url().queryParameter(it) ?: "") }
+    url.queryParameterNames.associateWith { (url.queryParameter(it) ?: "") }
 
-private fun HttpUrl.toBodyFile() = pathSegments().last().takeUnless { it.isNullOrBlank() } ?: "index"
+private fun HttpUrl.toBodyFile() = pathSegments.last().takeUnless { it.isBlank() } ?: "index"
 
 /**
  * Executes a request and returns the corresponding response
@@ -89,5 +91,5 @@ internal fun Interceptor.Chain.execute() = proceed(request())
  * @return the copy of the original response
  */
 internal fun Response.copyResponse(body: ByteArray?): Response = newBuilder()
-    .body(ResponseBody.create(body()?.contentType(), body ?: byteArrayOf()))
+    .body((body ?: byteArrayOf()).toResponseBody(this.body?.contentType()))
     .build()

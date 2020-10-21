@@ -24,13 +24,13 @@ class RequestMatcher {
 
     fun matchRequest(descriptor: RequestDescriptor, request: Request): Boolean = with(descriptor) {
         matchProtocol(request) &&
-                matchMethod(request) &&
-                matchHost(request) &&
-                matchPort(request) &&
-                matchPath(request) &&
-                matchHeaders(request) &&
-                matchParams(request) &&
-                matchBody(request)
+            matchMethod(request) &&
+            matchHost(request) &&
+            matchPort(request) &&
+            matchPath(request) &&
+            matchHeaders(request) &&
+            matchParams(request) &&
+            matchBody(request)
     }
 
     private fun RequestDescriptor.matchBody(request: Request) =
@@ -38,8 +38,8 @@ class RequestMatcher {
 
     private fun RequestDescriptor.matchParams(request: Request) =
         params.all {
-            request.url().queryParameter(it.key) == it.value
-        } && (!exactMatch || params.size == request.url().querySize())
+            request.url.queryParameter(it.key) == it.value
+        } && (!exactMatch || params.size == request.url.querySize)
 
     private fun RequestDescriptor.matchHeaders(request: Request) =
         headers.all {
@@ -48,20 +48,20 @@ class RequestMatcher {
             } else {
                 request.headers(it.name).isEmpty()
             }
-        } && (!exactMatch || headers.size == request.headers().size())
+        } && (!exactMatch || headers.size == request.headers.size)
 
     private fun RequestDescriptor.matchPath(request: Request) =
-        path?.let { it == request.url().encodedPath() } ?: true
+        path?.let { it == request.url.encodedPath } ?: true
 
     private fun RequestDescriptor.matchPort(request: Request) =
-        port?.let { it == request.url().port() } ?: true
+        port?.let { it == request.url.port } ?: true
 
     private fun RequestDescriptor.matchHost(request: Request) =
-        host?.equals(request.url().host(), true) ?: true
+        host?.equals(request.url.host, true) ?: true
 
     private fun RequestDescriptor.matchMethod(request: Request) =
-        method?.equals(request.method(), true) ?: true
+        method?.equals(request.method, true) ?: true
 
     private fun RequestDescriptor.matchProtocol(request: Request) =
-        protocol?.equals(request.url().scheme(), true) ?: true
+        protocol?.equals(request.url.scheme, true) ?: true
 }

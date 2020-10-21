@@ -67,9 +67,9 @@ class MainViewModelTest : ViewModelTest() {
             viewModel.getData().observeForever(observer)
 
             coEvery { mockService.listRepositoriesForOrganisation(org) } returns
-                    listOf(Repo(id, repo, topContributor = contributor))
+                listOf(Repo(id, repo, topContributor = contributor))
             coEvery { mockService.listContributorsForRepository(org, repo) } returns
-                    listOf(User(login = contributor, contributions = contributions))
+                listOf(User(login = contributor, contributions = contributions))
 
             viewModel.callService().join()
         }
@@ -98,7 +98,7 @@ class MainViewModelTest : ViewModelTest() {
         runBlocking {
             viewModel.getData().observeForever(observer)
             coEvery { mockService.listRepositoriesForOrganisation(org) } returns
-                    listOf(Repo(id, repo, topContributor = contributor))
+                listOf(Repo(id, repo, topContributor = contributor))
             coEvery {
                 mockService.listContributorsForRepository(
                     org,

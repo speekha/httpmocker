@@ -25,7 +25,7 @@ class MirrorPathPolicy(
     private val fileType: String
 ) : FilingPolicy {
 
-    override fun getPath(request: Request): String = with(request.url().pathSegments()) {
+    override fun getPath(request: Request): String = with(request.url.pathSegments) {
         joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
     }
 }

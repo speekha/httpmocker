@@ -17,11 +17,13 @@
 package fr.speekha.httpmocker.interceptor
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.RECORD
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
@@ -49,6 +51,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ArrayList
@@ -81,7 +84,7 @@ class RecordTests : TestWithServer() {
         }
 
         private fun setupProvider(
-            status: Mode = Mode.ENABLED
+            status: Mode = ENABLED
         ) {
             interceptor = mockInterceptor {
                 useDynamicMocks { null }
@@ -215,7 +218,7 @@ class RecordTests : TestWithServer() {
             val response = executeGetRequest(recordRequestUrl)
 
             assertResponseCode(response, 200, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -232,14 +235,14 @@ class RecordTests : TestWithServer() {
             val response = executeGetRequest(recordRequestUrl)
 
             assertResponseCode(response, 200, "OK")
-            assertEquals("body", response.body()?.string())
+            assertEquals("body", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails and errors are expected, " +
-                    "then the error should be returned"
+                "then the error should be returned"
         )
         fun `recording failure should return an error if desired`(
             title: String,
@@ -263,7 +266,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a request, " +
-                    "then scenario and response body files should be created in that folder"
+                "then scenario and response body files should be created in that folder"
         )
         fun `should store requests and responses in the proper locations when recording`(
             title: String,
@@ -283,7 +286,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a request for a URL ending with a '/', " +
-                    "then scenario files should be named with 'index'"
+                "then scenario files should be named with 'index'"
         )
         fun `should name body file correctly when last path segment is empty`(
             title: String,
@@ -332,7 +335,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a request or response with a null body, " +
-                    "then body should be empty in scenario files"
+                "then body should be empty in scenario files"
         )
         fun `should handle null request and response bodies when recording`(
             title: String,
@@ -365,7 +368,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When a scenario already exists for a request, " +
-                    "then the scenario should be completed with the new one"
+                "then the scenario should be completed with the new one"
         )
         fun `should update existing descriptors when recording`(
             title: String,
@@ -405,7 +408,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body, " +
-                    "then the file should have the proper extension"
+                "then the file should have the proper extension"
         )
         fun `should add proper extension to response files`(
             title: String,
@@ -427,7 +430,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with a mediatype charset, " +
-                    "then the file should have the proper extension"
+                "then the file should have the proper extension"
         )
         fun `should handle proper extension for response files`(
             title: String,
@@ -446,7 +449,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with unknwown mediatype, " +
-                    "then the file should have the default extension"
+                "then the file should have the default extension"
         )
         fun `should handle default extension for response files`(
             title: String,
@@ -465,7 +468,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When several matches exist for a request, " +
-                    "then the body file should have the same index as the request in the scenario"
+                "then the body file should have the same index as the request in the scenario"
         )
         fun `should match indexes in descriptor file and actual response file name`(
             title: String,
@@ -487,7 +490,7 @@ class RecordTests : TestWithServer() {
         @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails with an exception, " +
-                    "then the exception should be recorded"
+                "then the exception should be recorded"
         )
         fun `recording failure should save error in scenario`(
             title: String,
@@ -516,6 +519,34 @@ class RecordTests : TestWithServer() {
                 assertEquals(listOf(expectedResult), result)
             }
         }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @DisplayName(
+            "When recording a scenario with request body, " +
+                "then the corresponding scenario should be usable as is"
+        )
+        fun `recorded scenarios should be usable`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) {
+            enqueueServerResponse(200, "body")
+            setUpInterceptor(mapper, fileType = fileType)
+            executeRequest(
+                url = recordRequestUrl,
+                method = "POST",
+                body = """{"some Json content": "some random value"}"""
+            )
+            interceptor.mode = ENABLED
+            val response = executeRequest(
+                url = recordRequestUrl,
+                method = "POST",
+                body = """{"some Json content": "some random value"}"""
+            )
+            assertResponseCode(response, 200, "OK")
+            assertEquals("body", response.body?.string())
+        }
     }
 
     private val requestUrl = "request"
@@ -528,12 +559,17 @@ class RecordTests : TestWithServer() {
         failOnError: Boolean = false,
         fileType: String
     ) {
+        val loadingLambda: (String) -> InputStream? = mock {
+            on { invoke(any()) } doAnswer { File(SAVE_FOLDER, it.getArgument<String>(0)).inputStream() }
+        }
+
         interceptor = mockInterceptor {
             decodeScenarioPathWith {
-                val path = it.url().encodedPath()
-                (path + if (path.endsWith("/")) "index.json" else ".json")
+                val path = it.url.encodedPath
+                (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
                     .drop(1)
             }
+            loadFileWith(loadingLambda)
             parseScenariosWith(mapper)
             recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
             failOnRecordingError(failOnError)
@@ -561,7 +597,7 @@ class RecordTests : TestWithServer() {
     private fun requestWithParams() = Matcher(
         RequestDescriptor(
             method = "POST",
-            body = "requestBody",
+            body = "\\QrequestBody\\E",
             params = mapOf("param1" to "value1"),
             headers = listOf(Header("someHeader", "someValue"))
         ),

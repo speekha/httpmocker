@@ -27,7 +27,7 @@ internal data class Header(
     @SerialName(NAME)
     val name: String?,
     @SerialName(VALUE)
-    var value: String?
+    val value: String?
 ) {
     constructor(model: Model) : this(model.name, model.value)
 }

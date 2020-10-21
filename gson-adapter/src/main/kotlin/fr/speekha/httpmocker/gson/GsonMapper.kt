@@ -47,9 +47,11 @@ class GsonMapper : Mapper {
     private fun Gson.parse(json: String) =
         fromJson<List<JsonMatcher>>(json, dataType) ?: emptyList()
 
-    override fun serialize(matchers: List<Matcher>): String = gson.toJson(matchers.map {
-        it.fromModel()
-    })
+    override fun serialize(matchers: List<Matcher>): String = gson.toJson(
+        matchers.map {
+            it.fromModel()
+        }
+    )
 
     private class MatcherType : TypeToken<List<JsonMatcher>>()
 }

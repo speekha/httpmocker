@@ -85,12 +85,12 @@ private fun ResponseDescriptor.toXml(indentation: Int): String = writeTags(
     )
 }
 
-private fun NetworkError.toXml(indent: Int): String =
-    writeCData(
-        ERROR, indent, listOf(
-            EXCEPTION_TYPE to exceptionType
-        ), message
-    )
+private fun NetworkError.toXml(indent: Int): String = writeCData(
+    tag = ERROR,
+    indentation = indent,
+    attributes = listOf(EXCEPTION_TYPE to exceptionType),
+    body = message
+)
 
 private fun writeUrl(
     attributes: List<Pair<String, Any?>>,

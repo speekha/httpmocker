@@ -16,9 +16,9 @@
 
 package fr.speekha.httpmocker.scenario
 
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Request
 
-internal interface ScenarioProvider : RequestCallback {
-
-    fun loadResponseBody(request: Request, path: String): ByteArray?
+internal interface ScenarioProvider {
+    fun loadResponse(request: Request): ResponseDescriptor?
 }
