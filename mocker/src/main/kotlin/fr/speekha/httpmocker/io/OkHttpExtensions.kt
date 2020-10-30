@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker.io
 
 import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Headers
 import okhttp3.HttpUrl
@@ -41,7 +41,7 @@ internal fun RequestBody.readAsString(): String? = Buffer().let {
  * Tries to match an OkHttp Request with a request template
  * @return true if the request matches the template, false if it doesn't
  */
-internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.body?.let { bodyPattern ->
+internal fun Request.matchBody(request: RequestTemplate): Boolean = request.body?.let { bodyPattern ->
     val requestBody = body?.readAsString()
     requestBody != null && Regex(bodyPattern).matches(requestBody)
 } ?: true
@@ -50,24 +50,24 @@ internal fun Request.matchBody(request: RequestDescriptor): Boolean = request.bo
  * Converts an OkHttp Request to a template
  * @return the request description
  */
-internal fun Request.toDescriptor() = RequestDescriptor(
+internal fun Request.toGenericModel() = HttpRequest(
     method = method,
-    body = body?.readAsString().asLiteralRegex(),
+    scheme = url.scheme,
+    host = url.host,
+    port = url.port,
+    path = url.encodedPath,
     params = parseQueryParameters(),
-    headers = headers.parseHeaders { headers(it) }
+    headers = headers.parseHeaders { headers(it) },
+    body = body?.readAsString()
 )
-
-private fun String?.asLiteralRegex(): String? = this?.let { Regex.escape(it) }
 
 /**
  * Converts an OkHttp Response to a mock entry
  * @return the response description
  */
-internal fun Response.toDescriptor(duplicates: Int, fileExtension: String?) = ResponseDescriptor(
+internal fun Response.toDescriptor() = ResponseDescriptor(
     code = code,
-    bodyFile = fileExtension?.let {
-        request.url.toBodyFile() + "_body_$duplicates$it"
-    },
+    bodyFile = request.url.toBodyFile() + "_body_",
     headers = headers.parseHeaders { headers(it) }
 )
 

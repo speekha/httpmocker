@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package fr.speekha.httpmocker.scenario
 
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import okhttp3.Request
 
 internal class DynamicMockProvider(
     private val callbacks: List<RequestCallback>
 ) : ScenarioProvider {
 
-    override fun loadResponse(request: Request): ResponseDescriptor? = callbacks
+    override fun loadResponse(request: HttpRequest): ResponseDescriptor? = callbacks
         .asSequence()
         .mapNotNull { it.processRequest(request)?.copy(bodyFile = null) }
         .firstOrNull()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package fr.speekha.httpmocker.model
 
+import fr.speekha.httpmocker.io.HttpRequest
+
 /**
  * Describes a request to match
  */
-data class RequestDescriptor(
+data class RequestTemplate(
 
     /**
      * Request has to match exactly (extra parameters implies a failure)
@@ -67,3 +69,16 @@ data class RequestDescriptor(
     val body: String? = null
 
 )
+
+/**
+ * Converts an OkHttp Request to a template
+ * @return the request description
+ */
+internal fun HttpRequest.toDescriptor() = RequestTemplate(
+    method = method,
+    body = body?.asLiteralRegex(),
+    params = params,
+    headers = headers
+)
+
+private fun String?.asLiteralRegex(): String? = this?.let { Regex.escape(it) }

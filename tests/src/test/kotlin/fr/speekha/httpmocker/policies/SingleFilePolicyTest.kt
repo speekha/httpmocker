@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.model.Header
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -34,11 +35,12 @@ class SingleFilePolicyTest {
         fun `should always return the same file`() {
             val file = "folder/singleFile.json"
             val policy: FilingPolicy = SingleFilePolicy(file)
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             Assertions.assertEquals(file, policy.getPath(request))
         }

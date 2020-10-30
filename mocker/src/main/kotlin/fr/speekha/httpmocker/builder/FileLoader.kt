@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.io.InputStream
  * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
  * use of the AssetManager on Android.
  */
-interface FileLoader {
+fun interface FileLoader {
     /**
      * The method to load scenario files.
      */

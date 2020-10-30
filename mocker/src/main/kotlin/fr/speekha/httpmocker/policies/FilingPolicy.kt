@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
-import okhttp3.Request
+import fr.speekha.httpmocker.io.HttpRequest
 
 /**
  * Allows to specify path and naming conventions for configuration files.
@@ -28,5 +28,5 @@ fun interface FilingPolicy {
      * @param request the intercepted OkHttpRequest
      * @return the path where the JSON configuration can be loaded
      */
-    fun getPath(request: Request): String
+    fun getPath(request: HttpRequest): String
 }

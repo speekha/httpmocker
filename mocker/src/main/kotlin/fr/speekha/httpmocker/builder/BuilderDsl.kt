@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package fr.speekha.httpmocker.builder
 
 import java.io.File
-import java.io.InputStream
 
 fun mockInterceptor(assemble: InterceptorBuilder.() -> Unit) = with(
     InterceptorBuilder()
@@ -27,14 +26,7 @@ fun mockInterceptor(assemble: InterceptorBuilder.() -> Unit) = with(
 }
 
 fun InterceptorBuilder.recordScenariosIn(folder: File): RecorderBuilder =
-    RecorderBuilder(folder).also { recorder = it }
+    RecorderBuilder(folder).also { configBuilder.recorder = it }
 
 fun InterceptorBuilder.recordScenariosIn(folder: String): RecorderBuilder =
     recordScenariosIn(File(folder))
-
-/**
- * A loading function that takes a path as input and returns an InputStream to read from. Typical
- * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
- * use of the AssetManager on Android.
- */
-typealias LoadFile = (String) -> InputStream?

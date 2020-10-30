@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.builder.LoadFile
 import fr.speekha.httpmocker.getLogger
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.io.readAsString
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -26,12 +26,12 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
-import okhttp3.Request
 import java.io.FileNotFoundException
+import java.io.InputStream
 
 internal class StaticMockProvider(
     private val filingPolicy: FilingPolicy,
-    private val loadFileContent: LoadFile,
+    private val loadFileContent: (String) -> InputStream?,
     private val mapper: Mapper
 ) : ScenarioProvider {
 
@@ -39,15 +39,14 @@ internal class StaticMockProvider(
 
     private val matcher = RequestMatcher()
 
-    override fun loadResponse(request: Request): ResponseDescriptor? =
-        when (val result = loadResult(request)) {
-            is ResponseDescriptor -> result
-            is NetworkError -> throwError(result)
-            else -> null
-        }
+    override fun loadResponse(request: HttpRequest): ResponseDescriptor? = when (val result = loadResult(request)) {
+        is ResponseDescriptor -> result
+        is NetworkError -> throwError(result)
+        else -> null
+    }
 
     @SuppressWarnings("TooGenericExceptionCaught")
-    private fun loadResult(request: Request) = try {
+    private fun loadResult(request: HttpRequest) = try {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")
         loadAndMatchResponse(path, request)
@@ -60,23 +59,23 @@ internal class StaticMockProvider(
         ResponseDescriptor(code = 404, body = "${e.javaClass.name}: ${e.message}\n\tat $stackTrace")
     }
 
-    private fun loadAndMatchResponse(path: String, request: Request) =
+    private fun loadAndMatchResponse(path: String, request: HttpRequest) =
         loadFileContent(path)?.let { stream ->
             val list = mapper.readMatches(stream)
             matchRequest(request, list)
         }
 
-    private fun matchRequest(request: Request, list: List<Matcher>?): RequestResult? =
+    private fun matchRequest(request: HttpRequest, list: List<Matcher>?): RequestResult? =
         list?.firstOrNull { matcher.matchRequest(it.request, request) }?.result
             ?.buildResponseBody(request)
             .also { logger.info(if (it != null) "Match found" else "No match for request") }
 
-    private fun RequestResult.buildResponseBody(request: Request): RequestResult = if (this is ResponseDescriptor) {
-        val body = bodyFile?.let { loadResponseFromFile(request, bodyFile) } ?: body
+    private fun RequestResult.buildResponseBody(request: HttpRequest): RequestResult = if (this is ResponseDescriptor) {
+        val body = bodyFile?.let { loadResponseFromFile(request, it) } ?: body
         copy(body = body, bodyFile = null)
     } else this
 
-    private fun loadResponseFromFile(request: Request, path: String): String? {
+    private fun loadResponseFromFile(request: HttpRequest, path: String): String? {
         logger.info("Loading response body from file: $path")
         return loadFileContent(getRelativePath(filingPolicy.getPath(request), path))?.readAsString()
     }

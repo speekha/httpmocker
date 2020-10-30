@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ package fr.speekha.httpmocker
 enum class Mode(private val status: String) {
     /** lets every request through without interception. */
     DISABLED("disabled"),
+
     /** intercepts all requests and return responses found in a predefined configuration */
     ENABLED("enabled"),
+
     /** allows to look for responses locally, but execute the request if no response is found */
     MIXED("in mixed mode"),
+
     /** allows to record actual requests and responses for future use as mock scenarios */
     RECORD("recording");
 

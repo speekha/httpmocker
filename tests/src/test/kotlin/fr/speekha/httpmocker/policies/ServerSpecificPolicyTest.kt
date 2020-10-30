@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -35,11 +36,12 @@ class ServerSpecificPolicyTest {
         @Test
         @DisplayName("When processing a URL, host should be present in final path")
         fun `should include URL host in path`() {
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
         }
@@ -50,11 +52,12 @@ class ServerSpecificPolicyTest {
                 "then index.json should be added in the last empty segment"
         )
         fun `should handle URL when last segment is empty`() {
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path/",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path/",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             assertEquals("www.somestuff.com/test/with/path/index.json", policy.getPath(request))
         }
@@ -65,11 +68,12 @@ class ServerSpecificPolicyTest {
         )
         fun `should use proper extension`() {
             val xmlPolicy: FilingPolicy = ServerSpecificPolicy(XML_FORMAT)
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path/",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path/",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             assertEquals("www.somestuff.com/test/with/path/index.xml", xmlPolicy.getPath(request))
         }

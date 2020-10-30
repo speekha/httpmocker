@@ -18,19 +18,19 @@ package fr.speekha.httpmocker.moshi
 
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.moshi.model.Header as JsonHeader
 import fr.speekha.httpmocker.moshi.model.NetworkError as JsonNetworkError
 import fr.speekha.httpmocker.moshi.model.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.model.ResponseDescriptor as JsonResponseDescriptor
 
-internal fun JsonRequestDescriptor.fromJson() = RequestDescriptor(
+internal fun JsonRequestDescriptor.fromJson() = RequestTemplate(
     exactMatch ?: false, protocol, method, host, port, path,
     headers.map { it.fromJson() }, params, body
 )
 
-internal fun RequestDescriptor.toJson() = JsonRequestDescriptor(
+internal fun RequestTemplate.toJson() = JsonRequestDescriptor(
     exactMatch.takeIf { it }, protocol, method, host, port, path,
     headers.map { it.toJson() }, params, body
 )

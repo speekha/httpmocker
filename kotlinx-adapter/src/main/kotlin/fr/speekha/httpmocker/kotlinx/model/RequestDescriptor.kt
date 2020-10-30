@@ -27,7 +27,7 @@ import fr.speekha.httpmocker.serialization.PORT
 import fr.speekha.httpmocker.serialization.PROTOCOL
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import fr.speekha.httpmocker.model.RequestDescriptor as Model
+import fr.speekha.httpmocker.model.RequestTemplate as Model
 
 @Serializable
 internal data class RequestDescriptor(

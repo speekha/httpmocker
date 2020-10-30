@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package fr.speekha.httpmocker.io
 
-import fr.speekha.httpmocker.HTTP_RESPONSES_CODE
+import fr.speekha.httpmocker.messageForHttpCode
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.responseNotFound
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
 import okhttp3.Request
@@ -28,7 +27,7 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 
 internal class ResponseBuilder(
     private val request: Request,
-    private val response: ResponseDescriptor = responseNotFound()
+    private val response: ResponseDescriptor
 ) {
 
     fun buildResponse(): Response = Response.Builder()
@@ -43,15 +42,12 @@ internal class ResponseBuilder(
     private fun Response.Builder.addHeaders(response: ResponseDescriptor) = apply {
         header("Content-type", response.mediaType)
         response.headers.forEach {
-            if (it.value != null) {
-                header(it.name, it.value)
+            it.value?.let { value ->
+                header(it.name, value)
             }
         }
     }
 
     private fun loadResponseBody(response: ResponseDescriptor): ResponseBody =
         response.body.toResponseBody(response.mediaType.toMediaTypeOrNull())
-
-    private fun messageForHttpCode(httpCode: Int) =
-        HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"
 }

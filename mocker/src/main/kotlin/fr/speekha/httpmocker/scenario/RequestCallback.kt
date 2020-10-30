@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.scenario
 
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import okhttp3.Request
 
 /**
  * A callback to provide a dynamic mock response.
@@ -29,5 +29,5 @@ fun interface RequestCallback {
      * @param request the request to answer
      * @return the description of the mock response
      */
-    fun processRequest(request: Request): ResponseDescriptor?
+    fun processRequest(request: HttpRequest): ResponseDescriptor?
 }

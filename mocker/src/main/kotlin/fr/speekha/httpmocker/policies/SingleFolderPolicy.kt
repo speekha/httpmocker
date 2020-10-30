@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
-import okhttp3.Request
 
 /**
  * Simple filing policy that stores all the configuration files in the same folder. Slashes in the URL are replaced
@@ -28,9 +28,9 @@ class SingleFolderPolicy(
     private val fileType: String = JSON_FORMAT
 ) : FilingPolicy {
 
-    override fun getPath(request: Request): String {
+    override fun getPath(request: HttpRequest): String {
         val prefix = if (rootFolder.isEmpty()) "" else "$rootFolder/"
-        val fileName = request.url
+        val fileName = request
             .pathSegments
             .filter { it.isNotEmpty() }
             .joinToString("_")

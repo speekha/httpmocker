@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
 package fr.speekha.httpmocker.io
 
 import fr.speekha.httpmocker.getLogger
-import fr.speekha.httpmocker.io.Recorder.CallRecord
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.model.toDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import fr.speekha.httpmocker.serialization.writeValue
-import okhttp3.MediaType
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-internal class RequestWriter(
+class RequestWriter(
     private val mapper: Mapper,
     private val filingPolicy: FilingPolicy,
     private val rootFolder: File?,
@@ -60,46 +60,41 @@ internal class RequestWriter(
             logger.debug("Saving scenario file $it")
         }
 
-    private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> =
-        with(record) {
-            val previousRecords: List<Matcher> = if (requestFile.exists()) {
-                mapper.readMatches(requestFile) ?: emptyList()
-            } else {
-                emptyList()
-            }
-            return previousRecords + buildMatcher(previousRecords)
+    private fun buildMatcherList(record: CallRecord, requestFile: File): List<Matcher> = with(record) {
+        val previousRecords: List<Matcher> = if (requestFile.exists()) {
+            mapper.readMatches(requestFile) ?: emptyList()
+        } else {
+            emptyList()
         }
+        return previousRecords + buildMatcher(previousRecords.size)
+    }
 
-    private fun CallRecord.buildMatcher(previousRecords: List<Matcher>) =
-        Matcher(
-            request.toDescriptor(),
-            response?.toDescriptor(
-                previousRecords.size,
-                getExtension()
-            ),
-            error?.toDescriptor()
-        )
+    private fun CallRecord.buildMatcher(offset: Int) = Matcher(
+        request.toDescriptor(),
+        response?.updateBodyFile(offset, this),
+        error?.toDescriptor()
+    )
+
+    private fun ResponseDescriptor.updateBodyFile(offset: Int, record: CallRecord): ResponseDescriptor =
+        record.getExtension()?.let { ext -> copy(bodyFile = bodyFile + offset + ext) }
+            ?: this.copy(bodyFile = null)
 
     private fun CallRecord.getExtension(): String? =
         contentType?.getExtension()?.takeIf { body?.isNotEmpty() == true }
 
     private fun Throwable.toDescriptor() = NetworkError(javaClass.canonicalName, message)
 
-    private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) =
-        writeFile(requestFile) {
-            mapper.writeValue(it, matchers)
-        }
-
-    private fun saveResponseBody(
-        matchers: List<Matcher>,
-        requestFile: File,
-        record: CallRecord
-    ) = matchers.last().response?.bodyFile?.let { responseFile ->
-        val storeFile = File(requestFile.parentFile, responseFile)
-        record.body?.let { array ->
-            saveBodyFile(storeFile, array)
-        }
+    private fun saveRequestFile(requestFile: File, matchers: List<Matcher>) = writeFile(requestFile) {
+        mapper.writeValue(it, matchers)
     }
+
+    private fun saveResponseBody(matchers: List<Matcher>, requestFile: File, record: CallRecord) =
+        matchers.last().response?.bodyFile?.let { responseFile ->
+            val storeFile = File(requestFile.parentFile, responseFile)
+            record.body?.let { array ->
+                saveBodyFile(storeFile, array)
+            }
+        }
 
     private fun saveBodyFile(storeFile: File, array: ByteArray) {
         logger.debug("Saving response body file ${storeFile.name}")
@@ -134,4 +129,12 @@ internal class RequestWriter(
             } ?: mapOf()
 
     private fun MediaType.getExtension() = extensionMappings["$type/$subtype"] ?: ".txt"
+
+    class CallRecord(
+        val request: HttpRequest,
+        val response: ResponseDescriptor? = null,
+        val body: ByteArray? = null,
+        val contentType: MediaType? = null,
+        val error: Throwable? = null
+    )
 }

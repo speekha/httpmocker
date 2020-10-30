@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package fr.speekha.httpmocker
 import fr.speekha.httpmocker.io.MockResponder
 import fr.speekha.httpmocker.io.Recorder
 import fr.speekha.httpmocker.io.RequestWriter
+import fr.speekha.httpmocker.io.ResponseBuilder
 import fr.speekha.httpmocker.io.execute
+import fr.speekha.httpmocker.io.toGenericModel
 import fr.speekha.httpmocker.scenario.ScenarioProvider
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -52,9 +54,15 @@ internal constructor(
 
     private val logger = getLogger()
 
-    private val responder = MockResponder(providers, delay)
+    private val responder = MockResponder<Request, Response>(
+        providers,
+        delay,
+        { it.toGenericModel() },
+        { req, resp -> ResponseBuilder(req, resp).buildResponse() }
+    )
 
-    private val recorder = requestWriter?.let { Recorder(it) }
+    private
+    val recorder = requestWriter?.let { Recorder(it) }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()

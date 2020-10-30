@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import fr.speekha.httpmocker.builder.recordScenariosIn
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
@@ -58,6 +58,7 @@ import java.util.ArrayList
 import java.util.Collections
 
 @Suppress("UNUSED_PARAMETER")
+@DisplayName("Record tests with OkHttp")
 class RecordTests : TestWithServer() {
 
     @Nested
@@ -350,7 +351,7 @@ class RecordTests : TestWithServer() {
             withFile(fileName(requestUrl, fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
-                    RequestDescriptor(method = "GET"),
+                    RequestTemplate(method = "GET"),
                     ResponseDescriptor(
                         code = 200,
                         mediaType = "text/plain",
@@ -508,7 +509,7 @@ class RecordTests : TestWithServer() {
             withFile(fileName("record/error", fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
-                    request = RequestDescriptor(
+                    request = RequestTemplate(
                         method = "GET"
                     ),
                     error = NetworkError(
@@ -565,7 +566,7 @@ class RecordTests : TestWithServer() {
 
         interceptor = mockInterceptor {
             decodeScenarioPathWith {
-                val path = it.url.encodedPath
+                val path = it.path
                 (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
                     .drop(1)
             }
@@ -582,7 +583,7 @@ class RecordTests : TestWithServer() {
     private fun fileName(path: String, fileType: String) = "$SAVE_FOLDER/$path.$fileType"
 
     private fun requestWithNoParams() = Matcher(
-        RequestDescriptor(method = "GET"),
+        RequestTemplate(method = "GET"),
         ResponseDescriptor(
             code = 200,
             bodyFile = "request_body_1.txt",
@@ -595,7 +596,7 @@ class RecordTests : TestWithServer() {
     )
 
     private fun requestWithParams() = Matcher(
-        RequestDescriptor(
+        RequestTemplate(
             method = "POST",
             body = "\\QrequestBody\\E",
             params = mapOf("param1" to "value1"),

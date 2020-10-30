@@ -20,14 +20,14 @@ import fr.speekha.httpmocker.io.readAsStringList
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.InputStream
 
 internal val completeData = listOf(
     Matcher(
-        RequestDescriptor(
+        RequestTemplate(
             exactMatch = true,
             protocol = "https",
             method = "post",
@@ -64,8 +64,8 @@ internal val completeData = listOf(
 )
 
 internal val partialData = listOf(
-    Matcher(RequestDescriptor(), ResponseDescriptor()),
-    Matcher(RequestDescriptor(), ResponseDescriptor())
+    Matcher(RequestTemplate(), ResponseDescriptor()),
+    Matcher(RequestTemplate(), ResponseDescriptor())
 )
 
 internal val partialDataError = listOf(

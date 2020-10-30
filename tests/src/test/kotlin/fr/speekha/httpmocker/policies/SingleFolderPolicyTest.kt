@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -37,11 +38,12 @@ class SingleFolderPolicyTest {
         )
         fun `should store configuration files in a single folder`() {
             val policy: FilingPolicy = SingleFolderPolicy("folder")
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
         }
@@ -56,11 +58,12 @@ class SingleFolderPolicyTest {
                 "folder",
                 XML_FORMAT
             )
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             Assertions.assertEquals("folder/test_with_path.xml", policy.getPath(request))
         }
@@ -69,11 +72,12 @@ class SingleFolderPolicyTest {
         @DisplayName("When configured folder is empty, then resulting path should only contain a file name")
         fun `should handle empty root folder`() {
             val policy: FilingPolicy = SingleFolderPolicy("")
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             Assertions.assertEquals("test_with_path.json", policy.getPath(request))
         }
@@ -82,11 +86,12 @@ class SingleFolderPolicyTest {
         @DisplayName("When processing a URL ending with a '/', then file name should be based on the URL path")
         fun `should handle empty path segments`() {
             val policy: FilingPolicy = SingleFolderPolicy("folder")
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path/",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path/",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
         }
@@ -95,11 +100,12 @@ class SingleFolderPolicyTest {
         @DisplayName("When processing a URL with an empty path, then file name should be index.json")
         fun `should handle empty path URL`() {
             val policy: FilingPolicy = SingleFolderPolicy("folder")
-            val request = buildRequest(
-                "http://www.somestuff.com/",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "",
+                method = "POST",
+                body = "body",
+                headers = listOf(Header("header", "value")),
             )
             Assertions.assertEquals("folder/index.json", policy.getPath(request))
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import java.util.ArrayList;
 import fr.speekha.httpmocker.Mode;
 import fr.speekha.httpmocker.builder.FileLoader;
 import fr.speekha.httpmocker.builder.InterceptorBuilder;
+import fr.speekha.httpmocker.io.HttpRequest;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
 import fr.speekha.httpmocker.policies.FilingPolicy;
 import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 
 @DisplayName("Java API")
@@ -60,8 +60,8 @@ class JavaApiTest extends TestWithServer {
         public void shouldUseStaticMocksWithJavaApi() throws IOException {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
-            Request request = initRequest("/static");
-            executeRequest(request);
+            executeRequest(initRequest("/static"));
+            HttpRequest request = new HttpRequest("GET", "http", "127.0.0.1", getServer().getPort(), "/static");
             Mockito.verify(filingPolicy).getPath(request);
         }
 
@@ -73,8 +73,7 @@ class JavaApiTest extends TestWithServer {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             getInterceptor().setMode(Mode.RECORD);
-            Request request = initRequest("record/request");
-            executeRequest(request);
+            executeRequest(initRequest("record/request"));
             assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request.json");
             assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request_body_0.txt");
         }
@@ -98,8 +97,17 @@ class JavaApiTest extends TestWithServer {
         }
 
         @Nullable
-        private ResponseDescriptor getResponseDescriptor(Request request) {
+        private ResponseDescriptor getResponseDescriptor(okhttp3.Request request) {
             if (request.url().encodedPath().contains("dynamic")) {
+                return new ResponseDescriptor(0L, 0, "text/plain", new ArrayList<>(), "dynamic", null);
+            } else {
+                return null;
+            }
+        }
+
+        @Nullable
+        private ResponseDescriptor getResponseDescriptor(HttpRequest request) {
+            if (request.getPath().contains("dynamic")) {
                 return new ResponseDescriptor(0L, 0, "text/plain", new ArrayList<>(), "dynamic", null);
             } else {
                 return null;
