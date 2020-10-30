@@ -16,7 +16,6 @@
 
 apply plugin: 'kotlin'
 
-
 test {
     options {
         useJUnitPlatform()
@@ -38,6 +37,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 
 dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
     testImplementation project(':mocker')
     testImplementation project(':jackson-adapter')

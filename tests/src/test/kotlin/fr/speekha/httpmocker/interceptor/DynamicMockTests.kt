@@ -23,6 +23,12 @@ import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -31,8 +37,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.concurrent.CountDownLatch
-import kotlin.concurrent.thread
 
 @DisplayName("Dynamic Mocks")
 class DynamicMockTests : TestWithServer() {
@@ -196,11 +200,7 @@ class DynamicMockTests : TestWithServer() {
         )
         fun `should synchronize loadResponse`() {
             setupProvider(ENABLED) {
-                when {
-                    it.url.encodedPath.endsWith("request1") -> ResponseDescriptor(body = "body1")
-                    it.url.encodedPath.endsWith("request2") -> ResponseDescriptor(body = "body2")
-                    else -> null
-                }
+                ResponseDescriptor(body = "body${it.url.encodedPath.last()}")
             }
             repeat(1000) {
                 testSimultaneousRequests()
@@ -208,25 +208,25 @@ class DynamicMockTests : TestWithServer() {
         }
 
         private fun testSimultaneousRequests() {
-            val latch1 = CountDownLatch(1)
-            val latch2 = CountDownLatch(2)
-            var response1: Response? = null
-            var response2: Response? = null
-            thread {
-                latch1.await()
-                response1 = executeGetRequest("/request1")
-                latch2.countDown()
+            val response: Array<Response?> = arrayOfNulls(2)
+            val running = MutableStateFlow(false)
+            runBlocking {
+                response.indices.forEach { i ->
+                    launch(Dispatchers.IO) {
+                        response[i] = delayedRequest(running, i)
+                    }
+                }
+                running.emit(true)
             }
-            thread {
-                latch1.await()
-                response2 = executeGetRequest("/request2")
-                latch2.countDown()
-            }
-            latch1.countDown()
-            latch2.await()
 
-            assertEquals("body1", response1?.body?.byteString()?.utf8())
-            assertEquals("body2", response2?.body?.byteString()?.utf8())
+            response.indices.forEach { i ->
+                assertEquals("body$i", response[i]?.body?.byteString()?.utf8())
+            }
+        }
+
+        private suspend fun delayedRequest(lock: StateFlow<Boolean>, i: Int): Response {
+            lock.first { it }
+            return executeGetRequest("/request$i")
         }
     }
 
