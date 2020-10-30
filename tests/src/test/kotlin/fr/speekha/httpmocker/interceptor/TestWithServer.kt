@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ import java.util.stream.Stream
 
 open class TestWithServer {
 
-    private val server = MockWebServer()
+    protected val server = MockWebServer()
 
-    private val mockServerBaseUrl: String
+    internal val mockServerBaseUrl: String
         get() = "http://127.0.0.1:${server.port}"
 
     protected lateinit var interceptor: MockResponseInterceptor

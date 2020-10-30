@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.custom.parser.adapters
 
 import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.serialization.BODY
 import fr.speekha.httpmocker.serialization.EXACT_MATCH
 import fr.speekha.httpmocker.serialization.HEADERS
@@ -29,15 +29,15 @@ import fr.speekha.httpmocker.serialization.PATH
 import fr.speekha.httpmocker.serialization.PORT
 import fr.speekha.httpmocker.serialization.PROTOCOL
 
-internal class RequestAdapter : BaseObjectAdapter<RequestDescriptor>() {
+internal class RequestAdapter : BaseObjectAdapter<RequestTemplate>() {
 
-    override fun createObject(): RequestDescriptor = RequestDescriptor()
+    override fun createObject(): RequestTemplate = RequestTemplate()
 
     @SuppressWarnings("ComplexMethod")
     override fun updateObject(
         reader: JsonParser,
-        builder: RequestDescriptor
-    ): RequestDescriptor = when (val field = reader.readFieldName()) {
+        builder: RequestTemplate
+    ): RequestTemplate = when (val field = reader.readFieldName()) {
         EXACT_MATCH -> builder.copy(exactMatch = reader.readBoolean())
         PROTOCOL -> builder.copy(protocol = reader.readString())
         METHOD -> builder.copy(method = reader.readString())

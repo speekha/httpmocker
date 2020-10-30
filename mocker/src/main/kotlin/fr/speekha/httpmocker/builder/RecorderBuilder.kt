@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import java.io.File
 
 class RecorderBuilder(
-    internal var rootFolder: File?,
-    internal var policy: FilingPolicy? = null
+    var rootFolder: File?,
+    var policy: FilingPolicy? = null
 ) {
 
     /**

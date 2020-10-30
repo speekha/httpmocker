@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,25 @@ package fr.speekha.httpmocker.io
 
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.responseNotFound
 import fr.speekha.httpmocker.scenario.ScenarioProvider
-import okhttp3.Request
-import okhttp3.Response
 
-internal class MockResponder(
+class MockResponder<Request, Response>(
     private var providers: List<ScenarioProvider>,
-    private var delay: Long
+    private var delay: Long,
+    private val requestConverter: (Request) -> HttpRequest,
+    private val responseBuilder: (Request, ResponseDescriptor) -> Response
 ) {
 
     private val logger = getLogger()
 
-    fun mockResponse(request: Request): Response = mockResponseOrNull(request) ?: ResponseBuilder(
-        request
-    ).buildResponse()
+    fun mockResponse(request: Request): Response =
+        mockResponseOrNull(request) ?: responseBuilder(request, responseNotFound())
 
     fun mockResponseOrNull(request: Request): Response? = providers.asSequence()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
-            provider.loadResponse(request)?.let { response ->
+            provider.loadResponse(requestConverter(request))?.let { response ->
                 executeMockResponse(response, request)
             }
         }
@@ -48,7 +48,7 @@ internal class MockResponder(
     ): Response {
         logger.info("Response was found: $response")
         simulateDelay(response)
-        return ResponseBuilder(request, response).buildResponse()
+        return responseBuilder(request, response)
     }
 
     private fun simulateDelay(response: ResponseDescriptor) {

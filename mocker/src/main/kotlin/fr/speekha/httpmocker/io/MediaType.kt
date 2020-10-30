@@ -14,28 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.io
 
-/**
- * Describes a request pattern and the appropriate response for that request
- */
-data class Matcher(
-
-    /**
-     * The request to match
-     */
-    val request: RequestTemplate = RequestTemplate(),
-
-    /**
-     * The mocked response
-     */
-    val response: ResponseDescriptor? = null,
-
-    /**
-     * The mocked error
-     */
-    val error: NetworkError? = null
-) {
-    val result: RequestResult?
-        get() = response ?: error
-}
+data class MediaType(
+    val type: String,
+    val subtype: String
+)

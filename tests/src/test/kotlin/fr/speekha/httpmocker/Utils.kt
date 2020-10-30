@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker
 
-/**
- * Describes a request pattern and the appropriate response for that request
- */
-data class Matcher(
+import org.junit.jupiter.api.Assertions
 
-    /**
-     * The request to match
-     */
-    val request: RequestTemplate = RequestTemplate(),
-
-    /**
-     * The mocked response
-     */
-    val response: ResponseDescriptor? = null,
-
-    /**
-     * The mocked error
-     */
-    val error: NetworkError? = null
-) {
-    val result: RequestResult?
-        get() = response ?: error
+inline fun <reified T : Throwable> assertThrows(message: String? = null, block: () -> Unit): T {
+    try {
+        block()
+    } catch (e: Throwable) {
+        return (e as? T).takeIf { message == null || e.message == message } ?: Assertions.fail("Wrong exception: $e")
+    }
+    return Assertions.fail("No exception thrown")
 }

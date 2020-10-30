@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.sax
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.BODY
 import fr.speekha.httpmocker.serialization.CODE
@@ -52,7 +52,7 @@ private fun Matcher.toXml(indent: Int): String = writeTags("case", indent) {
     )
 }
 
-private fun RequestDescriptor.toXml(indentation: Int): String =
+private fun RequestTemplate.toXml(indentation: Int): String =
     writeTags(REQUEST, indentation, exactMatchAttribute()) {
         val subIndentation = indentation + 1
         writeTagList(
@@ -62,7 +62,7 @@ private fun RequestDescriptor.toXml(indentation: Int): String =
         )
     }
 
-private fun RequestDescriptor.getUrlAttributes(): List<Pair<String, Any?>> = listOf(
+private fun RequestTemplate.getUrlAttributes(): List<Pair<String, Any?>> = listOf(
     PROTOCOL to protocol,
     METHOD to method,
     HOST to host,
@@ -70,7 +70,7 @@ private fun RequestDescriptor.getUrlAttributes(): List<Pair<String, Any?>> = lis
     PATH to path
 )
 
-private fun RequestDescriptor.exactMatchAttribute() =
+private fun RequestTemplate.exactMatchAttribute() =
     listOf(EXACT_MATCH to true).takeIf { exactMatch } ?: emptyList()
 
 private fun ResponseDescriptor.toXml(indentation: Int): String = writeTags(

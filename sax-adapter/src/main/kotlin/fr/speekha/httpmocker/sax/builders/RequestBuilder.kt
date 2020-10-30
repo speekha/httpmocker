@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker.sax.builders
 
 import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import org.xml.sax.Attributes
 
 class RequestBuilder(
@@ -51,7 +51,7 @@ class RequestBuilder(
 
     override fun build() {
         parent.setRequest(
-            RequestDescriptor(
+            RequestTemplate(
                 exactMatch = exactMatch,
                 protocol = protocol,
                 method = method,

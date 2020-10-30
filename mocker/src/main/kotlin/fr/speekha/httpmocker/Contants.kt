@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ const val NO_RECORDER_ERROR =
 const val NO_ROOT_FOLDER_ERROR =
     "Network calls can not be recorded without a folder where to save files. Please add a root folder."
 
-internal val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
+val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     200 to "OK",
     201 to "Created",
     202 to "Accepted",
@@ -109,5 +109,7 @@ internal val HTTP_RESPONSES_CODE: Map<Int, String> = mapOf(
     527 to "Railgun Error"
 )
 
-internal fun responseNotFound(body: String = "Page not found") =
+fun responseNotFound(body: String = "Page not found") =
     ResponseDescriptor(code = 404, body = body)
+
+fun messageForHttpCode(httpCode: Int) = HTTP_RESPONSES_CODE[httpCode] ?: "Unknown error code"

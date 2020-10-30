@@ -16,37 +16,27 @@
 
 package fr.speekha.httpmocker.builder
 
-import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
-import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
-import fr.speekha.httpmocker.io.RequestWriter
 import fr.speekha.httpmocker.policies.FilingPolicy
-import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import java.io.File
 
-class InterceptorBuilder {
-
-    internal val configBuilder = ConfigBuilder()
+interface Configurator {
 
     /**
      * For static mocks: Defines the policy used to retrieve the configuration files based
      * on the request being intercepted
      * @param policy the naming policy to use for scenario files
      */
-    fun decodeScenarioPathWith(policy: FilingPolicy): InterceptorBuilder = apply {
-        configBuilder.decodeScenarioPathWith(policy)
-    }
+    fun decodeScenarioPathWith(policy: FilingPolicy)
 
     /**
      * For static mocks: Defines a loading function to retrieve the scenario files as a stream
      * @param loading a function to load files by name and path as a stream (could use
      * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
      */
-    fun loadFileWith(loading: FileLoader): InterceptorBuilder = apply {
-        configBuilder.loadFileWith(loading::load)
-    }
+    fun loadFileWith(loading: FileLoader)
 
     /**
      * Uses dynamic mocks to answer network requests instead of file scenarios
@@ -54,17 +44,13 @@ class InterceptorBuilder {
      * ResponseDescriptor for the current Request or null if not suitable Response could be
      * computed
      */
-    fun useDynamicMocks(callback: RequestCallback): InterceptorBuilder = apply {
-        configBuilder.useDynamicMocks(callback)
-    }
+    fun useDynamicMocks(callback: RequestCallback)
 
     /**
      * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
      * @param objectMapper A Mapper to parse scenario files.
      */
-    fun parseScenariosWith(objectMapper: Mapper): InterceptorBuilder = apply {
-        configBuilder.parseScenariosWith(objectMapper)
-    }
+    fun parseScenariosWith(objectMapper: Mapper)
 
     /**
      * Defines the folder where and how scenarios should be stored when recording. This method is
@@ -72,18 +58,14 @@ class InterceptorBuilder {
      * @param folder the root folder where saved scenarios should be saved
      * @param policy the naming policy to use for scenario files
      */
-    fun saveScenarios(folder: File, policy: FilingPolicy?): InterceptorBuilder = apply {
-        configBuilder.saveScenarios(folder, policy)
-    }
+    fun saveScenarios(folder: File, policy: FilingPolicy?)
 
     /**
      * Allows to return an error if saving fails when recording.
      * @param failOnError if true, failure to save scenarios will throw an exception.
      * If false, saving exceptions will be ignored.
      */
-    fun failOnRecordingError(failOnError: Boolean): InterceptorBuilder = apply {
-        configBuilder.failOnRecordingError(failOnError)
-    }
+    fun failOnRecordingError(failOnError: Boolean)
 
     /**
      * Allows to set a fake delay for every requests (can be overridden in a scenario) to
@@ -91,37 +73,17 @@ class InterceptorBuilder {
      * animations during your network calls).
      * @param delay default pause delay for network responses in ms
      */
-    fun addFakeNetworkDelay(delay: Long): InterceptorBuilder = apply { configBuilder.addFakeNetworkDelay(delay) }
+    fun addFakeNetworkDelay(delay: Long)
 
     /**
      * Defines how the interceptor should initially behave (can be enabled, disable, record
      * requests...)
      * @param status The interceptor mode
      */
-    fun setInterceptorStatus(status: Mode): InterceptorBuilder = apply { configBuilder.setInterceptorStatus(status) }
+    fun setInterceptorStatus(status: Mode)
 
     /**
-     * Builds the interceptor.
+     * Builds final config to be used in mock engine.
      */
-    fun build(): MockResponseInterceptor = with(configBuilder.buildConfig()) {
-        MockResponseInterceptor(
-            providers,
-            mapper?.let {
-                RequestWriter(
-                    it,
-                    configBuilder.recorder?.policy
-                        ?: filingPolicy.getOrNull(0)
-                        ?: MirrorPathPolicy(it.supportedFormat),
-                    configBuilder.recorder?.rootFolder,
-                    showSavingErrors
-                )
-            },
-            simulatedDelay
-        ).apply {
-            if (status == Mode.RECORD && configBuilder.recorder?.rootFolder == null) {
-                error(NO_ROOT_FOLDER_ERROR)
-            }
-            mode = status
-        }
-    }
+    fun buildConfig(): Config
 }

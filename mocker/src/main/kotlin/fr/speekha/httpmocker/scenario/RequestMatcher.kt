@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.io.matchBody
-import fr.speekha.httpmocker.model.RequestDescriptor
-import okhttp3.Request
+import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.model.RequestTemplate
 
 class RequestMatcher {
 
-    fun matchRequest(descriptor: RequestDescriptor, request: Request): Boolean = with(descriptor) {
+    fun matchRequest(template: RequestTemplate, request: HttpRequest): Boolean = with(template) {
         matchProtocol(request) &&
             matchMethod(request) &&
             matchHost(request) &&
@@ -33,35 +32,36 @@ class RequestMatcher {
             matchBody(request)
     }
 
-    private fun RequestDescriptor.matchBody(request: Request) =
-        request.matchBody(this)
+    private fun RequestTemplate.matchBody(request: HttpRequest) = body?.let { bodyPattern ->
+        request.body != null && Regex(bodyPattern).matches(request.body)
+    } ?: true
 
-    private fun RequestDescriptor.matchParams(request: Request) =
+    private fun RequestTemplate.matchParams(request: HttpRequest) =
         params.all {
-            request.url.queryParameter(it.key) == it.value
-        } && (!exactMatch || params.size == request.url.querySize)
+            request.params[it.key] == it.value
+        } && (!exactMatch || params.size == request.params.size)
 
-    private fun RequestDescriptor.matchHeaders(request: Request) =
-        headers.all {
-            if (it.value != null) {
-                request.headers(it.name).contains(it.value)
+    private fun RequestTemplate.matchHeaders(request: HttpRequest) =
+        headers.all { header ->
+            if (header.value != null) {
+                request.headers.any { it == header }
             } else {
-                request.headers(it.name).isEmpty()
+                request.headers.none { it.name == header.name }
             }
         } && (!exactMatch || headers.size == request.headers.size)
 
-    private fun RequestDescriptor.matchPath(request: Request) =
-        path?.let { it == request.url.encodedPath } ?: true
+    private fun RequestTemplate.matchPath(request: HttpRequest) =
+        path?.let { it == request.path } ?: true
 
-    private fun RequestDescriptor.matchPort(request: Request) =
-        port?.let { it == request.url.port } ?: true
+    private fun RequestTemplate.matchPort(request: HttpRequest) =
+        port?.let { it == request.port } ?: true
 
-    private fun RequestDescriptor.matchHost(request: Request) =
-        host?.equals(request.url.host, true) ?: true
+    private fun RequestTemplate.matchHost(request: HttpRequest) =
+        host?.equals(request.host, true) ?: true
 
-    private fun RequestDescriptor.matchMethod(request: Request) =
+    private fun RequestTemplate.matchMethod(request: HttpRequest) =
         method?.equals(request.method, true) ?: true
 
-    private fun RequestDescriptor.matchProtocol(request: Request) =
-        protocol?.equals(request.url.scheme, true) ?: true
+    private fun RequestTemplate.matchProtocol(request: HttpRequest) =
+        protocol?.equals(request.scheme, true) ?: true
 }

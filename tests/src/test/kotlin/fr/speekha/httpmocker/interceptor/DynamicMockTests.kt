@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.Response
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -38,7 +37,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-@DisplayName("Dynamic Mocks")
+@DisplayName("Dynamic Mocks with OkHttp")
 class DynamicMockTests : TestWithServer() {
 
     @Nested
@@ -74,7 +73,7 @@ class DynamicMockTests : TestWithServer() {
 
         @Test
         @DisplayName("When an error occurs while answering a request, then the exception should be let through")
-        fun `should return a 404 error when an exception occurs`() {
+        fun `should let exceptions through they occur`() {
             setupProvider(ENABLED) { error("Unexpected error") }
 
             assertThrows<IllegalStateException> {
@@ -130,13 +129,13 @@ class DynamicMockTests : TestWithServer() {
             interceptor = mockInterceptor {
                 useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
-                        request.url.toString().contains("1")
+                        request.path.contains("1")
                     }
                 }
                 useDynamicMocks {
                     ResponseDescriptor(body = result2)
                 }
-                mode = ENABLED
+                setInterceptorStatus(ENABLED)
             }
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
@@ -200,7 +199,7 @@ class DynamicMockTests : TestWithServer() {
         )
         fun `should synchronize loadResponse`() {
             setupProvider(ENABLED) {
-                ResponseDescriptor(body = "body${it.url.encodedPath.last()}")
+                ResponseDescriptor(body = "body${it.path.last()}")
             }
             repeat(1000) {
                 testSimultaneousRequests()
@@ -232,7 +231,7 @@ class DynamicMockTests : TestWithServer() {
 
     private fun setupProvider(
         status: Mode = ENABLED,
-        callback: (Request) -> ResponseDescriptor?
+        callback: RequestCallback
     ) {
         interceptor = mockInterceptor {
             useDynamicMocks(callback)

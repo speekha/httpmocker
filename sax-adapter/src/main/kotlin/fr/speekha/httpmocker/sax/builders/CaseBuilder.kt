@@ -18,18 +18,18 @@ package fr.speekha.httpmocker.sax.builders
 
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 
 class CaseBuilder(val parent: ScenariosBuilder) : NodeBuilder() {
 
-    private var request: RequestDescriptor? = null
+    private var request: RequestTemplate? = null
     private var response: ResponseDescriptor? = null
     private var error: NetworkError? = null
 
     override fun build() = parent.add(
         Matcher(
-            request = request ?: RequestDescriptor(),
+            request = request ?: RequestTemplate(),
             response = response,
             error = error
         )
@@ -39,7 +39,7 @@ class CaseBuilder(val parent: ScenariosBuilder) : NodeBuilder() {
         response = value
     }
 
-    fun setRequest(value: RequestDescriptor) {
+    fun setRequest(value: RequestTemplate) {
         request = value
     }
 

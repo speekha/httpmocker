@@ -16,27 +16,38 @@
 
 package fr.speekha.httpmocker.builder
 
-import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
-import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
-import fr.speekha.httpmocker.io.RequestWriter
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
+import fr.speekha.httpmocker.scenario.DynamicMockProvider
 import fr.speekha.httpmocker.scenario.RequestCallback
+import fr.speekha.httpmocker.scenario.ScenarioProvider
+import fr.speekha.httpmocker.scenario.StaticMockProvider
 import fr.speekha.httpmocker.serialization.Mapper
 import java.io.File
 
-class InterceptorBuilder {
+/**
+ * Builder to instantiate an interceptor.
+ */
+class ConfigBuilder internal constructor(
+    private var config: Config,
+    private val dynamicCallbacks: MutableList<RequestCallback>
+) : Configurator {
 
-    internal val configBuilder = ConfigBuilder()
+    constructor() : this(
+        config = Config(),
+        dynamicCallbacks = mutableListOf()
+    )
+
+    var recorder: RecorderBuilder? = null
 
     /**
      * For static mocks: Defines the policy used to retrieve the configuration files based
      * on the request being intercepted
      * @param policy the naming policy to use for scenario files
      */
-    fun decodeScenarioPathWith(policy: FilingPolicy): InterceptorBuilder = apply {
-        configBuilder.decodeScenarioPathWith(policy)
+    override fun decodeScenarioPathWith(policy: FilingPolicy) {
+        config += policy
     }
 
     /**
@@ -44,8 +55,8 @@ class InterceptorBuilder {
      * @param loading a function to load files by name and path as a stream (could use
      * Android's assets.open, Classloader.getRessourceAsStream, FileInputStream, etc.)
      */
-    fun loadFileWith(loading: FileLoader): InterceptorBuilder = apply {
-        configBuilder.loadFileWith(loading::load)
+    override fun loadFileWith(loading: FileLoader) {
+        config = config.copy(openFile = loading)
     }
 
     /**
@@ -54,16 +65,16 @@ class InterceptorBuilder {
      * ResponseDescriptor for the current Request or null if not suitable Response could be
      * computed
      */
-    fun useDynamicMocks(callback: RequestCallback): InterceptorBuilder = apply {
-        configBuilder.useDynamicMocks(callback)
+    override fun useDynamicMocks(callback: RequestCallback) {
+        dynamicCallbacks += callback
     }
 
     /**
      * Defines the mapper to use to parse the scenario files (Jackson, Moshi, GSON...)
      * @param objectMapper A Mapper to parse scenario files.
      */
-    fun parseScenariosWith(objectMapper: Mapper): InterceptorBuilder = apply {
-        configBuilder.parseScenariosWith(objectMapper)
+    override fun parseScenariosWith(objectMapper: Mapper) {
+        config = config.copy(mapper = objectMapper)
     }
 
     /**
@@ -72,8 +83,8 @@ class InterceptorBuilder {
      * @param folder the root folder where saved scenarios should be saved
      * @param policy the naming policy to use for scenario files
      */
-    fun saveScenarios(folder: File, policy: FilingPolicy?): InterceptorBuilder = apply {
-        configBuilder.saveScenarios(folder, policy)
+    override fun saveScenarios(folder: File, policy: FilingPolicy?) {
+        recorder = RecorderBuilder(folder, policy)
     }
 
     /**
@@ -81,8 +92,8 @@ class InterceptorBuilder {
      * @param failOnError if true, failure to save scenarios will throw an exception.
      * If false, saving exceptions will be ignored.
      */
-    fun failOnRecordingError(failOnError: Boolean): InterceptorBuilder = apply {
-        configBuilder.failOnRecordingError(failOnError)
+    override fun failOnRecordingError(failOnError: Boolean) {
+        config = config.copy(showSavingErrors = failOnError)
     }
 
     /**
@@ -91,37 +102,37 @@ class InterceptorBuilder {
      * animations during your network calls).
      * @param delay default pause delay for network responses in ms
      */
-    fun addFakeNetworkDelay(delay: Long): InterceptorBuilder = apply { configBuilder.addFakeNetworkDelay(delay) }
+    override fun addFakeNetworkDelay(delay: Long) {
+        config = config.copy(simulatedDelay = delay)
+    }
 
     /**
      * Defines how the interceptor should initially behave (can be enabled, disable, record
      * requests...)
      * @param status The interceptor mode
      */
-    fun setInterceptorStatus(status: Mode): InterceptorBuilder = apply { configBuilder.setInterceptorStatus(status) }
+    override fun setInterceptorStatus(status: Mode) {
+        config.status = status
+    }
 
-    /**
-     * Builds the interceptor.
-     */
-    fun build(): MockResponseInterceptor = with(configBuilder.buildConfig()) {
-        MockResponseInterceptor(
-            providers,
-            mapper?.let {
-                RequestWriter(
-                    it,
-                    configBuilder.recorder?.policy
-                        ?: filingPolicy.getOrNull(0)
-                        ?: MirrorPathPolicy(it.supportedFormat),
-                    configBuilder.recorder?.rootFolder,
-                    showSavingErrors
-                )
-            },
-            simulatedDelay
-        ).apply {
-            if (status == Mode.RECORD && configBuilder.recorder?.rootFolder == null) {
-                error(NO_ROOT_FOLDER_ERROR)
+    override fun buildConfig(): Config = config.copy(providers = buildProviders())
+
+    private fun buildProviders(): List<ScenarioProvider> {
+        val dynamicMockProvider =
+            dynamicCallbacks.takeIf { it.isNotEmpty() }?.let { DynamicMockProvider(it) }
+        val staticMockProvider = buildStaticProvider()
+        return listOfNotNull(dynamicMockProvider) + staticMockProvider
+    }
+
+    private fun buildStaticProvider(): List<StaticMockProvider> = with(config) {
+        if (mapper != null && openFile != null) {
+            var policies = filingPolicy
+            if (policies.isEmpty()) {
+                policies = listOf(MirrorPathPolicy(mapper.supportedFormat))
             }
-            mode = status
-        }
+            policies.map {
+                StaticMockProvider(it, openFile::load, mapper)
+            }
+        } else emptyList()
     }
 }

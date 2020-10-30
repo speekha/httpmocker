@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.io
 
+import fr.speekha.httpmocker.io.RequestWriter.CallRecord
 import okhttp3.Interceptor
-import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.Response
 
@@ -25,34 +25,33 @@ internal class Recorder(
     private val writer: RequestWriter
 ) {
 
-    fun recordCall(chain: Interceptor.Chain): Response {
-        val record = convertCallResult(chain)
-        writer.saveFiles(record)
-        return proceedWithCallResult(record)
-    }
-
     @SuppressWarnings("TooGenericExceptionCaught")
-    private fun convertCallResult(chain: Interceptor.Chain): CallRecord = try {
-        val response = chain.execute()
-        val body = response.body?.bytes()
-        val contentType = response.body?.contentType()
-        CallRecord(chain.request(), response, body, contentType)
-    } catch (e: Throwable) {
-        CallRecord(chain.request(), error = e)
-    }
-
-    private fun proceedWithCallResult(record: CallRecord): Response =
-        if (record.error != null) {
-            throw record.error
-        } else {
-            record.response?.copyResponse(record.body) ?: error("Response is null")
+    fun recordCall(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        var response: Response? = null
+        val record = try {
+            response = chain.execute()
+            convertCallResult(request, response)
+        } catch (e: Throwable) {
+            CallRecord(request.toGenericModel(), error = e)
         }
 
-    internal class CallRecord(
-        val request: Request,
-        val response: Response? = null,
-        val body: ByteArray? = null,
-        val contentType: MediaType? = null,
-        val error: Throwable? = null
-    )
+        writer.saveFiles(record)
+        return proceedWithCallResult(record, response)
+    }
+
+    private fun convertCallResult(request: Request, response: Response): CallRecord {
+        val body = response.body?.bytes()
+        return CallRecord(request.toGenericModel(), response.toDescriptor(), body, response.getMediaType())
+    }
+
+    private fun Response.getMediaType(): MediaType? {
+        val contentType = body?.contentType()
+        return contentType?.run { MediaType(type, subtype) }
+    }
+
+    private fun proceedWithCallResult(record: CallRecord, response: Response?): Response =
+        record.error?.let {
+            throw it
+        } ?: response?.copyResponse(record.body) ?: error("Response is null")
 }

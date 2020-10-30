@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.policies
 
-import okhttp3.Request
+import fr.speekha.httpmocker.io.HttpRequest
 
 /**
  * Simple filing policy that use a single file for all scenarios.
  */
 class SingleFilePolicy(private val file: String) : FilingPolicy {
 
-    override fun getPath(request: Request): String = file
+    override fun getPath(request: HttpRequest): String = file
 }

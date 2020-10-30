@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.kotlinx
 
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.BODY
 import fr.speekha.httpmocker.serialization.BODY_FILE
@@ -52,12 +52,12 @@ import kotlinx.serialization.json.long
 import fr.speekha.httpmocker.model.Header as ModelHeader
 
 internal fun JsonElement.toMatcher(): Matcher = Matcher(
-    jsonObject[REQUEST]?.toRequest() ?: RequestDescriptor(),
+    jsonObject[REQUEST]?.toRequest() ?: RequestTemplate(),
     jsonObject[RESPONSE]?.toResponse(),
     jsonObject[ERROR]?.toError()
 )
 
-private fun JsonElement.toRequest(): RequestDescriptor = RequestDescriptor(
+private fun JsonElement.toRequest(): RequestTemplate = RequestTemplate(
     jsonObject[EXACT_MATCH]?.jsonPrimitive?.boolean ?: false,
     jsonObject[PROTOCOL]?.asNullableLiteral(),
     jsonObject[METHOD]?.asNullableLiteral(),

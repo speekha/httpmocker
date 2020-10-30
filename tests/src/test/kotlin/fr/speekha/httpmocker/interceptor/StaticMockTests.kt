@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.interceptor
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -27,12 +28,12 @@ import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
 import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.builder.mockInterceptor
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.*
@@ -47,6 +48,7 @@ import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
+@DisplayName("Static Mocks with OkHttp")
 class StaticMockTests : TestWithServer() {
 
     private val loadingLambda: (String) -> InputStream? = mock {
@@ -70,7 +72,7 @@ class StaticMockTests : TestWithServer() {
             val request = initRequest("/request")
             client.newCall(request).execute()
 
-            verify(filingPolicy).getPath(request)
+            verify(filingPolicy).getPath(argThat { this.path == "/request" })
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -268,7 +270,7 @@ class StaticMockTests : TestWithServer() {
             interceptor = mockInterceptor {
                 useDynamicMocks { request ->
                     ResponseDescriptor(body = result1).takeIf {
-                        request.url.toString().contains("dynamic")
+                        request.path.contains("dynamic")
                     }
                 }
                 decodeScenarioPathWith(filingPolicy)
@@ -832,7 +834,7 @@ class StaticMockTests : TestWithServer() {
                             body = "in memory response",
                             mediaType = "text/plain"
                         ).takeIf {
-                            request.url.encodedPath == "/inMemory" && request.method == "GET"
+                            request.path == "/inMemory" && request.method == "GET"
                         }
                     }
                     setInterceptorStatus(MIXED)
@@ -879,7 +881,7 @@ class StaticMockTests : TestWithServer() {
     private fun initFilingPolicy(fileType: String) {
         filingPolicy = mock {
             on { getPath(any()) } doAnswer {
-                val path = it.getArgument<Request>(0).url.encodedPath
+                val path = it.getArgument<HttpRequest>(0).path
                 ("$path.$fileType").drop(1)
             }
         }

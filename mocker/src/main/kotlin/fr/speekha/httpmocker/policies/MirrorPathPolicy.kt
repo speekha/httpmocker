@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
-import okhttp3.Request
+import fr.speekha.httpmocker.io.HttpRequest
 
 /**
  * Simple filing policy discarding host name, and matching file path with url path.
@@ -25,7 +25,7 @@ class MirrorPathPolicy(
     private val fileType: String
 ) : FilingPolicy {
 
-    override fun getPath(request: Request): String = with(request.url.pathSegments) {
+    override fun getPath(request: HttpRequest): String = with(request.pathSegments) {
         joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
     }
 }
