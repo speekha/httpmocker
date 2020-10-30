@@ -27,7 +27,6 @@ import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.scenario.ScenarioProvider
 import fr.speekha.httpmocker.scenario.StaticMockProvider
 import fr.speekha.httpmocker.serialization.Mapper
-import okhttp3.Request
 import java.io.File
 
 /**
@@ -62,14 +61,6 @@ data class InterceptorBuilder internal constructor(
      */
     fun decodeScenarioPathWith(policy: FilingPolicy): InterceptorBuilder =
         apply { filingPolicy += policy }
-
-    /**
-     * For static mocks: Defines the policy used to retrieve the configuration files based
-     * on the request being intercepted
-     * @param policy a lambda to use as the naming policy for scenario files
-     */
-    fun decodeScenarioPathWith(policy: (Request) -> String): InterceptorBuilder =
-        apply { filingPolicy += FilingPolicyBuilder(policy) }
 
     /**
      * For static mocks: Defines a loading function to retrieve the scenario files as a stream
