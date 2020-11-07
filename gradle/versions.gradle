@@ -24,6 +24,7 @@ ext {
     moshi_version = '1.11.0'
     kotlinx_serialization_version = '1.0.0'
     okhttp_version = '4.9.0'
+    ktor_version = '1.4.1'
     retrofit_version = '2.9.0'
     dokka_version = '0.9.18'
     bintray_version = '1.8.5'

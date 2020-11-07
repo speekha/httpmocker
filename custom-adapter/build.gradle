@@ -17,7 +17,7 @@
 apply plugin: 'kotlin'
 
 dependencies {
-    api project(':mocker')
+    api project(':mocker-core')
 }
 
 apply from: '../gradle/dokka.gradle'

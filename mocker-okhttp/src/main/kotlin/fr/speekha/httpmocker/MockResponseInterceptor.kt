@@ -61,8 +61,7 @@ internal constructor(
         { req, resp -> ResponseBuilder(req, resp).buildResponse() }
     )
 
-    private
-    val recorder = requestWriter?.let { Recorder(it) }
+    private val recorder = requestWriter?.let { Recorder(it) }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()

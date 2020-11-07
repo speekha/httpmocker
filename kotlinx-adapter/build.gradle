@@ -31,7 +31,7 @@ repositories {
 dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
-    api project(':mocker')
+    api project(':mocker-core')
 }
 
 ext {
