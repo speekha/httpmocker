@@ -19,7 +19,7 @@ apply plugin: 'kotlin'
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
-    api project(':mocker')
+    api project(':mocker-core')
 
     api "com.fasterxml.jackson.core:jackson-core:$jackson_version"
     api "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"

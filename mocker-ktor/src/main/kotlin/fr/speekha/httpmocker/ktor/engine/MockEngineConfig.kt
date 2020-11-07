@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
+package fr.speekha.httpmocker.ktor.engine
 
-dependencies {
-    api project(':mocker-core')
+import fr.speekha.httpmocker.builder.ConfigBuilder
+import fr.speekha.httpmocker.builder.Configurator
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.HttpClientEngineConfig
+
+class MockEngineConfig
+private constructor(internal val configBuilder: ConfigBuilder) :
+    HttpClientEngineConfig(), Configurator by configBuilder {
+
+    constructor() : this(ConfigBuilder())
+
+    lateinit var delegate: HttpClientEngine
 }
-
-apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/publish.gradle'

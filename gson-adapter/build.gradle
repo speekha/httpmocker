@@ -17,7 +17,7 @@
 apply plugin: 'kotlin'
 
 dependencies {
-    api project(':mocker')
+    api project(':mocker-core')
 
     api "com.google.code.gson:gson:$gson_version"
 }

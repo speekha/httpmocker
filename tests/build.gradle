@@ -38,17 +38,21 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
-    testImplementation project(':mocker')
+    testImplementation project(':mocker-okhttp')
     testImplementation project(':jackson-adapter')
     testImplementation project(':gson-adapter')
     testImplementation project(':moshi-adapter')
     testImplementation project(':kotlinx-adapter')
     testImplementation project(':custom-adapter')
     testImplementation project(':sax-adapter')
+    testImplementation project(':mocker-ktor')
 
     testImplementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+//    testImplementation "io.ktor:ktor-client-android:$ktor_version"
+    testImplementation "io.ktor:ktor-client-cio:$ktor_version"
+//    testImplementation "io.ktor:ktor-client-core:$ktor_version"
 
     testImplementation "com.fasterxml.jackson.core:jackson-core:$jackson_version"
     testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"

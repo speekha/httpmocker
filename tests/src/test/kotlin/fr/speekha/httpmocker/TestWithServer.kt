@@ -110,7 +110,7 @@ open class TestWithServer {
         const val NOT_FOUND_CODE = 404
         const val URL_SIMPLE_REQUEST = "/request"
         const val URL_HEADERS = "/headers"
-        const val REQUEST_SIMPLE_BODY = "simple body"
         const val URL_METHOD = "/method"
+        const val REQUEST_SIMPLE_BODY = "simple body"
     }
 }

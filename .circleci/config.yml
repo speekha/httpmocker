@@ -22,9 +22,10 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker-core/build.gradle" }}-{{ checksum "mocker-okhttp/build.gradle" }}-{{ checksum "mocker-ktor/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker-core/build.gradle" }}-{{ checksum "mocker-okhttp/build.gradle" }}-{{ checksum "mocker-ktor/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker-core/build.gradle" }}-{{ checksum "mocker-okhttp/build.gradle" }}-{{ checksum "mocker-ktor/build.gradle" }}-
+            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker-core/build.gradle" }}
             - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-
             - jars-{{ checksum "build.gradle" }}-
             - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
@@ -37,7 +38,7 @@ commands:
       - restore_sources_and_gradle
       - restore_cache:
           keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
           command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
@@ -51,7 +52,13 @@ commands:
       - restore_sources_and_gradle
       - restore_cache:
           keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-mocker-okhttp-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-mocker-ktor-{{ .Branch }}-{{ .Revision }}
       - restore_cache:
           keys:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
@@ -85,7 +92,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker-core/build.gradle" }}-{{ checksum "mocker-okhttp/build.gradle" }}-{{ checksum "mocker-ktor/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
       - save_cache:
           paths:
             - ~/.gradle/wrapper
@@ -103,11 +110,21 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble mocker-core:sourcesJar mocker-core:dokkaJar --stacktrace
       - save_cache:
-          key: build-mocker-{{ .Branch }}-{{ .Revision }}
+          key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:
-            - mocker/build
+            - mocker-core/build
+  build_okhttp:
+    <<: *container_config
+    steps:
+      - build_module:
+          module: "mocker-okhttp"
+  build_ktor:
+    <<: *container_config
+    steps:
+      - build_module:
+          module: "mocker-ktor"
   build_jackson:
     <<: *container_config
     steps:
@@ -144,9 +161,8 @@ jobs:
       - restore_sources_and_gradle
       - restore_cache:
           keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-okhttp-{{ .Branch }}-{{ .Revision }}
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
@@ -196,8 +212,14 @@ jobs:
           name: Check quality
           command: ./gradlew --no-daemon detekt ktlintCheck --stacktrace
       - store_artifacts:
-          path: mocker/build/reports
-          destination: reports/mocker
+          path: mocker-core/build/reports
+          destination: reports/mocker-core
+      - store_artifacts:
+          path: mocker-okhttp/build/reports
+          destination: reports/mocker-okhttp
+      - store_artifacts:
+          path: mocker-ktor/build/reports
+          destination: reports/mocker-ktor
       - store_artifacts:
           path: custom-adapter/build/reports
           destination: reports/custom-adapter
@@ -255,6 +277,12 @@ workflows:
       - build_core:
           requires:
             - init_workspace
+      - build_okhttp:
+          requires:
+            - build_core
+      - build_ktor:
+          requires:
+            - build_core
       - build_jackson:
           requires:
             - build_core
@@ -275,9 +303,12 @@ workflows:
             - build_core
       - build_demo:
           requires:
+            - build_okhttp
             - build_jackson
       - store_artifacts:
           requires:
+            - build_okhttp
+            - build_ktor
             - build_jackson
             - build_gson
             - build_moshi
@@ -286,6 +317,8 @@ workflows:
             - build_sax
       - test:
           requires:
+            - build_okhttp
+            - build_ktor
             - build_jackson
             - build_gson
             - build_moshi
