@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.interceptor
+package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.MockResponseInterceptor
-import fr.speekha.httpmocker.buildRequest
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.io.readAsString
@@ -26,30 +24,21 @@ import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.sax.SaxMapper
 import fr.speekha.httpmocker.serialization.JsonFormatConverter
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
 import java.util.stream.Stream
 
 open class TestWithServer {
 
     protected val server = MockWebServer()
 
-    internal val mockServerBaseUrl: String
+    private val mockServerBaseUrl: String
         get() = "http://127.0.0.1:${server.port}"
-
-    protected lateinit var interceptor: MockResponseInterceptor
-
-    protected lateinit var client: OkHttpClient
 
     @Before
     fun setUp() {
@@ -83,47 +72,11 @@ open class TestWithServer {
 
     protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
 
-    protected fun assertResponseCode(response: Response, code: Int, message: String) {
-        Assertions.assertEquals(code, response.code)
-        Assertions.assertEquals(message, response.message)
-    }
-
-    protected fun executeGetRequest(
-        url: String,
-        headers: List<Pair<String, String>> = emptyList()
-    ): Response =
-        executeRequest(url, "GET", null, headers)
-
-    @JvmOverloads
-    protected fun executeRequest(
-        url: String,
-        method: String = "GET",
-        body: String? = null,
-        headers: List<Pair<String, String>> = emptyList()
-    ): Response {
-        val request = initRequest(url, headers, method, body)
-        return client.newCall(request).execute()
-    }
-
-    @Throws(IOException::class)
-    protected fun executeRequest(request: Request) {
-        client.newCall(request).execute()
-    }
-
-    @JvmOverloads
-    protected fun initRequest(
-        url: String,
-        headers: List<Pair<String, String>> = emptyList(),
-        method: String = "GET",
-        body: String? = null
-    ): Request {
+    fun completeLocalUrl(url: String): String = if (url.startsWith("http")) {
+        url
+    } else {
         val path = if (url.startsWith("/")) url.drop(1) else url
-        return buildRequest(
-            "$mockServerBaseUrl/$path",
-            headers,
-            method,
-            body
-        )
+        "$mockServerBaseUrl/$path"
     }
 
     companion object {
@@ -155,6 +108,9 @@ open class TestWithServer {
         const val REQUEST_OK_CODE = 200
         const val REQUEST_OK_MESSAGE = "OK"
         const val NOT_FOUND_CODE = 404
-        const val NOT_FOUND_MESSAGE = "Not Found"
+        const val URL_SIMPLE_REQUEST = "/request"
+        const val URL_HEADERS = "/headers"
+        const val REQUEST_SIMPLE_BODY = "simple body"
+        const val URL_METHOD = "/method"
     }
 }

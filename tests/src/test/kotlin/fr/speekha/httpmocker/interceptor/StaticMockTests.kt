@@ -26,7 +26,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
-import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
@@ -36,10 +36,11 @@ import fr.speekha.httpmocker.serialization.Mapper
 import okhttp3.OkHttpClient
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.FileNotFoundException
@@ -49,7 +50,7 @@ import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
 @DisplayName("Static Mocks with OkHttp")
-class StaticMockTests : TestWithServer() {
+class StaticMockTests : OkHttpTests() {
 
     private val loadingLambda: (String) -> InputStream? = mock {
         on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
@@ -61,7 +62,7 @@ class StaticMockTests : TestWithServer() {
     @DisplayName("Given an enabled mock interceptor with static scenarios")
     inner class StaticTests {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered with a scenario, " +
                 "then its path should be computed by the file policy"
@@ -69,14 +70,13 @@ class StaticMockTests : TestWithServer() {
         fun `should delegate path resolutions`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val request = initRequest("/request")
-            client.newCall(request).execute()
+            executeRequest(URL_SIMPLE_REQUEST)
 
-            verify(filingPolicy).getPath(argThat { this.path == "/request" })
+            verify(filingPolicy).getPath(argThat { this.path == URL_SIMPLE_REQUEST })
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When no scenario file is provided, " +
                 "then a 404 error should occur"
@@ -88,13 +88,11 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/unknown")
-
-            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
+            check404Response("/unknown")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When no requests in the file matches, " +
                 "then a 404 error should occur"
@@ -109,13 +107,11 @@ class StaticMockTests : TestWithServer() {
             }
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/no_match")
-
-            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
+            check404Response("/no_match")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while loading scenarios, " +
                 "then a 404 error should occur"
@@ -130,13 +126,11 @@ class StaticMockTests : TestWithServer() {
             }
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/unknown")
-
-            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
+            check404Response("/unknown")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When loaded scenario has neither response nor error, " +
                 "then a 404 error should occur"
@@ -148,13 +142,11 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/no_response_no_error")
-
-            assertResponseCode(response, NOT_FOUND_CODE, NOT_FOUND_MESSAGE)
+            check404Response("/no_response_no_error")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When an error is configured as an answer, " +
                 "then the corresponding exception should be thrown"
@@ -163,13 +155,13 @@ class StaticMockTests : TestWithServer() {
             setUpInterceptor(ENABLED, mapper, type)
 
             val exception = assertThrows<IOException> {
-                executeGetRequest("/exception")
+                executeRequest("/exception")
             }
             assertNull(exception.message)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When an error with a message is configured as an answer, " +
                 "then the corresponding exception with message should be thrown"
@@ -182,13 +174,13 @@ class StaticMockTests : TestWithServer() {
             setUpInterceptor(ENABLED, mapper, type)
 
             val exception = assertThrows<IOException> {
-                executeGetRequest("/exception_with_message")
+                executeRequest("/exception_with_message")
             }
             assertEquals("An exception message", exception.message)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while answering a request, " +
                 "then the request body should be the error"
@@ -203,7 +195,7 @@ class StaticMockTests : TestWithServer() {
             }
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/unknown").body?.string()
+            val response = executeRequest("/unknown").body?.string()
 
             MatcherAssert.assertThat(
                 response,
@@ -215,7 +207,7 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a response is found, then default HTTP code should be 200")
         fun `should return a 200 when response is found`(
             title: String,
@@ -224,13 +216,13 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/request")
+            val response = executeRequest(URL_SIMPLE_REQUEST)
 
             assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a response is found and response body is in JSON scenario, " +
                 "then it should be loaded from scenario"
@@ -242,9 +234,7 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/request")
-
-            assertEquals("simple body", response.body?.string())
+            checkResponseBody(REQUEST_SIMPLE_BODY, URL_SIMPLE_REQUEST)
         }
     }
 
@@ -252,7 +242,7 @@ class StaticMockTests : TestWithServer() {
     @DisplayName("Given an enabled mock interceptor with static and dynamic mocks")
     inner class StaticAndDynamic {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
                 "then dynamic mocks should be tried first before static ones"
@@ -263,7 +253,7 @@ class StaticMockTests : TestWithServer() {
             type: String
         ) {
             val result1 = "Dynamic"
-            val result2 = "simple body"
+            val result2 = REQUEST_SIMPLE_BODY
 
             initFilingPolicy(type)
 
@@ -281,15 +271,8 @@ class StaticMockTests : TestWithServer() {
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
-            val response1 =
-                client.newCall(buildRequest("http://www.test.fr/dynamic", method = "GET"))
-                    .execute()
-            val response2 =
-                client.newCall(buildRequest("http://www.test.fr/request", method = "GET"))
-                    .execute()
-
-            assertEquals(result1, response1.body?.string())
-            assertEquals(result2, response2.body?.string())
+            checkResponseBody(result1, "http://www.test.fr/dynamic")
+            checkResponseBody(result2, "http://www.test.fr/request")
         }
     }
 
@@ -301,7 +284,7 @@ class StaticMockTests : TestWithServer() {
             "When a response is found, " +
                 "then the body should be loaded from the file next to it"
         )
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         fun `should return a predefined response body from separate file`(
             title: String,
             mapper: Mapper,
@@ -309,13 +292,13 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/body_file")
+            val response = executeRequest("/body_file")
 
             assertEquals("separate body file", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When scenario file path is not empty, " +
                 "then response body should be in the same folder by default"
@@ -327,14 +310,14 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/folder/request_in_folder")
+            val response = executeRequest("/folder/request_in_folder")
 
             assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("separate body file", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a child folder, " +
                 "then response body path should be read from that folder"
@@ -346,14 +329,14 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/request_in_other_folder")
+            val response = executeRequest("/request_in_other_folder")
 
             assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("separate body file", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a parent folder, " +
                 "then response body path should be read from that folder"
@@ -365,7 +348,7 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/folder2/request_in_other_folder")
+            val response = executeRequest("/folder2/request_in_other_folder")
 
             assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("separate body file", response.body?.string())
@@ -377,7 +360,7 @@ class StaticMockTests : TestWithServer() {
     inner class ResponseBuilding {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, then the proper " +
                 "headers should be set in the response"
@@ -385,14 +368,14 @@ class StaticMockTests : TestWithServer() {
         fun `should return proper headers`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/request")
+            val response = executeRequest(URL_SIMPLE_REQUEST)
 
             assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("simple header", response.header("testHeader"))
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When the response is a redirect, " +
                 "then the response should have a HTTP code 302 and a location"
@@ -400,14 +383,14 @@ class StaticMockTests : TestWithServer() {
         fun `should handle redirects`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/redirect")
+            val response = executeRequest("/redirect")
 
             assertResponseCode(response, 302, "Found")
             assertEquals("http://www.google.com", response.header("Location"))
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
                 "then the proper content type should be set in the response"
@@ -415,16 +398,16 @@ class StaticMockTests : TestWithServer() {
         fun `should handle media type`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeGetRequest("/mediatype")
+            val response = executeRequest("/mediatype")
 
             assertResponseCode(response, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("application", response.body?.contentType()?.type)
-            assertEquals("application/json", response.header("Content-type"))
             assertEquals("json", response.body?.contentType()?.subtype)
+            assertEquals("application/json", response.header("Content-type"))
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request with no specific delay is answered, " +
                 "then default delay should be used"
@@ -433,7 +416,7 @@ class StaticMockTests : TestWithServer() {
             setUpInterceptor(ENABLED, mapper, type, 50)
 
             val delay = measureTimeMillis {
-                executeGetRequest("/request").body?.string()
+                executeRequest(URL_SIMPLE_REQUEST).body?.string()
             }
 
             val threshold = 50
@@ -441,7 +424,7 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request with a specific delay is answered, " +
                 "then that delay should be used"
@@ -454,11 +437,11 @@ class StaticMockTests : TestWithServer() {
             setUpInterceptor(ENABLED, mapper, type)
 
             val delay = measureTimeMillis {
-                executeGetRequest("/delay").body?.string()
+                executeRequest("/delay").body?.string()
             }
 
             val noDelay = measureTimeMillis {
-                executeGetRequest("/request").body?.string()
+                executeRequest(URL_SIMPLE_REQUEST).body?.string()
             }
 
             val threshold = 50
@@ -484,7 +467,7 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should use a MirrorPathPolicy as default")
         fun `should use mirror path as default file policy`(
             title: String,
@@ -493,9 +476,9 @@ class StaticMockTests : TestWithServer() {
         ) {
             setupInterceptor(mapper, type)
 
-            val get = executeGetRequest("/request").body?.string()
+            val get = executeRequest(URL_SIMPLE_REQUEST).body?.string()
 
-            assertEquals("simple body", get)
+            assertEquals(REQUEST_SIMPLE_BODY, get)
         }
     }
 
@@ -517,40 +500,40 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match URL protocol")
         fun `should take http protocol into account`(title: String, mapper: Mapper, type: String) {
             setupInterceptor("protocol", mapper, type)
 
-            val get = executeGetRequest("/protocol").body?.string()
+            val get = executeRequest("/protocol").body?.string()
 
             assertEquals("HTTP", get)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL host")
         fun `should select response based on host`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(SINGLE_FILE, mapper, type)
 
-            val request = buildRequest("http://hostTest.com:12345/anyUrl")
+            val response = executeRequest("http://hostTest.com:12345/anyUrl")
 
-            assertEquals("based on host", client.newCall(request).execute().body?.string())
+            assertEquals("based on host", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL port")
         fun `should select response based on port`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(SINGLE_FILE, mapper, type)
 
-            val request = buildRequest("http://someHost.com:45612/anyUrl")
+            val response = executeRequest("http://someHost.com:45612/anyUrl")
 
-            assertEquals("based on port", client.newCall(request).execute().body?.string())
+            assertEquals("based on port", response.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL path")
         fun `should select response based on URL path`(
             title: String,
@@ -559,9 +542,9 @@ class StaticMockTests : TestWithServer() {
         ) {
             setupInterceptor(SINGLE_FILE, mapper, type)
 
-            val request = buildRequest("http://someHost.com:12345/aTestUrl")
+            val response = executeRequest("http://someHost.com:12345/aTestUrl")
 
-            assertEquals("based on URL", client.newCall(request).execute().body?.string())
+            assertEquals("based on URL", response.body?.string())
         }
     }
 
@@ -594,32 +577,32 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When the first policy provides a match, then it should be used")
         fun `should use first policy if possible`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(mapper, type)
             whenever(policy1.getPath(any())).thenReturn("request.$type")
 
-            val get = executeGetRequest("/request").body?.string()
-            assertEquals("simple body", get)
+            val get = executeRequest(URL_SIMPLE_REQUEST).body?.string()
+            assertEquals(REQUEST_SIMPLE_BODY, get)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When the first policy does not provide a match, then the second one should be used")
         fun `should use second policy as fallback`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(mapper, type)
             whenever(policy2.getPath(any())).thenReturn("request.$type")
-            val get = executeGetRequest("/request").body?.string()
-            assertEquals("simple body", get)
+            val get = executeRequest(URL_SIMPLE_REQUEST).body?.string()
+            assertEquals(REQUEST_SIMPLE_BODY, get)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When none of the policies provide a match, then an 404 error should occur")
         fun `should handle all policy failure`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(mapper, type)
-            val get = executeGetRequest("/request")
+            val get = executeRequest(URL_SIMPLE_REQUEST)
             assertEquals(404, get.code)
         }
     }
@@ -629,14 +612,14 @@ class StaticMockTests : TestWithServer() {
     inner class RequestMatching {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         fun `should take http method into account`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val get = executeGetRequest("/method").body?.string()
-            val post = executeRequest("/method", "POST", "").body?.string()
-            val put = executeRequest("/method", "PUT", "").body?.string()
-            val delete = executeRequest("/method", "DELETE", "").body?.string()
+            val get = executeRequest(URL_METHOD).body?.string()
+            val post = executeRequest(URL_METHOD, "POST", "").body?.string()
+            val put = executeRequest(URL_METHOD, "PUT", "").body?.string()
+            val delete = executeRequest(URL_METHOD, "DELETE", "").body?.string()
 
             assertEquals("get", get)
             assertEquals("post", post)
@@ -645,7 +628,7 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match present query parameters")
         fun `should select response based on query params`(
             title: String,
@@ -654,15 +637,15 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val param1 = executeGetRequest("/query_param?param=1").body?.string()
-            val param2 = executeGetRequest("/query_param?param=2").body?.string()
+            val param1 = executeRequest("/query_param?param=1").body?.string()
+            val param2 = executeRequest("/query_param?param=2").body?.string()
 
             assertEquals("param A", param1)
             assertEquals("param B", param2)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match absent query parameters")
         fun `should select response based on absent query params`(
             title: String,
@@ -671,35 +654,35 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val param1 = executeGetRequest("/absent_query_param?param1=1").body?.string()
-            val param2 = executeGetRequest("/absent_query_param?param1=1&param2=2")
+            val param1 = executeRequest("/absent_query_param?param1=1").body?.string()
+            val param2 = executeRequest("/absent_query_param?param1=1&param2=2")
 
             assertEquals("Body found", param1)
             assertEquals(NOT_FOUND_CODE, param2.code)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match present headers")
         fun `should select response based on headers`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val noHeaders = executeGetRequest("/headers").body?.string()
-            val headers = executeGetRequest(
-                "/headers",
-                listOf(
+            val noHeaders = executeRequest(URL_HEADERS).body?.string()
+            val headers = executeRequest(
+                URL_HEADERS,
+                headers = listOf(
                     "header1" to "1",
                     "header1" to "2",
                     "header2" to "3"
                 )
             ).body?.string()
-            val header1 = executeGetRequest(
-                "/headers",
-                listOf("header1" to "1")
+            val header1 = executeRequest(
+                URL_HEADERS,
+                headers = listOf("header1" to "1")
             ).body?.string()
-            val header2 = executeGetRequest(
-                "/headers",
-                listOf("header2" to "2")
+            val header2 = executeRequest(
+                URL_HEADERS,
+                headers = listOf("header2" to "2")
             ).body?.string()
 
             assertEquals("no header", noHeaders)
@@ -709,7 +692,7 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match absent headers")
         fun `should select response based on absent headers`(
             title: String,
@@ -719,16 +702,16 @@ class StaticMockTests : TestWithServer() {
             setUpInterceptor(ENABLED, mapper, type)
 
             val correctHeader =
-                executeGetRequest("/absent_header", listOf("header1" to "1")).body?.string()
+                executeRequest("/absent_header", headers = listOf("header1" to "1")).body?.string()
             val extraHeader =
-                executeGetRequest("/absent_header", listOf("header1" to "1", "header2" to "2"))
+                executeRequest("/absent_header", headers = listOf("header1" to "1", "header2" to "2"))
 
             assertEquals("Body found", correctHeader)
             assertEquals(NOT_FOUND_CODE, extraHeader.code)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match request body")
         fun `should select response based on request body`(
             title: String,
@@ -745,7 +728,7 @@ class StaticMockTests : TestWithServer() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When a request with exact match is answered, " +
                 "then match should not allow extra headers or parameters"
@@ -757,11 +740,11 @@ class StaticMockTests : TestWithServer() {
         ) {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val exactHeader = executeGetRequest("/exact_match", listOf("header1" to "1"))
+            val exactHeader = executeRequest("/exact_match", headers = listOf("header1" to "1"))
             val extraHeader =
-                executeGetRequest("/exact_match", listOf("header1" to "1", "header2" to "2"))
-            val exactParam = executeGetRequest("/exact_match?param1=1")
-            val extraParam = executeGetRequest("/exact_match?param1=1&param2=2")
+                executeRequest("/exact_match", headers = listOf("header1" to "1", "header2" to "2"))
+            val exactParam = executeRequest("/exact_match?param1=1")
+            val extraParam = executeRequest("/exact_match?param1=1&param2=2")
 
             assertEquals("Exact headers", exactHeader.body?.string())
             assertEquals(NOT_FOUND_CODE, extraHeader.code)
@@ -775,7 +758,7 @@ class StaticMockTests : TestWithServer() {
     inner class MixedMode {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When a request is not mocked, then it should go to the server")
         fun `should support mixed mode to execute request when no response is found locally`(
             title: String,
@@ -785,17 +768,17 @@ class StaticMockTests : TestWithServer() {
             enqueueServerResponse(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper, type)
 
-            val serverResponse = executeGetRequest("")
-            val localResponse = executeGetRequest("/request")
+            val serverResponse = executeRequest("")
+            val localResponse = executeRequest(URL_SIMPLE_REQUEST)
 
             assertResponseCode(serverResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("body", serverResponse.body?.string())
             assertResponseCode(localResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
-            assertEquals("simple body", localResponse.body?.string())
+            assertEquals(REQUEST_SIMPLE_BODY, localResponse.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When mocked file does not exist, then the request should go to the server")
         fun `should support mixed mode to execute request when response file is not found locally`(
             title: String,
@@ -805,14 +788,14 @@ class StaticMockTests : TestWithServer() {
             enqueueServerResponse(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper, type)
             whenever(loadingLambda.invoke(any())).then { throw FileNotFoundException("File does not exist") }
-            val serverResponse = executeGetRequest("")
+            val serverResponse = executeRequest("")
 
             assertResponseCode(serverResponse, REQUEST_OK_CODE, REQUEST_OK_MESSAGE)
             assertEquals("body", serverResponse.body?.string())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName(
             "When several interceptors are stacked, " +
                 "then each should delegate to the next one requests it can't answer"
@@ -853,9 +836,9 @@ class StaticMockTests : TestWithServer() {
                 .addInterceptor(fileBasedInterceptor)
                 .build()
 
-            assertEquals("in memory response", executeGetRequest("inMemory").body?.string())
-            assertEquals("file response", executeGetRequest("fileMatch").body?.string())
-            assertEquals("server response", executeGetRequest("serverMatch").body?.string())
+            assertEquals("in memory response", executeRequest("inMemory").body?.string())
+            assertEquals("file response", executeRequest("fileMatch").body?.string())
+            assertEquals("server response", executeRequest("serverMatch").body?.string())
         }
     }
 

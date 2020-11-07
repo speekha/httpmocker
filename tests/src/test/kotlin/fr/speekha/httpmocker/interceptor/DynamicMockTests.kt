@@ -19,10 +19,11 @@ package fr.speekha.httpmocker.interceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.DISABLED
 import fr.speekha.httpmocker.Mode.ENABLED
-import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.scenario.RequestCallback
+import fr.speekha.httpmocker.url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,10 +36,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 @DisplayName("Dynamic Mocks with OkHttp")
-class DynamicMockTests : TestWithServer() {
+class DynamicMockTests : OkHttpTests() {
 
     @Nested
     @DisplayName("Given an mock interceptor that is disabled")
@@ -50,7 +50,7 @@ class DynamicMockTests : TestWithServer() {
             setupProvider(DISABLED) { null }
             enqueueServerResponse(REQUEST_OK_CODE, "body")
 
-            val response = executeGetRequest("")
+            val response = executeRequest("")
 
             assertResponseCode(response, REQUEST_OK_CODE, "OK")
             assertEquals("body", response.body?.string())
@@ -66,7 +66,7 @@ class DynamicMockTests : TestWithServer() {
         fun `should return a 404 error when response is not found`() {
             setupProvider(ENABLED) { null }
 
-            val response = executeGetRequest("/unknown")
+            val response = executeRequest("/unknown")
 
             assertResponseCode(response, NOT_FOUND_CODE, "Not Found")
         }
@@ -77,7 +77,7 @@ class DynamicMockTests : TestWithServer() {
             setupProvider(ENABLED) { error("Unexpected error") }
 
             assertThrows<IllegalStateException> {
-                executeGetRequest("/unknown")
+                executeRequest("/unknown")
             }
         }
 
@@ -88,12 +88,7 @@ class DynamicMockTests : TestWithServer() {
             setupProvider {
                 ResponseDescriptor(code = resultCode, body = "some random body")
             }
-            val response = client.newCall(
-                buildRequest(
-                    url,
-                    method = "GET"
-                )
-            ).execute()
+            val response = executeRequest(url)
 
             assertEquals(resultCode, response.code)
             assertEquals("some random body", response.body?.string())
@@ -106,12 +101,7 @@ class DynamicMockTests : TestWithServer() {
             val body = "Time: ${System.currentTimeMillis()}"
             setupProvider { ResponseDescriptor(code = resultCode, body = body) }
 
-            val response = client.newCall(
-                buildRequest(
-                    url,
-                    method = "GET"
-                )
-            ).execute()
+            val response = executeRequest(url)
 
             assertEquals(resultCode, response.code)
             assertEquals(body, response.body?.string())
@@ -140,20 +130,8 @@ class DynamicMockTests : TestWithServer() {
 
             client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
-            val response1 =
-                client.newCall(
-                    buildRequest(
-                        "http://www.test.fr/request1",
-                        method = "GET"
-                    )
-                ).execute()
-            val response2 =
-                client.newCall(
-                    buildRequest(
-                        "http://www.test.fr/request2",
-                        method = "GET"
-                    )
-                ).execute()
+            val response1 = executeRequest("http://www.test.fr/request1")
+            val response2 = executeRequest("http://www.test.fr/request2")
 
             assertEquals(result1, response1.body?.string())
             assertEquals(result2, response2.body?.string())
@@ -165,32 +143,13 @@ class DynamicMockTests : TestWithServer() {
         )
         fun `should support exception results`() {
 
-            interceptor = mockInterceptor {
-                useDynamicMocks {
-                    error("Should throw an error")
-                }
-                setInterceptorStatus(ENABLED)
+            setupProvider {
+                error("Should throw an error")
             }
-
-            client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
             assertThrows<IllegalStateException> {
-                client.newCall(
-                    buildRequest(
-                        "http://www.test.fr/request1",
-                        method = "GET"
-                    )
-                ).execute()
+                executeRequest("http://www.test.fr/request1")
             }
-        }
-
-        private fun setupProvider(callback: RequestCallback) {
-            interceptor = mockInterceptor {
-                useDynamicMocks(callback)
-                setInterceptorStatus(ENABLED)
-            }
-
-            client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         }
 
         @Test
@@ -225,7 +184,7 @@ class DynamicMockTests : TestWithServer() {
 
         private suspend fun delayedRequest(lock: StateFlow<Boolean>, i: Int): Response {
             lock.first { it }
-            return executeGetRequest("/request$i")
+            return executeRequest("/request$i")
         }
     }
 
@@ -239,9 +198,5 @@ class DynamicMockTests : TestWithServer() {
         }
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-    }
-
-    companion object {
-        const val url = "http://www.test.fr/path1?param=1"
     }
 }
