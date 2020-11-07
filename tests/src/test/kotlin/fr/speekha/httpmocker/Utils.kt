@@ -26,3 +26,5 @@ inline fun <reified T : Throwable> assertThrows(message: String? = null, block: 
     }
     return Assertions.fail("No exception thrown")
 }
+
+const val url = "http://www.test.fr/path1?param=1"

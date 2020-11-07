@@ -41,11 +41,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 @DisplayName("Java API")
-class JavaApiTest extends TestWithServer {
+class JavaApiTest extends OkHttpTests {
 
     @Nested
     @DisplayName("Given a Java code base, When using the Kotlin API")
-    public class WithJavaCode extends TestWithServer {
+    public class WithJavaCode extends OkHttpTests {
 
         @Test
         @DisplayName("Then dynamic mocks should work properly")
@@ -60,7 +60,7 @@ class JavaApiTest extends TestWithServer {
         public void shouldUseStaticMocksWithJavaApi() throws IOException {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
-            executeRequest(initRequest("/static"));
+            executeRequest("/static");
             HttpRequest request = new HttpRequest("GET", "http", "127.0.0.1", getServer().getPort(), "/static");
             Mockito.verify(filingPolicy).getPath(request);
         }
@@ -73,7 +73,7 @@ class JavaApiTest extends TestWithServer {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             getInterceptor().setMode(Mode.RECORD);
-            executeRequest(initRequest("record/request"));
+            executeRequest("record/request");
             assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request.json");
             assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request_body_0.txt");
         }
