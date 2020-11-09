@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor.engine
+package fr.speekha.httpmocker.ktor.io
 
 import fr.speekha.httpmocker.io.RequestWriter
 import io.ktor.client.engine.HttpClientEngine
@@ -27,7 +27,6 @@ class Recorder(
     private val engine: HttpClientEngine
 ) {
 
-    @SuppressWarnings("TooGenericExceptionCaught")
     @InternalAPI
     suspend fun executeAndRecordCall(request: HttpRequestData): HttpResponseData {
         val (response, record) = executeCall(request)
@@ -38,6 +37,7 @@ class Recorder(
     private fun proceedWithCallResult(record: RequestWriter.CallRecord, response: HttpResponseData?): HttpResponseData =
         record.error?.let { throw it } ?: response?.withBody(record.body) ?: error("Response is null")
 
+    @SuppressWarnings("TooGenericExceptionCaught")
     @InternalAPI
     private suspend fun executeCall(request: HttpRequestData): Pair<HttpResponseData?, RequestWriter.CallRecord> {
         var response: HttpResponseData? = null

@@ -20,8 +20,8 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.DISABLED
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.assertThrows
-import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.url
 import kotlinx.coroutines.Dispatchers

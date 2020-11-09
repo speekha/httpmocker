@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.okhttp
 
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.NO_RECORDER_ERROR
+import fr.speekha.httpmocker.RECORD_NOT_SUPPORTED_ERROR
+import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.io.MockResponder
-import fr.speekha.httpmocker.io.Recorder
 import fr.speekha.httpmocker.io.RequestWriter
-import fr.speekha.httpmocker.io.ResponseBuilder
-import fr.speekha.httpmocker.io.execute
-import fr.speekha.httpmocker.io.toGenericModel
+import fr.speekha.httpmocker.okhttp.io.Recorder
+import fr.speekha.httpmocker.okhttp.io.ResponseBuilder
+import fr.speekha.httpmocker.okhttp.io.execute
+import fr.speekha.httpmocker.okhttp.io.toGenericModel
 import fr.speekha.httpmocker.scenario.ScenarioProvider
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -41,7 +45,7 @@ internal constructor(
     private val forbidRecord = requestWriter == null
 
     /**
-     * Enables to set the interception mode. @see fr.speekha.httpmocker.MockResponseInterceptor.Mode
+     * Enables to set the interception mode. @see fr.speekha.httpmocker.okhttp.MockResponseInterceptor.Mode
      */
     var mode: Mode = Mode.DISABLED
         set(value) {

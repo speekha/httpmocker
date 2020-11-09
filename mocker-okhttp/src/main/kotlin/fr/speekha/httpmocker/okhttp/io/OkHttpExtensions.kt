@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.io
+package fr.speekha.httpmocker.okhttp.io
 
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor

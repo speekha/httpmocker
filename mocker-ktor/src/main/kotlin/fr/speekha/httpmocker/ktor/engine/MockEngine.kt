@@ -21,6 +21,9 @@ import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.RECORD_NOT_SUPPORTED_ERROR
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.io.MockResponder
+import fr.speekha.httpmocker.ktor.io.Recorder
+import fr.speekha.httpmocker.ktor.io.mapRequest
+import fr.speekha.httpmocker.ktor.io.toModel
 import io.ktor.client.engine.HttpClientEngineBase
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
@@ -46,9 +49,8 @@ class MockEngine(
     private val responder = MockResponder(
         internalConf.providers,
         internalConf.simulatedDelay,
-        ::mapRequest,
-        ::mapResponse
-    )
+        ::mapRequest
+    ) { _, response -> response.toModel() }
 
     private val recorder: Recorder? = config.configBuilder.buildRecorder()?.let { Recorder(it, config.delegate) }
 

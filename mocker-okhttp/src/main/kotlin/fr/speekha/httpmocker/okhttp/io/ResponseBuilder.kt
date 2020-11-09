@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.io
+package fr.speekha.httpmocker.okhttp.io
 
 import fr.speekha.httpmocker.messageForHttpCode
 import fr.speekha.httpmocker.model.ResponseDescriptor

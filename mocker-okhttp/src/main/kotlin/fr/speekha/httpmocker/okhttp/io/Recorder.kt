@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.io
+package fr.speekha.httpmocker.okhttp.io
 
+import fr.speekha.httpmocker.io.MediaType
+import fr.speekha.httpmocker.io.RequestWriter
 import fr.speekha.httpmocker.io.RequestWriter.CallRecord
 import okhttp3.Interceptor
 import okhttp3.Request
