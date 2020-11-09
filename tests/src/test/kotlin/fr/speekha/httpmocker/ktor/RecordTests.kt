@@ -230,6 +230,21 @@ class RecordTests : KtorTests() {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @DisplayName("When a response with multiple lines is recorded, then all lines should be read")
+        fun `should let response with multiple lines through when recording`(
+            title: String,
+            mapper: Mapper,
+            fileType: String
+        ) = runBlocking {
+            val body = "line 1\nline 2\n".repeat(100)
+            enqueueServerResponse(200, body)
+            setUpInterceptor(mapper, fileType = fileType)
+
+            checkResponseBody(body, recordRequestUrl)
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
         @DisplayName("When recording a request fails, then it should not interfere with the request")
         fun `should let requests through when recording even if saving fails`(
             title: String,
