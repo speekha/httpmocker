@@ -17,7 +17,6 @@
 package fr.speekha.httpmocker.ktor.builder
 
 import fr.speekha.httpmocker.ktor.engine.MockEngineFactory
-import fr.speekha.httpmocker.ktor.engine.MockableClientConfiguration
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory

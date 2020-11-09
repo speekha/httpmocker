@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package fr.speekha.httpmocker.demo.ui
 
 import androidx.lifecycle.Observer
 import fr.speekha.httpmocker.Mode
-import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.jackson.JacksonMapper
+import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified

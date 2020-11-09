@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.okhttp.builder
 
+import fr.speekha.httpmocker.builder.RecorderBuilder
 import java.io.File
 
 fun mockInterceptor(assemble: InterceptorBuilder.() -> Unit) = with(

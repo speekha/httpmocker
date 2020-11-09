@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker.ktor
 
 import fr.speekha.httpmocker.TestWithServer
-import fr.speekha.httpmocker.ktor.engine.readBytes
+import fr.speekha.httpmocker.ktor.io.readBytes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.headers
 import io.ktor.client.request.request

@@ -31,10 +31,10 @@ import java.util.ArrayList;
 
 import fr.speekha.httpmocker.Mode;
 import fr.speekha.httpmocker.builder.FileLoader;
-import fr.speekha.httpmocker.builder.InterceptorBuilder;
 import fr.speekha.httpmocker.io.HttpRequest;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
+import fr.speekha.httpmocker.okhttp.builder.InterceptorBuilder;
 import fr.speekha.httpmocker.policies.FilingPolicy;
 import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
@@ -30,6 +29,7 @@ import fr.speekha.httpmocker.demo.model.onFailure
 import fr.speekha.httpmocker.demo.model.onSuccess
 import fr.speekha.httpmocker.demo.model.resultOf
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
+import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

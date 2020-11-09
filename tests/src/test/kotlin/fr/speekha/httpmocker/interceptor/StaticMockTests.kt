@@ -27,9 +27,9 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
 import fr.speekha.httpmocker.assertThrows
-import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper

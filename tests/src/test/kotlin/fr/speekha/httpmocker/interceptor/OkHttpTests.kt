@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.interceptor
 
-import fr.speekha.httpmocker.MockResponseInterceptor
 import fr.speekha.httpmocker.TestWithServer
+import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient

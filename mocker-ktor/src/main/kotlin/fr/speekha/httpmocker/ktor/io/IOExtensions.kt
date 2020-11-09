@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor.engine
+package fr.speekha.httpmocker.ktor.io
 
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.io.MediaType
@@ -60,10 +60,7 @@ internal fun HttpRequestData.toModel(): HttpRequest = HttpRequest(
     body = readBody()
 )
 
-internal fun mapResponse(request: HttpRequestData, response: ResponseDescriptor): HttpResponseData =
-    response.toModel()
-
-private fun ResponseDescriptor.toModel() = HttpResponseData(
+internal fun ResponseDescriptor.toModel() = HttpResponseData(
     statusCode = HttpStatusCode(code, messageForHttpCode(code)),
     requestTime = GMTDate(),
     headers = buildHeaders(),
