@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.ktor
 
 import fr.speekha.httpmocker.TestWithServer
+import fr.speekha.httpmocker.ktor.engine.readFully
 import io.ktor.client.HttpClient
 import io.ktor.client.request.headers
 import io.ktor.client.request.request
@@ -71,6 +72,6 @@ open class KtorTests : TestWithServer() {
     }
 
     suspend fun assertResponseBody(expected: String, response: HttpResponse) {
-        Assertions.assertEquals(expected, response.content.readUTF8Line(Int.MAX_VALUE))
+        Assertions.assertEquals(expected, String(response.content.readFully()))
     }
 }
