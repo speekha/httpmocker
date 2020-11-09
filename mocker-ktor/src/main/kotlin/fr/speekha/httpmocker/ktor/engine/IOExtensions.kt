@@ -112,20 +112,27 @@ internal fun HttpResponseData.getMediaType(): MediaType? {
 }
 
 internal suspend fun HttpResponseData.readBody(): ByteArray? = when (val content = body) {
-    is ByteReadChannel -> content.readFully()
+    is ByteReadChannel -> content.readBytes()
     else -> content.toString().toByteArray()
 }
 
 private const val READ_CHANNEL_CHUNKS = 1024
 
-suspend fun ByteReadChannel.readFully(): ByteArray = withContext(Dispatchers.IO) {
-    val buffer = ByteArrayOutputStream()
-    val line = ByteArray(READ_CHANNEL_CHUNKS)
+suspend fun ByteReadChannel.readBytes(): ByteArray = ByteArrayOutputStream()
+    .also { output -> transferContent(output) }
+    .toByteArray()
+
+private suspend fun ByteReadChannel.transferContent(output: ByteArrayOutputStream) {
+    val buffer = ByteArray(READ_CHANNEL_CHUNKS)
     while (!isClosedForRead) {
-        val length = readAvailable(line, 0, READ_CHANNEL_CHUNKS)
+        transferChunk(buffer, output)
+    }
+}
+
+private suspend fun ByteReadChannel.transferChunk(buffer: ByteArray, output: ByteArrayOutputStream) =
+    withContext(Dispatchers.IO) {
+        val length = readAvailable(buffer, 0, READ_CHANNEL_CHUNKS)
         if (length >= 0) {
-            buffer.write(line, 0, length)
+            output.write(buffer, 0, length)
         }
     }
-    buffer.toByteArray()
-}
