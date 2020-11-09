@@ -38,6 +38,7 @@ import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 internal fun HttpResponseData.toDescriptor(url: Url) = ResponseDescriptor(
@@ -115,14 +116,16 @@ internal suspend fun HttpResponseData.readBody(): ByteArray? = when (val content
     else -> content.toString().toByteArray()
 }
 
-suspend fun ByteReadChannel.readFully(): ByteArray {
+private const val READ_CHANNEL_CHUNKS = 1024
+
+suspend fun ByteReadChannel.readFully(): ByteArray = withContext(Dispatchers.IO) {
     val buffer = ByteArrayOutputStream()
-    while (!this.isClosedForRead) {
-        val line = ByteArray(1024)
-        when (val length = readAvailable(line, 0, 1024)) {
-            1024 -> buffer.write(line, 0, 1024)
-            in 0..1023 -> buffer.write(line, 0, length)
+    val line = ByteArray(READ_CHANNEL_CHUNKS)
+    while (!isClosedForRead) {
+        val length = readAvailable(line, 0, READ_CHANNEL_CHUNKS)
+        if (length >= 0) {
+            buffer.write(line, 0, length)
         }
     }
-    return buffer.toByteArray()
+    buffer.toByteArray()
 }
