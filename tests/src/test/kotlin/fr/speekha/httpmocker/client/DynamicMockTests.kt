@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor
+package fr.speekha.httpmocker.client
 
-import fr.speekha.httpmocker.HttpClientTester
 import fr.speekha.httpmocker.Mode.DISABLED
-import fr.speekha.httpmocker.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.assertThrows
+import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.url
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +27,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@DisplayName("Dynamic Mocks with Ktor")
 abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
 
     @Nested
@@ -45,7 +41,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         @Test
         @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() = runBlocking {
-            setupProvider({ null }, status = DISABLED)
+            setupProviders({ null }, status = DISABLED)
             enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
 
             val response = executeRequest("/")
@@ -61,7 +57,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         @Test
         @DisplayName("When no response is provided, then a 404 error should occur")
         fun `should return a 404 error when response is not found`() = runBlocking {
-            setupProvider({ null })
+            setupProviders({ null })
 
             check404Response("/unknown")
         }
@@ -70,7 +66,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         @DisplayName("When an error occurs while answering a request, then the exception should be let through")
         fun `should let exceptions through when they occur`() {
             runBlocking {
-                setupProvider({ error("Unexpected error") })
+                setupProviders({ error("Unexpected error") })
 
                 assertThrows<IllegalStateException>("Unexpected error") {
                     executeRequest("/unknown")
@@ -84,7 +80,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             val resultCode = 202
             val body = "some random body"
 
-            setupProvider({
+            setupProviders({
                 ResponseDescriptor(code = resultCode, body = body)
             })
             val response = executeRequest(url)
@@ -98,11 +94,11 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         fun `should reply with a stateful callback`() = runBlocking {
             val resultCode = 201
             val body = "Time: ${System.currentTimeMillis()}"
-            setupProvider({ ResponseDescriptor(code = resultCode, body = body) })
+            setupProviders({ ResponseDescriptor(code = resultCode, body = body) })
 
             val response = executeRequest(url)
 
-            assertEquals(HttpStatusCode.Created, response)
+            assertResponseCode(HttpStatusCode.Created, response)
             assertResponseBody(body, response)
         }
 
@@ -115,7 +111,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             val result1 = "First mock"
             val result2 = "Second mock"
 
-            setupProvider(
+            setupProviders(
                 { request ->
                     ResponseDescriptor(body = result1).takeIf {
                         request.path.contains("1")
@@ -139,7 +135,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         fun `should support exception results`() {
             runBlocking {
 
-                setupProvider({
+                setupProviders({
                     error("Should throw an error")
                 })
 
@@ -154,7 +150,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             "When 2 request are executed simultaneously then proper responses are returned"
         )
         fun `should synchronize loadResponse`() {
-            setupProvider({
+            setupProviders({
                 ResponseDescriptor(body = "body${it.path.last()}")
             })
             repeat(1000) {
@@ -163,20 +159,21 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         }
 
         private fun testSimultaneousRequests() {
-            val response = mutableListOf<Response>()
+            val responses: Array<Any?> = arrayOfNulls(2)
             val running = MutableStateFlow(false)
             runBlocking {
-                (1..2).forEach { i ->
+                responses.indices.forEach { i ->
                     launch(Dispatchers.IO) {
-                        response[i] = delayedRequest(running, i)
+                        responses[i] = delayedRequest(running, i)
                     }
                 }
                 running.emit(true)
             }
 
             runBlocking {
-                response.indices.forEach { i ->
-                    assertResponseBody("body$i", response[i] ?: fail("Response is null"))
+                responses.indices.forEach { i ->
+                    val response = responses[i] as? Response
+                    assertResponseBody("body$i", response ?: fail("Response is null"))
                 }
             }
         }
@@ -185,5 +182,9 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             lock.first { it }
             return executeRequest("/request$i")
         }
+    }
+
+    companion object {
+        const val url = "http://www.test.fr/path1?param=1"
     }
 }

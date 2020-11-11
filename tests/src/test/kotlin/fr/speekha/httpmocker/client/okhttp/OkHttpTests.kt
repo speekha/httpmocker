@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.interceptor
+package fr.speekha.httpmocker.client.okhttp
 
-import fr.speekha.httpmocker.TestWithServer
+import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import kotlinx.coroutines.runBlocking
 import okhttp3.Headers

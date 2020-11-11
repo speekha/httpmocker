@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.interceptor
+package fr.speekha.httpmocker.client.okhttp
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
@@ -49,7 +49,6 @@ import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
-@DisplayName("Static Mocks with OkHttp")
 class StaticMockTests : OkHttpTests() {
 
     private val loadingLambda: (String) -> InputStream? = mock {
@@ -62,7 +61,7 @@ class StaticMockTests : OkHttpTests() {
     @DisplayName("Given an enabled mock interceptor with static scenarios")
     inner class StaticTests {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered with a scenario, " +
                 "then its path should be computed by the file policy"
@@ -76,7 +75,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When no scenario file is provided, " +
                 "then a 404 error should occur"
@@ -92,7 +91,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When no requests in the file matches, " +
                 "then a 404 error should occur"
@@ -111,7 +110,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while loading scenarios, " +
                 "then a 404 error should occur"
@@ -130,7 +129,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When loaded scenario has neither response nor error, " +
                 "then a 404 error should occur"
@@ -146,7 +145,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error is configured as an answer, " +
                 "then the corresponding exception should be thrown"
@@ -161,7 +160,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error with a message is configured as an answer, " +
                 "then the corresponding exception with message should be thrown"
@@ -180,7 +179,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while answering a request, " +
                 "then the request body should be the error"
@@ -201,13 +200,13 @@ class StaticMockTests : OkHttpTests() {
                 response,
                 StringStartsWith(
                     "java.lang.IllegalStateException: Loading error\n" +
-                        "\tat fr.speekha.httpmocker.interceptor.StaticMockTests"
+                        "\tat fr.speekha.httpmocker.client.okhttp.StaticMockTests"
                 )
             )
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a response is found, then default HTTP code should be 200")
         fun `should return a 200 when response is found`(
             title: String,
@@ -222,7 +221,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a response is found and response body is in JSON scenario, " +
                 "then it should be loaded from scenario"
@@ -242,7 +241,7 @@ class StaticMockTests : OkHttpTests() {
     @DisplayName("Given an enabled mock interceptor with static and dynamic mocks")
     inner class StaticAndDynamic {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
                 "then dynamic mocks should be tried first before static ones"
@@ -284,7 +283,7 @@ class StaticMockTests : OkHttpTests() {
             "When a response is found, " +
                 "then the body should be loaded from the file next to it"
         )
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         fun `should return a predefined response body from separate file`(
             title: String,
             mapper: Mapper,
@@ -298,7 +297,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When scenario file path is not empty, " +
                 "then response body should be in the same folder by default"
@@ -317,7 +316,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a child folder, " +
                 "then response body path should be read from that folder"
@@ -336,7 +335,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a parent folder, " +
                 "then response body path should be read from that folder"
@@ -360,7 +359,7 @@ class StaticMockTests : OkHttpTests() {
     inner class ResponseBuilding {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, then the proper " +
                 "headers should be set in the response"
@@ -375,7 +374,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When the response is a redirect, " +
                 "then the response should have a HTTP code 302 and a location"
@@ -390,7 +389,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
                 "then the proper content type should be set in the response"
@@ -407,7 +406,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request with no specific delay is answered, " +
                 "then default delay should be used"
@@ -424,7 +423,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request with a specific delay is answered, " +
                 "then that delay should be used"
@@ -467,7 +466,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should use a MirrorPathPolicy as default")
         fun `should use mirror path as default file policy`(
             title: String,
@@ -500,7 +499,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match URL protocol")
         fun `should take http protocol into account`(title: String, mapper: Mapper, type: String) {
             setupInterceptor("protocol", mapper, type)
@@ -511,7 +510,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL host")
         fun `should select response based on host`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(SINGLE_FILE, mapper, type)
@@ -522,7 +521,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL port")
         fun `should select response based on port`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(SINGLE_FILE, mapper, type)
@@ -533,7 +532,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL path")
         fun `should select response based on URL path`(
             title: String,
@@ -577,7 +576,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When the first policy provides a match, then it should be used")
         fun `should use first policy if possible`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(mapper, type)
@@ -588,7 +587,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When the first policy does not provide a match, then the second one should be used")
         fun `should use second policy as fallback`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(mapper, type)
@@ -598,7 +597,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When none of the policies provide a match, then an 404 error should occur")
         fun `should handle all policy failure`(title: String, mapper: Mapper, type: String) {
             setupInterceptor(mapper, type)
@@ -612,7 +611,7 @@ class StaticMockTests : OkHttpTests() {
     inner class RequestMatching {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         fun `should take http method into account`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
 
@@ -628,7 +627,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match present query parameters")
         fun `should select response based on query params`(
             title: String,
@@ -645,7 +644,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match absent query parameters")
         fun `should select response based on absent query params`(
             title: String,
@@ -662,7 +661,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match present headers")
         fun `should select response based on headers`(title: String, mapper: Mapper, type: String) {
             setUpInterceptor(ENABLED, mapper, type)
@@ -692,7 +691,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match absent headers")
         fun `should select response based on absent headers`(
             title: String,
@@ -711,7 +710,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match request body")
         fun `should select response based on request body`(
             title: String,
@@ -728,7 +727,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request with exact match is answered, " +
                 "then match should not allow extra headers or parameters"
@@ -758,7 +757,7 @@ class StaticMockTests : OkHttpTests() {
     inner class MixedMode {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is not mocked, then it should go to the server")
         fun `should support mixed mode to execute request when no response is found locally`(
             title: String,
@@ -778,7 +777,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When mocked file does not exist, then the request should go to the server")
         fun `should support mixed mode to execute request when response file is not found locally`(
             title: String,
@@ -795,7 +794,7 @@ class StaticMockTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When several interceptors are stacked, " +
                 "then each should delegate to the next one requests it can't answer"

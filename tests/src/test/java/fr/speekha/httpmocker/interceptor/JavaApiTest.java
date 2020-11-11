@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import fr.speekha.httpmocker.Mode;
-import fr.speekha.httpmocker.builder.FileLoader;
+import fr.speekha.httpmocker.client.okhttp.OkHttpTests;
+import fr.speekha.httpmocker.client.okhttp.RecordTestsKt;
 import fr.speekha.httpmocker.io.HttpRequest;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
@@ -88,7 +89,7 @@ class JavaApiTest extends OkHttpTests {
             interceptor = new InterceptorBuilder()
                     .useDynamicMocks(this::getResponseDescriptor)
                     .decodeScenarioPathWith(policy)
-                    .loadFileWith((FileLoader) file -> getClass().getClassLoader().getResourceAsStream(file))
+                    .loadFileWith(file -> getClass().getClassLoader().getResourceAsStream(file))
                     .parseScenariosWith(mapper)
                     .setInterceptorStatus(Mode.ENABLED)
                     .saveScenarios(new File(RecordTestsKt.SAVE_FOLDER), policy)

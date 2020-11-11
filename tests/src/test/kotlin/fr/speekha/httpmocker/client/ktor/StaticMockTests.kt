@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor
+package fr.speekha.httpmocker.client.ktor
 
-import fr.speekha.httpmocker.HttpClientTester
+import fr.speekha.httpmocker.client.HttpClientTester
+import fr.speekha.httpmocker.client.StaticMockTests
 import io.ktor.client.statement.HttpResponse
+import org.junit.jupiter.api.DisplayName
 
-class DynamicMockKtor : HttpClientTester<HttpResponse> by KtorTests() {
-}
+@DisplayName("Static Mocks with OkHttp")
+class StaticMockTests : StaticMockTests<HttpResponse>(), HttpClientTester<HttpResponse> by KtorTests()

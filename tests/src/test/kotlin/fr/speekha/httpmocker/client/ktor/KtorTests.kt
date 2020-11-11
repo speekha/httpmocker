@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor
+package fr.speekha.httpmocker.client.ktor
 
-import fr.speekha.httpmocker.HttpClientTester
 import fr.speekha.httpmocker.Mode
-import fr.speekha.httpmocker.TestWithServer
+import fr.speekha.httpmocker.builder.FileLoader
+import fr.speekha.httpmocker.client.HttpClientTester
+import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
+import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
+import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.headers
@@ -29,6 +32,9 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readText
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import org.hamcrest.MatcherAssert
+import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 
 open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
@@ -76,7 +82,7 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
         assertEquals(expected, response.readText())
     }
 
-    override fun setupProvider(
+    override fun setupProviders(
         vararg callbacks: RequestCallback,
         status: Mode
     ) {
@@ -90,11 +96,51 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
         }
     }
 
+    override fun setupInterceptor(
+        mode: Mode,
+        loadingLambda: FileLoader,
+        mapper: Mapper,
+        delay: Long?,
+        vararg filingPolicy: FilingPolicy,
+        callback: RequestCallback?
+    ) {
+        client = mockableHttpClient(CIO) {
+            mock {
+                callback?.let { useDynamicMocks(it) }
+                filingPolicy.forEach { decodeScenarioPathWith(it) }
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                delay?.let { addFakeNetworkDelay(it) }
+                setInterceptorStatus(mode)
+            }
+            expectSuccess = false
+            followRedirects = false
+        }
+    }
+
     override suspend fun assertResponseBody(expected: String, response: HttpResponse) {
         assertEquals(expected, response.readText())
     }
 
+    override suspend fun assertResponseBodyStartsWith(expected: String, response: HttpResponse) {
+        MatcherAssert.assertThat(
+            response.readText(),
+            StringStartsWith(
+                expected
+            )
+        )
+    }
+
     override fun assertResponseCode(resultCode: HttpStatusCode, response: HttpResponse) {
         assertEquals(resultCode, response.status)
+    }
+
+    override fun assertHeaderEquals(expected: String, response: HttpResponse, header: String) {
+        assertEquals(expected, response.headers[header])
+    }
+
+    override fun assertContentType(type: String, subtype: String, response: HttpResponse) {
+        assertEquals("application", response.contentType()?.contentType)
+        assertEquals("json", response.contentType()?.contentSubtype)
     }
 }

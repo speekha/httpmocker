@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.interceptor
+package fr.speekha.httpmocker.client.okhttp
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
@@ -101,7 +101,7 @@ class RecordTests : OkHttpTests() {
     inner class PolicyTest : RecorderTestSuite {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a recording policy is set, then it should be used")
         fun `should use recording policy`(
             title: String,
@@ -128,7 +128,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a recording policy is set as lambda, then it should be used")
         fun `should use recording policy as lambda`(
             title: String,
@@ -150,7 +150,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When no recording policy is set, then the read policy should be used")
         fun `should use read policy`(
             title: String,
@@ -174,7 +174,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When no policy is set at all, then a default Mirror path policy should be used")
         fun `should use default policy`(
             title: String,
@@ -206,7 +206,7 @@ class RecordTests : OkHttpTests() {
     @DisplayName("Given an mock interceptor in record mode")
     inner class InterceptionTest : RecorderTestSuite {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is recorded, then it should not be blocked")
         fun `should let requests through when recording`(
             title: String,
@@ -223,7 +223,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When recording a request fails, then it should not interfere with the request")
         fun `should let requests through when recording even if saving fails`(
             title: String,
@@ -240,7 +240,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails and errors are expected, " +
                 "then the error should be returned"
@@ -264,7 +264,7 @@ class RecordTests : OkHttpTests() {
     inner class RecordTest : RecorderTestSuite {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request, " +
                 "then scenario and response body files should be created in that folder"
@@ -284,7 +284,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request for a URL ending with a '/', " +
                 "then scenario files should be named with 'index'"
@@ -304,7 +304,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When recording a request, then content of scenario files should be correct")
         fun `should store requests and responses when recording`(
             title: String,
@@ -333,7 +333,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request or response with a null body, " +
                 "then body should be empty in scenario files"
@@ -366,7 +366,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a scenario already exists for a request, " +
                 "then the scenario should be completed with the new one"
@@ -406,7 +406,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body, " +
                 "then the file should have the proper extension"
@@ -428,7 +428,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with a mediatype charset, " +
                 "then the file should have the proper extension"
@@ -447,7 +447,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with unknwown mediatype, " +
                 "then the file should have the default extension"
@@ -466,7 +466,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When several matches exist for a request, " +
                 "then the body file should have the same index as the request in the scenario"
@@ -488,7 +488,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails with an exception, " +
                 "then the exception should be recorded"
@@ -522,7 +522,7 @@ class RecordTests : OkHttpTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a scenario with request body, " +
                 "then the corresponding scenario should be usable as is"
