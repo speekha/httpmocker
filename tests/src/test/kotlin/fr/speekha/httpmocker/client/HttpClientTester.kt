@@ -18,19 +18,24 @@ package fr.speekha.httpmocker.client
 
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.FileLoader
+import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.HttpStatusCode
 
-interface HttpClientTester<Response> {
+interface HttpClientTester<Response, Client> {
 
-    fun setupProviders(
+    var client: Client
+
+    val extraHeaders: List<Header>
+
+    fun setupDynamicConf(
         vararg callbacks: RequestCallback,
         status: Mode = Mode.ENABLED
     )
 
-    fun setupInterceptor(
+    fun setupStaticConf(
         mode: Mode,
         loadingLambda: FileLoader,
         mapper: Mapper,
@@ -39,12 +44,24 @@ interface HttpClientTester<Response> {
         callback: RequestCallback? = null
     )
 
+    fun setupRecordConf(
+        mapper: Mapper,
+        loadingLambda: FileLoader,
+        rootFolder: String = SAVE_FOLDER,
+        failOnError: Boolean = false,
+        fileType: String
+    )
+
+    fun setupRecordPolicyConf(mapper: Mapper, readPolicy: FilingPolicy?, writePolicy: FilingPolicy?)
+
     fun enqueueServerResponseTmp(
         responseCode: Int,
         responseBody: String?,
         headers: List<Pair<String, String>> = listOf(),
         contentType: String? = null
     )
+
+    fun changeMockerStatus(mode: Mode)
 
     suspend fun executeRequest(
         url: String,
@@ -58,7 +75,12 @@ interface HttpClientTester<Response> {
         method: String = "GET",
         body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
-    )
+    ) {
+        assertResponseCode(
+            HttpStatusCode.NotFound,
+            executeRequest(url, method, body, headers)
+        )
+    }
 
     suspend fun checkResponseBody(
         expected: String,
@@ -68,10 +90,10 @@ interface HttpClientTester<Response> {
         headers: List<Pair<String, String>> = emptyList()
     )
 
-
     suspend fun assertResponseBody(expected: String, response: Response)
     suspend fun assertResponseBodyStartsWith(expected: String, response: Response)
     fun assertResponseCode(resultCode: HttpStatusCode, response: Response)
     fun assertHeaderEquals(expected: String, response: Response, header: String)
     fun assertContentType(type: String, subtype: String, response: Response)
+    fun assertFilesExist(vararg path: String)
 }

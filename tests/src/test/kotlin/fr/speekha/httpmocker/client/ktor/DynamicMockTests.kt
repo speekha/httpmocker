@@ -18,8 +18,11 @@ package fr.speekha.httpmocker.client.ktor
 
 import fr.speekha.httpmocker.client.DynamicMockTests
 import fr.speekha.httpmocker.client.HttpClientTester
+import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Dynamic Mocks with Ktor")
-class DynamicMockTests : DynamicMockTests<HttpResponse>(), HttpClientTester<HttpResponse> by KtorTests()
+class DynamicMockTests :
+    DynamicMockTests<HttpResponse, HttpClient>(),
+    HttpClientTester<HttpResponse, HttpClient> by KtorTests()

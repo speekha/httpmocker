@@ -32,16 +32,16 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
+abstract class DynamicMockTests<Response, Client> : HttpClientTester<Response, Client> {
 
     @Nested
-    @DisplayName("Given an mock interceptor that is disabled")
+    @DisplayName("Given a mock interceptor that is disabled")
     inner class DisabledInterceptor {
 
         @Test
         @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() = runBlocking {
-            setupProviders({ null }, status = DISABLED)
+            setupDynamicConf({ null }, status = DISABLED)
             enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
 
             val response = executeRequest("/")
@@ -57,7 +57,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         @Test
         @DisplayName("When no response is provided, then a 404 error should occur")
         fun `should return a 404 error when response is not found`() = runBlocking {
-            setupProviders({ null })
+            setupDynamicConf({ null })
 
             check404Response("/unknown")
         }
@@ -66,7 +66,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         @DisplayName("When an error occurs while answering a request, then the exception should be let through")
         fun `should let exceptions through when they occur`() {
             runBlocking {
-                setupProviders({ error("Unexpected error") })
+                setupDynamicConf({ error("Unexpected error") })
 
                 assertThrows<IllegalStateException>("Unexpected error") {
                     executeRequest("/unknown")
@@ -80,7 +80,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             val resultCode = 202
             val body = "some random body"
 
-            setupProviders({
+            setupDynamicConf({
                 ResponseDescriptor(code = resultCode, body = body)
             })
             val response = executeRequest(url)
@@ -94,7 +94,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         fun `should reply with a stateful callback`() = runBlocking {
             val resultCode = 201
             val body = "Time: ${System.currentTimeMillis()}"
-            setupProviders({ ResponseDescriptor(code = resultCode, body = body) })
+            setupDynamicConf({ ResponseDescriptor(code = resultCode, body = body) })
 
             val response = executeRequest(url)
 
@@ -111,12 +111,13 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             val result1 = "First mock"
             val result2 = "Second mock"
 
-            setupProviders(
+            setupDynamicConf(
                 { request ->
                     ResponseDescriptor(body = result1).takeIf {
                         request.path.contains("1")
                     }
-                }, {
+                },
+                {
                     ResponseDescriptor(body = result2)
                 }
             )
@@ -135,7 +136,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
         fun `should support exception results`() {
             runBlocking {
 
-                setupProviders({
+                setupDynamicConf({
                     error("Should throw an error")
                 })
 
@@ -150,7 +151,7 @@ abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
             "When 2 request are executed simultaneously then proper responses are returned"
         )
         fun `should synchronize loadResponse`() {
-            setupProviders({
+            setupDynamicConf({
                 ResponseDescriptor(body = "body${it.path.last()}")
             })
             repeat(1000) {

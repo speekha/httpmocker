@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor
+package fr.speekha.httpmocker.client
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
@@ -35,9 +35,10 @@ import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
-import fr.speekha.httpmocker.policies.MirrorPathPolicy
+import fr.speekha.httpmocker.readAsString
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
+import fr.speekha.httpmocker.withFile
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.runBlocking
@@ -54,15 +55,13 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.ArrayList
 import java.util.Collections
 
 @Suppress("UNUSED_PARAMETER")
-@DisplayName("Record tests with Ktor")
-class RecordTests : KtorTests() {
+abstract class RecordTests<Response, Client> : HttpClientTester<Response, Client> {
 
     @Nested
-    @DisplayName("Given an mock interceptor with no recorder set")
+    @DisplayName("Given a mock interceptor with no recorder set")
     inner class NoRecorderSet {
         private lateinit var client: HttpClient
 
@@ -97,112 +96,73 @@ class RecordTests : KtorTests() {
     }
 
     @Nested
-    @DisplayName("Given an mock interceptor")
+    @DisplayName("Given a mock interceptor")
     inner class PolicyTest : RecorderTestSuite {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a recording policy is set, then it should be used")
         fun `should use recording policy`(
             title: String,
             mapper: Mapper,
             fileType: String
-        ) = runBlocking {
-            val policy: FilingPolicy = mock {
-                on { getPath(any()) } doReturn "record_policy.$fileType"
-            }
-
-            testInterceptor {
-                mockableHttpClient(CIO) {
-                    mock {
-                        decodeScenarioPathWith {
-                            "wrongPolicy.$fileType"
-                        }
-                        parseScenariosWith(mapper)
-                        recordScenariosIn(SAVE_FOLDER) with policy
-                        failOnRecordingError(true)
-                        setInterceptorStatus(RECORD)
-                    }
+        ) {
+            runBlocking {
+                val policy: FilingPolicy = mock {
+                    on { getPath(any()) } doReturn "record_policy.$fileType"
                 }
+
+                testInterceptor(mapper, { "wrongPolicy.$fileType" }, policy)
+                assertFilesExist("$SAVE_FOLDER/record_policy.$fileType", requestBodyFile)
+                verify(policy).getPath(any())
             }
-            assertFilesExist("$SAVE_FOLDER/record_policy.$fileType", requestBodyFile)
-            verify(policy).getPath(any())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a recording policy is set as lambda, then it should be used")
         fun `should use recording policy as lambda`(
             title: String,
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            testInterceptor {
-                mockableHttpClient(CIO) {
-                    mock {
-                        decodeScenarioPathWith {
-                            "wrongPolicy.$fileType"
-                        }
-                        parseScenariosWith(mapper)
-                        recordScenariosIn(SAVE_FOLDER) with { "lambda_policy.$fileType" }
-                        failOnRecordingError(true)
-                        setInterceptorStatus(RECORD)
-                    }
-                }
-            }
+            testInterceptor(mapper, { "wrongPolicy.$fileType" }, { "lambda_policy.$fileType" })
             assertFilesExist("$SAVE_FOLDER/lambda_policy.$fileType", requestBodyFile)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When no recording policy is set, then the read policy should be used")
         fun `should use read policy`(
             title: String,
             mapper: Mapper,
             fileType: String
-        ) = runBlocking {
-            val policy: FilingPolicy = mock {
-                on { getPath(any()) } doReturn "read_policy.$fileType"
-            }
-            testInterceptor {
-                mockableHttpClient(CIO) {
-                    mock {
-                        decodeScenarioPathWith(policy)
-                        parseScenariosWith(mapper)
-                        recordScenariosIn(SAVE_FOLDER)
-                        failOnRecordingError(true)
-                        setInterceptorStatus(RECORD)
-                    }
+        ) {
+            runBlocking {
+                val policy: FilingPolicy = mock {
+                    on { getPath(any()) } doReturn "read_policy.$fileType"
                 }
+                testInterceptor(mapper, policy, null)
+                assertFilesExist("$SAVE_FOLDER/read_policy.$fileType", requestBodyFile)
+                verify(policy).getPath(any())
             }
-            assertFilesExist("$SAVE_FOLDER/read_policy.$fileType", requestBodyFile)
-            verify(policy).getPath(any())
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When no policy is set at all, then a default Mirror path policy should be used")
         fun `should use default policy`(
             title: String,
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            testInterceptor {
-                mockableHttpClient(CIO) {
-                    mock {
-                        parseScenariosWith(mapper)
-                        recordScenariosIn(SAVE_FOLDER)
-                        failOnRecordingError(true)
-                        setInterceptorStatus(RECORD)
-                    }
-                }
-            }
+            testInterceptor(mapper, null, null)
             assertFilesExist("$SAVE_FOLDER/request.$fileType", requestBodyFile)
         }
 
-        private suspend fun testInterceptor(buildInterceptor: () -> HttpClient) {
-            enqueueServerResponse(200, "body", ArrayList(), null)
-            client = buildInterceptor()
+        private suspend fun testInterceptor(mapper: Mapper, readPolicy: FilingPolicy?, writePolicy: FilingPolicy?) {
+            enqueueServerResponseTmp(200, "body")
+            setupRecordPolicyConf(mapper, readPolicy, writePolicy)
             executeRequest(requestUrl)
         }
 
@@ -210,24 +170,24 @@ class RecordTests : KtorTests() {
     }
 
     @Nested
-    @DisplayName("Given an mock interceptor in record mode")
+    @DisplayName("Given a mock interceptor in record mode")
     inner class InterceptionTest : RecorderTestSuite {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is recorded, then it should not be blocked")
         fun `should let requests through when recording`(
             title: String,
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponseTmp(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
 
             checkResponseBody("body", recordRequestUrl)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a response with multiple lines is recorded, then all lines should be read")
         fun `should let response with multiple lines through when recording`(
             title: String,
@@ -235,28 +195,28 @@ class RecordTests : KtorTests() {
             fileType: String
         ) = runBlocking {
             val body = "line 1\nline 2\n".repeat(100)
-            enqueueServerResponse(200, body)
+            enqueueServerResponseTmp(200, body)
             setUpInterceptor(mapper, fileType = fileType)
 
             checkResponseBody(body, recordRequestUrl)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When recording a request fails, then it should not interfere with the request")
         fun `should let requests through when recording even if saving fails`(
             title: String,
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponseTmp(200, "body")
             setUpInterceptor(mapper, "", false, fileType)
 
             checkResponseBody("body", recordRequestUrl)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails and errors are expected, " +
                 "then the error should be returned"
@@ -266,7 +226,7 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponseTmp(200, "body")
             setUpInterceptor(mapper, "", true, fileType)
 
             assertThrows<FileNotFoundException> {
@@ -276,11 +236,11 @@ class RecordTests : KtorTests() {
     }
 
     @Nested
-    @DisplayName("Given an mock interceptor in record mode with a root folder")
+    @DisplayName("Given a mock interceptor in record mode with a root folder")
     inner class RecordTest : RecorderTestSuite {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request, " +
                 "then scenario and response body files should be created in that folder"
@@ -290,17 +250,17 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponseTmp(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(recordRequestUrl)
 
-            assertFileExists("$SAVE_FOLDER/record/request.$fileType")
-            assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
+            assertFilesExist("$SAVE_FOLDER/record/request.$fileType")
+            assertFilesExist("$SAVE_FOLDER/record/request_body_0.txt")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request for a URL ending with a '/', " +
                 "then scenario files should be named with 'index'"
@@ -310,24 +270,24 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponseTmp(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/")
 
-            assertFileExists("$SAVE_FOLDER/record/index.$fileType")
-            assertFileExists("$SAVE_FOLDER/record/index_body_0.txt")
+            assertFilesExist("$SAVE_FOLDER/record/index.$fileType")
+            assertFilesExist("$SAVE_FOLDER/record/index_body_0.txt")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When recording a request, then content of scenario files should be correct")
         fun `should store requests and responses when recording`(
             title: String,
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
+            enqueueServerResponseTmp(200, "body", listOf("someKey" to "someValue"))
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(
@@ -349,7 +309,7 @@ class RecordTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request or response with a null body, " +
                 "then body should be empty in scenario files"
@@ -359,7 +319,7 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, null)
+            enqueueServerResponseTmp(200, null)
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(requestUrl)
@@ -369,10 +329,7 @@ class RecordTests : KtorTests() {
                 val expectedResult = Matcher(
                     RequestTemplate(
                         method = "GET",
-                        headers = listOf(
-                            Header("Accept-Charset", "UTF-8"),
-                            Header("Accept", "*/*")
-                        )
+                        headers = extraHeaders
                     ),
                     ResponseDescriptor(
                         code = 200,
@@ -388,7 +345,7 @@ class RecordTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a scenario already exists for a request, " +
                 "then the scenario should be completed with the new one"
@@ -398,8 +355,8 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
-            enqueueServerResponse(200, "second body")
+            enqueueServerResponseTmp(200, "body", listOf("someKey" to "someValue"))
+            enqueueServerResponseTmp(200, "second body")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(
@@ -428,7 +385,7 @@ class RecordTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body, " +
                 "then the file should have the proper extension"
@@ -438,19 +395,19 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body", contentType = "image/png")
-            enqueueServerResponse(200, "body", contentType = "application/json")
+            enqueueServerResponseTmp(200, "body", contentType = "image/png")
+            enqueueServerResponseTmp(200, "body", contentType = "application/json")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/request1")
             executeRequest("record/request2")
 
-            assertFileExists("$SAVE_FOLDER/record/request1_body_0.png")
-            assertFileExists("$SAVE_FOLDER/record/request2_body_0.json")
+            assertFilesExist("$SAVE_FOLDER/record/request1_body_0.png")
+            assertFilesExist("$SAVE_FOLDER/record/request2_body_0.json")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with a mediatype charset, " +
                 "then the file should have the proper extension"
@@ -460,16 +417,16 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body", contentType = "application/json; charset=UTF-8")
+            enqueueServerResponseTmp(200, "body", contentType = "application/json; charset=UTF-8")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/request1")
 
-            assertFileExists("$SAVE_FOLDER/record/request1_body_0.json")
+            assertFilesExist("$SAVE_FOLDER/record/request1_body_0.json")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with unknwown mediatype, " +
                 "then the file should have the default extension"
@@ -479,16 +436,16 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body", contentType = "unknown/no-type")
+            enqueueServerResponseTmp(200, "body", contentType = "unknown/no-type")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/request1")
 
-            assertFileExists("$SAVE_FOLDER/record/request1_body_0.txt")
+            assertFilesExist("$SAVE_FOLDER/record/request1_body_0.txt")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When several matches exist for a request, " +
                 "then the body file should have the same index as the request in the scenario"
@@ -498,19 +455,19 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body", contentType = "image/png")
-            enqueueServerResponse(200, "body", contentType = "application/json")
+            enqueueServerResponseTmp(200, "body", contentType = "image/png")
+            enqueueServerResponseTmp(200, "body", contentType = "application/json")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(recordRequestUrl)
             executeRequest(recordRequestUrl)
 
-            assertFileExists("$SAVE_FOLDER/record/request_body_0.png")
-            assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
+            assertFilesExist("$SAVE_FOLDER/record/request_body_0.png")
+            assertFilesExist("$SAVE_FOLDER/record/request_body_1.json")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails with an exception, " +
                 "then the exception should be recorded"
@@ -522,20 +479,17 @@ class RecordTests : KtorTests() {
         ) = runBlocking {
             setUpInterceptor(mapper, fileType = fileType)
 
-            val exception = assertThrows<java.nio.channels.UnresolvedAddressException> {
+            val exception = checkIoException {
                 executeRequest("http://falseUrl.wrong/record/error")
             }
 
-            assertFileExists(fileName("record/error", fileType))
+            assertFilesExist(fileName("record/error", fileType))
             withFile(fileName("record/error", fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     request = RequestTemplate(
                         method = "GET",
-                        headers = listOf(
-                            Header("Accept-Charset", "UTF-8"),
-                            Header("Accept", "*/*")
-                        )
+                        headers = extraHeaders
                     ),
                     error = NetworkError(
                         exceptionType = exception.javaClass.canonicalName,
@@ -547,7 +501,7 @@ class RecordTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a scenario with request body, " +
                 "then the corresponding scenario should be usable as is"
@@ -557,14 +511,14 @@ class RecordTests : KtorTests() {
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponse(200, "body")
+            enqueueServerResponseTmp(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
             executeRequest(
                 url = recordRequestUrl,
                 method = "POST",
                 body = """{"some Json content": "some random value"}"""
             )
-            (client.engine as MockEngine).mode = ENABLED
+            changeMockerStatus(ENABLED)
             checkResponseBody(
                 expected = "body",
                 url = recordRequestUrl,
@@ -573,6 +527,8 @@ class RecordTests : KtorTests() {
             )
         }
     }
+
+    abstract suspend fun checkIoException(block: suspend () -> Unit): Throwable
 
     private val requestUrl = "request"
 
@@ -588,20 +544,7 @@ class RecordTests : KtorTests() {
             on { invoke(any()) } doAnswer { File(SAVE_FOLDER, it.getArgument<String>(0)).inputStream() }
         }
 
-        client = mockableHttpClient(CIO) {
-            mock {
-                decodeScenarioPathWith {
-                    val path = it.path
-                    (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
-                        .drop(1)
-                }
-                loadFileWith(loadingLambda)
-                parseScenariosWith(mapper)
-                recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
-                failOnRecordingError(failOnError)
-                setInterceptorStatus(RECORD)
-            }
-        }
+        setupRecordConf(mapper, loadingLambda, rootFolder, failOnError, fileType)
     }
 
     private fun fileName(path: String, fileType: String) = "$SAVE_FOLDER/$path.$fileType"
@@ -609,7 +552,7 @@ class RecordTests : KtorTests() {
     private fun requestWithNoParams() = Matcher(
         RequestTemplate(
             method = "GET",
-            headers = listOf(Header("Accept-Charset", "UTF-8"), Header("Accept", "*/*"))
+            headers = extraHeaders
         ),
         ResponseDescriptor(
             code = 200,
@@ -628,10 +571,8 @@ class RecordTests : KtorTests() {
             body = "\\QrequestBody\\E",
             params = mapOf("param1" to "value1"),
             headers = listOf(
-                Header("someHeader", "someValue"),
-                Header("Accept-Charset", "UTF-8"),
-                Header("Accept", "*/*")
-            )
+                Header("someHeader", "someValue")
+            ) + extraHeaders
         ),
         ResponseDescriptor(
             code = 200,

@@ -53,13 +53,13 @@ import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
 @DisplayName("Static Mocks with Ktor")
-abstract class StaticMockTests<Response> : HttpClientTester<Response> {
+abstract class StaticMockTests<Response, Client> : HttpClientTester<Response, Client> {
 
-    private val loadingLambda: (String) -> InputStream? = mock {
+    protected val loadingLambda: (String) -> InputStream? = mock {
         on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
     }
 
-    private lateinit var filingPolicy: FilingPolicy
+    protected lateinit var filingPolicy: FilingPolicy
 
     @Nested
     @DisplayName("Given an enabled mock interceptor with static scenarios")
@@ -203,7 +203,8 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
 
             assertResponseBodyStartsWith(
                 "java.lang.IllegalStateException: Loading error\n" +
-                    "\tat fr.speekha.httpmocker.client.", response
+                    "\tat fr.speekha.httpmocker.client.",
+                response
             )
         }
 
@@ -258,7 +259,7 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
 
             initFilingPolicy(type)
 
-            setupInterceptor(ENABLED, loadingLambda, mapper, null, filingPolicy) { request ->
+            setupStaticConf(ENABLED, loadingLambda, mapper, null, filingPolicy) { request ->
                 ResponseDescriptor(body = result1).takeIf {
                     request.path.contains("dynamic")
                 }
@@ -436,7 +437,7 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
     inner class DefaultPolicy {
 
         private fun setupInterceptor(mapper: Mapper, type: String) {
-            setupInterceptor(ENABLED, loadingLambda, mapper)
+            setupStaticConf(ENABLED, loadingLambda, mapper)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -458,7 +459,7 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
     inner class UrlMatching {
 
         fun setupInterceptor(scenarioFile: String, mapper: Mapper, type: String) {
-            setupInterceptor(ENABLED, loadingLambda, mapper, null, SingleFilePolicy("$scenarioFile.$type"))
+            setupStaticConf(ENABLED, loadingLambda, mapper, null, SingleFilePolicy("$scenarioFile.$type"))
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -517,7 +518,7 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
                 on { this.getPath(any()) } doReturn "incorrect"
             }
 
-            setupInterceptor(ENABLED, loadingLambda, mapper, null, policy1, policy2)
+            setupStaticConf(ENABLED, loadingLambda, mapper, null, policy1, policy2)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -554,6 +555,7 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
 
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
+        @DisplayName("When a request is answered, then it should match the HTTP method")
         fun `should take http method into account`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
@@ -711,10 +713,10 @@ abstract class StaticMockTests<Response> : HttpClientTester<Response> {
     ) {
         initFilingPolicy(type)
 
-        this.setupInterceptor(mode, loadingLambda, mapper, delay, filingPolicy)
+        this.setupStaticConf(mode, loadingLambda, mapper, delay, filingPolicy)
     }
 
-    private fun initFilingPolicy(fileType: String) {
+    protected fun initFilingPolicy(fileType: String) {
         filingPolicy = mock {
             on { getPath(any()) } doAnswer {
                 val path = it.getArgument<HttpRequest>(0).path
