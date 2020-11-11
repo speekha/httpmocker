@@ -51,16 +51,16 @@ class JavaApiTest extends OkHttpTests {
         @DisplayName("Then dynamic mocks should work properly")
         public void shouldUseDynamicMocksWithJavaApi() throws IOException {
             initInterceptor(getFilingPolicy());
-            Response response = executeRequest("/dynamic");
+            Response response = executeRequestSync("/dynamic");
             Assertions.assertEquals("dynamic", response.body().string());
         }
 
         @Test
         @DisplayName("Then static mocks should work properly")
-        public void shouldUseStaticMocksWithJavaApi() throws IOException {
+        public void shouldUseStaticMocksWithJavaApi() {
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
-            executeRequest("/static");
+            executeRequestSync("/static");
             HttpRequest request = new HttpRequest("GET", "http", "127.0.0.1", getServer().getPort(), "/static");
             Mockito.verify(filingPolicy).getPath(request);
         }
@@ -68,12 +68,12 @@ class JavaApiTest extends OkHttpTests {
 
         @Test
         @DisplayName("Then recording should work properly")
-        public void shouldRecordWithJavaApi() throws IOException {
+        public void shouldRecordWithJavaApi() {
             enqueueServerResponse(200, "body", new ArrayList<>(), null);
             FilingPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             getInterceptor().setMode(Mode.RECORD);
-            executeRequest("record/request");
+            executeRequestSync("record/request");
             assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request.json");
             assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request_body_0.txt");
         }

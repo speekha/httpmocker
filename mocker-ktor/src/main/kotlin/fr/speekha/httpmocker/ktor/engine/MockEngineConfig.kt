@@ -20,6 +20,7 @@ import fr.speekha.httpmocker.builder.ConfigBuilder
 import fr.speekha.httpmocker.builder.Configurator
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.HttpClientEngineConfig
+import java.io.File
 
 class MockEngineConfig
 private constructor(internal val configBuilder: ConfigBuilder) :
@@ -28,4 +29,7 @@ private constructor(internal val configBuilder: ConfigBuilder) :
     constructor() : this(ConfigBuilder())
 
     lateinit var delegate: HttpClientEngine
+
+    val saveFolder: File?
+        get() = configBuilder.recorder?.rootFolder
 }

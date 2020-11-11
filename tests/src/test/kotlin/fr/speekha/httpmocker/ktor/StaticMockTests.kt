@@ -34,8 +34,7 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpMethod
+import io.ktor.client.statement.readText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -75,7 +74,7 @@ class StaticMockTests : KtorTests() {
         fun `should delegate path resolutions`(title: String, mapper: Mapper, type: String) {
             runBlocking {
                 setUpInterceptor(ENABLED, mapper, type)
-                executeRequest<HttpResponse>(URL_SIMPLE_REQUEST)
+                executeRequest(URL_SIMPLE_REQUEST)
 
                 verify(filingPolicy).getPath(argThat { this.path == URL_SIMPLE_REQUEST })
             }
@@ -201,7 +200,7 @@ class StaticMockTests : KtorTests() {
             }
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest<String>("/unknown")
+            val response = executeRequest("/unknown").readText()
 
             MatcherAssert.assertThat(
                 response,
@@ -222,7 +221,7 @@ class StaticMockTests : KtorTests() {
         ) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest<HttpResponse>(URL_SIMPLE_REQUEST)
+            val response = executeRequest(URL_SIMPLE_REQUEST)
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -240,9 +239,10 @@ class StaticMockTests : KtorTests() {
         ) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest<HttpResponse>(URL_SIMPLE_REQUEST)
+            val response = executeRequest(URL_SIMPLE_REQUEST)
 
-            assertResponseBody(REQUEST_SIMPLE_BODY, response)
+            assertEquals(REQUEST_SIMPLE_BODY, response.readText())
+            Unit
         }
     }
 
@@ -365,7 +365,7 @@ class StaticMockTests : KtorTests() {
         fun `should return proper headers`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest<HttpResponse>(URL_SIMPLE_REQUEST)
+            val response = executeRequest(URL_SIMPLE_REQUEST)
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals("simple header", response.headers["testHeader"])
@@ -380,7 +380,7 @@ class StaticMockTests : KtorTests() {
         fun `should handle redirects`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest<HttpResponse>("/redirect")
+            val response = executeRequest("/redirect")
 
             assertEquals(HttpStatusCode.Found, response.status)
             assertEquals("http://www.google.com", response.headers["Location"])
@@ -395,7 +395,7 @@ class StaticMockTests : KtorTests() {
         fun `should handle media type`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest<HttpResponse>("/mediatype")
+            val response = executeRequest("/mediatype")
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals("application", response.contentType()?.contentType)
@@ -413,7 +413,7 @@ class StaticMockTests : KtorTests() {
             setUpInterceptor(ENABLED, mapper, type, 50)
 
             val delay = measureTimeMillis {
-                executeRequest<HttpResponse>(URL_SIMPLE_REQUEST)
+                executeRequest(URL_SIMPLE_REQUEST)
             }
 
             val threshold = 50
@@ -434,11 +434,11 @@ class StaticMockTests : KtorTests() {
             setUpInterceptor(ENABLED, mapper, type)
 
             val delay = measureTimeMillis {
-                executeRequest<HttpResponse>("/delay")
+                executeRequest("/delay")
             }
 
             val noDelay = measureTimeMillis {
-                executeRequest<HttpResponse>(URL_SIMPLE_REQUEST)
+                executeRequest(URL_SIMPLE_REQUEST)
             }
 
             val threshold = 50
@@ -595,9 +595,9 @@ class StaticMockTests : KtorTests() {
             setUpInterceptor(ENABLED, mapper, type)
 
             checkResponseBody("get", URL_METHOD)
-            checkResponseBody("post", URL_METHOD, HttpMethod.Post, "")
-            checkResponseBody("put", URL_METHOD, HttpMethod.Put, "")
-            checkResponseBody("delete", URL_METHOD, HttpMethod.Delete, "")
+            checkResponseBody("post", URL_METHOD, "POST", "")
+            checkResponseBody("put", URL_METHOD, "PUT", "")
+            checkResponseBody("delete", URL_METHOD, "DELETE", "")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -634,8 +634,8 @@ class StaticMockTests : KtorTests() {
         fun `should select response based on headers`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val noHeaders = executeRequest<HttpResponse>(URL_HEADERS)
-            val headers = executeRequest<HttpResponse>(
+            val noHeaders = executeRequest(URL_HEADERS)
+            val headers = executeRequest(
                 URL_HEADERS,
                 headers = listOf(
                     "header1" to "1",
@@ -643,19 +643,20 @@ class StaticMockTests : KtorTests() {
                     "header2" to "3"
                 )
             )
-            val header1 = executeRequest<HttpResponse>(
+            val header1 = executeRequest(
                 URL_HEADERS,
                 headers = listOf("header1" to "1")
             )
-            val header2 = executeRequest<HttpResponse>(
+            val header2 = executeRequest(
                 URL_HEADERS,
                 headers = listOf("header2" to "2")
             )
 
-            assertResponseBody("no header", noHeaders)
-            assertResponseBody("with header 1", header1)
-            assertResponseBody("with header 2", header2)
-            assertResponseBody("with headers", headers)
+            assertEquals("no header", noHeaders.readText())
+            assertEquals("with header 1", header1.readText())
+            assertEquals("with header 2", header2.readText())
+            assertEquals("with headers", headers.readText())
+            Unit
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -682,8 +683,8 @@ class StaticMockTests : KtorTests() {
         ) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            checkResponseBody("matched", "/body_matching", HttpMethod.Post, "azer1zere")
-            checkResponseBody("no match", "/body_matching", HttpMethod.Post, "azerzere")
+            checkResponseBody("matched", "/body_matching", "POST", "azer1zere")
+            checkResponseBody("no match", "/body_matching", "POST", "azerzere")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")

@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.interceptor
 
 import fr.speekha.httpmocker.TestWithServer
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
+import kotlinx.coroutines.runBlocking
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -37,8 +38,7 @@ open class OkHttpTests : TestWithServer() {
         Assertions.assertEquals(message, response.message)
     }
 
-    @JvmOverloads
-    protected fun executeRequest(
+    fun executeRequest(
         url: String,
         method: String = "GET",
         body: String? = null,
@@ -49,7 +49,16 @@ open class OkHttpTests : TestWithServer() {
     }
 
     @JvmOverloads
-    fun buildRequest(
+    fun executeRequestSync(
+        url: String,
+        method: String = "GET",
+        body: String? = null,
+        headers: List<Pair<String, String>> = emptyList()
+    ): Response = runBlocking {
+        executeRequest(url, method, body, headers)
+    }
+
+    private fun buildRequest(
         url: String,
         headers: List<Pair<String, String>> = emptyList(),
         method: String = "GET",
@@ -62,7 +71,7 @@ open class OkHttpTests : TestWithServer() {
             .build()
     }
 
-    protected fun check404Response(
+    fun check404Response(
         url: String,
         method: String = "GET",
         body: String? = null,
@@ -71,7 +80,7 @@ open class OkHttpTests : TestWithServer() {
         assertResponseCode(executeRequest(url, method, body, headers), 404, "Not Found")
     }
 
-    protected fun checkResponseBody(
+    fun checkResponseBody(
         expected: String,
         url: String,
         method: String = "GET",

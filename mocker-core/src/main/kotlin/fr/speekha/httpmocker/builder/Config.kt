@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.builder
 
 import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.io.RequestWriter
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.ScenarioProvider
 import fr.speekha.httpmocker.serialization.Mapper
@@ -31,7 +32,8 @@ data class Config internal constructor(
     val simulatedDelay: Long,
     var status: Mode,
     val showSavingErrors: Boolean,
-    val providers: List<ScenarioProvider>
+    val providers: List<ScenarioProvider>,
+    val requestWriter: RequestWriter?
 ) {
     constructor() : this(
         filingPolicy = emptyList(),
@@ -40,7 +42,8 @@ data class Config internal constructor(
         simulatedDelay = 0,
         status = Mode.DISABLED,
         showSavingErrors = false,
-        providers = emptyList()
+        providers = emptyList(),
+        requestWriter = null
     )
 
     operator fun plus(policy: FilingPolicy) = copy(filingPolicy = filingPolicy + policy)

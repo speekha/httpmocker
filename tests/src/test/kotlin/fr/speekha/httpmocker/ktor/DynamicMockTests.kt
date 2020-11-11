@@ -16,16 +16,14 @@
 
 package fr.speekha.httpmocker.ktor
 
-import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.HttpClientTester
 import fr.speekha.httpmocker.Mode.DISABLED
-import fr.speekha.httpmocker.Mode.ENABLED
+import fr.speekha.httpmocker.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.assertThrows
-import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.url
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readText
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +38,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("Dynamic Mocks with Ktor")
-class DynamicMockTests : KtorTests() {
+class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
 
     @Nested
     @DisplayName("Given an mock interceptor that is disabled")
@@ -49,10 +47,10 @@ class DynamicMockTests : KtorTests() {
         @Test
         @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() = runBlocking {
-            setupProvider(DISABLED) { null }
-            enqueueServerResponse(REQUEST_OK_CODE, "body")
+            setupProvider({ null }, status = DISABLED)
+            enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
 
-            val response: String = executeRequest("/")
+            val response: String = executeRequest("/").readText()
 
             assertEquals("body", response)
         }
@@ -65,7 +63,7 @@ class DynamicMockTests : KtorTests() {
         @Test
         @DisplayName("When no response is provided, then a 404 error should occur")
         fun `should return a 404 error when response is not found`() = runBlocking {
-            setupProvider(ENABLED) { null }
+            setupProvider({ null })
 
             val response: HttpResponse = executeRequest("/unknown")
 
@@ -76,10 +74,10 @@ class DynamicMockTests : KtorTests() {
         @DisplayName("When an error occurs while answering a request, then the exception should be let through")
         fun `should let exceptions through when they occur`() {
             runBlocking {
-                setupProvider(ENABLED) { error("Unexpected error") }
+                setupProvider({ error("Unexpected error") })
 
                 assertThrows<IllegalStateException>("Unexpected error") {
-                    executeRequest<HttpResponse>("/unknown")
+                    executeRequest("/unknown")
                 }
             }
         }
@@ -89,13 +87,14 @@ class DynamicMockTests : KtorTests() {
         fun `should reply with a dynamically generated response`() = runBlocking {
             val resultCode = HttpStatusCode.Accepted
             val body = "some random body"
-            setupProvider {
+            setupProvider({
                 ResponseDescriptor(code = resultCode.value, body = body)
-            }
-            val response = executeRequest<HttpResponse>(url)
+            })
+            val response = executeRequest(url)
 
             assertEquals(resultCode, response.status)
-            assertResponseBody(body, response)
+            assertEquals(body, response.readText())
+            Unit
         }
 
         @Test
@@ -103,12 +102,13 @@ class DynamicMockTests : KtorTests() {
         fun `should reply with a stateful callback`() = runBlocking {
             val resultCode = 201
             val body = "Time: ${System.currentTimeMillis()}"
-            setupProvider { ResponseDescriptor(code = resultCode, body = body) }
+            setupProvider({ ResponseDescriptor(code = resultCode, body = body) })
 
-            val response = executeRequest<HttpResponse>(url)
+            val response = executeRequest(url)
 
             assertEquals(HttpStatusCode.Created, response.status)
-            assertResponseBody(body, response)
+            assertEquals(body, response.readText())
+            Unit
         }
 
         @Test
@@ -120,39 +120,38 @@ class DynamicMockTests : KtorTests() {
             val result1 = "First mock"
             val result2 = "Second mock"
 
-            client = mockableHttpClient(CIO) {
-                mock {
-                    useDynamicMocks { request ->
-                        ResponseDescriptor(body = result1).takeIf {
-                            request.path.contains("1")
-                        }
+            setupProvider(
+                { request ->
+                    ResponseDescriptor(body = result1).takeIf {
+                        request.path.contains("1")
                     }
-                    useDynamicMocks {
-                        ResponseDescriptor(body = result2)
-                    }
-                    setInterceptorStatus(ENABLED)
+                }, {
+                    ResponseDescriptor(body = result2)
                 }
-            }
+            )
 
-            val response1 = executeRequest<HttpResponse>("http://www.test.fr/request1")
-            val response2 = executeRequest<HttpResponse>("http://www.test.fr/request2")
+            val response1 = executeRequest("http://www.test.fr/request1")
+            val response2 = executeRequest("http://www.test.fr/request2")
 
-            assertResponseBody(result1, response1)
-            assertResponseBody(result2, response2)
+            assertEquals(result1, response1.readText())
+            assertEquals(result2, response2.readText())
+            Unit
         }
 
         @Test
         @DisplayName(
             "When the response is an error, then the proper exception should be thrown"
         )
-        fun `should support exception results`() = runBlocking {
+        fun `should support exception results`() {
+            runBlocking {
 
-            setupProvider {
-                error("Should throw an error")
-            }
+                setupProvider({
+                    error("Should throw an error")
+                })
 
-            assertThrows<IllegalStateException> {
-                executeRequest<HttpResponse>("http://www.test.fr/request1")
+                assertThrows<IllegalStateException> {
+                    executeRequest("http://www.test.fr/request1")
+                }
             }
         }
 
@@ -161,9 +160,9 @@ class DynamicMockTests : KtorTests() {
             "When 2 request are executed simultaneously then proper responses are returned"
         )
         fun `should synchronize loadResponse`() {
-            setupProvider(ENABLED) {
+            setupProvider({
                 ResponseDescriptor(body = "body${it.path.last()}")
-            }
+            })
             repeat(1000) {
                 testSimultaneousRequests()
             }
@@ -183,7 +182,7 @@ class DynamicMockTests : KtorTests() {
 
             runBlocking {
                 response.indices.forEach { i ->
-                    assertResponseBody("body$i", response[i] ?: fail("Response is null"))
+                    assertEquals("body$i", (response[i] ?: fail("Response is null")).readText())
                 }
             }
         }
@@ -191,18 +190,6 @@ class DynamicMockTests : KtorTests() {
         private suspend fun delayedRequest(lock: StateFlow<Boolean>, i: Int): HttpResponse {
             lock.first { it }
             return executeRequest("/request$i")
-        }
-    }
-
-    private fun setupProvider(
-        status: Mode = ENABLED,
-        callback: RequestCallback
-    ) {
-        client = mockableHttpClient(CIO) {
-            mock {
-                setInterceptorStatus(status)
-                useDynamicMocks(callback)
-            }
         }
     }
 }

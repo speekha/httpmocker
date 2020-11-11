@@ -20,13 +20,15 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.util.InternalAPI
 
-class MockEngineFactory : HttpClientEngineFactory<MockEngineConfig> {
+object MockClient : HttpClientEngineFactory<MockEngineConfig> {
 
+    @InternalAPI
     override fun create(block: MockEngineConfig.() -> Unit): HttpClientEngine {
         val config = MockEngineConfig().apply(block)
-        return MockEngine(config).apply {
-            if (mode == Mode.RECORD && config.configBuilder.recorder?.rootFolder == null) {
+        return MockEngine(config, config.delegate::execute).apply {
+            if (mode == Mode.RECORD && config.saveFolder == null) {
                 error(NO_ROOT_FOLDER_ERROR)
             }
         }

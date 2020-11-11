@@ -17,17 +17,14 @@
 package fr.speekha.httpmocker.ktor.io
 
 import fr.speekha.httpmocker.io.RequestWriter
-import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
-import io.ktor.util.InternalAPI
 
 class Recorder(
     private val writer: RequestWriter,
-    private val engine: HttpClientEngine
+    private val executor: suspend (HttpRequestData) -> HttpResponseData
 ) {
 
-    @InternalAPI
     suspend fun executeAndRecordCall(request: HttpRequestData): HttpResponseData {
         val (response, record) = executeCall(request)
         writer.saveFiles(record)
@@ -38,11 +35,10 @@ class Recorder(
         record.error?.let { throw it } ?: response?.withBody(record.body) ?: error("Response is null")
 
     @SuppressWarnings("TooGenericExceptionCaught")
-    @InternalAPI
     private suspend fun executeCall(request: HttpRequestData): Pair<HttpResponseData?, RequestWriter.CallRecord> {
         var response: HttpResponseData? = null
         val callRecord = try {
-            response = engine.execute(request)
+            response = executor(request)
             convertCallResult(request, response)
         } catch (e: Throwable) {
             RequestWriter.CallRecord(request.toModel(), error = e)
