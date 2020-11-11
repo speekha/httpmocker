@@ -60,7 +60,7 @@ internal fun HttpRequestData.toModel(): HttpRequest = HttpRequest(
     body = readBody()
 )
 
-internal fun ResponseDescriptor.toModel() = HttpResponseData(
+internal fun ResponseDescriptor.toKtorRequest() = HttpResponseData(
     statusCode = HttpStatusCode(code, messageForHttpCode(code)),
     requestTime = GMTDate(),
     headers = buildHeaders(),

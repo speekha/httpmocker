@@ -16,27 +16,32 @@
 
 package fr.speekha.httpmocker.ktor
 
+import fr.speekha.httpmocker.HttpClientTester
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.TestWithServer
-import fr.speekha.httpmocker.ktor.io.readBytes
+import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
+import fr.speekha.httpmocker.scenario.RequestCallback
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.headers
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readText
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import org.junit.jupiter.api.Assertions
 
-open class KtorTests : TestWithServer() {
+open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
 
     protected lateinit var client: HttpClient
 
-    protected suspend inline fun <reified T> executeRequest(
+    override suspend fun executeRequest(
         url: String,
-        method: HttpMethod = HttpMethod.Get,
-        body: String? = null,
-        headers: List<Pair<String, String>> = emptyList()
-    ): T = client.request(completeLocalUrl(url)) {
-        this.method = method
+        method: String,
+        body: String?,
+        headers: List<Pair<String, String>>
+    ): HttpResponse = client.request(completeLocalUrl(url)) {
+        this.method = HttpMethod.parse(method)
         body?.let {
             this.body = it
         }
@@ -47,31 +52,41 @@ open class KtorTests : TestWithServer() {
         }
     }
 
-    protected suspend fun check404Response(
+    override suspend fun check404Response(
         url: String,
-        method: HttpMethod = HttpMethod.Get,
-        body: String? = null,
-        headers: List<Pair<String, String>> = emptyList()
+        method: String,
+        body: String?,
+        headers: List<Pair<String, String>>
     ) {
         Assertions.assertEquals(
             HttpStatusCode.NotFound,
-            executeRequest<HttpResponse>(url, method, body, headers).status
+            executeRequest(url, method, body, headers).status
         )
     }
 
-    protected suspend fun checkResponseBody(
+    override suspend fun checkResponseBody(
         expected: String,
         url: String,
-        method: HttpMethod = HttpMethod.Get,
-        body: String? = null,
-        headers: List<Pair<String, String>> = emptyList()
+        method: String,
+        body: String?,
+        headers: List<Pair<String, String>>
     ) {
-        val response = executeRequest<HttpResponse>(url, method, body, headers)
+        val response = executeRequest(url, method, body, headers)
         Assertions.assertEquals(HttpStatusCode.OK, response.status)
-        assertResponseBody(expected, response)
+        Assertions.assertEquals(expected, response.readText())
     }
 
-    suspend fun assertResponseBody(expected: String, response: HttpResponse) {
-        Assertions.assertEquals(expected, String(response.content.readBytes()))
+    override fun setupProvider(
+        vararg callbacks: RequestCallback,
+        status: Mode
+    ) {
+        client = mockableHttpClient(CIO) {
+            mock {
+                setInterceptorStatus(status)
+                callbacks.forEach {
+                    useDynamicMocks(it)
+                }
+            }
+        }
     }
 }

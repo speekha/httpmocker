@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.ktor.builder
 
-import fr.speekha.httpmocker.ktor.engine.MockEngineFactory
+import fr.speekha.httpmocker.ktor.engine.MockClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -26,7 +26,7 @@ fun <T : HttpClientEngineConfig> mockableHttpClient(
     block: MockableClientConfiguration<T>.() -> Unit = {}
 ): HttpClient {
     val conf = MockableClientConfiguration<T>().apply(block)
-    return HttpClient(MockEngineFactory()) {
+    return HttpClient(MockClient) {
         conf.applyConfiguration(this)
         engine {
             conf.mockConfiguration(this)

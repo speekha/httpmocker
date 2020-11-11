@@ -106,7 +106,7 @@ class InterceptorBuilder {
     fun build(): MockResponseInterceptor = with(configBuilder.buildConfig()) {
         MockResponseInterceptor(
             providers,
-            configBuilder.buildRecorder(),
+            requestWriter,
             simulatedDelay
         ).apply {
             if (status == Mode.RECORD && configBuilder.recorder?.rootFolder == null) {

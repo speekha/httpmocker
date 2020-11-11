@@ -40,8 +40,6 @@ import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpMethod
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -205,7 +203,7 @@ class RecordTests : KtorTests() {
         private suspend fun testInterceptor(buildInterceptor: () -> HttpClient) {
             enqueueServerResponse(200, "body", ArrayList(), null)
             client = buildInterceptor()
-            executeRequest<HttpResponse>(requestUrl)
+            executeRequest(requestUrl)
         }
 
         private val requestBodyFile = "$SAVE_FOLDER/request_body_0.txt"
@@ -295,7 +293,7 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>(recordRequestUrl)
+            executeRequest(recordRequestUrl)
 
             assertFileExists("$SAVE_FOLDER/record/request.$fileType")
             assertFileExists("$SAVE_FOLDER/record/request_body_0.txt")
@@ -315,7 +313,7 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>("record/")
+            executeRequest("record/")
 
             assertFileExists("$SAVE_FOLDER/record/index.$fileType")
             assertFileExists("$SAVE_FOLDER/record/index_body_0.txt")
@@ -332,9 +330,9 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body", listOf("someKey" to "someValue"))
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>(
+            executeRequest(
                 "request?param1=value1",
-                HttpMethod.Post,
+                "POST",
                 "requestBody",
                 listOf("someHeader" to "someValue")
             )
@@ -364,7 +362,7 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, null)
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>(requestUrl)
+            executeRequest(requestUrl)
 
             withFile(fileName(requestUrl, fileType)) {
                 val result = mapper.readMatches(it)
@@ -404,13 +402,13 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "second body")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>(
+            executeRequest(
                 "request?param1=value1",
-                HttpMethod.Post,
+                "POST",
                 "requestBody",
                 listOf("someHeader" to "someValue")
             )
-            executeRequest<HttpResponse>(requestUrl)
+            executeRequest(requestUrl)
 
             withFile(fileName(requestUrl, fileType)) {
                 val result = mapper.readMatches(it)
@@ -444,8 +442,8 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body", contentType = "application/json")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>("record/request1")
-            executeRequest<HttpResponse>("record/request2")
+            executeRequest("record/request1")
+            executeRequest("record/request2")
 
             assertFileExists("$SAVE_FOLDER/record/request1_body_0.png")
             assertFileExists("$SAVE_FOLDER/record/request2_body_0.json")
@@ -465,7 +463,7 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body", contentType = "application/json; charset=UTF-8")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>("record/request1")
+            executeRequest("record/request1")
 
             assertFileExists("$SAVE_FOLDER/record/request1_body_0.json")
         }
@@ -484,7 +482,7 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body", contentType = "unknown/no-type")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>("record/request1")
+            executeRequest("record/request1")
 
             assertFileExists("$SAVE_FOLDER/record/request1_body_0.txt")
         }
@@ -504,8 +502,8 @@ class RecordTests : KtorTests() {
             enqueueServerResponse(200, "body", contentType = "application/json")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest<HttpResponse>(recordRequestUrl)
-            executeRequest<HttpResponse>(recordRequestUrl)
+            executeRequest(recordRequestUrl)
+            executeRequest(recordRequestUrl)
 
             assertFileExists("$SAVE_FOLDER/record/request_body_0.png")
             assertFileExists("$SAVE_FOLDER/record/request_body_1.json")
@@ -525,7 +523,7 @@ class RecordTests : KtorTests() {
             setUpInterceptor(mapper, fileType = fileType)
 
             val exception = assertThrows<java.nio.channels.UnresolvedAddressException> {
-                executeRequest<HttpResponse>("http://falseUrl.wrong/record/error")
+                executeRequest("http://falseUrl.wrong/record/error")
             }
 
             assertFileExists(fileName("record/error", fileType))
@@ -561,16 +559,16 @@ class RecordTests : KtorTests() {
         ) = runBlocking {
             enqueueServerResponse(200, "body")
             setUpInterceptor(mapper, fileType = fileType)
-            executeRequest<HttpResponse>(
+            executeRequest(
                 url = recordRequestUrl,
-                method = HttpMethod.Post,
+                method = "POST",
                 body = """{"some Json content": "some random value"}"""
             )
             (client.engine as MockEngine).mode = ENABLED
             checkResponseBody(
                 expected = "body",
                 url = recordRequestUrl,
-                method = HttpMethod.Post,
+                method = "POST",
                 body = """{"some Json content": "some random value"}"""
             )
         }

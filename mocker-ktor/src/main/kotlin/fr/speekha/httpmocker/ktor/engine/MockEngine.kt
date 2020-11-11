@@ -19,11 +19,12 @@ package fr.speekha.httpmocker.ktor.engine
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.RECORD_NOT_SUPPORTED_ERROR
+import fr.speekha.httpmocker.builder.Config
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.io.MockResponder
 import fr.speekha.httpmocker.ktor.io.Recorder
 import fr.speekha.httpmocker.ktor.io.mapRequest
-import fr.speekha.httpmocker.ktor.io.toModel
+import fr.speekha.httpmocker.ktor.io.toKtorRequest
 import io.ktor.client.engine.HttpClientEngineBase
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
@@ -34,6 +35,7 @@ import kotlin.coroutines.CoroutineContext
 
 class MockEngine(
     override val config: MockEngineConfig,
+    private val executor: suspend (HttpRequestData) -> HttpResponseData
 ) : HttpClientEngineBase("Mock Engine") {
 
     private val job = Job()
@@ -44,18 +46,17 @@ class MockEngine(
 
     private val logger = getLogger()
 
-    private val internalConf = config.buildConfig()
+    private val internalConf: Config = config.buildConfig()
 
     private val responder = MockResponder(
         internalConf.providers,
         internalConf.simulatedDelay,
         ::mapRequest
-    ) { _, response -> response.toModel() }
+    ) { _, response -> response.toKtorRequest() }
 
-    private val recorder: Recorder? = config.configBuilder.buildRecorder()?.let { Recorder(it, config.delegate) }
+    private val forbidRecord: Boolean = internalConf.requestWriter == null
 
-    private val forbidRecord: Boolean
-        get() = recorder == null
+    private val recorder: Recorder? = internalConf.requestWriter?.let { Recorder(it, executor) }
 
     /**
      * Enables to set the interception mode. @see fr.speekha.httpmocker.MockResponseInterceptor.Mode
@@ -76,11 +77,10 @@ class MockEngine(
         return respondToRequest(data)
     }
 
-    @InternalAPI
     private suspend fun respondToRequest(request: HttpRequestData): HttpResponseData = when (internalConf.status) {
-        Mode.DISABLED -> config.delegate.execute(request)
+        Mode.DISABLED -> executor(request)
         Mode.ENABLED -> responder.mockResponse(request)
-        Mode.MIXED -> responder.mockResponseOrNull(request) ?: config.delegate.execute(request)
+        Mode.MIXED -> responder.mockResponseOrNull(request) ?: executor(request)
         Mode.RECORD -> recorder?.executeAndRecordCall(request) ?: error(RECORD_NOT_SUPPORTED_ERROR)
     }
 }

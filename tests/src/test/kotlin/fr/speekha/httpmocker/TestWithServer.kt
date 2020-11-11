@@ -45,10 +45,17 @@ open class TestWithServer {
         server.start()
     }
 
+    fun enqueueServerResponseTmp(
+        responseCode: Int,
+        responseBody: String?,
+        headers: List<Pair<String, String>>,
+        contentType: String?
+    ) = enqueueServerResponse(responseCode, responseBody, headers, contentType)
+
     protected fun enqueueServerResponse(
         responseCode: Int,
         responseBody: String?,
-        headers: List<Pair<String, String>> = listOf(),
+        headers: List<Pair<String, String>> = emptyList(),
         contentType: String? = null
     ) {
         val serverResponse = MockResponse().apply {
