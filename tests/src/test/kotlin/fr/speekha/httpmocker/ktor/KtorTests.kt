@@ -29,7 +29,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readText
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 
 open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
 
@@ -58,7 +58,7 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
         body: String?,
         headers: List<Pair<String, String>>
     ) {
-        Assertions.assertEquals(
+        assertEquals(
             HttpStatusCode.NotFound,
             executeRequest(url, method, body, headers).status
         )
@@ -72,8 +72,8 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
         headers: List<Pair<String, String>>
     ) {
         val response = executeRequest(url, method, body, headers)
-        Assertions.assertEquals(HttpStatusCode.OK, response.status)
-        Assertions.assertEquals(expected, response.readText())
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(expected, response.readText())
     }
 
     override fun setupProvider(
@@ -88,5 +88,13 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
                 }
             }
         }
+    }
+
+    override suspend fun assertResponseBody(expected: String, response: HttpResponse) {
+        assertEquals(expected, response.readText())
+    }
+
+    override fun assertResponseCode(resultCode: HttpStatusCode, response: HttpResponse) {
+        assertEquals(resultCode, response.status)
     }
 }

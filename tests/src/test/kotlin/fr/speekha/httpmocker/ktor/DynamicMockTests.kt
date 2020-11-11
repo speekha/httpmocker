@@ -22,8 +22,6 @@ import fr.speekha.httpmocker.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.url
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.readText
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +36,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("Dynamic Mocks with Ktor")
-class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
+abstract class DynamicMockTests<Response> : HttpClientTester<Response> {
 
     @Nested
     @DisplayName("Given an mock interceptor that is disabled")
@@ -50,9 +48,9 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
             setupProvider({ null }, status = DISABLED)
             enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
 
-            val response: String = executeRequest("/").readText()
+            val response = executeRequest("/")
 
-            assertEquals("body", response)
+            assertResponseBody("body", response)
         }
     }
 
@@ -65,9 +63,7 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
         fun `should return a 404 error when response is not found`() = runBlocking {
             setupProvider({ null })
 
-            val response: HttpResponse = executeRequest("/unknown")
-
-            assertEquals(HttpStatusCode.NotFound, response.status)
+            check404Response("/unknown")
         }
 
         @Test
@@ -85,16 +81,16 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
         @Test
         @DisplayName("When a lambda is provided, then it should be used to answer requests")
         fun `should reply with a dynamically generated response`() = runBlocking {
-            val resultCode = HttpStatusCode.Accepted
+            val resultCode = 202
             val body = "some random body"
+
             setupProvider({
-                ResponseDescriptor(code = resultCode.value, body = body)
+                ResponseDescriptor(code = resultCode, body = body)
             })
             val response = executeRequest(url)
 
-            assertEquals(resultCode, response.status)
-            assertEquals(body, response.readText())
-            Unit
+            assertResponseCode(HttpStatusCode.Accepted, response)
+            assertResponseBody(body, response)
         }
 
         @Test
@@ -106,9 +102,8 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
 
             val response = executeRequest(url)
 
-            assertEquals(HttpStatusCode.Created, response.status)
-            assertEquals(body, response.readText())
-            Unit
+            assertEquals(HttpStatusCode.Created, response)
+            assertResponseBody(body, response)
         }
 
         @Test
@@ -133,9 +128,8 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
             val response1 = executeRequest("http://www.test.fr/request1")
             val response2 = executeRequest("http://www.test.fr/request2")
 
-            assertEquals(result1, response1.readText())
-            assertEquals(result2, response2.readText())
-            Unit
+            assertResponseBody(result1, response1)
+            assertResponseBody(result2, response2)
         }
 
         @Test
@@ -169,10 +163,10 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
         }
 
         private fun testSimultaneousRequests() {
-            val response: Array<HttpResponse?> = arrayOfNulls(2)
+            val response = mutableListOf<Response>()
             val running = MutableStateFlow(false)
             runBlocking {
-                response.indices.forEach { i ->
+                (1..2).forEach { i ->
                     launch(Dispatchers.IO) {
                         response[i] = delayedRequest(running, i)
                     }
@@ -182,12 +176,12 @@ class DynamicMockTests : HttpClientTester<HttpResponse> by KtorTests() {
 
             runBlocking {
                 response.indices.forEach { i ->
-                    assertEquals("body$i", (response[i] ?: fail("Response is null")).readText())
+                    assertResponseBody("body$i", response[i] ?: fail("Response is null"))
                 }
             }
         }
 
-        private suspend fun delayedRequest(lock: StateFlow<Boolean>, i: Int): HttpResponse {
+        private suspend fun delayedRequest(lock: StateFlow<Boolean>, i: Int): Response {
             lock.first { it }
             return executeRequest("/request$i")
         }

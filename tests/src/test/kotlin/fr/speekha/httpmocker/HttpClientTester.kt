@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.scenario.RequestCallback
+import io.ktor.http.HttpStatusCode
 
 interface HttpClientTester<Response> {
 
@@ -54,4 +55,7 @@ interface HttpClientTester<Response> {
         status: Mode = Mode.ENABLED
     )
 
+    suspend fun assertResponseBody(expected: String, response: Response)
+
+    fun assertResponseCode(resultCode: HttpStatusCode, response: Response)
 }
