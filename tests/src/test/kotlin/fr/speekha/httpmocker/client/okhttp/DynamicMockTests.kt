@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.interceptor
+package fr.speekha.httpmocker.client.okhttp
 
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.DISABLED
@@ -23,7 +23,6 @@ import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import fr.speekha.httpmocker.scenario.RequestCallback
-import fr.speekha.httpmocker.url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -198,5 +197,9 @@ class DynamicMockTests : OkHttpTests() {
         }
 
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+    }
+
+    companion object {
+        const val url = "http://www.test.fr/path1?param=1"
     }
 }

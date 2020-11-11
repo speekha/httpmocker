@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.ktor
+package fr.speekha.httpmocker.client
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
@@ -27,19 +27,18 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
 import fr.speekha.httpmocker.assertThrows
+import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_OK_CODE
+import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_SIMPLE_BODY
+import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_HEADERS
+import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_METHOD
+import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_SIMPLE_REQUEST
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.statement.readText
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.MatcherAssert
-import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -54,7 +53,7 @@ import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
 @DisplayName("Static Mocks with Ktor")
-class StaticMockTests : KtorTests() {
+abstract class StaticMockTests<Response> : HttpClientTester<Response> {
 
     private val loadingLambda: (String) -> InputStream? = mock {
         on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
@@ -66,7 +65,7 @@ class StaticMockTests : KtorTests() {
     @DisplayName("Given an enabled mock interceptor with static scenarios")
     inner class StaticTests {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered with a scenario, " +
                 "then its path should be computed by the file policy"
@@ -81,7 +80,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When no scenario file is provided, " +
                 "then a 404 error should occur"
@@ -97,7 +96,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When no requests in the file matches, " +
                 "then a 404 error should occur"
@@ -116,7 +115,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while loading scenarios, " +
                 "then a 404 error should occur"
@@ -135,7 +134,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When loaded scenario has neither response nor error, " +
                 "then a 404 error should occur"
@@ -151,7 +150,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error is configured as an answer, " +
                 "then the corresponding exception should be thrown"
@@ -166,7 +165,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error with a message is configured as an answer, " +
                 "then the corresponding exception with message should be thrown"
@@ -185,7 +184,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When an error occurs while answering a request, " +
                 "then the request body should be the error"
@@ -200,19 +199,16 @@ class StaticMockTests : KtorTests() {
             }
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest("/unknown").readText()
+            val response = executeRequest("/unknown")
 
-            MatcherAssert.assertThat(
-                response,
-                StringStartsWith(
-                    "java.lang.IllegalStateException: Loading error\n" +
-                        "\tat fr.speekha.httpmocker.ktor.StaticMockTests"
-                )
+            assertResponseBodyStartsWith(
+                "java.lang.IllegalStateException: Loading error\n" +
+                    "\tat fr.speekha.httpmocker.client.", response
             )
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a response is found, then default HTTP code should be 200")
         fun `should return a 200 when response is found`(
             title: String,
@@ -223,11 +219,11 @@ class StaticMockTests : KtorTests() {
 
             val response = executeRequest(URL_SIMPLE_REQUEST)
 
-            assertEquals(HttpStatusCode.OK, response.status)
+            assertResponseCode(HttpStatusCode.OK, response)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a response is found and response body is in JSON scenario, " +
                 "then it should be loaded from scenario"
@@ -239,10 +235,7 @@ class StaticMockTests : KtorTests() {
         ) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            val response = executeRequest(URL_SIMPLE_REQUEST)
-
-            assertEquals(REQUEST_SIMPLE_BODY, response.readText())
-            Unit
+            checkResponseBody(REQUEST_SIMPLE_BODY, URL_SIMPLE_REQUEST)
         }
     }
 
@@ -250,7 +243,7 @@ class StaticMockTests : KtorTests() {
     @DisplayName("Given an enabled mock interceptor with static and dynamic mocks")
     inner class StaticAndDynamic {
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
                 "then dynamic mocks should be tried first before static ones"
@@ -265,17 +258,9 @@ class StaticMockTests : KtorTests() {
 
             initFilingPolicy(type)
 
-            client = mockableHttpClient(CIO) {
-                mock {
-                    useDynamicMocks { request ->
-                        ResponseDescriptor(body = result1).takeIf {
-                            request.path.contains("dynamic")
-                        }
-                    }
-                    decodeScenarioPathWith(filingPolicy)
-                    loadFileWith(loadingLambda)
-                    parseScenariosWith(mapper)
-                    setInterceptorStatus(ENABLED)
+            setupInterceptor(ENABLED, loadingLambda, mapper, null, filingPolicy) { request ->
+                ResponseDescriptor(body = result1).takeIf {
+                    request.path.contains("dynamic")
                 }
             }
 
@@ -292,7 +277,7 @@ class StaticMockTests : KtorTests() {
             "When a response is found, " +
                 "then the body should be loaded from the file next to it"
         )
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         fun `should return a predefined response body from separate file`(
             title: String,
             mapper: Mapper,
@@ -304,7 +289,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When scenario file path is not empty, " +
                 "then response body should be in the same folder by default"
@@ -320,7 +305,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a child folder, " +
                 "then response body path should be read from that folder"
@@ -336,7 +321,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When response body is in a parent folder, " +
                 "then response body path should be read from that folder"
@@ -357,7 +342,7 @@ class StaticMockTests : KtorTests() {
     inner class ResponseBuilding {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, then the proper " +
                 "headers should be set in the response"
@@ -367,12 +352,12 @@ class StaticMockTests : KtorTests() {
 
             val response = executeRequest(URL_SIMPLE_REQUEST)
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("simple header", response.headers["testHeader"])
+            assertResponseCode(HttpStatusCode.OK, response)
+            assertHeaderEquals("simple header", response, "testHeader")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When the response is a redirect, " +
                 "then the response should have a HTTP code 302 and a location"
@@ -382,12 +367,12 @@ class StaticMockTests : KtorTests() {
 
             val response = executeRequest("/redirect")
 
-            assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("http://www.google.com", response.headers["Location"])
+            assertResponseCode(HttpStatusCode.Found, response)
+            assertHeaderEquals("http://www.google.com", response, "Location")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request is answered, " +
                 "then the proper content type should be set in the response"
@@ -397,14 +382,13 @@ class StaticMockTests : KtorTests() {
 
             val response = executeRequest("/mediatype")
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("application", response.contentType()?.contentType)
-            assertEquals("json", response.contentType()?.contentSubtype)
-            assertEquals("application/json", response.headers["Content-type"])
+            assertResponseCode(HttpStatusCode.OK, response)
+            assertContentType("application", "json", response)
+            assertHeaderEquals("application/json", response, "Content-type")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request with no specific delay is answered, " +
                 "then default delay should be used"
@@ -421,7 +405,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request with a specific delay is answered, " +
                 "then that delay should be used"
@@ -452,17 +436,11 @@ class StaticMockTests : KtorTests() {
     inner class DefaultPolicy {
 
         private fun setupInterceptor(mapper: Mapper, type: String) {
-            client = mockableHttpClient(CIO) {
-                mock {
-                    loadFileWith(loadingLambda)
-                    parseScenariosWith(mapper)
-                    setInterceptorStatus(ENABLED)
-                }
-            }
+            setupInterceptor(ENABLED, loadingLambda, mapper)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should use a MirrorPathPolicy as default")
         fun `should use mirror path as default file policy`(
             title: String,
@@ -480,18 +458,11 @@ class StaticMockTests : KtorTests() {
     inner class UrlMatching {
 
         fun setupInterceptor(scenarioFile: String, mapper: Mapper, type: String) {
-            client = mockableHttpClient(CIO) {
-                mock {
-                    decodeScenarioPathWith(SingleFilePolicy("$scenarioFile.$type"))
-                    loadFileWith(loadingLambda)
-                    parseScenariosWith(mapper)
-                    setInterceptorStatus(ENABLED)
-                }
-            }
+            setupInterceptor(ENABLED, loadingLambda, mapper, null, SingleFilePolicy("$scenarioFile.$type"))
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match URL protocol")
         fun `should take http protocol into account`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor("protocol", mapper, type)
@@ -500,7 +471,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL host")
         fun `should select response based on host`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(SINGLE_FILE, mapper, type)
@@ -509,7 +480,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL port")
         fun `should select response based on port`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(SINGLE_FILE, mapper, type)
@@ -518,7 +489,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match the URL path")
         fun `should select response based on URL path`(
             title: String,
@@ -546,19 +517,11 @@ class StaticMockTests : KtorTests() {
                 on { this.getPath(any()) } doReturn "incorrect"
             }
 
-            client = mockableHttpClient(CIO) {
-                mock {
-                    decodeScenarioPathWith(policy1)
-                    decodeScenarioPathWith(policy2)
-                    loadFileWith(loadingLambda)
-                    parseScenariosWith(mapper)
-                    setInterceptorStatus(ENABLED)
-                }
-            }
+            setupInterceptor(ENABLED, loadingLambda, mapper, null, policy1, policy2)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When the first policy provides a match, then it should be used")
         fun `should use first policy if possible`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(mapper, type)
@@ -568,7 +531,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When the first policy does not provide a match, then the second one should be used")
         fun `should use second policy as fallback`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(mapper, type)
@@ -577,7 +540,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When none of the policies provide a match, then an 404 error should occur")
         fun `should handle all policy failure`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(mapper, type)
@@ -590,7 +553,7 @@ class StaticMockTests : KtorTests() {
     inner class RequestMatching {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         fun `should take http method into account`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
@@ -601,7 +564,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match present query parameters")
         fun `should select response based on query params`(
             title: String,
@@ -615,7 +578,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match absent query parameters")
         fun `should select response based on absent query params`(
             title: String,
@@ -629,7 +592,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match present headers")
         fun `should select response based on headers`(title: String, mapper: Mapper, type: String) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
@@ -652,15 +615,14 @@ class StaticMockTests : KtorTests() {
                 headers = listOf("header2" to "2")
             )
 
-            assertEquals("no header", noHeaders.readText())
-            assertEquals("with header 1", header1.readText())
-            assertEquals("with header 2", header2.readText())
-            assertEquals("with headers", headers.readText())
-            Unit
+            assertResponseBody("no header", noHeaders)
+            assertResponseBody("with header 1", header1)
+            assertResponseBody("with header 2", header2)
+            assertResponseBody("with headers", headers)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match absent headers")
         fun `should select response based on absent headers`(
             title: String,
@@ -674,7 +636,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is answered, then it should match request body")
         fun `should select response based on request body`(
             title: String,
@@ -688,7 +650,7 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a request with exact match is answered, " +
                 "then match should not allow extra headers or parameters"
@@ -712,14 +674,14 @@ class StaticMockTests : KtorTests() {
     inner class MixedMode {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a request is not mocked, then it should go to the server")
         fun `should support mixed mode to execute request when no response is found locally`(
             title: String,
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            enqueueServerResponse(REQUEST_OK_CODE, "body")
+            enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper, type)
 
             checkResponseBody("body", "")
@@ -727,14 +689,14 @@ class StaticMockTests : KtorTests() {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.TestWithServer#mappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When mocked file does not exist, then the request should go to the server")
         fun `should support mixed mode to execute request when response file is not found locally`(
             title: String,
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            enqueueServerResponse(REQUEST_OK_CODE, "body")
+            enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper, type)
             whenever(loadingLambda.invoke(any())).then { throw FileNotFoundException("File does not exist") }
             checkResponseBody("body", "")
@@ -749,17 +711,7 @@ class StaticMockTests : KtorTests() {
     ) {
         initFilingPolicy(type)
 
-        client = mockableHttpClient(CIO) {
-            mock {
-                decodeScenarioPathWith(filingPolicy)
-                loadFileWith(loadingLambda)
-                parseScenariosWith(mapper)
-                setInterceptorStatus(mode)
-                delay?.let { addFakeNetworkDelay(it) }
-            }
-            expectSuccess = false
-            followRedirects = false
-        }
+        this.setupInterceptor(mode, loadingLambda, mapper, delay, filingPolicy)
     }
 
     private fun initFilingPolicy(fileType: String) {

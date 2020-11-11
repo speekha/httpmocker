@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.client.ktor
 
-import org.junit.jupiter.api.Assertions
+import fr.speekha.httpmocker.client.DynamicMockTests
+import fr.speekha.httpmocker.client.HttpClientTester
+import io.ktor.client.statement.HttpResponse
+import org.junit.jupiter.api.DisplayName
 
-inline fun <reified T : Throwable> assertThrows(message: String? = null, block: () -> Unit): T {
-    try {
-        block()
-    } catch (e: Throwable) {
-        return (e as? T).takeIf { message == null || e.message == message } ?: Assertions.fail("Wrong exception: $e")
-    }
-    return Assertions.fail("No exception thrown")
-}
-
+@DisplayName("Dynamic Mocks with Ktor")
+class DynamicMockTests : DynamicMockTests<HttpResponse>(), HttpClientTester<HttpResponse> by KtorTests()

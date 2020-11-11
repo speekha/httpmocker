@@ -14,12 +14,30 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.client
 
+import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.builder.FileLoader
+import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
+import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.HttpStatusCode
 
 interface HttpClientTester<Response> {
+
+    fun setupProviders(
+        vararg callbacks: RequestCallback,
+        status: Mode = Mode.ENABLED
+    )
+
+    fun setupInterceptor(
+        mode: Mode,
+        loadingLambda: FileLoader,
+        mapper: Mapper,
+        delay: Long? = null,
+        vararg filingPolicy: FilingPolicy,
+        callback: RequestCallback? = null
+    )
 
     fun enqueueServerResponseTmp(
         responseCode: Int,
@@ -50,12 +68,10 @@ interface HttpClientTester<Response> {
         headers: List<Pair<String, String>> = emptyList()
     )
 
-    fun setupProvider(
-        vararg callbacks: RequestCallback,
-        status: Mode = Mode.ENABLED
-    )
 
     suspend fun assertResponseBody(expected: String, response: Response)
-
+    suspend fun assertResponseBodyStartsWith(expected: String, response: Response)
     fun assertResponseCode(resultCode: HttpStatusCode, response: Response)
+    fun assertHeaderEquals(expected: String, response: Response, header: String)
+    fun assertContentType(type: String, subtype: String, response: Response)
 }
