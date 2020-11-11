@@ -18,19 +18,17 @@ package fr.speekha.httpmocker.client
 
 import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
-import fr.speekha.httpmocker.io.readAsString
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.sax.SaxMapper
 import fr.speekha.httpmocker.serialization.JsonFormatConverter
+import fr.speekha.httpmocker.withFile
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.provider.Arguments
-import java.io.File
-import java.io.FileInputStream
 import java.util.stream.Stream
 
 open class TestWithServer {
@@ -69,15 +67,11 @@ open class TestWithServer {
         server.enqueue(serverResponse)
     }
 
-    protected fun File.readAsString() = FileInputStream(this).readAsString()
-
-    protected fun assertFileExists(path: String) = withFile(path) {
+    private fun assertFileExists(path: String) = withFile(path) {
         assertTrue(it.exists(), "File $path does not exist")
     }
 
-    protected fun assertFilesExist(vararg path: String) = path.forEach { assertFileExists(it) }
-
-    protected fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
+    fun assertFilesExist(vararg path: String) = path.forEach { assertFileExists(it) }
 
     fun completeLocalUrl(url: String): String = if (url.startsWith("http")) {
         url

@@ -16,14 +16,21 @@
 
 package fr.speekha.httpmocker
 
+import fr.speekha.httpmocker.io.readAsString
 import org.junit.jupiter.api.Assertions
+import java.io.File
+import java.io.FileInputStream
 
 inline fun <reified T : Throwable> assertThrows(message: String? = null, block: () -> Unit): T {
     try {
         block()
     } catch (e: Throwable) {
-        return (e as? T).takeIf { message == null || e.message == message } ?: Assertions.fail("Wrong exception: $e")
+        return (e as? T).takeIf { message == null || e.message == message }
+            ?: Assertions.fail("Wrong exception: $e. Expected: ${T::class.qualifiedName}")
     }
     return Assertions.fail("No exception thrown")
 }
 
+fun File.readAsString() = FileInputStream(this).readAsString()
+
+fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))

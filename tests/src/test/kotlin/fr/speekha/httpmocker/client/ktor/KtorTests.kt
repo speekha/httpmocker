@@ -19,9 +19,13 @@ package fr.speekha.httpmocker.client.ktor
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.FileLoader
 import fr.speekha.httpmocker.client.HttpClientTester
+import fr.speekha.httpmocker.client.SAVE_FOLDER
 import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
+import fr.speekha.httpmocker.ktor.engine.MockEngine
+import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.client.HttpClient
@@ -37,52 +41,20 @@ import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 
-open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
+class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
 
-    protected lateinit var client: HttpClient
+    override lateinit var client: HttpClient
 
-    override suspend fun executeRequest(
-        url: String,
-        method: String,
-        body: String?,
-        headers: List<Pair<String, String>>
-    ): HttpResponse = client.request(completeLocalUrl(url)) {
-        this.method = HttpMethod.parse(method)
-        body?.let {
-            this.body = it
-        }
-        headers {
-            headers.forEach { (key, value) ->
-                append(key, value)
-            }
-        }
+    override val extraHeaders: List<Header> = listOf(
+        Header("Accept-Charset", "UTF-8"),
+        Header("Accept", "*/*")
+    )
+
+    override fun changeMockerStatus(mode: Mode) {
+        (client.engine as MockEngine).mode = Mode.ENABLED
     }
 
-    override suspend fun check404Response(
-        url: String,
-        method: String,
-        body: String?,
-        headers: List<Pair<String, String>>
-    ) {
-        assertEquals(
-            HttpStatusCode.NotFound,
-            executeRequest(url, method, body, headers).status
-        )
-    }
-
-    override suspend fun checkResponseBody(
-        expected: String,
-        url: String,
-        method: String,
-        body: String?,
-        headers: List<Pair<String, String>>
-    ) {
-        val response = executeRequest(url, method, body, headers)
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(expected, response.readText())
-    }
-
-    override fun setupProviders(
+    override fun setupDynamicConf(
         vararg callbacks: RequestCallback,
         status: Mode
     ) {
@@ -96,7 +68,7 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
         }
     }
 
-    override fun setupInterceptor(
+    override fun setupStaticConf(
         mode: Mode,
         loadingLambda: FileLoader,
         mapper: Mapper,
@@ -116,6 +88,72 @@ open class KtorTests : TestWithServer(), HttpClientTester<HttpResponse> {
             expectSuccess = false
             followRedirects = false
         }
+    }
+
+    override fun setupRecordConf(
+        mapper: Mapper,
+        loadingLambda: FileLoader,
+        rootFolder: String,
+        failOnError: Boolean,
+        fileType: String
+    ) {
+        client = mockableHttpClient(CIO) {
+            mock {
+                decodeScenarioPathWith {
+                    val path = it.path
+                    (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
+                        .drop(1)
+                }
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
+                failOnRecordingError(failOnError)
+                setInterceptorStatus(Mode.RECORD)
+            }
+        }
+    }
+
+    override fun setupRecordPolicyConf(mapper: Mapper, readPolicy: FilingPolicy?, writePolicy: FilingPolicy?) {
+        client = mockableHttpClient(CIO) {
+            mock {
+                readPolicy?.let { decodeScenarioPathWith(it) }
+                parseScenariosWith(mapper)
+                writePolicy?.let {
+                    recordScenariosIn(SAVE_FOLDER) with it
+                } ?: recordScenariosIn(SAVE_FOLDER)
+                failOnRecordingError(true)
+                setInterceptorStatus(Mode.RECORD)
+            }
+        }
+    }
+
+    override suspend fun executeRequest(
+        url: String,
+        method: String,
+        body: String?,
+        headers: List<Pair<String, String>>
+    ): HttpResponse = client.request(completeLocalUrl(url)) {
+        this.method = HttpMethod.parse(method)
+        body?.let {
+            this.body = it
+        }
+        headers {
+            headers.forEach { (key, value) ->
+                append(key, value)
+            }
+        }
+    }
+
+    override suspend fun checkResponseBody(
+        expected: String,
+        url: String,
+        method: String,
+        body: String?,
+        headers: List<Pair<String, String>>
+    ) {
+        val response = executeRequest(url, method, body, headers)
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(expected, response.readText())
     }
 
     override suspend fun assertResponseBody(expected: String, response: HttpResponse) {

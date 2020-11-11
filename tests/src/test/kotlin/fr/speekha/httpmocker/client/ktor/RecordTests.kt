@@ -16,13 +16,21 @@
 
 package fr.speekha.httpmocker.client.ktor
 
+import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.client.HttpClientTester
-import fr.speekha.httpmocker.client.StaticMockTests
+import fr.speekha.httpmocker.client.RecordTests
 import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
 import org.junit.jupiter.api.DisplayName
+import java.nio.channels.UnresolvedAddressException
 
-@DisplayName("Static Mocks with Ktor")
-class StaticMockTests :
-    StaticMockTests<HttpResponse, HttpClient>(),
-    HttpClientTester<HttpResponse, HttpClient> by KtorTests()
+@DisplayName("Record tests with Ktor")
+class RecordTests :
+    RecordTests<HttpResponse, HttpClient>(),
+    HttpClientTester<HttpResponse, HttpClient> by KtorTests() {
+
+    override suspend fun checkIoException(block: suspend () -> Unit): Throwable =
+        assertThrows<UnresolvedAddressException> {
+            block()
+        }
+}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.interceptor;
+package fr.speekha.httpmocker.client.okhttp;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,8 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import fr.speekha.httpmocker.Mode;
-import fr.speekha.httpmocker.client.okhttp.OkHttpTests;
-import fr.speekha.httpmocker.client.okhttp.RecordTestsKt;
+import fr.speekha.httpmocker.client.RecordTestsKt;
 import fr.speekha.httpmocker.io.HttpRequest;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
@@ -46,7 +45,7 @@ class JavaApiTest extends OkHttpTests {
 
     @Nested
     @DisplayName("Given a Java code base, When using the Kotlin API")
-    public class WithJavaCode extends OkHttpTests {
+    public class WithJavaCode {
 
         @Test
         @DisplayName("Then dynamic mocks should work properly")
@@ -75,8 +74,8 @@ class JavaApiTest extends OkHttpTests {
             initInterceptor(filingPolicy);
             getInterceptor().setMode(Mode.RECORD);
             executeRequestSync("record/request");
-            assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request.json");
-            assertFileExists(RecordTestsKt.SAVE_FOLDER + "/request_body_0.txt");
+            assertFilesExist(RecordTestsKt.SAVE_FOLDER + "/request.json");
+            assertFilesExist(RecordTestsKt.SAVE_FOLDER + "/request_body_0.txt");
         }
 
         @AfterEach
