@@ -20,6 +20,10 @@ import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.responseNotFound
 import fr.speekha.httpmocker.scenario.ScenarioProvider
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.mapNotNull
 
 class MockResponder<Request, Response>(
     private var providers: List<ScenarioProvider>,
@@ -30,10 +34,10 @@ class MockResponder<Request, Response>(
 
     private val logger = getLogger()
 
-    fun mockResponse(request: Request): Response =
+    suspend fun mockResponse(request: Request): Response =
         mockResponseOrNull(request) ?: responseBuilder(request, responseNotFound())
 
-    fun mockResponseOrNull(request: Request): Response? = providers.asSequence()
+    suspend fun mockResponseOrNull(request: Request): Response? = providers.asFlow()
         .mapNotNull { provider ->
             logger.info("Looking up mock scenario for $request in $provider")
             provider.loadResponse(requestConverter(request))?.let { response ->
@@ -42,7 +46,7 @@ class MockResponder<Request, Response>(
         }
         .firstOrNull()
 
-    private fun executeMockResponse(
+    private suspend fun executeMockResponse(
         response: ResponseDescriptor,
         request: Request
     ): Response {
@@ -51,10 +55,10 @@ class MockResponder<Request, Response>(
         return responseBuilder(request, response)
     }
 
-    private fun simulateDelay(response: ResponseDescriptor) {
+    private suspend fun simulateDelay(response: ResponseDescriptor) {
         when {
-            response.delay > 0 -> Thread.sleep(response.delay)
-            delay > 0 -> Thread.sleep(delay)
+            response.delay > 0 -> delay(response.delay)
+            delay > 0 -> delay(delay)
         }
     }
 }

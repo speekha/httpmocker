@@ -27,6 +27,7 @@ import fr.speekha.httpmocker.okhttp.io.ResponseBuilder
 import fr.speekha.httpmocker.okhttp.io.execute
 import fr.speekha.httpmocker.okhttp.io.toGenericModel
 import fr.speekha.httpmocker.scenario.ScenarioProvider
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
@@ -67,13 +68,13 @@ internal constructor(
 
     private val recorder = requestWriter?.let { Recorder(it) }
 
-    override fun intercept(chain: Interceptor.Chain): Response {
+    override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         val request = chain.request()
         logger.info("Intercepted request $request: Interceptor is $mode")
-        return respondToRequest(chain, request)
+        respondToRequest(chain, request)
     }
 
-    private fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
+    private suspend fun respondToRequest(chain: Interceptor.Chain, request: Request) = when (mode) {
         Mode.DISABLED -> chain.execute()
         Mode.ENABLED -> responder.mockResponse(request)
         Mode.MIXED -> responder.mockResponseOrNull(request) ?: chain.execute()
