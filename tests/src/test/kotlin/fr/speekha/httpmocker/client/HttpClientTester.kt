@@ -24,7 +24,7 @@ import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.HttpStatusCode
 
-interface HttpClientTester<Response, Client> {
+interface HttpClientTester<Response : Any, Client : Any> {
 
     var client: Client
 
@@ -33,7 +33,7 @@ interface HttpClientTester<Response, Client> {
     fun setupDynamicConf(
         vararg callbacks: RequestCallback,
         status: Mode = Mode.ENABLED
-    )
+    ): Client
 
     fun setupStaticConf(
         mode: Mode,

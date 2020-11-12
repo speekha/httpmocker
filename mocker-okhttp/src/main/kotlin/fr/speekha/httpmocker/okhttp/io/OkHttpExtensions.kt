@@ -18,7 +18,6 @@ package fr.speekha.httpmocker.okhttp.io
 
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import okhttp3.Headers
 import okhttp3.HttpUrl
@@ -37,15 +36,6 @@ internal fun RequestBody.readAsString(): String? = Buffer().let {
     writeTo(it)
     it.inputStream().bufferedReader().use { reader -> reader.readText() }
 }
-
-/**
- * Tries to match an OkHttp Request with a request template
- * @return true if the request matches the template, false if it doesn't
- */
-internal fun Request.matchBody(request: RequestTemplate): Boolean = request.body?.let { bodyPattern ->
-    val requestBody = body?.readAsString()
-    requestBody != null && Regex(bodyPattern).matches(requestBody)
-} ?: true
 
 /**
  * Converts an OkHttp Request to a template

@@ -27,8 +27,6 @@ import fr.speekha.httpmocker.Mode.RECORD
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.assertThrows
-import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
-import fr.speekha.httpmocker.ktor.engine.MockEngine
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -39,8 +37,6 @@ import fr.speekha.httpmocker.readAsString
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import fr.speekha.httpmocker.withFile
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -58,12 +54,12 @@ import java.nio.file.Path
 import java.util.Collections
 
 @Suppress("UNUSED_PARAMETER")
-abstract class RecordTests<Response, Client> : HttpClientTester<Response, Client> {
+abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Response, Client> {
 
     @Nested
     @DisplayName("Given a mock interceptor with no recorder set")
     inner class NoRecorderSet {
-        private lateinit var client: HttpClient
+        private lateinit var client: Client
 
         @Test
         @DisplayName("When building the interceptor in record mode, then an error should occur")
@@ -78,20 +74,13 @@ abstract class RecordTests<Response, Client> : HttpClientTester<Response, Client
         fun `should not allow to record requests if recorder is not set`() = runBlocking {
             setupProvider()
             val exception = assertThrows<IllegalStateException> {
-                (client.engine as? MockEngine)?.mode = RECORD
+                changeMockerStatus(RECORD)
             }
             assertEquals(NO_RECORDER_ERROR, exception.message)
         }
 
-        private fun setupProvider(
-            status: Mode = ENABLED
-        ) {
-            client = mockableHttpClient(CIO) {
-                mock {
-                    useDynamicMocks { null }
-                    setInterceptorStatus(status)
-                }
-            }
+        private fun setupProvider(status: Mode = ENABLED) {
+            client = setupDynamicConf({ null }, status = status)
         }
     }
 
@@ -225,12 +214,14 @@ abstract class RecordTests<Response, Client> : HttpClientTester<Response, Client
             title: String,
             mapper: Mapper,
             fileType: String
-        ) = runBlocking {
-            enqueueServerResponseTmp(200, "body")
-            setUpInterceptor(mapper, "", true, fileType)
+        ) {
+            runBlocking {
+                enqueueServerResponseTmp(200, "body")
+                setUpInterceptor(mapper, "", true, fileType)
 
-            assertThrows<FileNotFoundException> {
-                executeRequest(recordRequestUrl)
+                assertThrows<FileNotFoundException> {
+                    executeRequest(recordRequestUrl)
+                }
             }
         }
     }

@@ -17,6 +17,7 @@
 apply plugin: 'kotlin'
 
 dependencies {
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     api "org.slf4j:slf4j-api:$slf4j_version"
 }
 

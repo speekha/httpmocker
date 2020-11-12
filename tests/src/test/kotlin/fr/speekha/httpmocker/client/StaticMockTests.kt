@@ -53,7 +53,7 @@ import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
 @DisplayName("Static Mocks with Ktor")
-abstract class StaticMockTests<Response, Client> : HttpClientTester<Response, Client> {
+abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<Response, Client> {
 
     protected val loadingLambda: (String) -> InputStream? = mock {
         on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
@@ -468,7 +468,8 @@ abstract class StaticMockTests<Response, Client> : HttpClientTester<Response, Cl
         fun `should take http protocol into account`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor("protocol", mapper, type)
 
-            checkResponseBody("HTTP", "/protocol")
+            checkResponseBody("HTTP", "http://test.com/protocol")
+            checkResponseBody("HTTPS", "https://test.com/protocol")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")

@@ -47,13 +47,10 @@ internal class Recorder(
         return CallRecord(request.toGenericModel(), response.toDescriptor(), body, response.getMediaType())
     }
 
-    private fun Response.getMediaType(): MediaType? {
-        val contentType = body?.contentType()
-        return contentType?.run { MediaType(type, subtype) }
-    }
+    private fun Response.getMediaType(): MediaType? = body?.contentType()?.run { MediaType(type, subtype) }
 
     private fun proceedWithCallResult(record: CallRecord, response: Response?): Response =
-        record.error?.let {
-            throw it
-        } ?: response?.copyResponse(record.body) ?: error("Response is null")
+        record.error?.let { throw it }
+            ?: response?.copyResponse(record.body)
+            ?: error("Response is null")
 }

@@ -29,7 +29,10 @@ import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import okhttp3.Call
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -52,14 +55,14 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         interceptor.mode = mode
     }
 
-    override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode) {
+    override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode): OkHttpClient {
         interceptor = mockInterceptor {
             setInterceptorStatus(status)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
         }
-        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+        return OkHttpClient.Builder().addInterceptor(interceptor).build().also { client = it }
     }
 
     override fun setupStaticConf(
@@ -123,7 +126,12 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         headers: List<Pair<String, String>>
     ): Response {
         val request = buildRequest(completeLocalUrl(url), headers, method, body)
-        return client.newCall(request).execute()
+        return client.newCall(request).run()
+    }
+
+    private suspend fun Call.run() = withContext(Dispatchers.IO) {
+        @Suppress("BlockingMethodInNonBlockingContext")
+        execute()
     }
 
     @JvmOverloads
@@ -158,20 +166,25 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
     ) {
         val response = executeRequest(url, method, body, headers)
         assertResponseCode(HttpStatusCode.OK, response)
-        assertEquals(expected, response.body?.string())
+        assertEquals(expected, response.readText())
     }
 
     override suspend fun assertResponseBody(expected: String, response: Response) {
-        assertEquals(expected, response.body?.string())
+        assertEquals(expected, response.readText())
     }
 
     override suspend fun assertResponseBodyStartsWith(expected: String, response: Response) {
         MatcherAssert.assertThat(
-            response.body?.string(),
+            response.readText(),
             StringStartsWith(
                 expected
             )
         )
+    }
+
+    private suspend fun Response.readText() = withContext(Dispatchers.IO) {
+        @Suppress("BlockingMethodInNonBlockingContext")
+        body?.string()
     }
 
     override fun assertResponseCode(resultCode: HttpStatusCode, response: Response) {

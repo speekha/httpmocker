@@ -32,7 +32,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-abstract class DynamicMockTests<Response, Client> : HttpClientTester<Response, Client> {
+abstract class DynamicMockTests<Response : Any, Client : Any> : HttpClientTester<Response, Client> {
 
     @Nested
     @DisplayName("Given a mock interceptor that is disabled")
