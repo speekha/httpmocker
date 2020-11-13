@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.client.okhttp
 
+import fr.speekha.httpmocker.HTTP_METHOD_GET
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.client.HttpClientTester
 import fr.speekha.httpmocker.client.StaticMockTests
@@ -55,7 +56,7 @@ class StaticMockTests :
         ) = runBlocking {
             initFilingPolicy(type)
 
-            enqueueServerResponseTmp(TestWithServer.REQUEST_OK_CODE, "server response")
+            enqueueServerResponse(TestWithServer.REQUEST_OK_CODE, "server response")
 
             val inMemoryInterceptor =
                 mockInterceptor {
@@ -65,7 +66,7 @@ class StaticMockTests :
                             body = "in memory response",
                             mediaType = "text/plain"
                         ).takeIf {
-                            request.path == "/inMemory" && request.method == "GET"
+                            request.path == "/inMemory" && request.method == HTTP_METHOD_GET
                         }
                     }
                     setInterceptorStatus(Mode.MIXED)

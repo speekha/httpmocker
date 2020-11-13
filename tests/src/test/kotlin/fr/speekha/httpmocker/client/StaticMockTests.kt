@@ -23,6 +23,9 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import fr.speekha.httpmocker.HTTP_METHOD_DELETE
+import fr.speekha.httpmocker.HTTP_METHOD_POST
+import fr.speekha.httpmocker.HTTP_METHOD_PUT
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
@@ -561,9 +564,9 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             setUpInterceptor(ENABLED, mapper, type)
 
             checkResponseBody("get", URL_METHOD)
-            checkResponseBody("post", URL_METHOD, "POST", "")
-            checkResponseBody("put", URL_METHOD, "PUT", "")
-            checkResponseBody("delete", URL_METHOD, "DELETE", "")
+            checkResponseBody("post", URL_METHOD, HTTP_METHOD_POST, "")
+            checkResponseBody("put", URL_METHOD, HTTP_METHOD_PUT, "")
+            checkResponseBody("delete", URL_METHOD, HTTP_METHOD_DELETE, "")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -648,8 +651,8 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         ) = runBlocking {
             setUpInterceptor(ENABLED, mapper, type)
 
-            checkResponseBody("matched", "/body_matching", "POST", "azer1zere")
-            checkResponseBody("no match", "/body_matching", "POST", "azerzere")
+            checkResponseBody("matched", "/body_matching", HTTP_METHOD_POST, "azer1zere")
+            checkResponseBody("no match", "/body_matching", HTTP_METHOD_POST, "azerzere")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -684,7 +687,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper, type)
 
             checkResponseBody("body", "")
@@ -699,7 +702,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            enqueueServerResponseTmp(REQUEST_OK_CODE, "body")
+            enqueueServerResponse(REQUEST_OK_CODE, "body")
             setUpInterceptor(MIXED, mapper, type)
             whenever(loadingLambda.invoke(any())).then { throw FileNotFoundException("File does not exist") }
             checkResponseBody("body", "")

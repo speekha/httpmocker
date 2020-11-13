@@ -21,6 +21,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import fr.speekha.httpmocker.HTTP_METHOD_GET
+import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.RECORD
@@ -34,6 +36,7 @@ import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.readAsString
+import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import fr.speekha.httpmocker.withFile
@@ -150,9 +153,9 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         }
 
         private suspend fun testInterceptor(mapper: Mapper, readPolicy: FilingPolicy?, writePolicy: FilingPolicy?) {
-            enqueueServerResponseTmp(200, "body")
+            enqueueServerResponse(200, BODY)
             setupRecordPolicyConf(mapper, readPolicy, writePolicy)
-            executeRequest(requestUrl)
+            executeRequest(REQUEST_URL)
         }
 
         private val requestBodyFile = "$SAVE_FOLDER/request_body_0.txt"
@@ -169,10 +172,10 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body")
+            enqueueServerResponse(200, BODY)
             setUpInterceptor(mapper, fileType = fileType)
 
-            checkResponseBody("body", recordRequestUrl)
+            checkResponseBody(BODY, RECORD_REQUEST_URL)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -184,10 +187,10 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             fileType: String
         ) = runBlocking {
             val body = "line 1\nline 2\n".repeat(100)
-            enqueueServerResponseTmp(200, body)
+            enqueueServerResponse(200, body)
             setUpInterceptor(mapper, fileType = fileType)
 
-            checkResponseBody(body, recordRequestUrl)
+            checkResponseBody(body, RECORD_REQUEST_URL)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -198,10 +201,10 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body")
+            enqueueServerResponse(200, BODY)
             setUpInterceptor(mapper, "", false, fileType)
 
-            checkResponseBody("body", recordRequestUrl)
+            checkResponseBody(BODY, RECORD_REQUEST_URL)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
@@ -216,11 +219,11 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             fileType: String
         ) {
             runBlocking {
-                enqueueServerResponseTmp(200, "body")
+                enqueueServerResponse(200, BODY)
                 setUpInterceptor(mapper, "", true, fileType)
 
                 assertThrows<FileNotFoundException> {
-                    executeRequest(recordRequestUrl)
+                    executeRequest(RECORD_REQUEST_URL)
                 }
             }
         }
@@ -241,10 +244,10 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body")
+            enqueueServerResponse(200, BODY)
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest(recordRequestUrl)
+            executeRequest(RECORD_REQUEST_URL)
 
             assertFilesExist("$SAVE_FOLDER/record/request.$fileType")
             assertFilesExist("$SAVE_FOLDER/record/request_body_0.txt")
@@ -261,7 +264,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body")
+            enqueueServerResponse(200, BODY)
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/")
@@ -278,24 +281,24 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body", listOf("someKey" to "someValue"))
+            enqueueServerResponse(200, BODY, listOf(HEADER2))
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(
                 "request?param1=value1",
-                "POST",
+                HTTP_METHOD_POST,
                 "requestBody",
-                listOf("someHeader" to "someValue")
+                listOf(HEADER1)
             )
 
-            withFile(fileName(requestUrl, fileType)) {
+            withFile(fileName(REQUEST_URL, fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = requestWithParams()
                 assertEquals(listOf(expectedResult), result)
             }
 
             withFile("$SAVE_FOLDER/request_body_0.txt") {
-                assertEquals("body", it.readAsString())
+                assertEquals(BODY, it.readAsString())
             }
         }
 
@@ -310,24 +313,24 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, null)
+            enqueueServerResponse(200, null)
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest(requestUrl)
+            executeRequest(REQUEST_URL)
 
-            withFile(fileName(requestUrl, fileType)) {
+            withFile(fileName(REQUEST_URL, fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     RequestTemplate(
-                        method = "GET",
+                        method = HTTP_METHOD_GET,
                         headers = extraHeaders
                     ),
                     ResponseDescriptor(
                         code = 200,
-                        mediaType = "text/plain",
+                        mediaType = DEFAULT_MEDIA_TYPE,
                         headers = listOf(
-                            Header("Content-Length", "0"),
-                            Header("Content-Type", "text/plain")
+                            Header(CONTENT_LENGTH, "0"),
+                            Header(CONTENT_TYPE, DEFAULT_MEDIA_TYPE)
                         )
                     )
                 )
@@ -346,19 +349,19 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body", listOf("someKey" to "someValue"))
-            enqueueServerResponseTmp(200, "second body")
+            enqueueServerResponse(200, BODY, listOf(HEADER2))
+            enqueueServerResponse(200, "second body")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest(
                 "request?param1=value1",
-                "POST",
+                HTTP_METHOD_POST,
                 "requestBody",
-                listOf("someHeader" to "someValue")
+                listOf(HEADER1)
             )
-            executeRequest(requestUrl)
+            executeRequest(REQUEST_URL)
 
-            withFile(fileName(requestUrl, fileType)) {
+            withFile(fileName(REQUEST_URL, fileType)) {
                 val result = mapper.readMatches(it)
                 val expectedResult = listOf(
                     requestWithParams(),
@@ -368,7 +371,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             }
 
             withFile("$SAVE_FOLDER/request_body_0.txt") {
-                assertEquals("body", it.readAsString())
+                assertEquals(BODY, it.readAsString())
             }
             withFile("$SAVE_FOLDER/request_body_1.txt") {
                 assertEquals("second body", it.readAsString())
@@ -386,8 +389,8 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body", contentType = "image/png")
-            enqueueServerResponseTmp(200, "body", contentType = "application/json")
+            enqueueServerResponse(200, BODY, contentType = "image/png")
+            enqueueServerResponse(200, BODY, contentType = "application/json")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/request1")
@@ -408,7 +411,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body", contentType = "application/json; charset=UTF-8")
+            enqueueServerResponse(200, BODY, contentType = "application/json; charset=UTF-8")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/request1")
@@ -427,7 +430,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body", contentType = "unknown/no-type")
+            enqueueServerResponse(200, BODY, contentType = "unknown/no-type")
             setUpInterceptor(mapper, fileType = fileType)
 
             executeRequest("record/request1")
@@ -446,12 +449,12 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body", contentType = "image/png")
-            enqueueServerResponseTmp(200, "body", contentType = "application/json")
+            enqueueServerResponse(200, BODY, contentType = "image/png")
+            enqueueServerResponse(200, BODY, contentType = "application/json")
             setUpInterceptor(mapper, fileType = fileType)
 
-            executeRequest(recordRequestUrl)
-            executeRequest(recordRequestUrl)
+            executeRequest(RECORD_REQUEST_URL)
+            executeRequest(RECORD_REQUEST_URL)
 
             assertFilesExist("$SAVE_FOLDER/record/request_body_0.png")
             assertFilesExist("$SAVE_FOLDER/record/request_body_1.json")
@@ -479,7 +482,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
                 val result = mapper.readMatches(it)
                 val expectedResult = Matcher(
                     request = RequestTemplate(
-                        method = "GET",
+                        method = HTTP_METHOD_GET,
                         headers = extraHeaders
                     ),
                     error = NetworkError(
@@ -502,28 +505,24 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             mapper: Mapper,
             fileType: String
         ) = runBlocking {
-            enqueueServerResponseTmp(200, "body")
+            enqueueServerResponse(200, BODY)
             setUpInterceptor(mapper, fileType = fileType)
             executeRequest(
-                url = recordRequestUrl,
-                method = "POST",
+                url = RECORD_REQUEST_URL,
+                method = HTTP_METHOD_POST,
                 body = """{"some Json content": "some random value"}"""
             )
             changeMockerStatus(ENABLED)
             checkResponseBody(
-                expected = "body",
-                url = recordRequestUrl,
-                method = "POST",
+                expected = BODY,
+                url = RECORD_REQUEST_URL,
+                method = HTTP_METHOD_POST,
                 body = """{"some Json content": "some random value"}"""
             )
         }
     }
 
     abstract suspend fun checkIoException(block: suspend () -> Unit): Throwable
-
-    private val requestUrl = "request"
-
-    private val recordRequestUrl = "record/request"
 
     private fun setUpInterceptor(
         mapper: Mapper,
@@ -542,37 +541,37 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
 
     private fun requestWithNoParams() = Matcher(
         RequestTemplate(
-            method = "GET",
+            method = HTTP_METHOD_GET,
             headers = extraHeaders
         ),
         ResponseDescriptor(
             code = 200,
             bodyFile = "request_body_1.txt",
-            mediaType = "text/plain",
+            mediaType = DEFAULT_MEDIA_TYPE,
             headers = listOf(
-                Header("Content-Length", "11"),
-                Header("Content-Type", "text/plain")
+                Header(CONTENT_LENGTH, "11"),
+                Header(CONTENT_TYPE, DEFAULT_MEDIA_TYPE)
             )
         )
     )
 
     private fun requestWithParams() = Matcher(
         RequestTemplate(
-            method = "POST",
+            method = HTTP_METHOD_POST,
             body = "\\QrequestBody\\E",
             params = mapOf("param1" to "value1"),
             headers = listOf(
-                Header("someHeader", "someValue")
+                Header(HEADER1_NAME, HEADER_VALUE)
             ) + extraHeaders
         ),
         ResponseDescriptor(
             code = 200,
             bodyFile = "request_body_0.txt",
-            mediaType = "text/plain",
+            mediaType = DEFAULT_MEDIA_TYPE,
             headers = listOf(
-                Header("Content-Length", "4"),
-                Header("Content-Type", "text/plain"),
-                Header("someKey", "someValue")
+                Header(CONTENT_LENGTH, "4"),
+                Header(CONTENT_TYPE, DEFAULT_MEDIA_TYPE),
+                Header(HEADER2_NAME, HEADER_VALUE)
             )
         )
     )
@@ -586,6 +585,17 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
 }
 
 internal const val SAVE_FOLDER = "testFolder"
+
+private const val REQUEST_URL = "request"
+private const val RECORD_REQUEST_URL = "record/request"
+private const val BODY = "body"
+private const val HEADER1_NAME = "someHeader"
+private const val HEADER2_NAME = "someKey"
+private const val HEADER_VALUE = "someValue"
+private val HEADER1 = HEADER1_NAME to HEADER_VALUE
+private val HEADER2 = HEADER2_NAME to HEADER_VALUE
+private const val CONTENT_LENGTH = "Content-Length"
+private const val CONTENT_TYPE = "Content-Type"
 
 fun clearTestFolder() {
     val folder = File(SAVE_FOLDER)

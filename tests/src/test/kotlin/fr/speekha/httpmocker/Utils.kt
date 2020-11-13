@@ -21,6 +21,11 @@ import org.junit.jupiter.api.Assertions
 import java.io.File
 import java.io.FileInputStream
 
+const val HTTP_METHOD_GET = "GET"
+const val HTTP_METHOD_POST = "POST"
+const val HTTP_METHOD_PUT = "PUT"
+const val HTTP_METHOD_DELETE = "DELETE"
+
 inline fun <reified T : Throwable> assertThrows(message: String? = null, block: () -> Unit): T {
     try {
         block()
