@@ -16,11 +16,6 @@
 
 package fr.speekha.httpmocker.client
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import fr.speekha.httpmocker.HTTP_METHOD_GET
 import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.Mode
@@ -29,6 +24,7 @@ import fr.speekha.httpmocker.Mode.RECORD
 import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.assertThrows
+import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -40,6 +36,11 @@ import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
 import fr.speekha.httpmocker.withFile
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -100,13 +101,18 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             fileType: String
         ) {
             runBlocking {
-                val policy: FilingPolicy = mock {
-                    on { getPath(any()) } doReturn "record_policy.$fileType"
+                val policy: FilingPolicy = mockk {
+                    every { getPath(any()) } returns "record_policy.$fileType"
                 }
 
                 testInterceptor(mapper, { "wrongPolicy.$fileType" }, policy)
                 assertFilesExist("$SAVE_FOLDER/record_policy.$fileType", requestBodyFile)
-                verify(policy).getPath(any())
+                val request = slot<HttpRequest>()
+                verify {
+                    policy.getPath(capture(request))
+                }
+                confirmVerified(policy)
+                assertEquals("/$REQUEST_URL", request.captured.path)
             }
         }
 
@@ -131,12 +137,13 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             fileType: String
         ) {
             runBlocking {
-                val policy: FilingPolicy = mock {
-                    on { getPath(any()) } doReturn "read_policy.$fileType"
+                val policy: FilingPolicy = mockk {
+                    every { getPath(any()) } returns "read_policy.$fileType"
                 }
                 testInterceptor(mapper, policy, null)
                 assertFilesExist("$SAVE_FOLDER/read_policy.$fileType", requestBodyFile)
-                verify(policy).getPath(any())
+                verify { policy.getPath(any()) }
+                confirmVerified()
             }
         }
 
@@ -530,8 +537,8 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         failOnError: Boolean = false,
         fileType: String
     ) {
-        val loadingLambda: (String) -> InputStream? = mock {
-            on { invoke(any()) } doAnswer { File(SAVE_FOLDER, it.getArgument<String>(0)).inputStream() }
+        val loadingLambda: (String) -> InputStream? = {
+            File(SAVE_FOLDER, it).inputStream()
         }
 
         setupRecordConf(mapper, loadingLambda, rootFolder, failOnError, fileType)
