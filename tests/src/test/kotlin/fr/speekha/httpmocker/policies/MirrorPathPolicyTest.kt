@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.policies
 
+import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
@@ -39,7 +40,7 @@ class MirrorPathPolicyTest {
             val request = HttpRequest(
                 host = "www.somestuff.com",
                 path = "/test/with/path",
-                method = "POST",
+                method = HTTP_METHOD_POST,
                 body = "body",
                 headers = listOf(Header("header", "value")),
             )
@@ -55,7 +56,7 @@ class MirrorPathPolicyTest {
             val request = HttpRequest(
                 host = "www.somestuff.com",
                 path = "/test/with/path/",
-                method = "POST",
+                method = HTTP_METHOD_POST,
                 body = "body",
                 headers = listOf(Header("header", "value")),
             )
@@ -73,7 +74,7 @@ class MirrorPathPolicyTest {
             val request = HttpRequest(
                 host = "www.somestuff.com",
                 path = "/test/with/path/",
-                method = "POST",
+                method = HTTP_METHOD_POST,
                 body = "body",
                 headers = listOf(Header("header", "value")),
             )

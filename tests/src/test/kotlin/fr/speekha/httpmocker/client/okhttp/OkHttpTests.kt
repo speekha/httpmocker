@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.client.okhttp
 
+import fr.speekha.httpmocker.HTTP_METHOD_GET
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.FileLoader
 import fr.speekha.httpmocker.client.HttpClientTester
@@ -137,7 +138,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
     @JvmOverloads
     fun executeRequestSync(
         url: String,
-        method: String = "GET",
+        method: String = HTTP_METHOD_GET,
         body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
     ): Response = runBlocking {
@@ -147,7 +148,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
     private fun buildRequest(
         url: String,
         headers: List<Pair<String, String>> = emptyList(),
-        method: String = "GET",
+        method: String = HTTP_METHOD_GET,
         body: String? = null
     ): Request {
         return Request.Builder()

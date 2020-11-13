@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.client
 
+import fr.speekha.httpmocker.HTTP_METHOD_GET
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.FileLoader
 import fr.speekha.httpmocker.model.Header
@@ -54,7 +55,7 @@ interface HttpClientTester<Response : Any, Client : Any> {
 
     fun setupRecordPolicyConf(mapper: Mapper, readPolicy: FilingPolicy?, writePolicy: FilingPolicy?)
 
-    fun enqueueServerResponseTmp(
+    fun enqueueServerResponse(
         responseCode: Int,
         responseBody: String?,
         headers: List<Pair<String, String>> = listOf(),
@@ -65,14 +66,14 @@ interface HttpClientTester<Response : Any, Client : Any> {
 
     suspend fun executeRequest(
         url: String,
-        method: String = "GET",
+        method: String = HTTP_METHOD_GET,
         body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
     ): Response
 
     suspend fun check404Response(
         url: String,
-        method: String = "GET",
+        method: String = HTTP_METHOD_GET,
         body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
     ) {
@@ -85,7 +86,7 @@ interface HttpClientTester<Response : Any, Client : Any> {
     suspend fun checkResponseBody(
         expected: String,
         url: String,
-        method: String = "GET",
+        method: String = HTTP_METHOD_GET,
         body: String? = null,
         headers: List<Pair<String, String>> = emptyList()
     )
