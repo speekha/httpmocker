@@ -16,13 +16,6 @@
 
 package fr.speekha.httpmocker.client
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argThat
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import fr.speekha.httpmocker.HTTP_METHOD_DELETE
 import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.HTTP_METHOD_PUT
@@ -41,6 +34,11 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.HttpStatusCode
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -58,9 +56,7 @@ import kotlin.system.measureTimeMillis
 @DisplayName("Static Mocks with Ktor")
 abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<Response, Client> {
 
-    protected val loadingLambda: (String) -> InputStream? = mock {
-        on { invoke(any()) } doAnswer { javaClass.classLoader.getResourceAsStream(it.getArgument(0)) }
-    }
+    protected var loadingLambda: (String) -> InputStream? = { javaClass.classLoader.getResourceAsStream(it) }
 
     protected lateinit var filingPolicy: FilingPolicy
 
@@ -78,7 +74,12 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
                 setUpInterceptor(ENABLED, mapper, type)
                 executeRequest(URL_SIMPLE_REQUEST)
 
-                verify(filingPolicy).getPath(argThat { this.path == URL_SIMPLE_REQUEST })
+                val request = slot<HttpRequest>()
+                verify {
+                    filingPolicy.getPath(capture(request))
+                }
+                confirmVerified()
+                assertEquals(URL_SIMPLE_REQUEST, request.captured.path)
             }
         }
 
@@ -109,9 +110,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            whenever(loadingLambda.invoke(any())) doAnswer {
-                loadingError()
-            }
+            loadingLambda = { loadingError() }
             setUpInterceptor(ENABLED, mapper, type)
 
             check404Response("/no_match")
@@ -128,9 +127,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            whenever(loadingLambda.invoke(any())) doAnswer {
-                loadingError()
-            }
+            loadingLambda = { loadingError() }
             setUpInterceptor(ENABLED, mapper, type)
 
             check404Response("/unknown")
@@ -197,9 +194,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             mapper: Mapper,
             type: String
         ) = runBlocking {
-            whenever(loadingLambda.invoke(any())) doAnswer {
-                loadingError()
-            }
+            loadingLambda = { loadingError() }
             setUpInterceptor(ENABLED, mapper, type)
 
             val response = executeRequest("/unknown")
@@ -515,11 +510,11 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         private lateinit var policy2: FilingPolicy
 
         private fun setupInterceptor(mapper: Mapper, type: String) {
-            policy1 = mock {
-                on { this.getPath(any()) } doReturn "incorrect"
+            policy1 = mockk {
+                every { getPath(any()) } returns "incorrect"
             }
-            policy2 = mock {
-                on { this.getPath(any()) } doReturn "incorrect"
+            policy2 = mockk {
+                every { getPath(any()) } returns "incorrect"
             }
 
             setupStaticConf(ENABLED, loadingLambda, mapper, null, policy1, policy2)
@@ -530,7 +525,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         @DisplayName("When the first policy provides a match, then it should be used")
         fun `should use first policy if possible`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(mapper, type)
-            whenever(policy1.getPath(any())).thenReturn("request.$type")
+            every { policy1.getPath(any()) } returns "request.$type"
 
             checkResponseBody(REQUEST_SIMPLE_BODY, URL_SIMPLE_REQUEST)
         }
@@ -540,7 +535,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         @DisplayName("When the first policy does not provide a match, then the second one should be used")
         fun `should use second policy as fallback`(title: String, mapper: Mapper, type: String) = runBlocking {
             setupInterceptor(mapper, type)
-            whenever(policy2.getPath(any())).thenReturn("request.$type")
+            every { policy2.getPath(any()) } returns "request.$type"
             checkResponseBody(REQUEST_SIMPLE_BODY, URL_SIMPLE_REQUEST)
         }
 
@@ -703,8 +698,8 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             type: String
         ) = runBlocking {
             enqueueServerResponse(REQUEST_OK_CODE, "body")
+            loadingLambda = { throw FileNotFoundException("File does not exist") }
             setUpInterceptor(MIXED, mapper, type)
-            whenever(loadingLambda.invoke(any())).then { throw FileNotFoundException("File does not exist") }
             checkResponseBody("body", "")
         }
     }
@@ -721,9 +716,9 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
     }
 
     protected fun initFilingPolicy(fileType: String) {
-        filingPolicy = mock {
-            on { getPath(any()) } doAnswer {
-                val path = it.getArgument<HttpRequest>(0).path
+        filingPolicy = mockk {
+            every { getPath(any()) } answers {
+                val path = firstArg<HttpRequest>().path
                 ("$path.$fileType").drop(1)
             }
         }

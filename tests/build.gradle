@@ -63,7 +63,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
+    testImplementation "io.mockk:mockk:1.10.2"
 
     testImplementation "org.slf4j:slf4j-simple:$slf4j_version"
 }
