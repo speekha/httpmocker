@@ -56,14 +56,13 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         interceptor.mode = mode
     }
 
-    override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode): OkHttpClient {
-        interceptor = mockInterceptor {
+    override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode): OkHttpClient = buildClient {
+        mockInterceptor {
             setInterceptorStatus(status)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
         }
-        return OkHttpClient.Builder().addInterceptor(interceptor).build().also { client = it }
     }
 
     override fun setupStaticConf(
@@ -74,15 +73,16 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         vararg filingPolicy: FilingPolicy,
         callback: RequestCallback?
     ) {
-        interceptor = mockInterceptor {
-            callback?.let { useDynamicMocks(it) }
-            filingPolicy.forEach { decodeScenarioPathWith(it) }
-            loadFileWith(loadingLambda)
-            parseScenariosWith(mapper)
-            delay?.let { addFakeNetworkDelay(it) }
-            setInterceptorStatus(mode)
+        buildClient {
+            mockInterceptor {
+                callback?.let { useDynamicMocks(it) }
+                filingPolicy.forEach { decodeScenarioPathWith(it) }
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                delay?.let { addFakeNetworkDelay(it) }
+                setInterceptorStatus(mode)
+            }
         }
-        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
     override fun setupRecordConf(
@@ -92,32 +92,40 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         failOnError: Boolean,
         fileType: String
     ) {
-        interceptor = mockInterceptor {
-            decodeScenarioPathWith {
-                val path = it.path
-                (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
-                    .drop(1)
+        buildClient {
+            mockInterceptor {
+                decodeScenarioPathWith {
+                    val path = it.path
+                    (path + if (path.endsWith("/")) "index.$fileType" else ".$fileType")
+                        .drop(1)
+                }
+                loadFileWith(loadingLambda)
+                parseScenariosWith(mapper)
+                recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
+                failOnRecordingError(failOnError)
+                setInterceptorStatus(Mode.RECORD)
             }
-            loadFileWith(loadingLambda)
-            parseScenariosWith(mapper)
-            recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
-            failOnRecordingError(failOnError)
-            setInterceptorStatus(Mode.RECORD)
         }
-        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
     override fun setupRecordPolicyConf(mapper: Mapper, readPolicy: FilingPolicy?, writePolicy: FilingPolicy?) {
-        interceptor = mockInterceptor {
-            readPolicy?.let { decodeScenarioPathWith(it) }
-            parseScenariosWith(mapper)
-            writePolicy?.let {
-                recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER) with it
-            } ?: recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER)
-            failOnRecordingError(true)
-            setInterceptorStatus(Mode.RECORD)
+        buildClient {
+            mockInterceptor {
+                readPolicy?.let { decodeScenarioPathWith(it) }
+                parseScenariosWith(mapper)
+                writePolicy?.let {
+                    recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER) with it
+                } ?: recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER)
+                failOnRecordingError(true)
+                setInterceptorStatus(Mode.RECORD)
+            }
         }
+    }
+
+    private fun buildClient(conf: () -> MockResponseInterceptor): OkHttpClient {
+        interceptor = conf()
         client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+        return client
     }
 
     override suspend fun executeRequest(
@@ -150,13 +158,11 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         headers: List<Pair<String, String>> = emptyList(),
         method: String = HTTP_METHOD_GET,
         body: String? = null
-    ): Request {
-        return Request.Builder()
-            .url(url)
-            .headers(Headers.headersOf(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
-            .method(method, body?.toRequestBody("text/plain".toMediaTypeOrNull()))
-            .build()
-    }
+    ): Request = Request.Builder()
+        .url(url)
+        .headers(Headers.headersOf(*headers.flatMap { listOf(it.first, it.second) }.toTypedArray()))
+        .method(method, body?.toRequestBody("text/plain".toMediaTypeOrNull()))
+        .build()
 
     override suspend fun checkResponseBody(
         expected: String,

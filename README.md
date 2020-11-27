@@ -1,6 +1,6 @@
 # HttpMocker
 
-[![Kotlin](https://img.shields.io/badge/kotlin-1.4.10-blue.svg)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.4.20-blue.svg)](http://kotlinlang.org)
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
 
@@ -57,13 +57,14 @@ repositories {
 
 This library contains two parts: a core module handling the mock logic, and an additional adapter to parse the scenario 
 files for static mocks. Currently, there are six possible options that are provided for parsing, based on some of the 
-most commonly used serialization libraries and on a custom implementations (no third party dependency): 
+most commonly used serialization libraries and on a custom implementation (no third party dependency): 
 * Jackson
 * Gson
 * Moshi
-* Kotlinx serialization)
+* Kotlinx serialization
 * Custom JSON implementation
 * Custom Sax-based implementation
+
 This should allow you to choose one matching what you already use in your application (in order to prevent 
 duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
 of JSON, the SAX-based parser allows to do it. If you choose one of these options, all you need to add is the 
@@ -99,7 +100,8 @@ implementation "fr.speekha.httpmocker:mocker:1.3.0"
 
 #### External dependencies
 
-* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp.
+* HttpMocker is a mocking library for OkHttp connections, so it depends on OkHttp (as of v1.3.0, HttpMocker uses 
+OkHttp 4 API, previous versions use OkHttp 3).
 * It also depends on the SLF4J API for logging.
 * JSON parsers depend on their respective external libraries: Jackson, Gson, Moshi or KotlinX serialization.
 
@@ -119,7 +121,7 @@ is to add it to your OkHttp client. Here's an example with minimal configuration
 using the Java-friendly builder syntax:
 ```kotlin
     val interceptor = Builder()
-        .useDynamicMocks{
+        .useDynamicMocks {
             ResponseDescriptor(code = 200, body = "Fake response body")
         }
         .setInterceptorStatus(ENABLED)
@@ -132,7 +134,7 @@ using the Java-friendly builder syntax:
 You can write the same thing in a more Kotlin-friendly style:
 ```kotlin
     val interceptor = mockInterceptor {
-        useDynamicMocks{
+        useDynamicMocks {
             ResponseDescriptor(code = 200, body = "Fake response body")
         }
         setInterceptorStatus(ENABLED)
@@ -291,7 +293,7 @@ In this example, a POST request on the corresponding URL, including a query para
 "myParamValue", a header "myHeader" with the value "myHeaderValue" and a body containing the digit '1' (based on 
 the regex used as body) will match the first case: it will be answered a HTTP 200 response of type 
 "application/json", with a header "myHeader" of value "headerValue1". The body for this response will be found in 
-a nearby file name "body_content.txt". In any other cases, the request will be answered with the second response:
+a nearby file named "body_content.txt". In any other cases, the request will be answered with the second response:
 a HTTP 200 response with "headerValue2" as header and a simple string "No body here" as body.
 
 Finally, in some cases, network connections might fail with an exception instead of a HTTP error code. This kind

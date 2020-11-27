@@ -91,6 +91,8 @@ interface HttpClientTester<Response : Any, Client : Any> {
         headers: List<Pair<String, String>> = emptyList()
     )
 
+    fun completeLocalUrl(url: String): String
+
     suspend fun assertResponseBody(expected: String, response: Response)
     suspend fun assertResponseBodyStartsWith(expected: String, response: Response)
     fun assertResponseCode(resultCode: HttpStatusCode, response: Response)
