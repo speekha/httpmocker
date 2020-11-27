@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,20 +57,18 @@ class JavaApiTest extends OkHttpTests {
         @Test
         @DisplayName("Then static mocks should work properly")
         public void shouldUseStaticMocksWithJavaApi() {
-            FilingPolicy filingPolicy = getFilingPolicy();
+            MockPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             executeRequestSync("/static");
             HttpRequest request = new HttpRequest("GET", "http", "127.0.0.1", getServer().getPort(), "/static");
-            Mockito.verify(filingPolicy).getPath(request);
+            Assertions.assertEquals(request, filingPolicy.arg);
         }
-
 
         @Test
         @DisplayName("Then recording should work properly")
         public void shouldRecordWithJavaApi() {
             enqueueServerResponse(200, "body", new ArrayList<>(), null);
-            FilingPolicy filingPolicy = getFilingPolicy();
-            initInterceptor(filingPolicy);
+            initInterceptor(new MockPolicy());
             getInterceptor().setMode(Mode.RECORD);
             executeRequestSync("record/request");
             assertFilesExist(RecordTestsKt.SAVE_FOLDER + "/request.json");
@@ -115,10 +112,20 @@ class JavaApiTest extends OkHttpTests {
         }
 
         @NotNull
-        private FilingPolicy getFilingPolicy() {
-            FilingPolicy filingPolicy = Mockito.mock(FilingPolicy.class);
-            Mockito.when(filingPolicy.getPath(Mockito.any())).thenReturn("request.json");
-            return filingPolicy;
+        private MockPolicy getFilingPolicy() {
+            return new MockPolicy();
+        }
+    }
+
+    private static class MockPolicy implements FilingPolicy {
+
+        private HttpRequest arg = null;
+
+        @NotNull
+        @Override
+        public String getPath(@NotNull HttpRequest request) {
+            arg = request;
+            return "request.json";
         }
     }
 }
