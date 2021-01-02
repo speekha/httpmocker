@@ -64,6 +64,8 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 useDynamicMocks(it)
             }
         }
+        expectSuccess = false
+        followRedirects = false
     }.also { client = it }
 
     override fun setupStaticConf(
