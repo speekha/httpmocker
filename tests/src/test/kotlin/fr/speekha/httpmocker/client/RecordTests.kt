@@ -220,7 +220,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails and errors are expected, " +
-                    "then the error should be returned"
+                "then the error should be returned"
         )
         fun `recording failure should return an error if desired`(
             title: String,
@@ -252,7 +252,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request, " +
-                    "then scenario and response body files should be created in that folder"
+                "then scenario and response body files should be created in that folder"
         )
         fun `should store requests and responses in the proper locations when recording`(
             title: String,
@@ -272,7 +272,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request for a URL ending with a '/', " +
-                    "then scenario files should be named with 'index'"
+                "then scenario files should be named with 'index'"
         )
         fun `should name body file correctly when last path segment is empty`(
             title: String,
@@ -321,7 +321,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request or response with a null body, " +
-                    "then body should be empty in scenario files"
+                "then body should be empty in scenario files"
         )
         fun `should handle null request and response bodies when recording`(
             title: String,
@@ -357,7 +357,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When a scenario already exists for a request, " +
-                    "then the scenario should be completed with the new one"
+                "then the scenario should be completed with the new one"
         )
         fun `should update existing descriptors when recording`(
             title: String,
@@ -397,7 +397,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body, " +
-                    "then the file should have the proper extension"
+                "then the file should have the proper extension"
         )
         fun `should add proper extension to response files`(
             title: String,
@@ -419,7 +419,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with a mediatype charset, " +
-                    "then the file should have the proper extension"
+                "then the file should have the proper extension"
         )
         fun `should handle proper extension for response files`(
             title: String,
@@ -438,7 +438,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a response body with unknwown mediatype, " +
-                    "then the file should have the default extension"
+                "then the file should have the default extension"
         )
         fun `should handle default extension for response files`(
             title: String,
@@ -457,7 +457,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When several matches exist for a request, " +
-                    "then the body file should have the same index as the request in the scenario"
+                "then the body file should have the same index as the request in the scenario"
         )
         fun `should match indexes in descriptor file and actual response file name`(
             title: String,
@@ -479,7 +479,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a request fails with an exception, " +
-                    "then the exception should be recorded"
+                "then the exception should be recorded"
         )
         fun `recording failure should save error in scenario`(
             title: String,
@@ -513,7 +513,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName(
             "When recording a scenario with request body, " +
-                    "then the corresponding scenario should be usable as is"
+                "then the corresponding scenario should be usable as is"
         )
         fun `recorded scenarios should be usable`(
             title: String,
