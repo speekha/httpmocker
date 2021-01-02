@@ -27,13 +27,13 @@ const val HTTP_METHOD_PUT = "PUT"
 const val HTTP_METHOD_DELETE = "DELETE"
 
 inline fun <reified T : Throwable> assertThrows(message: String? = null, block: () -> Unit): T {
-    try {
+    val result = try {
         block()
     } catch (e: Throwable) {
         return (e as? T).takeIf { message == null || e.message == message }
             ?: Assertions.fail("Wrong exception: $e. Expected: ${T::class.qualifiedName}")
     }
-    return Assertions.fail("No exception thrown")
+    return Assertions.fail("No exception thrown. Result was $result")
 }
 
 fun File.readAsString() = FileInputStream(this).readAsString()
