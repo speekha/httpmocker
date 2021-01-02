@@ -1,5 +1,6 @@
 # HttpMocker
 
+[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.4.20-blue.svg)](http://kotlinlang.org)
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
 [![Download](https://api.bintray.com/packages/speekha/httpmocker/mocker/images/download.svg)](https://bintray.com/speekha/httpmocker/mocker/_latestVersion)
