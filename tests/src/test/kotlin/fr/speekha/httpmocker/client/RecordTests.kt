@@ -16,31 +16,18 @@
 
 package fr.speekha.httpmocker.client
 
-import fr.speekha.httpmocker.HTTP_METHOD_GET
-import fr.speekha.httpmocker.HTTP_METHOD_POST
-import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.*
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.RECORD
-import fr.speekha.httpmocker.NO_RECORDER_ERROR
-import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.*
 import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
-import fr.speekha.httpmocker.readAsString
 import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
-import fr.speekha.httpmocker.withFile
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -52,11 +39,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.Collections
+import java.util.*
 
 @Suppress("UNUSED_PARAMETER")
 abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Response, Client> {
