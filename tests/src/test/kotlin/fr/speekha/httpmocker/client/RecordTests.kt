@@ -240,7 +240,7 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
 
         private fun blockWritingToOutputFolder() {
             File(SAVE_FOLDER).mkdir()
-            FileOutputStream("$SAVE_FOLDER/record").close()
+            File("$SAVE_FOLDER/record").createNewFile()
         }
     }
 
