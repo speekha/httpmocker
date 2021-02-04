@@ -32,6 +32,18 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    flavorDimensions "engine"
+
+    productFlavors {
+        okhttp {
+            dimension "engine"
+        }
+
+        ktor {
+            dimension "engine"
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -51,7 +63,7 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '29.0.3'
 }
 
 //repositories {
@@ -71,14 +83,24 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
 
     implementation "org.koin:koin-androidx-viewmodel:2.0.1"
     implementation "org.slf4j:slf4j-android:$slf4j_version"
 
-    //implementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
-    implementation project(':mocker-okhttp')
-    implementation project(':jackson-adapter')
+    //okhttpImplementation "fr.speekha.httpmocker:mocker-okhttp:$httpmock_version"
+    //okhttpImplementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
+    okhttpImplementation project(':mocker-okhttp')
+    okhttpImplementation project(':jackson-adapter')
+    okhttpImplementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
+
+    //ktorImplementation "fr.speekha.httpmocker:mocker-ktor:$httpmock_version"
+    //ktorImplementation "fr.speekha.httpmocker:kotlinx-adapter:$httpmock_version"
+    ktorImplementation project(':mocker-ktor')
+    ktorImplementation project(':kotlinx-adapter')
+    ktorImplementation "io.ktor:ktor-client-cio:$ktor_version"
+    ktorImplementation "io.ktor:ktor-client-android:$ktor_version"
+    ktorImplementation "io.ktor:ktor-client-json:$ktor_version"
+    ktorImplementation "io.ktor:ktor-client-jackson:$ktor_version"
 
     testImplementation "junit:junit:4.13.1"
     testImplementation "io.mockk:mockk:1.10.2"

@@ -1,6 +1,7 @@
 [
   {
     "response": {
+      "media-type": "application/json",
       "body-file": "repoList.json"
     }
   }

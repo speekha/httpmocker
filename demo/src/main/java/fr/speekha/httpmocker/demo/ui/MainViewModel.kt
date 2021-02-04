@@ -29,14 +29,13 @@ import fr.speekha.httpmocker.demo.model.onFailure
 import fr.speekha.httpmocker.demo.model.onSuccess
 import fr.speekha.httpmocker.demo.model.resultOf
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
-import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainViewModel(
     private val apiService: GithubApiEndpoints,
-    private val mocker: MockResponseInterceptor
+    private val mocker: MockerWrapper
 ) : ViewModel() {
 
     private val data = MutableLiveData<Data>()

@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.demo
 
 import android.app.Application
+import fr.speekha.httpmocker.demo.di.engineInjection
 import fr.speekha.httpmocker.demo.di.injectionModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -27,6 +28,7 @@ class DemoApplication : Application() {
         startKoin {
             androidContext(this@DemoApplication)
             modules(injectionModule)
+            modules(engineInjection)
         }
     }
 }

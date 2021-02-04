@@ -166,7 +166,7 @@ jobs:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testReleaseUnitTest demo:lint --stacktrace
+          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testOkhttpReleaseUnitTest demo:lint --stacktrace
       - store_test_results:
           path: demo/build/test-results
       - store_artifacts:
