@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@1.0.2
+  build-tools: circleci/build-tools@2.7.1
+
 references:
   container_config: &container_config
     docker:
@@ -11,15 +15,17 @@ references:
       JVM_OPTS: -Xmx3g
 
 commands:
-  restore_sources_and_gradle:
-    description: "Restores previous build steps state"
+  restore_sources_cache:
+    description: "Restores branch cache"
     steps:
       - restore_cache:
           keys:
             - source-{{ .Branch }}-{{ .Revision }}
             - source-{{ .Branch }}-
             - source-
-      - checkout
+  restore_gradle_cache:
+    description: "Restores cache for gradle"
+    steps:
       - restore_cache:
           keys:
             - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker-core/build.gradle" }}-{{ checksum "mocker-okhttp/build.gradle" }}-{{ checksum "mocker-ktor/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
@@ -29,6 +35,13 @@ commands:
             - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-
             - jars-{{ checksum "build.gradle" }}-
             - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  restore_sources_and_gradle:
+    description: "Restores previous build steps state"
+    steps:
+      - restore_sources_cache
+      - checkout
+      - build-tools/merge-with-parent
+      - restore_gradle_cache
   build_module:
     description: "Builds a specific module"
     parameters:
@@ -77,9 +90,6 @@ commands:
       - restore_cache:
           keys:
             - build-sax-adapter-{{ .Branch }}-{{ .Revision }}
-
-orbs:
-  codecov: codecov/codecov@1.0.2
 
 jobs:
   init_workspace:
