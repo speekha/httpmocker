@@ -37,10 +37,19 @@ commands:
             - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
   restore_sources_and_gradle:
     description: "Restores previous build steps state"
+    parameters:
+      pr:
+        default: false
+        description:
+          This branch should be considered as a PR and built with parent
+        type: boolean
     steps:
       - restore_sources_cache
       - checkout
-      - build-tools/merge-with-parent
+      - when
+        condition: <<parameters.pr>>
+        steps:
+          - build-tools/merge-with-parent
       - restore_gradle_cache
   build_module:
     description: "Builds a specific module"
@@ -96,6 +105,11 @@ jobs:
     <<: *container_config
     steps:
       - restore_sources_and_gradle
+        - pr:
+          not:
+            - or:
+              - equal: [master, <<pipeline.git.branch>> ]
+              - equal: [develop, <<pipeline.git.branch>> ]
       - run:
           name: Download Dependencies
           command: ./gradlew --no-daemon androidDependencies --stacktrace
