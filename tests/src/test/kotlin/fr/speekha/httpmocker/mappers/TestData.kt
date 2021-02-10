@@ -17,11 +17,7 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.io.readAsStringList
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.model.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.InputStream
 
@@ -35,13 +31,17 @@ internal val completeData = listOf(
             port = 15926,
             path = "/path",
             headers = listOf(
-                Header("reqHeader1", "1"),
-                Header("reqHeader1", "2"),
-                Header("reqHeader2", "3"),
-                Header("reqHeader3", null),
-                Header("Set-Cookie", "\"cookie\"=\"value\"")
+                NamedParameter("reqHeader1", "1"),
+                NamedParameter("reqHeader1", "2"),
+                NamedParameter("reqHeader2", "3"),
+                NamedParameter("reqHeader3", null),
+                NamedParameter("Set-Cookie", "\"cookie\"=\"value\"")
             ),
-            params = mapOf("param1" to "1", "param2" to "2", "param3" to null),
+            params = listOf(
+                NamedParameter("param1", "1"),
+                NamedParameter("param2", "2"),
+                NamedParameter("param3", null)
+            ),
             body = ".*<1>.*"
         ),
         ResponseDescriptor(
@@ -49,9 +49,9 @@ internal val completeData = listOf(
             code = 201,
             mediaType = "application/json",
             headers = listOf(
-                Header("resHeader1", "4"),
-                Header("resHeader1", "5"),
-                Header("resHeader2", "6")
+                NamedParameter("resHeader1", "4"),
+                NamedParameter("resHeader1", "5"),
+                NamedParameter("resHeader2", "6")
             ),
             body = "<simple body />",
             bodyFile = "body_content.txt"

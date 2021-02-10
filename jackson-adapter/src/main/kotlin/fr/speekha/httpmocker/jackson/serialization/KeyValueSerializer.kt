@@ -19,19 +19,19 @@ package fr.speekha.httpmocker.jackson.serialization
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import fr.speekha.httpmocker.jackson.model.Header
+import fr.speekha.httpmocker.jackson.model.KeyValue
 import java.io.IOException
 
 /**
  * Special deserializer allowing to have the same header several times (e.g. Set-Cookie)
  */
-internal class HeadersSerializer : JsonSerializer<List<Header>>() {
+internal class KeyValueSerializer : JsonSerializer<List<KeyValue>>() {
 
     @Throws(IOException::class)
-    override fun serialize(value: List<Header>, gen: JsonGenerator, serializers: SerializerProvider) {
+    override fun serialize(value: List<KeyValue>, gen: JsonGenerator, serializers: SerializerProvider) {
         gen.writeStartObject()
         value.forEach {
-            gen.writeStringField(it.name, it.value)
+            gen.writeStringField(it.key, it.value)
         }
         gen.writeEndObject()
     }

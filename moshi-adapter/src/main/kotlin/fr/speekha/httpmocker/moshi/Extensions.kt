@@ -18,13 +18,14 @@ package fr.speekha.httpmocker.moshi
 
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
+import fr.speekha.httpmocker.model.NamedParameter
 
-internal fun JsonWriter.writeList(list: Iterable<Pair<String, String?>>) {
+internal fun JsonWriter.writeList(list: Iterable<NamedParameter>) {
     beginObject()
     serializeNulls = true
     list.forEach {
-        name(it.first)
-        value(it.second)
+        name(it.name)
+        value(it.value)
     }
     serializeNulls = false
     endObject()

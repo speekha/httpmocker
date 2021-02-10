@@ -18,15 +18,7 @@ package fr.speekha.httpmocker.moshi.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.METHOD
-import fr.speekha.httpmocker.serialization.PARAMS
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.*
 
 @JsonClass(generateAdapter = true)
 internal data class RequestDescriptor(
@@ -50,10 +42,10 @@ internal data class RequestDescriptor(
     val path: String? = null,
 
     @field:Json(name = HEADERS)
-    val headers: List<Header> = emptyList(),
+    val headers: List<KeyValue> = emptyList(),
 
     @field:Json(name = PARAMS)
-    val params: Map<String, String?> = emptyMap(),
+    val params: List<KeyValue> = emptyList(),
 
     @field:Json(name = BODY)
     val body: String? = null

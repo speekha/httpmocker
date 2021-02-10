@@ -38,7 +38,7 @@ class JacksonMapper : Mapper {
     private val matcherTypeRef = jacksonTypeRef<List<JsonMatcher>>()
 
     override fun deserialize(payload: String): List<Matcher> =
-        mapper.readValue<List<JsonMatcher>>(payload, matcherTypeRef).toModel()
+        mapper.readValue(payload, matcherTypeRef).toModel()
 
     override fun serialize(matchers: List<Matcher>): String =
         mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matchers.map { it.fromModel() })

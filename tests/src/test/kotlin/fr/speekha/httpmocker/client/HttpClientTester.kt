@@ -19,17 +19,17 @@ package fr.speekha.httpmocker.client
 import fr.speekha.httpmocker.HTTP_METHOD_GET
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.FileLoader
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 
 interface HttpClientTester<Response : Any, Client : Any> {
 
     var client: Client
 
-    val extraHeaders: List<Header>
+    val extraHeaders: List<NamedParameter>
 
     fun setupDynamicConf(
         vararg callbacks: RequestCallback,

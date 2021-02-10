@@ -19,12 +19,13 @@ package fr.speekha.httpmocker.gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import fr.speekha.httpmocker.model.NamedParameter
 
 internal class ParamsAdapter : TypeAdapter<ParamsAdapter.ParamList>() {
 
     internal class ParamList(
-        map: Map<String, String?> = emptyMap()
-    ) : ArrayList<Pair<String, String?>>(map.entries.map { it.key to it.value })
+        map: List<NamedParameter> = emptyList()
+    ) : ArrayList<NamedParameter>(map)
 
     override fun write(writer: JsonWriter?, params: ParamList?) {
         writer?.writeList(params) { it }
@@ -32,7 +33,7 @@ internal class ParamsAdapter : TypeAdapter<ParamsAdapter.ParamList>() {
 
     override fun read(reader: JsonReader?): ParamList = ParamList().also {
         reader?.run {
-            readList(it) { name, value -> name to value }
+            readList(it) { name, value -> NamedParameter(name, value) }
         }
     }
 }

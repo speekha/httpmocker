@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.kotlinx.model
+package fr.speekha.httpmocker.model
 
-import fr.speekha.httpmocker.serialization.NAME
-import fr.speekha.httpmocker.serialization.VALUE
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import fr.speekha.httpmocker.model.Header as Model
+/**
+ * A request or response header. Simple key-value pair.
+ */
+data class NamedParameter(
 
-@Serializable
-internal data class Header(
-    @SerialName(NAME)
-    val name: String?,
-    @SerialName(VALUE)
-    val value: String?
-) {
-    constructor(model: Model) : this(model.name, model.value)
-}
+    /**
+     * Header key
+     */
+    val name: String = "",
+
+    /**
+     * Header value
+     */
+    val value: String? = null
+)

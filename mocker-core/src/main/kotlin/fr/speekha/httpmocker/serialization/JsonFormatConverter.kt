@@ -62,8 +62,13 @@ class JsonFormatConverter {
      */
     fun compact(input: String): String =
         convertJsonBlock(
-            input,
-            outputHeaderPattern
+            convertJsonBlock(
+                input,
+                outputHeaderPattern
+            ) { json, matcher, position ->
+                exportHeaderBlock(json, matcher, position)
+            },
+            outputParameterPattern
         ) { json, matcher, position ->
             exportHeaderBlock(json, matcher, position)
         }
@@ -73,7 +78,12 @@ class JsonFormatConverter {
      */
     fun expand(input: String): String =
         convertJsonBlock(
-            input,
+            convertJsonBlock(
+                input,
+                inputParameterPattern
+            ) { json, matcher, position ->
+                importHeaderBlock(json, matcher, position)
+            },
             inputHeaderPattern
         ) { json, matcher, position ->
             importHeaderBlock(json, matcher, position)
@@ -140,6 +150,10 @@ class JsonFormatConverter {
             Pattern.compile("\"headers\"\\p{Space}*:\\p{Space}*\\[[^]]*]")
         private val inputHeaderPattern =
             Pattern.compile("\"headers\"\\p{Space}*:\\p{Space}*\\{[^}]*}")
+        private val outputParameterPattern =
+            Pattern.compile("\"params\"\\p{Space}*:\\p{Space}*\\[[^]]*]")
+        private val inputParameterPattern =
+            Pattern.compile("\"params\"\\p{Space}*:\\p{Space}*\\{[^}]*}")
         private val separatorPattern = Pattern.compile("\"\\p{Space}*:\\p{Space}*")
     }
 }

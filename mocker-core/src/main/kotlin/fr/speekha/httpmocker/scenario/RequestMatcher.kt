@@ -37,9 +37,13 @@ class RequestMatcher {
     } ?: true
 
     private fun RequestTemplate.matchParams(request: HttpRequest) =
-        params.all {
-            request.params[it.key] == it.value
-        } && (!exactMatch || params.size == request.params.size)
+        params.all { param ->
+            if (param.value != null) {
+                request.params.any { it == param }
+            } else {
+                request.params.none { it.name == param.name }
+            }
+       } && (!exactMatch || params.size == request.params.size)
 
     private fun RequestTemplate.matchHeaders(request: HttpRequest) =
         headers.all { header ->

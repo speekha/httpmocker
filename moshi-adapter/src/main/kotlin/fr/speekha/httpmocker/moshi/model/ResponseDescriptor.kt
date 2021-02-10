@@ -18,14 +18,7 @@ package fr.speekha.httpmocker.moshi.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.BODY_FILE
-import fr.speekha.httpmocker.serialization.CODE
-import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
-import fr.speekha.httpmocker.serialization.DEFAULT_RESPONSE_CODE
-import fr.speekha.httpmocker.serialization.DELAY
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.*
 
 @JsonClass(generateAdapter = true)
 internal data class ResponseDescriptor(
@@ -40,7 +33,7 @@ internal data class ResponseDescriptor(
     val mediaType: String = DEFAULT_MEDIA_TYPE,
 
     @field:Json(name = HEADERS)
-    val headers: List<Header> = emptyList(),
+    val headers: List<KeyValue> = emptyList(),
 
     @field:Json(name = BODY)
     val body: String = "",

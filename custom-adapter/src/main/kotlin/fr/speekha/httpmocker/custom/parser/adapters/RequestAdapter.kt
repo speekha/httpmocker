@@ -19,15 +19,7 @@ package fr.speekha.httpmocker.custom.parser.adapters
 import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.METHOD
-import fr.speekha.httpmocker.serialization.PARAMS
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.*
 
 internal class RequestAdapter : BaseObjectAdapter<RequestTemplate>() {
 
@@ -44,8 +36,8 @@ internal class RequestAdapter : BaseObjectAdapter<RequestTemplate>() {
         PORT -> builder.copy(port = reader.readInt())
         HOST -> builder.copy(host = reader.readString())
         PATH -> builder.copy(path = reader.readString())
-        HEADERS -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
-        PARAMS -> builder.copy(params = reader.readObject(MapAdapter()))
+        HEADERS -> builder.copy(headers = reader.readObject(ParamListAdapter()))
+        PARAMS -> builder.copy(params = reader.readObject(ParamListAdapter()))
         BODY -> builder.copy(body = reader.readString())
         else -> unknownFieldError(field)
     }

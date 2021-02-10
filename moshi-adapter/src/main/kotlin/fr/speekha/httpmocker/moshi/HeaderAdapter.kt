@@ -20,7 +20,8 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import fr.speekha.httpmocker.moshi.model.Header as JsonHeader
+import fr.speekha.httpmocker.model.NamedParameter
+import fr.speekha.httpmocker.moshi.model.KeyValue as JsonHeader
 
 internal class HeaderAdapter {
 
@@ -28,11 +29,11 @@ internal class HeaderAdapter {
     fun headerFromJson(reader: JsonReader): List<JsonHeader> =
         reader.readList(mutableListOf()) { name, value ->
             add(
-                fr.speekha.httpmocker.moshi.model.Header(name, value)
+                fr.speekha.httpmocker.moshi.model.KeyValue(name, value)
             )
         }
 
     @ToJson
     fun headerToJson(writer: JsonWriter, headers: List<JsonHeader>) =
-        writer.writeList(headers.map { it.name to it.value })
+        writer.writeList(headers.map { NamedParameter(it.key, it.value) })
 }

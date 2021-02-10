@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -44,7 +44,7 @@ class SingleFolderPolicyTest {
                 path = "/test/with/path",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
         }
@@ -64,7 +64,7 @@ class SingleFolderPolicyTest {
                 path = "/test/with/path",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             Assertions.assertEquals("folder/test_with_path.xml", policy.getPath(request))
         }
@@ -78,7 +78,7 @@ class SingleFolderPolicyTest {
                 path = "/test/with/path",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             Assertions.assertEquals("test_with_path.json", policy.getPath(request))
         }
@@ -92,7 +92,7 @@ class SingleFolderPolicyTest {
                 path = "/test/with/path/",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             Assertions.assertEquals("folder/test_with_path.json", policy.getPath(request))
         }
@@ -106,7 +106,7 @@ class SingleFolderPolicyTest {
                 path = "",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             Assertions.assertEquals("folder/index.json", policy.getPath(request))
         }

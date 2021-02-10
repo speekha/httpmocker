@@ -20,36 +20,9 @@ import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.BODY_FILE
-import fr.speekha.httpmocker.serialization.CODE
-import fr.speekha.httpmocker.serialization.DELAY
-import fr.speekha.httpmocker.serialization.ERROR
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.MEDIA_TYPE
-import fr.speekha.httpmocker.serialization.METHOD
-import fr.speekha.httpmocker.serialization.NAME
-import fr.speekha.httpmocker.serialization.PARAMS
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
-import fr.speekha.httpmocker.serialization.REQUEST
-import fr.speekha.httpmocker.serialization.RESPONSE
-import fr.speekha.httpmocker.serialization.VALUE
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
-import fr.speekha.httpmocker.model.Header as ModelHeader
+import fr.speekha.httpmocker.serialization.*
+import kotlinx.serialization.json.*
+import fr.speekha.httpmocker.model.NamedParameter as ModelHeader
 
 internal fun JsonElement.toMatcher(): Matcher = Matcher(
     jsonObject[REQUEST]?.toRequest() ?: RequestTemplate(),
@@ -89,11 +62,15 @@ private fun JsonElement.toError(): NetworkError = NetworkError(
     jsonObject[EXCEPTION_MESSAGE]?.asNullableLiteral()
 )
 
-private fun JsonElement?.toParams(): Map<String, String?> =
-    this?.jsonObject?.mapValues { it.value.asNullableLiteral() } ?: mapOf()
+private fun JsonElement?.toParams(): List<ModelHeader> = this?.jsonArray?.map {
+    ModelHeader(
+        it.jsonObject[NAME].asNullableLiteral() ?: error("Incorrect header name"),
+        it.jsonObject[VALUE].asNullableLiteral()
+    )
+} ?: listOf()
 
 private fun JsonElement?.toHeaders(): List<ModelHeader> = this?.jsonArray?.map {
-    fr.speekha.httpmocker.model.Header(
+    fr.speekha.httpmocker.model.NamedParameter(
         it.jsonObject[NAME].asNullableLiteral() ?: error("Incorrect header name"),
         it.jsonObject[VALUE].asNullableLiteral()
     )

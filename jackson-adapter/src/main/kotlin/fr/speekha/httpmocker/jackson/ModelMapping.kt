@@ -16,12 +16,8 @@
 
 package fr.speekha.httpmocker.jackson
 
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.jackson.model.Header as JsonHeader
+import fr.speekha.httpmocker.model.*
+import fr.speekha.httpmocker.jackson.model.KeyValue as JsonParameter
 import fr.speekha.httpmocker.jackson.model.Matcher as JsonMatcher
 import fr.speekha.httpmocker.jackson.model.NetworkError as JsonNetworkError
 import fr.speekha.httpmocker.jackson.model.RequestDescriptor as JsonRequestDescriptor
@@ -40,8 +36,8 @@ private fun JsonRequestDescriptor.toModel() = RequestTemplate(
     host = host,
     port = port,
     path = path,
-    headers = headers.map { it.toModel() },
-    params = params,
+    headers = headers.toModel(),
+    params = params.toModel(),
     body = body
 )
 
@@ -52,20 +48,22 @@ private fun RequestTemplate.fromModel() = JsonRequestDescriptor(
     host = host,
     port = port,
     path = path,
-    headers = headers.map { it.fromModel() },
-    params = params,
+    headers = headers.fromModel(),
+    params = params.fromModel(),
     body = body
 )
 
-private fun JsonHeader.toModel() = Header(name, value)
+private fun List<JsonParameter>.toModel() = map { NamedParameter(it.key, it.value) }
 
-private fun Header.fromModel() = JsonHeader(name, value)
+private fun List<NamedParameter>.fromModel() = map { JsonParameter(it.name, it.value) }
+
+private fun NamedParameter.fromModel() = JsonParameter(name, value)
 
 private fun JsonResponseDescriptor.toModel() = ResponseDescriptor(
     delay = delay,
     code = code,
     mediaType = mediaType,
-    headers = headers.map { it.toModel() },
+    headers = headers.toModel(),
     body = body,
     bodyFile = bodyFile
 )

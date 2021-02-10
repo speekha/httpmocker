@@ -16,11 +16,7 @@
 
 package fr.speekha.httpmocker.gson
 
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.model.*
 import fr.speekha.httpmocker.gson.model.Header as JsonHeader
 import fr.speekha.httpmocker.gson.model.Matcher as JsonMatcher
 import fr.speekha.httpmocker.gson.model.NetworkError as JsonNetworkError
@@ -32,10 +28,10 @@ internal fun JsonMatcher.toModel() =
 
 private fun JsonRequestDescriptor.toModel() = RequestTemplate(
     exactMatch ?: false, protocol, method, host, port, path,
-    headers.toModel(), params.associate { it }, body
+    headers.toModel(), params, body
 )
 
-private fun JsonHeader.toModel() = Header(name, value)
+private fun JsonHeader.toModel() = NamedParameter(name, value)
 
 private fun HeaderAdapter.HeaderList?.toModel() = this?.map { it.toModel() } ?: emptyList()
 
@@ -56,7 +52,7 @@ private fun RequestTemplate.fromModel() = JsonRequestDescriptor(
 private fun RequestTemplate.getHeaders() =
     HeaderAdapter.HeaderList(headers.map { it.fromModel() })
 
-private fun Header.fromModel() = JsonHeader(name, value)
+private fun NamedParameter.fromModel() = JsonHeader(name, value)
 
 private fun ResponseDescriptor.fromModel() = JsonResponseDescriptor(
     delay,

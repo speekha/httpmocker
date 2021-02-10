@@ -17,20 +17,10 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.assertThrows
-import fr.speekha.httpmocker.custom.parser.INCORRECT_FIELD
-import fr.speekha.httpmocker.custom.parser.INVALID_BOOLEAN_ERROR
-import fr.speekha.httpmocker.custom.parser.INVALID_NUMBER_ERROR
-import fr.speekha.httpmocker.custom.parser.JsonParser
-import fr.speekha.httpmocker.custom.parser.NO_MORE_TOKEN_ERROR
-import fr.speekha.httpmocker.custom.parser.NULL_STRING_VALUE
-import fr.speekha.httpmocker.custom.parser.WRONG_END_OF_LIST_ERROR
-import fr.speekha.httpmocker.custom.parser.WRONG_END_OF_OBJECT_ERROR
-import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_FIELD_NAME_ERROR
-import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_LIST_ERROR
-import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_OBJECT_ERROR
-import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_STRING_FIELD_ERROR
+import fr.speekha.httpmocker.custom.parser.*
 import fr.speekha.httpmocker.custom.parser.adapters.ObjectAdapter
 import fr.speekha.httpmocker.custom.serializer.truncate
+import fr.speekha.httpmocker.model.NamedParameter
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.*
@@ -267,15 +257,18 @@ class JsonParserTest {
         @Test
         fun `When parsing the object, then fields should be iterable`() {
             with(reader) {
-                val list = mutableListOf<Pair<String, String?>>()
+                val list = mutableListOf<NamedParameter>()
                 beginObject()
                 while (hasNext()) {
                     val field = readFieldName()
                     val value = readString()
                     next()
-                    list += field to value
+                    list += NamedParameter(field, value)
                 }
-                assertEquals(listOf("field1" to "1", "field2" to "2"), list)
+                assertEquals(
+                    listOf(NamedParameter("field1", "1"), NamedParameter("field2", "2")),
+                    list
+                )
             }
         }
 

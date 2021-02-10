@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.jackson.model
+package fr.speekha.httpmocker.moshi.model
 
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import fr.speekha.httpmocker.serialization.NAME
 import fr.speekha.httpmocker.serialization.VALUE
 
-internal data class Header
-@JsonCreator constructor(
-    @JsonProperty(NAME)
-    val name: String = "",
+@JsonClass(generateAdapter = true)
+internal data class KeyValue(
+    @field:Json(name = NAME)
+    val key: String = "",
 
-    @JsonProperty(VALUE)
+    @field:Json(name = VALUE)
     var value: String? = null
 )

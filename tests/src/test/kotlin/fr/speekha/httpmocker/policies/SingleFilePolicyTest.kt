@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -41,7 +41,7 @@ class SingleFilePolicyTest {
                 path = "/test/with/path",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             Assertions.assertEquals(file, policy.getPath(request))
         }

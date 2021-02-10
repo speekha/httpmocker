@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.Mapper
@@ -86,7 +86,7 @@ class JsonMapperTest {
                     Matcher(
                         response = ResponseDescriptor(
                             headers = listOf(
-                                Header("Location", "http://www.google.com")
+                                NamedParameter("Location", "http://www.google.com")
                             )
                         )
                     )
@@ -116,7 +116,7 @@ class JsonMapperTest {
                     Matcher(
                         response = ResponseDescriptor(
                             headers = listOf(
-                                Header("Set-Cookie", "\"cookie\"=\"value\"")
+                                NamedParameter("Set-Cookie", "\"cookie\"=\"value\"")
                             )
                         )
                     )
