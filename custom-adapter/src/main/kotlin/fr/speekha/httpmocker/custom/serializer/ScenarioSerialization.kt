@@ -18,29 +18,8 @@ package fr.speekha.httpmocker.custom.serializer
 
 import fr.speekha.httpmocker.custom.parser.COMMA
 import fr.speekha.httpmocker.custom.parser.OPENING_BRACE
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.BODY_FILE
-import fr.speekha.httpmocker.serialization.CODE
-import fr.speekha.httpmocker.serialization.DELAY
-import fr.speekha.httpmocker.serialization.ERROR
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.EXCEPTION_MESSAGE
-import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.MEDIA_TYPE
-import fr.speekha.httpmocker.serialization.METHOD
-import fr.speekha.httpmocker.serialization.PARAMS
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
-import fr.speekha.httpmocker.serialization.REQUEST
-import fr.speekha.httpmocker.serialization.RESPONSE
+import fr.speekha.httpmocker.model.*
+import fr.speekha.httpmocker.serialization.*
 
 internal fun List<Matcher>.toJson() =
     joinToString(separator = ", ", prefix = "[\n  ", postfix = "\n]") { it.toJson(1) }
@@ -84,15 +63,15 @@ internal fun NetworkError.toJson(indent: Int): String = writeObjectFields(
     EXCEPTION_MESSAGE to message.wrap()
 )
 
-internal fun Map<String, String?>.toJson(indent: Int): String = entries.joinToString(
+internal fun List<NamedParameter>.toJson(indent: Int): String = joinToString(
     separator = COMMA,
     prefix = OPENING_BRACE,
     postfix = closingBrace(indent)
 ) {
     writePair(
         indent + 1,
-        it.key to it.value.wrap()
+        it.name to it.value.wrap()
     )
 }
 
-internal fun Header.toJson(): String = "\"$name\": ${value.wrap()}"
+internal fun NamedParameter.toJson(): String = "\"$name\": ${value.wrap()}"

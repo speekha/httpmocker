@@ -20,24 +20,24 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import fr.speekha.httpmocker.jackson.model.Header
+import fr.speekha.httpmocker.jackson.model.KeyValue
 import java.io.IOException
 
 /**
  * Special deserializer allowing to have the same header several times (e.g. Set-Cookie)
  */
-internal class HeadersDeserializer : JsonDeserializer<List<Header>>() {
+internal class KeyValueDeserializer : JsonDeserializer<List<KeyValue>>() {
 
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(
         jsonParser: JsonParser,
         deserializationContext: DeserializationContext
-    ): List<Header> = mutableListOf<Header>().apply {
+    ): List<KeyValue> = mutableListOf<KeyValue>().apply {
         var token: String?
         do {
             token = jsonParser.nextFieldName()?.also { field ->
                 val value = jsonParser.nextTextValue()
-                add(Header(field, value))
+                add(KeyValue(field, value))
             }
         } while (token != null)
     }

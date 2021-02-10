@@ -103,6 +103,9 @@ class JsonFormatConverterTest {
                 "request": {
                   "headers": {
                     "header1": "value1"
+                  },
+                  "params": {
+                    "param1": "value1"
                   }
                 },
                 "response": {}
@@ -119,6 +122,10 @@ class JsonFormatConverterTest {
                   "headers": {
                     "header1": "value1",
                     "header1": "value2"
+                  },
+                  "params": {
+                    "param1": "value1",
+                    "param1": "value2"
                   }
                 },
                 "response": {
@@ -151,8 +158,8 @@ class JsonFormatConverterTest {
                   "method": "GET",
                   "headers": [
                   ],
-                  "params": {
-                  }
+                  "params": [
+                  ]
                 },
                 "response": {
                   "delay": 0,
@@ -172,6 +179,12 @@ class JsonFormatConverterTest {
                   "headers": [
                     {
                       "name": "header1",
+                      "value": "value1"
+                    }
+                  ],
+                  "params": [
+                    {
+                      "name": "param1",
                       "value": "value1"
                     }
                   ]
@@ -194,6 +207,16 @@ class JsonFormatConverterTest {
                     },
                     {
                       "name": "header1",
+                      "value": "value2"
+                    }
+                  ],
+                  "params": [
+                    {
+                      "name": "param1",
+                      "value": "value1"
+                    },
+                    {
+                      "name": "param1",
                       "value": "value2"
                     }
                   ]

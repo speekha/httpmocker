@@ -20,6 +20,7 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
+import fr.speekha.httpmocker.model.NamedParameter
 
 internal class ParamAdapter {
 
@@ -29,5 +30,5 @@ internal class ParamAdapter {
 
     @ToJson
     fun paramToJson(writer: JsonWriter, params: Map<String, String?>) =
-        writer.writeList(params.entries.map { it.key to it.value })
+        writer.writeList(params.entries.map { NamedParameter(it.key, it.value) })
 }

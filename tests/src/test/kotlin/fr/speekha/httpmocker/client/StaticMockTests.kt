@@ -16,13 +16,9 @@
 
 package fr.speekha.httpmocker.client
 
-import fr.speekha.httpmocker.HTTP_METHOD_DELETE
-import fr.speekha.httpmocker.HTTP_METHOD_POST
-import fr.speekha.httpmocker.HTTP_METHOD_PUT
-import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.*
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
-import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_SIMPLE_BODY
 import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_HEADERS
@@ -33,16 +29,10 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.HttpStatusCode
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.ktor.http.*
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
@@ -590,6 +580,19 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
 
             checkResponseBody("Body found", "/absent_query_param?param1=1")
             check404Response("/absent_query_param?param1=1&param2=2")
+        }
+
+        @ParameterizedTest(name = "Mapper: {0}")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
+        @DisplayName("When a request is answered, then it should match duplicated query parameters")
+        fun `should select response based on duplicate query params`(
+            title: String,
+            mapper: Mapper,
+            type: String
+        ) = runBlocking {
+            setUpInterceptor(ENABLED, mapper, type)
+
+            checkResponseBody("param C", "/query_param?param=1&param=2")
         }
 
         @ParameterizedTest(name = "Mapper: {0}")

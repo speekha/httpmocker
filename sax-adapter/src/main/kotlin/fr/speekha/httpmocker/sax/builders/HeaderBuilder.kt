@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.sax.builders
 
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import org.xml.sax.Attributes
 
 class HeaderBuilder(
@@ -27,6 +27,6 @@ class HeaderBuilder(
     private val name = attributes?.getValue("name") ?: ""
 
     override fun build() {
-        parent.addHeader(Header(name, textContent))
+        parent.addHeader(NamedParameter(name, textContent))
     }
 }

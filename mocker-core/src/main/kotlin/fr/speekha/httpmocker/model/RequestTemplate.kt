@@ -56,12 +56,12 @@ data class RequestTemplate(
     /**
      * List of request headers
      */
-    val headers: List<Header> = emptyList(),
+    val headers: List<NamedParameter> = emptyList(),
 
     /**
      * Query parameters
      */
-    val params: Map<String, String?> = emptyMap(),
+    val params: List<NamedParameter> = emptyList(),
 
     /**
      * Request body

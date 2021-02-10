@@ -16,28 +16,8 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.Matcher
-import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestTemplate
-import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.CODE
-import fr.speekha.httpmocker.serialization.DELAY
-import fr.speekha.httpmocker.serialization.ERROR
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
-import fr.speekha.httpmocker.serialization.HEADER
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.MEDIA_TYPE
-import fr.speekha.httpmocker.serialization.METHOD
-import fr.speekha.httpmocker.serialization.PARAM
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
-import fr.speekha.httpmocker.serialization.REQUEST
-import fr.speekha.httpmocker.serialization.RESPONSE
-import fr.speekha.httpmocker.serialization.URL
+import fr.speekha.httpmocker.model.*
+import fr.speekha.httpmocker.serialization.*
 
 internal fun List<Matcher>.toXml() = XML_PREFACE + writeTags("scenarios", 0) {
     toXml { it.toXml(1) }
@@ -94,7 +74,7 @@ private fun NetworkError.toXml(indent: Int): String = writeCData(
 
 private fun writeUrl(
     attributes: List<Pair<String, Any?>>,
-    params: Map<String, String?>,
+    params: List<NamedParameter>,
     indent: Int
 ): String = if (attributes.any { it.second != null } || params.isNotEmpty()) {
     writeTags(URL, indent, attributes) { params.toXml(indent + 1) }
@@ -102,17 +82,17 @@ private fun writeUrl(
     ""
 }
 
-private fun writeHeaders(headers: List<Header>, indent: Int): String = if (headers.isEmpty()) {
+private fun writeHeaders(headers: List<NamedParameter>, indent: Int): String = if (headers.isEmpty()) {
     ""
 } else {
     headers.toXml { it.toXml(indent) }
 }
 
-private fun Header.toXml(indent: Int): String =
+private fun NamedParameter.toXml(indent: Int): String =
     writeCData(HEADER, indent, listOf("name" to name), value)
 
-private fun Map<String, String?>.toXml(indent: Int): String = entries.toXml {
-    writeCData(PARAM, indent, listOf("name" to it.key), it.value)
+private fun List<NamedParameter>.toXml(indent: Int): String = toXml {
+    writeCData(PARAM, indent, listOf("name" to it.name), it.value)
 }
 
 private fun writeTags(

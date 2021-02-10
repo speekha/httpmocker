@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.custom.parser.adapters
+package fr.speekha.httpmocker.jackson.model
 
-import fr.speekha.httpmocker.custom.parser.JsonParser
-import fr.speekha.httpmocker.model.Header
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+import fr.speekha.httpmocker.serialization.NAME
+import fr.speekha.httpmocker.serialization.VALUE
 
-internal class HeaderListAdapter : BaseObjectAdapter<List<Header>>() {
+internal data class KeyValue
+@JsonCreator constructor(
+    @JsonProperty(NAME)
+    val key: String = "",
 
-    override fun createObject(): List<Header> = listOf()
-
-    override fun updateObject(reader: JsonParser, builder: List<Header>): List<Header> =
-        builder + Header(
-            reader.readFieldName(),
-            reader.readString()
-        )
-}
+    @JsonProperty(VALUE)
+    var value: String? = null
+)

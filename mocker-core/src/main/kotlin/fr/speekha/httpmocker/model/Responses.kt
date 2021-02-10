@@ -41,7 +41,7 @@ data class ResponseDescriptor(
     /**
      * List of headers
      */
-    val headers: List<Header> = emptyList(),
+    val headers: List<NamedParameter> = emptyList(),
 
     /**
      * Response body, if bodyFile is null

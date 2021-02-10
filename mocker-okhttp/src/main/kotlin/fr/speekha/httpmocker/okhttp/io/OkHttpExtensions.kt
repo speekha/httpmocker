@@ -17,14 +17,9 @@
 package fr.speekha.httpmocker.okhttp.io
 
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import okhttp3.Headers
-import okhttp3.HttpUrl
-import okhttp3.Interceptor
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
+import okhttp3.*
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.Buffer
 
@@ -32,7 +27,7 @@ import okio.Buffer
  * Reads a request body and returns it as a String
  * @return a string with the request body content
  */
-internal fun RequestBody.readAsString(): String? = Buffer().let {
+internal fun RequestBody.readAsString(): String = Buffer().let {
     writeTo(it)
     it.inputStream().bufferedReader().use { reader -> reader.readText() }
 }
@@ -63,10 +58,12 @@ internal fun Response.toDescriptor() = ResponseDescriptor(
 )
 
 private fun Headers.parseHeaders(getHeaders: (String) -> List<String>) =
-    names().flatMap { name -> getHeaders(name).map { Header(name, it) } }
+    names().flatMap { name -> getHeaders(name).map { NamedParameter(name, it) } }
 
 private fun Request.parseQueryParameters() =
-    url.queryParameterNames.associateWith { (url.queryParameter(it) ?: "") }
+    url.queryParameterNames.flatMap { name ->
+        url.queryParameterValues(name).map { NamedParameter(name, it) }
+    }
 
 private fun HttpUrl.toBodyFile() = pathSegments.last().takeUnless { it.isBlank() } ?: "index"
 

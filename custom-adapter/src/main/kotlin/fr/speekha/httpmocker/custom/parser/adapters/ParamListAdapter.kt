@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.model
+package fr.speekha.httpmocker.custom.parser.adapters
 
-/**
- * A request or response header. Simple key-value pair.
- */
-data class Header(
+import fr.speekha.httpmocker.custom.parser.JsonParser
+import fr.speekha.httpmocker.model.NamedParameter
 
-    /**
-     * Header key
-     */
-    val name: String = "",
+internal class ParamListAdapter : BaseObjectAdapter<List<NamedParameter>>() {
 
-    /**
-     * Header value
-     */
-    val value: String? = null
+    override fun createObject(): List<NamedParameter> = listOf()
 
-)
+    override fun updateObject(reader: JsonParser, builder: List<NamedParameter>): List<NamedParameter> =
+        builder + NamedParameter(
+            reader.readFieldName(),
+            reader.readString()
+        )
+}

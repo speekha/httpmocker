@@ -16,23 +16,23 @@
 
 package fr.speekha.httpmocker.moshi
 
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.moshi.model.Header as JsonHeader
+import fr.speekha.httpmocker.moshi.model.KeyValue as JsonParameter
 import fr.speekha.httpmocker.moshi.model.NetworkError as JsonNetworkError
 import fr.speekha.httpmocker.moshi.model.RequestDescriptor as JsonRequestDescriptor
 import fr.speekha.httpmocker.moshi.model.ResponseDescriptor as JsonResponseDescriptor
 
 internal fun JsonRequestDescriptor.fromJson() = RequestTemplate(
     exactMatch ?: false, protocol, method, host, port, path,
-    headers.map { it.fromJson() }, params, body
+    headers.map { it.fromJson() }, params.map { NamedParameter(it.key, it.value) }, body
 )
 
 internal fun RequestTemplate.toJson() = JsonRequestDescriptor(
     exactMatch.takeIf { it }, protocol, method, host, port, path,
-    headers.map { it.toJson() }, params, body
+    headers.map { it.toJson() }, params.map { JsonParameter(it.name, it.value) }, body
 )
 
 internal fun JsonResponseDescriptor.fromJson() = ResponseDescriptor(
@@ -51,6 +51,6 @@ internal fun NetworkError.toJson() = JsonNetworkError(
     exceptionType, message
 )
 
-private fun JsonHeader.fromJson(): Header = Header(name, value)
+private fun JsonParameter.fromJson(): NamedParameter = NamedParameter(key, value)
 
-private fun Header.toJson() = JsonHeader(name, value)
+private fun NamedParameter.toJson() = JsonParameter(name, value)

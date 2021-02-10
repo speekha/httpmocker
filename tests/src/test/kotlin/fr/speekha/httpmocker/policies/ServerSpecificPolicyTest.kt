@@ -18,7 +18,7 @@ package fr.speekha.httpmocker.policies
 
 import fr.speekha.httpmocker.HTTP_METHOD_POST
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -42,7 +42,7 @@ class ServerSpecificPolicyTest {
                 path = "/test/with/path",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             assertEquals("www.somestuff.com/test/with/path.json", policy.getPath(request))
         }
@@ -58,7 +58,7 @@ class ServerSpecificPolicyTest {
                 path = "/test/with/path/",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             assertEquals("www.somestuff.com/test/with/path/index.json", policy.getPath(request))
         }
@@ -74,7 +74,7 @@ class ServerSpecificPolicyTest {
                 path = "/test/with/path/",
                 method = HTTP_METHOD_POST,
                 body = "body",
-                headers = listOf(Header("header", "value")),
+                headers = listOf(NamedParameter("header", "value")),
             )
             assertEquals("www.somestuff.com/test/with/path/index.xml", xmlPolicy.getPath(request))
         }

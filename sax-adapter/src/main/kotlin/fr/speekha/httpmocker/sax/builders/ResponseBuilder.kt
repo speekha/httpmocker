@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.sax.builders
 
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
 import fr.speekha.httpmocker.serialization.DEFAULT_RESPONSE_CODE
@@ -34,7 +34,7 @@ class ResponseBuilder(
     private val mediatype: String = attributes?.getValue("media-type") ?: DEFAULT_MEDIA_TYPE
     override var body: String? = null
     override var bodyFile: String? = null
-    override var headers = mutableListOf<Header>()
+    override var headers = mutableListOf<NamedParameter>()
 
     override fun build() = parent.setResponse(
         ResponseDescriptor(

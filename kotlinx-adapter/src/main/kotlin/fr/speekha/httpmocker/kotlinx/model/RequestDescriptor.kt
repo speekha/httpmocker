@@ -16,15 +16,7 @@
 
 package fr.speekha.httpmocker.kotlinx.model
 
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.EXACT_MATCH
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.HOST
-import fr.speekha.httpmocker.serialization.METHOD
-import fr.speekha.httpmocker.serialization.PARAMS
-import fr.speekha.httpmocker.serialization.PATH
-import fr.speekha.httpmocker.serialization.PORT
-import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.RequestTemplate as Model
@@ -44,9 +36,9 @@ internal data class RequestDescriptor(
     @SerialName(PATH)
     val path: String? = null,
     @SerialName(HEADERS)
-    val headers: List<Header>? = null,
+    val headers: List<KeyValue>? = null,
     @SerialName(PARAMS)
-    val params: Map<String, String?>? = null,
+    val params: List<KeyValue>? = null,
     @SerialName(BODY)
     val body: String? = null
 ) {
@@ -57,8 +49,8 @@ internal data class RequestDescriptor(
         model.host,
         model.port,
         model.path,
-        model.headers.map { Header(it) },
-        model.params,
+        model.headers.map { KeyValue(it) },
+        model.params.map { KeyValue(it) },
         model.body
     )
 }

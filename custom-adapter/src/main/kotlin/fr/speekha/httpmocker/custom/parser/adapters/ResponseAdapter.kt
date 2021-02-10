@@ -19,12 +19,7 @@ package fr.speekha.httpmocker.custom.parser.adapters
 import fr.speekha.httpmocker.custom.parser.JsonParser
 import fr.speekha.httpmocker.custom.unknownFieldError
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import fr.speekha.httpmocker.serialization.BODY
-import fr.speekha.httpmocker.serialization.BODY_FILE
-import fr.speekha.httpmocker.serialization.CODE
-import fr.speekha.httpmocker.serialization.DELAY
-import fr.speekha.httpmocker.serialization.HEADERS
-import fr.speekha.httpmocker.serialization.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.*
 
 internal class ResponseAdapter : BaseObjectAdapter<ResponseDescriptor>() {
 
@@ -37,7 +32,7 @@ internal class ResponseAdapter : BaseObjectAdapter<ResponseDescriptor>() {
         DELAY -> builder.copy(delay = reader.readLong())
         CODE -> builder.copy(code = reader.readInt())
         MEDIA_TYPE -> builder.copy(mediaType = reader.readString() ?: "")
-        HEADERS -> builder.copy(headers = reader.readObject(HeaderListAdapter()))
+        HEADERS -> builder.copy(headers = reader.readObject(ParamListAdapter()))
         BODY -> builder.copy(body = reader.readString() ?: "")
         BODY_FILE -> builder.copy(bodyFile = reader.readString())
         else -> unknownFieldError(field)

@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.sax.builders
 
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 
 abstract class NodeBuilder {
 
@@ -30,9 +30,9 @@ abstract class NodeBuilder {
 
 interface NodeWithHeaders {
 
-    val headers: MutableList<Header>
+    val headers: MutableList<NamedParameter>
 
-    fun addHeader(header: Header) {
+    fun addHeader(header: NamedParameter) {
         headers += header
     }
 }

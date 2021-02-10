@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.io
 
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.model.NamedParameter
 
 data class HttpRequest @JvmOverloads constructor(
     val method: String = "GET",
@@ -24,8 +24,8 @@ data class HttpRequest @JvmOverloads constructor(
     val host: String = "",
     val port: Int = 80,
     val path: String = "",
-    val params: Map<String, String> = emptyMap(),
-    val headers: List<Header> = emptyList(),
+    val params: List<NamedParameter> = emptyList(),
+    val headers: List<NamedParameter> = emptyList(),
     val body: String? = null,
 ) {
     val pathSegments: List<String>

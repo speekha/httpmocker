@@ -330,8 +330,8 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
                         code = 200,
                         mediaType = DEFAULT_MEDIA_TYPE,
                         headers = listOf(
-                            Header(CONTENT_LENGTH, "0"),
-                            Header(CONTENT_TYPE, DEFAULT_MEDIA_TYPE)
+                            NamedParameter(CONTENT_LENGTH, "0"),
+                            NamedParameter(CONTENT_TYPE, DEFAULT_MEDIA_TYPE)
                         )
                     )
                 )
@@ -549,8 +549,8 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             bodyFile = "request_body_1.txt",
             mediaType = DEFAULT_MEDIA_TYPE,
             headers = listOf(
-                Header(CONTENT_LENGTH, "11"),
-                Header(CONTENT_TYPE, DEFAULT_MEDIA_TYPE)
+                NamedParameter(CONTENT_LENGTH, "11"),
+                NamedParameter(CONTENT_TYPE, DEFAULT_MEDIA_TYPE)
             )
         )
     )
@@ -559,9 +559,9 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         RequestTemplate(
             method = HTTP_METHOD_POST,
             body = "\\QrequestBody\\E",
-            params = mapOf("param1" to "value1"),
+            params = listOf(NamedParameter("param1", "value1")),
             headers = listOf(
-                Header(HEADER1_NAME, HEADER_VALUE)
+                NamedParameter(HEADER1_NAME, HEADER_VALUE)
             ) + extraHeaders
         ),
         ResponseDescriptor(
@@ -569,9 +569,9 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             bodyFile = "request_body_0.txt",
             mediaType = DEFAULT_MEDIA_TYPE,
             headers = listOf(
-                Header(CONTENT_LENGTH, "4"),
-                Header(CONTENT_TYPE, DEFAULT_MEDIA_TYPE),
-                Header(HEADER2_NAME, HEADER_VALUE)
+                NamedParameter(CONTENT_LENGTH, "4"),
+                NamedParameter(CONTENT_TYPE, DEFAULT_MEDIA_TYPE),
+                NamedParameter(HEADER2_NAME, HEADER_VALUE)
             )
         )
     )

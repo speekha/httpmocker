@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.moshi.model
+package fr.speekha.httpmocker.kotlinx.model
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import fr.speekha.httpmocker.serialization.NAME
 import fr.speekha.httpmocker.serialization.VALUE
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import fr.speekha.httpmocker.model.NamedParameter as Model
 
-@JsonClass(generateAdapter = true)
-internal data class Header(
-    @field:Json(name = NAME)
-    val name: String = "",
-
-    @field:Json(name = VALUE)
-    var value: String? = null
-)
+@Serializable
+internal data class KeyValue(
+    @SerialName(NAME)
+    val name: String?,
+    @SerialName(VALUE)
+    val value: String?
+) {
+    constructor(model: Model) : this(model.name, model.value)
+}
