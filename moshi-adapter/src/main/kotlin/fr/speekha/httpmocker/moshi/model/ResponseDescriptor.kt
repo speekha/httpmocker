@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,14 @@ package fr.speekha.httpmocker.moshi.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import fr.speekha.httpmocker.serialization.*
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_RESPONSE_CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
 
 @JsonClass(generateAdapter = true)
 internal data class ResponseDescriptor(

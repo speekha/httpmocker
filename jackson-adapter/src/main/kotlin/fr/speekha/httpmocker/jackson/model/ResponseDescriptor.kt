@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import fr.speekha.httpmocker.jackson.serialization.KeyValueDeserializer
 import fr.speekha.httpmocker.jackson.serialization.KeyValueSerializer
-import fr.speekha.httpmocker.serialization.*
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.DEFAULT_RESPONSE_CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 internal data class ResponseDescriptor

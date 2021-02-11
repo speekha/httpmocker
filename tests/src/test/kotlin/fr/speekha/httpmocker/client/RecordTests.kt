@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,31 @@
 
 package fr.speekha.httpmocker.client
 
-import fr.speekha.httpmocker.*
+import fr.speekha.httpmocker.HTTP_METHOD_GET
+import fr.speekha.httpmocker.HTTP_METHOD_POST
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.RECORD
+import fr.speekha.httpmocker.NO_RECORDER_ERROR
+import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.io.HttpRequest
-import fr.speekha.httpmocker.model.*
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
+import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.model.RequestTemplate
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.readAsString
 import fr.speekha.httpmocker.serialization.DEFAULT_MEDIA_TYPE
 import fr.speekha.httpmocker.serialization.Mapper
 import fr.speekha.httpmocker.serialization.readMatches
-import io.mockk.*
+import fr.speekha.httpmocker.withFile
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions

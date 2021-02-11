@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class RequestMatcher {
             } else {
                 request.params.none { it.name == param.name }
             }
-       } && (!exactMatch || params.size == request.params.size)
+        } && (!exactMatch || params.size == request.params.size)
 
     private fun RequestTemplate.matchHeaders(request: HttpRequest) =
         headers.all { header ->

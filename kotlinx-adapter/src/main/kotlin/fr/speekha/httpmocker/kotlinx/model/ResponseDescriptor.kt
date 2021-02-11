@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,12 @@
 
 package fr.speekha.httpmocker.kotlinx.model
 
-import fr.speekha.httpmocker.serialization.*
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.BODY_FILE
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.ResponseDescriptor as Model
