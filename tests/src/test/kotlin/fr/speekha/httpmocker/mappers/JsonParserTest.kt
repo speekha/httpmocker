@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,18 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.assertThrows
-import fr.speekha.httpmocker.custom.parser.*
+import fr.speekha.httpmocker.custom.parser.INCORRECT_FIELD
+import fr.speekha.httpmocker.custom.parser.INVALID_BOOLEAN_ERROR
+import fr.speekha.httpmocker.custom.parser.INVALID_NUMBER_ERROR
+import fr.speekha.httpmocker.custom.parser.JsonParser
+import fr.speekha.httpmocker.custom.parser.NO_MORE_TOKEN_ERROR
+import fr.speekha.httpmocker.custom.parser.NULL_STRING_VALUE
+import fr.speekha.httpmocker.custom.parser.WRONG_END_OF_LIST_ERROR
+import fr.speekha.httpmocker.custom.parser.WRONG_END_OF_OBJECT_ERROR
+import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_FIELD_NAME_ERROR
+import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_LIST_ERROR
+import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_OBJECT_ERROR
+import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_STRING_FIELD_ERROR
 import fr.speekha.httpmocker.custom.parser.adapters.ObjectAdapter
 import fr.speekha.httpmocker.custom.serializer.truncate
 import fr.speekha.httpmocker.model.NamedParameter

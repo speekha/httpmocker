@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,28 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.model.*
-import fr.speekha.httpmocker.serialization.*
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
+import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.model.RequestTemplate
+import fr.speekha.httpmocker.model.ResponseDescriptor
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.CODE
+import fr.speekha.httpmocker.serialization.DELAY
+import fr.speekha.httpmocker.serialization.ERROR
+import fr.speekha.httpmocker.serialization.EXACT_MATCH
+import fr.speekha.httpmocker.serialization.EXCEPTION_TYPE
+import fr.speekha.httpmocker.serialization.HEADER
+import fr.speekha.httpmocker.serialization.HOST
+import fr.speekha.httpmocker.serialization.MEDIA_TYPE
+import fr.speekha.httpmocker.serialization.METHOD
+import fr.speekha.httpmocker.serialization.PARAM
+import fr.speekha.httpmocker.serialization.PATH
+import fr.speekha.httpmocker.serialization.PORT
+import fr.speekha.httpmocker.serialization.PROTOCOL
+import fr.speekha.httpmocker.serialization.REQUEST
+import fr.speekha.httpmocker.serialization.RESPONSE
+import fr.speekha.httpmocker.serialization.URL
 
 internal fun List<Matcher>.toXml() = XML_PREFACE + writeTags("scenarios", 0) {
     toXml { it.toXml(1) }

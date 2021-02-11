@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.features.HttpClientFeature
-import io.ktor.client.features.HttpRedirect
-import io.ktor.client.features.defaultTransformers
 import java.io.File
 
 class MockableClientConfiguration<T : HttpClientEngineConfig> {

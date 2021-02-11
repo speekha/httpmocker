@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,11 @@
 package fr.speekha.httpmocker.mappers
 
 import fr.speekha.httpmocker.io.readAsStringList
-import fr.speekha.httpmocker.model.*
+import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
+import fr.speekha.httpmocker.model.NetworkError
+import fr.speekha.httpmocker.model.RequestTemplate
+import fr.speekha.httpmocker.model.ResponseDescriptor
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.InputStream
 

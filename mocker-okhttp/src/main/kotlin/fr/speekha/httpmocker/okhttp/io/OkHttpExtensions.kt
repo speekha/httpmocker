@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,12 @@ package fr.speekha.httpmocker.okhttp.io
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import okhttp3.*
+import okhttp3.Headers
+import okhttp3.HttpUrl
+import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.Buffer
 

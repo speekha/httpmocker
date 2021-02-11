@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,20 @@ import fr.speekha.httpmocker.io.MediaType
 import fr.speekha.httpmocker.messageForHttpCode
 import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import io.ktor.client.request.*
-import io.ktor.client.utils.*
-import io.ktor.content.*
-import io.ktor.http.*
-import io.ktor.util.date.*
-import io.ktor.utils.io.*
+import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.HttpResponseData
+import io.ktor.client.utils.EmptyContent
+import io.ktor.content.ByteArrayContent
+import io.ktor.content.TextContent
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpProtocolVersion
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
+import io.ktor.http.headersOf
+import io.ktor.util.date.GMTDate
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
@@ -67,8 +75,7 @@ private fun ResponseDescriptor.buildHeaderList() = headers
     .groupBy { it.name }
     .mapValues { it.value.mapNotNull { header -> header.value } }
     .entries
-    .map { it.key to it.value } +
-        (HttpHeaders.ContentType to listOf(mediaType))
+    .map { it.key to it.value } + (HttpHeaders.ContentType to listOf(mediaType))
 
 private fun Headers.toModel() = entries().flatMap { (key, values) ->
     values.map { value -> NamedParameter(key, value) }

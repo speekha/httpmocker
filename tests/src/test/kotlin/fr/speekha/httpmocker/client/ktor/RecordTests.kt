@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package fr.speekha.httpmocker.client.ktor
 import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.client.HttpClientTester
 import fr.speekha.httpmocker.client.RecordTests
-import io.ktor.client.HttpClient
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.*
+import io.ktor.client.statement.*
 import org.junit.jupiter.api.DisplayName
 import java.nio.channels.UnresolvedAddressException
 

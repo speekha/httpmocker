@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import fr.speekha.httpmocker.sax.builders.ScenariosBuilder
 import fr.speekha.httpmocker.sax.builders.UrlBuilder
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
-import java.util.LinkedList
+import java.util.*
 
 class ScenarioHandler : DefaultHandler() {
 
