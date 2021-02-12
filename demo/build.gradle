@@ -63,10 +63,12 @@ android {
     buildToolsVersion '29.0.3'
 }
 
-//repositories {
-//    // For snapshots versions
+repositories {
+    // For snapshots versions
 //    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
-//}
+    // Still needed for koin
+    jcenter()
+}
 
 dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
