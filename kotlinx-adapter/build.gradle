@@ -24,7 +24,7 @@ test {
 }
 
 repositories {
-    jcenter()
+    //jcenter()
     maven { url "https://kotlin.bintray.com/kotlinx" }
 }
 
