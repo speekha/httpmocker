@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-include ':demo', ':mocker-core',':mocker-okhttp', ':tests', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter', ':sax-adapter', ':mocker-ktor'
-
+include ':mocker-core',':mocker-okhttp', ':mocker-ktor', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter', ':sax-adapter', ':tests', ':demo'

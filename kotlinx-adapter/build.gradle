@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlinx-serialization'
-
-test {
-    options {
-        useJUnitPlatform()
-    }
-}
-
-repositories {
-    //jcenter()
-    maven { url "https://kotlin.bintray.com/kotlinx" }
+plugins {
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.plugin.serialization"
 }
 
 dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
     api project(':mocker-core')
-}
-
-ext {
-    pom_name = "mocker-kotlinx-adapter"
 }
 
 apply from: '../gradle/dokka.gradle'
