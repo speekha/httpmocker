@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.io
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import java.io.InputStream
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
+/**
+ * Reads the content of an input stream and returns it as a list of strings.
+ * @return the data as a list, line by line
+ */
+fun InputStream.readAsStringList(): List<String> =
+    bufferedReader().use { reader -> reader.readLines() }
 
-    /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
-     */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
-}
+/**
+ * Reads the content of an input stream and returns it as a string.
+ * @return the data as a single String
+ */
+fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }

@@ -57,15 +57,14 @@ class RequestWriter(
             logger.debug("Saving scenario file $it")
         }
 
-    private fun buildMatcherList(record: CallRecord, requestFile: FileAccessor): List<Matcher> =
-        with(record) {
-            val previousRecords: List<Matcher> = if (requestFile.exists()) {
-                mapper.readMatches(requestFile) ?: emptyList()
-            } else {
-                emptyList()
-            }
-            return previousRecords + buildMatcher(previousRecords.size)
+    private fun buildMatcherList(record: CallRecord, requestFile: FileAccessor): List<Matcher> = with(record) {
+        val previousRecords: List<Matcher> = if (requestFile.exists()) {
+            mapper.readMatches(requestFile) ?: emptyList()
+        } else {
+            emptyList()
         }
+        return previousRecords + buildMatcher(previousRecords.size)
+    }
 
     private fun CallRecord.buildMatcher(offset: Int) = Matcher(
         request.toDescriptor(),
@@ -73,33 +72,26 @@ class RequestWriter(
         error?.toDescriptor()
     )
 
-    private fun ResponseDescriptor.updateBodyFile(
-        offset: Int,
-        record: CallRecord
-    ): ResponseDescriptor =
+    private fun ResponseDescriptor.updateBodyFile(offset: Int, record: CallRecord): ResponseDescriptor =
         record.getExtension()?.let { ext -> copy(bodyFile = bodyFile + offset + ext) }
             ?: this.copy(bodyFile = null)
 
     private fun CallRecord.getExtension(): String? =
         contentType?.getExtension()?.takeIf { body?.isNotEmpty() == true }
 
-    private fun Throwable.toDescriptor() = NetworkError(this::class.qualifiedName ?: "", message)
+    private fun Throwable.toDescriptor() = NetworkError(this::class.qualifiedName?:"", message)
 
-    private fun saveRequestFile(requestFile: FileAccessor, matchers: List<Matcher>) =
-        writeFile(requestFile) {
-            mapper.writeValue(it, matchers)
-        }
-
-    private fun saveResponseBody(
-        matchers: List<Matcher>,
-        requestFile: FileAccessor,
-        record: CallRecord
-    ) = matchers.last().response?.bodyFile?.let { responseFile ->
-        val storeFile = (requestFile.parentFile ?: rootFolder).getFile(responseFile)
-        record.body?.let { array ->
-            saveBodyFile(storeFile, array)
-        }
+    private fun saveRequestFile(requestFile: FileAccessor, matchers: List<Matcher>) = writeFile(requestFile) {
+        mapper.writeValue(it, matchers)
     }
+
+    private fun saveResponseBody(matchers: List<Matcher>, requestFile: FileAccessor, record: CallRecord) =
+        matchers.last().response?.bodyFile?.let { responseFile ->
+            val storeFile = requestFile.parentFile.getFile(responseFile)
+            record.body?.let { array ->
+                saveBodyFile(storeFile, array)
+            }
+        }
 
     private fun saveBodyFile(storeFile: FileAccessor, array: ByteArray) {
         logger.debug("Saving response body file ${storeFile.name}")

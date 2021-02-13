@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.model
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
-
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
+/**
+ * Describes a request pattern and the appropriate response for that request
+ */
+data class Matcher(
 
     /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
+     * The request to match
      */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
+    val request: RequestTemplate = RequestTemplate(),
+
+    /**
+     * The mocked response
+     */
+    val response: ResponseDescriptor? = null,
+
+    /**
+     * The mocked error
+     */
+    val error: NetworkError? = null
+) {
+    val result: RequestResult?
+        get() = response ?: error
 }

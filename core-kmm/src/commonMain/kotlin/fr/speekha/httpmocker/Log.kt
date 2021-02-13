@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import kotlin.reflect.KClass
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
-
-    /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
-     */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
+expect class Logger(clazz: KClass<*>) {
+    fun debug(message: String)
+    fun info(message: String)
+    fun warn(message: String)
+    fun error(message: String, exception: Throwable? = null)
 }
+
+inline fun <reified T : Any> T.getLogger(): Logger = Logger(this::class)

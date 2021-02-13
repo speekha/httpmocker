@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.io.HttpRequest
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
+/**
+ * Simple filing policy discarding host name, and matching file path with url path.
+ */
+class MirrorPathPolicy(
+    private val fileType: String
+) : FilingPolicy {
 
-    /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
-     */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
+    override fun getPath(request: HttpRequest): String = with(request.pathSegments) {
+        joinToString("/") + if (last() == "") "index.$fileType" else ".$fileType"
     }
 }

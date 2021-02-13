@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.io.HttpRequest
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
+/**
+ * Allows to specify path and naming conventions for configuration files.
+ */
+fun interface FilingPolicy {
 
     /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
+     * Computes the path where the appropriate configuration file should be for this request.
+     * @param request the intercepted OkHttpRequest
+     * @return the path where the JSON configuration can be loaded
      */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
+    fun getPath(request: HttpRequest): String
 }

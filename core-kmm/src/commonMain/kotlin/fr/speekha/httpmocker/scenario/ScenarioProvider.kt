@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.model.ResponseDescriptor
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
-
-    /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
-     */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
+interface ScenarioProvider {
+    fun loadResponse(request: HttpRequest): ResponseDescriptor?
 }
