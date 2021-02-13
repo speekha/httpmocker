@@ -19,23 +19,23 @@ package fr.speekha.httpmocker
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
-class Logger constructor(clazz: KClass<*>) {
+actual class Logger actual constructor(clazz: KClass<*>) {
 
     private val logger = LoggerFactory.getLogger(clazz.java)
 
-    fun debug(message: String) {
+    actual fun debug(message: String) {
         logger.debug(message)
     }
 
-    fun info(message: String) {
+    actual fun info(message: String) {
         logger.info(message)
     }
 
-    fun warn(message: String) {
+    actual fun warn(message: String) {
         logger.warn(message)
     }
 
-    fun error(message: String, exception: Throwable? = null) {
+    actual fun error(message: String, exception: Throwable?) {
         if (exception != null) {
             logger.error(message, exception)
         } else {
@@ -43,6 +43,3 @@ class Logger constructor(clazz: KClass<*>) {
         }
     }
 }
-
-inline fun <reified T : Any> T.getLogger(): Logger = Logger(this::class)
-

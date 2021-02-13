@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.builder
+package fr.speekha.httpmocker.io
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.model.NamedParameter
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
+data class HttpRequest constructor(
+    val method: String = "GET",
+    val scheme: String = "http",
+    val host: String = "",
+    val port: Int = 80,
+    val path: String = "",
+    val params: List<NamedParameter> = emptyList(),
+    val headers: List<NamedParameter> = emptyList(),
+    val body: String? = null,
 ) {
-
-    /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
-     */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
+    val pathSegments: List<String>
+        get() {
+            val segments = if (path.startsWith("/")) path.drop(1) else path
+            return segments.split("/")
+        }
 }

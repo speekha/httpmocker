@@ -16,7 +16,9 @@
 
 package fr.speekha.httpmocker.builder
 
-import java.io.InputStream
+import fr.speekha.httpmocker.io.IOException
+import fr.speekha.httpmocker.io.StreamReader
+import java.io.FileNotFoundException
 
 /**
  * A loading function that takes a path as input and returns an InputStream to read from. Typical
@@ -27,5 +29,13 @@ fun interface FileLoader {
     /**
      * The method to load scenario files.
      */
-    fun load(file: String): InputStream?
+    fun load(file: String): StreamReader?
+}
+
+internal fun wrapLoadingExceptions(loader: FileLoader): FileLoader = FileLoader { path ->
+    try {
+        loader.load(path)
+    } catch (e: FileNotFoundException) {
+        throw IOException(e.message, e)
+    }
 }

@@ -16,19 +16,19 @@
 
 package fr.speekha.httpmocker.builder
 
-import fr.speekha.httpmocker.io.FileAccessor
-import fr.speekha.httpmocker.policies.FilingPolicy
+import fr.speekha.httpmocker.io.StreamReader
 
-class RecorderBuilder(
-    var rootFolder: FileAccessor,
-    var policy: FilingPolicy? = null
-) {
-
+/**
+ * A loading function that takes a path as input and returns an InputStream to read from. Typical
+ * implementations can use FileInputStream instantiations, Classloader.getResourceAsStream call or
+ * use of the AssetManager on Android.
+ */
+fun interface FileLoader {
     /**
-     * Defines the policy used to name the scenario files based on the request being intercepted
-     * @param filingPolicy the naming policy to use for scenario files
+     * The method to load scenario files.
+     * TODO : should convert FileNotFoundException to IOException on JVM
      */
-    infix fun with(filingPolicy: FilingPolicy) = apply {
-        policy = filingPolicy
-    }
+    fun load(file: String): StreamReader?
 }
+
+internal expect fun wrapLoadingExceptions(loader: FileLoader): FileLoader
