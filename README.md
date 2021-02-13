@@ -111,8 +111,8 @@ OkHttp 4 API, previous versions use OkHttp 3).
 
 Since Jackson, Gson or Kotlinx serialization use some type of introspection or annotation 
 processing to parse JSON streams, it is recommended to keep the mapping classes unobfuscated. 
-You can refer to the [proguard-rules.pro](demo/proguard-rules.pro) file included in the demo app 
-for an example of required rules.
+You can refer to those libraries recommandations and to the[proguard-rules.pro](demo/proguard-rules.pro) file included 
+in the demo app for an example of required rules.
 
 The custom and moshi parsers are immune to obfuscation because they do not use any introspection.
 

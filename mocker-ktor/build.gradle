@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlinx-serialization'
-//apply plugin: 'kotlin-multiplatform'
-
-test {
-    options {
-        useJUnitPlatform()
-    }
-}
-
-repositories {
-    maven { url "https://kotlin.bintray.com/kotlinx" }
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 dependencies {
