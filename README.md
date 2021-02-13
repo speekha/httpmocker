@@ -31,20 +31,41 @@ httpmocker_version = '1.3.0'
 
 ## Gradle 
 
-### Jcenter 
+### Maven Central
 
-For stable versions, check that you have the `jcenter` repository. 
+For stable versions, check that you have the `mavenCentral` repository.
 
 ```gradle
 // Add Jcenter to your repositories if needed
 repositories {
-	jcenter()    
+	mavenCentral()
 }
 ```
 
-### OJO
+For Snapshot versions, check that you have Sonatype's snapshot repository.
 
-For Snapshot versions, check that you have the `OJO` snapshot repository. 
+```gradle
+// Add oss.sonatype.org to your repositories if needed
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+```
+
+### Jcenter
+
+HttpMocker is also available on JCenter, but due to JFrog sunsetting of that repository, no new 
+version will be published to that repository past March 31st, 2021.
+
+For stable versions, check that you have the `jcenter` repository.
+
+```gradle
+// Add Jcenter to your repositories if needed
+repositories {
+	jcenter()
+}
+```
+
+For Snapshot versions, check that you have the `OJO` snapshot repository.
 
 ```gradle
 // Add oss.jfrog.org to your repositories if needed
