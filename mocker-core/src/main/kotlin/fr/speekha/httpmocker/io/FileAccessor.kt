@@ -21,7 +21,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 
 class FileAccessor(
-    private var fileHandle: File
+    private val fileHandle: File
 ) {
 
     constructor(path: String) : this(File(path))

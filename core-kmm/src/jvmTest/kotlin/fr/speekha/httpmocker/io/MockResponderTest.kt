@@ -48,9 +48,8 @@ class MockResponderTest {
     private data class Response(
         val request: Request,
         val body: String
-        )
+    )
 
     private fun createResponse(request: Request, response: ResponseDescriptor) =
         Response(request, response.body)
-
 }

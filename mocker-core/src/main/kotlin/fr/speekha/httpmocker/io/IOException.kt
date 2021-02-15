@@ -16,4 +16,4 @@
 
 package fr.speekha.httpmocker.io
 
-class IOException(message: String? = null, cause: Throwable ?= null) : Exception(message, cause)
+class IOException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)

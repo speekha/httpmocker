@@ -21,11 +21,13 @@ import android.os.Environment
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.service.GithubEndpointWithKtor
 import fr.speekha.httpmocker.demo.ui.MockerWrapper
+import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
-import fr.speekha.httpmocker.policies.FilingPolicy
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -34,11 +36,11 @@ val engineInjection: Module = module {
     single {
         mockableHttpClient(CIO) {
             mock {
-                decodeScenarioPathWith(get<FilingPolicy>())
-                loadFileWith(get<Context>().assets::open)
+                decodeScenarioPathWith(get())
+                loadFileWith { get<Context>().assets.open(it).asReader() }
                 parseScenariosWith(KotlinxMapper())
                 saveScenarios(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    FileAccessor(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)),
                     get()
                 )
                 addFakeNetworkDelay(500)

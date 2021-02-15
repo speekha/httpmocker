@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.demo.model
 
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
@@ -64,7 +65,7 @@ class DatasourceTest {
     private fun setupInterceptor(policy: SingleFolderPolicy): MockResponseInterceptor =
         mockInterceptor {
             decodeScenarioPathWith(policy)
-            loadFileWith { javaClass.classLoader?.getResourceAsStream(it) }
+            loadFileWith { javaClass.classLoader?.getResourceAsStream(it)?.asReader() }
             parseScenariosWith(JacksonMapper())
             setInterceptorStatus(Mode.ENABLED)
         }

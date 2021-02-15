@@ -20,6 +20,8 @@ import fr.speekha.httpmocker.io.readAsStringList
 import fr.speekha.httpmocker.model.NetworkError
 
 class ClassloaderUtils {
+
+    @Suppress("UnsafeCast")
     fun createException(error: NetworkError): Throwable {
         val exceptionType = Class.forName(error.exceptionType)
         return if (error.message == null) {
@@ -36,5 +38,4 @@ class ClassloaderUtils {
                 val (extension, mimeType) = it.split("=")
                 mimeType to extension
             } ?: mapOf()
-
 }

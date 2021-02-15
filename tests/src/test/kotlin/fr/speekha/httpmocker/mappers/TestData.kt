@@ -78,23 +78,22 @@ internal val partialDataError = listOf(
     Matcher(error = NetworkError("SomeExceptionType"))
 )
 
-internal fun getCompleteJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
+internal fun getCompleteJsonInput(): InputStream = loadAsStream("complete_input.json")
 
-internal fun getCompleteXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.xml") ?: "".byteInputStream()
+internal fun getCompleteXmlInput(): InputStream = loadAsStream("complete_input.xml")
 
-internal fun getPartialJsonInput(): StreamReader = (ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.json") ?: "".byteInputStream()).asReader()
+internal fun getPartialJsonInput(): StreamReader = loadAsReader("partial_input.json")
 
-internal fun getPartialXmlInput(): StreamReader = (ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.xml") ?: "".byteInputStream()).asReader()
+internal fun getPartialXmlInput(): StreamReader = loadAsReader("partial_input.xml")
 
-internal fun getPartialJsonInputWithError(): StreamReader = (ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()).asReader()
+internal fun getPartialJsonInputWithError(): StreamReader = loadAsReader("partial_with_error.json")
 
-internal fun getPartialXmlInputWithError(): StreamReader = (ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()).asReader()
+internal fun getPartialXmlInputWithError(): StreamReader = loadAsReader("partial_with_error.xml")
+
+private fun loadAsReader(fileName: String) = loadAsStream(fileName).asReader()
+
+private fun loadAsStream(fileName: String) =
+    ClassLoader.getSystemClassLoader().getResourceAsStream(fileName) ?: "".byteInputStream()
 
 internal fun getExpectedJsonOutput() = getCompleteJsonInput().readAsStringList()
     .map {

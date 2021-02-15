@@ -38,6 +38,7 @@ class RequestWriter(
 
     private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
+    @Suppress("TooGenericExceptionCaught")
     fun saveFiles(record: CallRecord) {
         try {
             val requestFile = getRequestFilePath(record)
