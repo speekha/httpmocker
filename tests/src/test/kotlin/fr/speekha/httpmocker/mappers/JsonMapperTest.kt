@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
@@ -41,7 +42,7 @@ class JsonMapperTest {
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getCompleteJsonInput())
+            val result = mapper.readMatches(getCompleteJsonInput().asReader())
             assertEquals(completeData, result)
         }
 
@@ -91,7 +92,7 @@ class JsonMapperTest {
                         )
                     )
                 ),
-                mapper.readMatches(json.byteInputStream())
+                mapper.readMatches(json.byteInputStream().asReader())
             )
         }
 
@@ -121,7 +122,7 @@ class JsonMapperTest {
                         )
                     )
                 ),
-                mapper.readMatches(json.byteInputStream())
+                mapper.readMatches(json.byteInputStream().asReader())
             )
         }
     }

@@ -16,6 +16,8 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.StreamWriter
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.sax.SaxMapper
 import fr.speekha.httpmocker.serialization.Mapper
@@ -43,18 +45,23 @@ private fun convertFolder(
         if (it.isDirectory) {
             convertFolder(it, reader, writer)
         } else {
-            convertFile(it, reader, writer) { file ->
+            convertFile(FileAccessor(it), reader, writer) { file ->
                 file.absolutePath.replace(".json", ".xml")
             }
         }
     }
 }
 
-private fun convertFile(file: File, reader: Mapper, writer: Mapper, rename: (File) -> String) {
+private fun convertFile(
+    file: FileAccessor,
+    reader: Mapper,
+    writer: Mapper,
+    rename: (FileAccessor) -> String
+) {
     reader.readMatches(file)?.let { scenario ->
         val dest = File(rename(file))
         if (!dest.exists()) {
-            writer.writeValue(FileOutputStream(dest), scenario)
+            writer.writeValue(StreamWriter(FileOutputStream(dest)), scenario)
         }
     }
 }

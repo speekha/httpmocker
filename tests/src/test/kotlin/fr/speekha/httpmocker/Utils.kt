@@ -16,10 +16,8 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.io.readAsString
+import fr.speekha.httpmocker.io.FileAccessor
 import org.junit.jupiter.api.Assertions
-import java.io.File
-import java.io.FileInputStream
 
 const val HTTP_METHOD_GET = "GET"
 const val HTTP_METHOD_POST = "POST"
@@ -36,6 +34,6 @@ inline fun <reified T : Throwable> assertThrows(message: String? = null, block: 
     return Assertions.fail("No exception thrown. Result was $result")
 }
 
-fun File.readAsString() = FileInputStream(this).readAsString()
+fun FileAccessor.readAsString() = getReader().readAsString()
 
-fun <T : Any?> withFile(path: String, block: (File) -> T) = block(File(path))
+fun <T : Any?> withFile(path: String, block: (FileAccessor) -> T) = block(FileAccessor(path))
