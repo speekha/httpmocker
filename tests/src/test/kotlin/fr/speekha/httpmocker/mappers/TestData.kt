@@ -16,6 +16,8 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.io.StreamReader
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.io.readAsStringList
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NamedParameter
@@ -82,17 +84,17 @@ internal fun getCompleteJsonInput(): InputStream = ClassLoader.getSystemClassLoa
 internal fun getCompleteXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
     .getResourceAsStream("complete_input.xml") ?: "".byteInputStream()
 
-internal fun getPartialJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
+internal fun getPartialJsonInput(): StreamReader = (ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_input.json") ?: "".byteInputStream()).asReader()
 
-internal fun getPartialXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.xml") ?: "".byteInputStream()
+internal fun getPartialXmlInput(): StreamReader = (ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_input.xml") ?: "".byteInputStream()).asReader()
 
-internal fun getPartialJsonInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()
+internal fun getPartialJsonInputWithError(): StreamReader = (ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()).asReader()
 
-internal fun getPartialXmlInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()
+internal fun getPartialXmlInputWithError(): StreamReader = (ClassLoader.getSystemClassLoader()
+    .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()).asReader()
 
 internal fun getExpectedJsonOutput() = getCompleteJsonInput().readAsStringList()
     .map {

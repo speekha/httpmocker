@@ -25,6 +25,8 @@ import fr.speekha.httpmocker.NO_RECORDER_ERROR
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.io.StreamReader
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
@@ -52,7 +54,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -543,8 +544,8 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
         failOnError: Boolean = false,
         fileType: String
     ) {
-        val loadingLambda: (String) -> InputStream? = {
-            File(SAVE_FOLDER, it).inputStream()
+        val loadingLambda: (String) -> StreamReader? = {
+            File(SAVE_FOLDER, it).inputStream().asReader()
         }
 
         setupRecordConf(mapper, loadingLambda, SAVE_FOLDER, failOnError, fileType)

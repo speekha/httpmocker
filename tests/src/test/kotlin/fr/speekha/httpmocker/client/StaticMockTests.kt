@@ -29,11 +29,13 @@ import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_HEADERS
 import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_METHOD
 import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_SIMPLE_REQUEST
 import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.io.StreamReader
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -47,14 +49,13 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
 @Suppress("UNUSED_PARAMETER")
 @DisplayName("Static Mocks with Ktor")
 abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<Response, Client> {
 
-    protected var loadingLambda: (String) -> InputStream? = { javaClass.classLoader.getResourceAsStream(it) }
+    protected var loadingLambda: (String) -> StreamReader? = { javaClass.classLoader.getResourceAsStream(it)?.asReader() }
 
     protected lateinit var filingPolicy: FilingPolicy
 
@@ -198,8 +199,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
             val response = executeRequest("/unknown")
 
             assertResponseBodyStartsWith(
-                "java.lang.IllegalStateException: Loading error\n" +
-                    "\tat fr.speekha.httpmocker.client.",
+                "IllegalStateException: Loading error\n\tat ",
                 response
             )
         }

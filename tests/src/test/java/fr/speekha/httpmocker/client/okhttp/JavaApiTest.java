@@ -26,11 +26,13 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import fr.speekha.httpmocker.Mode;
 import fr.speekha.httpmocker.client.RecordTestsKt;
 import fr.speekha.httpmocker.io.HttpRequest;
+import fr.speekha.httpmocker.io.StreamReader;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
 import fr.speekha.httpmocker.okhttp.builder.InterceptorBuilder;
@@ -38,6 +40,7 @@ import fr.speekha.httpmocker.policies.FilingPolicy;
 import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 @DisplayName("Java API")
 class JavaApiTest extends OkHttpTests {
@@ -51,7 +54,8 @@ class JavaApiTest extends OkHttpTests {
         public void shouldUseDynamicMocksWithJavaApi() throws IOException {
             initInterceptor(getFilingPolicy());
             Response response = executeRequestSync("/dynamic");
-            Assertions.assertEquals("dynamic", response.body().string());
+            ResponseBody body = response.body();
+            Assertions.assertEquals("dynamic", (body != null) ? body.string() : null);
         }
 
         @Test
@@ -85,12 +89,17 @@ class JavaApiTest extends OkHttpTests {
             interceptor = new InterceptorBuilder()
                     .useDynamicMocks(this::getResponseDescriptor)
                     .decodeScenarioPathWith(policy)
-                    .loadFileWith(file -> getClass().getClassLoader().getResourceAsStream(file))
+                    .loadFileWith(this::loadResource)
                     .parseScenariosWith(mapper)
                     .setInterceptorStatus(Mode.ENABLED)
                     .saveScenarios(new File(RecordTestsKt.SAVE_FOLDER), policy)
                     .build();
             client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        }
+
+        private StreamReader loadResource(String file) {
+            InputStream stream = getClass().getClassLoader().getResourceAsStream(file);
+            return stream != null ? new StreamReader(stream) : null;
         }
 
         @Nullable
