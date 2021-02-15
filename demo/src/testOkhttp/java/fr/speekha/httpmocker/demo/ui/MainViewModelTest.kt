@@ -24,12 +24,19 @@ import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
-import io.mockk.*
+import fr.speekha.httpmocker.okhttp.builder.recordScenariosIn
+import io.mockk.coEvery
+import io.mockk.coVerifyOrder
+import io.mockk.confirmVerified
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.io.IOException
 
 @ExperimentalCoroutinesApi
@@ -45,6 +52,7 @@ class MainViewModelTest : ViewModelTest() {
     private val mockResponseInterceptor =
         mockInterceptor {
             parseScenariosWith(JacksonMapper())
+            recordScenariosIn(File(""))
         }
 
     private lateinit var viewModel: MainViewModel

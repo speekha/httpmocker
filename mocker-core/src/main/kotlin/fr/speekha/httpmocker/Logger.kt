@@ -45,4 +45,3 @@ class Logger constructor(clazz: KClass<*>) {
 }
 
 inline fun <reified T : Any> T.getLogger(): Logger = Logger(this::class)
-

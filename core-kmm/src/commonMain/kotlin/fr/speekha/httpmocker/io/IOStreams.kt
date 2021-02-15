@@ -25,5 +25,5 @@ expect class StreamReader {
 
 expect class StreamWriter {
     fun write(array: ByteArray)
-    fun <R : Any> use(block: (StreamWriter) -> R) : R
+    fun <R : Any> use(block: (StreamWriter) -> R): R
 }

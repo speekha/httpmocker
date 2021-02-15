@@ -34,7 +34,7 @@ class Recorder(
     private fun proceedWithCallResult(record: RequestWriter.CallRecord, response: HttpResponseData?): HttpResponseData =
         record.error?.let { throw it } ?: response?.withBody(record.body) ?: error("Response is null")
 
-    @SuppressWarnings("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun executeCall(request: HttpRequestData): Pair<HttpResponseData?, RequestWriter.CallRecord> {
         var response: HttpResponseData? = null
         val callRecord = try {

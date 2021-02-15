@@ -18,6 +18,6 @@ package fr.speekha.httpmocker.io
 
 import kotlinx.coroutines.runBlocking
 
-fun runTest(test: suspend () -> Unit): Unit = runBlocking {
+fun runTest(test: suspend () -> Unit) = runBlocking {
     test()
 }

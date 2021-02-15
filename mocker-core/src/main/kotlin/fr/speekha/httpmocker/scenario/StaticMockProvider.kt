@@ -45,6 +45,7 @@ internal class StaticMockProvider(
         else -> null
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun loadResult(request: HttpRequest): RequestResult? = try {
         val path = filingPolicy.getPath(request)
         logger.info("Loading scenarios from $path")

@@ -27,7 +27,7 @@ internal class Recorder(
     private val writer: RequestWriter
 ) {
 
-    @SuppressWarnings("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught")
     fun recordCall(chain: Interceptor.Chain): Response {
         val request = chain.request()
         var response: Response? = null

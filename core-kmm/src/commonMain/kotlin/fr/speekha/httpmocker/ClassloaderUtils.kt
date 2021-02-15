@@ -18,10 +18,9 @@ package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.NetworkError
 
-expect class ClassloaderUtils() {
+expect class ClassloaderUtils {
 
     fun createException(error: NetworkError): Throwable
 
-    fun loadExtensionMap() : Map<String, String>
-
+    fun loadExtensionMap(): Map<String, String>
 }

@@ -33,7 +33,7 @@ internal class RequestAdapter : BaseObjectAdapter<RequestTemplate>() {
 
     override fun createObject(): RequestTemplate = RequestTemplate()
 
-    @SuppressWarnings("ComplexMethod")
+    @Suppress("ComplexMethod")
     override fun updateObject(
         reader: JsonParser,
         builder: RequestTemplate

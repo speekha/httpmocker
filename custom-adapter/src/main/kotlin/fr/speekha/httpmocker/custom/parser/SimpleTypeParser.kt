@@ -55,7 +55,7 @@ internal class SimpleTypeParser(
         else -> error(INVALID_BOOLEAN_ERROR)
     }
 
-    @SuppressWarnings("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught")
     private fun <T : Any?> parseToken(pattern: Regex, error: String, converter: (String) -> T): T =
         converter(handler.extractLiteral(pattern, error))
 }

@@ -46,7 +46,7 @@ class ScenarioHandler : DefaultHandler() {
         scenarios = ScenariosBuilder()
     }
 
-    @SuppressWarnings("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught")
     override fun startElement(
         uri: String?,
         localName: String?,
@@ -60,7 +60,7 @@ class ScenarioHandler : DefaultHandler() {
         throw IllegalStateException("Invalid XML input", e)
     }
 
-    @SuppressWarnings("UnsafeCast", "ComplexMethod")
+    @Suppress("UnsafeCast", "ComplexMethod")
     private fun getNodeBuilder(
         qName: String?,
         parent: NodeBuilder?,
