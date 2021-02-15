@@ -20,6 +20,7 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
 import fr.speekha.httpmocker.builder.ConfigBuilder
 import fr.speekha.httpmocker.builder.FileLoader
+import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
@@ -73,7 +74,7 @@ class InterceptorBuilder {
      * @param policy the naming policy to use for scenario files
      */
     fun saveScenarios(folder: File, policy: FilingPolicy?): InterceptorBuilder = apply {
-        configBuilder.saveScenarios(folder, policy)
+        configBuilder.saveScenarios(FileAccessor(folder), policy)
     }
 
     /**

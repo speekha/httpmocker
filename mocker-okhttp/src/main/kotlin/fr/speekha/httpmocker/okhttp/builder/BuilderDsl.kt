@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.okhttp.builder
 
 import fr.speekha.httpmocker.builder.RecorderBuilder
+import fr.speekha.httpmocker.io.FileAccessor
 import java.io.File
 
 fun mockInterceptor(assemble: InterceptorBuilder.() -> Unit) = with(
@@ -27,7 +28,7 @@ fun mockInterceptor(assemble: InterceptorBuilder.() -> Unit) = with(
 }
 
 fun InterceptorBuilder.recordScenariosIn(folder: File): RecorderBuilder =
-    RecorderBuilder(folder).also { configBuilder.recorder = it }
+    RecorderBuilder(FileAccessor(folder)).also { configBuilder.recorder = it }
 
 fun InterceptorBuilder.recordScenariosIn(folder: String): RecorderBuilder =
     recordScenariosIn(File(folder))
