@@ -17,11 +17,15 @@
 package fr.speekha.httpmocker.ktor.builder
 
 import fr.speekha.httpmocker.builder.RecorderBuilder
+import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockEngineConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.features.HttpClientFeature
+import io.ktor.client.features.HttpRedirect
+import io.ktor.client.features.defaultTransformers
+import io.ktor.http.ContentType
 import java.io.File
 
 class MockableClientConfiguration<T : HttpClientEngineConfig> {
@@ -56,13 +60,13 @@ class MockableClientConfiguration<T : HttpClientEngineConfig> {
     }
 
     fun MockEngineConfig.recordScenariosIn(folder: File): RecorderBuilder =
-        RecorderBuilder(folder).also { configBuilder.recorder = it }
+        RecorderBuilder(FileAccessor(folder)).also { configBuilder.recorder = it }
 
     fun MockEngineConfig.recordScenariosIn(folder: String): RecorderBuilder =
         recordScenariosIn(File(folder))
 
     /**
-     * Applies all the installed [features] and [customInterceptors] from this configuration
+     * Applies all the installed features and customInterceptors from this configuration
      * into the specified [client].
      */
     fun install(client: HttpClient) {
