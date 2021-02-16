@@ -58,7 +58,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
 
     override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode): OkHttpClient = buildClient {
         mockInterceptor {
-            setStatus(status)
+            setMode(status)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
@@ -80,7 +80,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                 loadFileWith(loadingLambda)
                 parseScenariosWith(mapper)
                 delay?.let { addFakeNetworkDelay(it) }
-                setStatus(mode)
+                setMode(mode)
             }
         }
     }
@@ -103,7 +103,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                 parseScenariosWith(mapper)
                 recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
                 failOnRecordingError(failOnError)
-                setStatus(Mode.RECORD)
+                setMode(Mode.RECORD)
             }
         }
     }
@@ -117,7 +117,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                     recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER) with it
                 } ?: recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER)
                 failOnRecordingError(true)
-                setStatus(Mode.RECORD)
+                setMode(Mode.RECORD)
             }
         }
     }

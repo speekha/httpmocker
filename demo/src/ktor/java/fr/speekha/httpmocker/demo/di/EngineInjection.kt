@@ -21,13 +21,14 @@ import android.os.Environment
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.service.GithubEndpointWithKtor
 import fr.speekha.httpmocker.demo.ui.MockerWrapper
-import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
+import fr.speekha.httpmocker.ktor.builder.saveScenarios
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -40,14 +41,18 @@ val engineInjection: Module = module {
                 loadFileWith { get<Context>().assets.open(it).asReader() }
                 parseScenariosWith(KotlinxMapper())
                 saveScenarios(
-                    FileAccessor(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)),
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                     get()
                 )
                 addFakeNetworkDelay(500)
             }
 
             install(JsonFeature) {
-                serializer = JacksonSerializer()
+                serializer = KotlinxSerializer(
+                    Json {
+                        ignoreUnknownKeys = true
+                    }
+                )
             }
 
             expectSuccess = false

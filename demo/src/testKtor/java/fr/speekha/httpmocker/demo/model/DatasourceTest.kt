@@ -18,17 +18,19 @@ package fr.speekha.httpmocker.demo.model
 
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
+import fr.speekha.httpmocker.demo.service.GithubEndpointWithKtor
 import fr.speekha.httpmocker.io.asReader
-import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
-import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
+import fr.speekha.httpmocker.kotlinx.KotlinxMapper
+import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.policies.SingleFolderPolicy
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import retrofit2.Retrofit
-import retrofit2.converter.jackson.JacksonConverterFactory
 
 /**
  * These test cases demonstrate how to use HttpMocker to mock service calls in automated tests, so
@@ -56,28 +58,28 @@ class DatasourceTest {
 
     private fun setupService(folder: String): GithubApiEndpoints {
         val policy = SingleFolderPolicy(folder)
-        val interceptor = setupInterceptor(policy)
-        val client = setupClient(interceptor)
-        val retrofit = setupRetrofit(client)
-        return retrofit.create(GithubApiEndpoints::class.java)
+        val client = setupClient(policy)
+        return GithubEndpointWithKtor(client)
     }
 
-    private fun setupInterceptor(policy: SingleFolderPolicy): MockResponseInterceptor =
-        mockInterceptor {
-            decodeScenarioPathWith(policy)
-            loadFileWith { javaClass.classLoader?.getResourceAsStream(it)?.asReader() }
-            parseScenariosWith(JacksonMapper())
-            setMode(Mode.ENABLED)
+    private fun setupClient(policy: SingleFolderPolicy): HttpClient =
+        mockableHttpClient(CIO) {
+            mock {
+                decodeScenarioPathWith(policy)
+                loadFileWith { javaClass.classLoader?.getResourceAsStream(it)?.asReader() }
+                parseScenariosWith(KotlinxMapper())
+                setMode(Mode.ENABLED)
+            }
+
+            install(JsonFeature) {
+                serializer = KotlinxSerializer(
+                    Json {
+                        ignoreUnknownKeys = true
+                    }
+                )
+            }
+
+            expectSuccess = false
+            followRedirects = false
         }
-
-    private fun setupClient(interceptor: MockResponseInterceptor): OkHttpClient =
-        OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .build()
-
-    private fun setupRetrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
-        .baseUrl("https://api.github.com")
-        .client(client)
-        .addConverterFactory(JacksonConverterFactory.create())
-        .build()
 }

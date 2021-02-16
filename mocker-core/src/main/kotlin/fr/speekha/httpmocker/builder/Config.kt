@@ -30,7 +30,7 @@ data class Config internal constructor(
     val openFile: FileLoader?,
     val mapper: Mapper?,
     val simulatedDelay: Long,
-    var status: Mode,
+    var mode: Mode,
     val showSavingErrors: Boolean,
     val providers: List<ScenarioProvider>,
     val requestWriter: RequestWriter?
@@ -40,7 +40,7 @@ data class Config internal constructor(
         openFile = null,
         mapper = null,
         simulatedDelay = 0,
-        status = Mode.DISABLED,
+        mode = Mode.DISABLED,
         showSavingErrors = false,
         providers = emptyList(),
         requestWriter = null

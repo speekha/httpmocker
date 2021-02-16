@@ -16,33 +16,30 @@
 
 package fr.speekha.httpmocker.demo.model
 
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class User
-@JsonCreator
-constructor(
+@Serializable
+data class User(
 
-    @JsonProperty("login")
+    @SerialName("login")
     val login: String? = null,
 
-    @JsonProperty("id")
+    @SerialName("id")
     val id: Int? = null,
 
-    @JsonProperty("avatar_url")
+    @SerialName("avatar_url")
     val avatarUrl: String? = null,
 
-    @JsonProperty("url")
+    @SerialName("url")
     val url: String? = null,
 
-    @JsonProperty("bio")
-    val bio: Any? = null,
+    @SerialName("bio")
+    val bio: String? = null,
 
-    @JsonProperty("public_repos")
+    @SerialName("public_repos")
     val publicRepos: Int? = null,
 
-    @JsonProperty("contributions")
+    @SerialName("contributions")
     val contributions: Int = 0
 )
