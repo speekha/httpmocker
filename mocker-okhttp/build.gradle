@@ -18,6 +18,12 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
