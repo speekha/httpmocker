@@ -91,7 +91,7 @@ internal class StaticMockProvider(
     }
 
     private fun throwError(error: NetworkError): Nothing {
-        throw ClassloaderUtils().createException(error)
+        throw ClassloaderUtils.createException(error)
     }
 
     override fun toString(): String = "static mock configuration"

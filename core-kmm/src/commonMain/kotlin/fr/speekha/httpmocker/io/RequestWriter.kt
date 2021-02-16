@@ -97,7 +97,7 @@ class RequestWriter(
         record: CallRecord
     ) =
         matchers.last().response?.bodyFile?.let { responseFile ->
-            val storeFile = requestFile.parentFile.getFile(responseFile)
+            val storeFile = (requestFile.parentFile ?: rootFolder).getFile(responseFile)
             record.body?.let { array ->
                 saveBodyFile(storeFile, array)
             }
@@ -127,7 +127,7 @@ class RequestWriter(
         }
     }
 
-    private fun loadExtensionMap(): Map<String, String> = ClassloaderUtils().loadExtensionMap()
+    private fun loadExtensionMap(): Map<String, String> = ClassloaderUtils.loadExtensionMap()
 
     private fun MediaType.getExtension() = extensionMappings["$type/$subtype"] ?: ".txt"
 

@@ -29,8 +29,8 @@ actual class FileAccessor(
     actual val name: String
         get() = fileHandle.name
 
-    actual val parentFile: FileAccessor
-        get() = FileAccessor(fileHandle.parentFile)
+    actual val parentFile: FileAccessor?
+        get() = fileHandle.parentFile?.let { FileAccessor(it) }
 
     actual val absolutePath: String
         get() = fileHandle.absolutePath
