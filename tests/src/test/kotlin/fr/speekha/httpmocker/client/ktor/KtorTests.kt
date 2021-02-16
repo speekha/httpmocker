@@ -56,10 +56,10 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
 
     override fun setupDynamicConf(
         vararg callbacks: RequestCallback,
-        status: Mode
+        mode: Mode
     ): HttpClient = mockableHttpClient(CIO) {
         mock {
-            setMode(status)
+            setMode(mode)
             callbacks.forEach {
                 useDynamicMocks(it)
             }

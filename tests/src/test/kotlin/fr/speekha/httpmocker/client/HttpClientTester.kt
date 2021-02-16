@@ -33,7 +33,7 @@ interface HttpClientTester<Response : Any, Client : Any> {
 
     fun setupDynamicConf(
         vararg callbacks: RequestCallback,
-        status: Mode = Mode.ENABLED
+        mode: Mode = Mode.ENABLED
     ): Client
 
     fun setupStaticConf(

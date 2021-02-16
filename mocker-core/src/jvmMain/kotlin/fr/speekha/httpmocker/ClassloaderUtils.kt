@@ -19,19 +19,19 @@ package fr.speekha.httpmocker
 import fr.speekha.httpmocker.io.readAsStringList
 import fr.speekha.httpmocker.model.NetworkError
 
-object ClassloaderUtils {
+actual object ClassloaderUtils {
 
     @Suppress("UnsafeCast")
-    fun createException(error: NetworkError): Throwable {
+    actual fun createException(error: NetworkError): Throwable {
         val exceptionType = Class.forName(error.exceptionType)
         return if (error.message == null) {
-            exceptionType.newInstance()
+            exceptionType.getConstructor().newInstance(error.message)
         } else {
             exceptionType.getConstructor(String::class.java).newInstance(error.message)
         } as Throwable
     }
 
-    fun loadExtensionMap(): Map<String, String> =
+    actual fun loadExtensionMap(): Map<String, String> =
         javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes")
             ?.readAsStringList()
             ?.associate {

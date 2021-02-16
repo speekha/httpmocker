@@ -78,9 +78,9 @@ interface Configurator {
     /**
      * Defines how the interceptor should initially behave (can be enabled, disable, record
      * requests...)
-     * @param status The interceptor mode
+     * @param mode The interceptor mode
      */
-    fun setMode(status: Mode)
+    fun setMode(mode: Mode)
 
     /**
      * Builds final config to be used in mock engine.

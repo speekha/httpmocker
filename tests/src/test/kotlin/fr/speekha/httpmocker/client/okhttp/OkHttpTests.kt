@@ -56,9 +56,9 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
         interceptor.mode = mode
     }
 
-    override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode): OkHttpClient = buildClient {
+    override fun setupDynamicConf(vararg callbacks: RequestCallback, mode: Mode): OkHttpClient = buildClient {
         mockInterceptor {
-            setMode(status)
+            setMode(mode)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
