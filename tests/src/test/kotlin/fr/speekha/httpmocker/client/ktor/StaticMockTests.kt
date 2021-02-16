@@ -64,7 +64,7 @@ class StaticMockTests :
                     decodeScenarioPathWith(filingPolicy)
                     loadFileWith(loadingLambda)
                     parseScenariosWith(mapper)
-                    setStatus(Mode.DISABLED)
+                    setMode(Mode.DISABLED)
                 }
                 install(JsonFeature) {
                     serializer = KotlinxSerializer()

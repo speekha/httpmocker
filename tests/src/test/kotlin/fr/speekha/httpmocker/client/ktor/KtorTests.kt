@@ -59,7 +59,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
         status: Mode
     ): HttpClient = mockableHttpClient(CIO) {
         mock {
-            setStatus(status)
+            setMode(status)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
@@ -83,7 +83,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 loadFileWith(loadingLambda)
                 parseScenariosWith(mapper)
                 delay?.let { addFakeNetworkDelay(it) }
-                setStatus(mode)
+                setMode(mode)
             }
             expectSuccess = false
             followRedirects = false
@@ -108,7 +108,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 parseScenariosWith(mapper)
                 recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
                 failOnRecordingError(failOnError)
-                setStatus(Mode.RECORD)
+                setMode(Mode.RECORD)
             }
         }
     }
@@ -122,7 +122,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                     recordScenariosIn(SAVE_FOLDER) with it
                 } ?: recordScenariosIn(SAVE_FOLDER)
                 failOnRecordingError(true)
-                setStatus(Mode.RECORD)
+                setMode(Mode.RECORD)
             }
         }
     }

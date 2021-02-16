@@ -62,22 +62,22 @@ class MockEngine(
      * Enables to set the interception mode. @see fr.speekha.httpmocker.MockResponseInterceptor.Mode
      */
     var mode: Mode
-        get() = internalConf.status
+        get() = internalConf.mode
         set(value) {
             if (value == Mode.RECORD && forbidRecord) {
                 error(NO_RECORDER_ERROR)
             } else {
-                internalConf.status = value
+                internalConf.mode = value
             }
         }
 
     @InternalAPI
     override suspend fun execute(data: HttpRequestData): HttpResponseData {
-        logger.info("Intercepted request $data: Interceptor is ${internalConf.status}")
+        logger.info("Intercepted request $data: Interceptor is ${internalConf.mode}")
         return respondToRequest(data)
     }
 
-    private suspend fun respondToRequest(request: HttpRequestData): HttpResponseData = when (internalConf.status) {
+    private suspend fun respondToRequest(request: HttpRequestData): HttpResponseData = when (internalConf.mode) {
         Mode.DISABLED -> executor(request)
         Mode.ENABLED -> responder.mockResponse(request)
         Mode.MIXED -> responder.mockResponseOrNull(request) ?: executor(request)

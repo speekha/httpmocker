@@ -22,9 +22,10 @@ import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
-import fr.speekha.httpmocker.jackson.JacksonMapper
-import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
-import fr.speekha.httpmocker.okhttp.builder.recordScenariosIn
+import fr.speekha.httpmocker.kotlinx.KotlinxMapper
+import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
+import fr.speekha.httpmocker.ktor.engine.MockEngine
+import io.ktor.client.engine.cio.CIO
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
@@ -49,17 +50,22 @@ class MainViewModelTest : ViewModelTest() {
     private val id = 0L
 
     private lateinit var mockService: GithubApiEndpoints
-    private val mockResponseInterceptor = mockInterceptor {
-        parseScenariosWith(JacksonMapper())
-        recordScenariosIn(File(""))
+    private val mockClient = mockableHttpClient(CIO) {
+        mock {
+            parseScenariosWith(KotlinxMapper())
+            recordScenariosIn(File(""))
+        }
     }
+
+    private val clientMode: Mode
+        get() = (mockClient.engine as MockEngine).mode
 
     private lateinit var viewModel: MainViewModel
 
     @Before
     fun setup() {
         mockService = mockk()
-        viewModel = MainViewModel(mockService, MockerWrapper(mockResponseInterceptor))
+        viewModel = MainViewModel(mockService, MockerWrapper(mockClient))
     }
 
     @Test
@@ -140,7 +146,7 @@ class MainViewModelTest : ViewModelTest() {
 
         viewModel.setMode(Mode.DISABLED)
 
-        assertEquals(mockResponseInterceptor.mode, Mode.DISABLED)
+        assertEquals(clientMode, Mode.DISABLED)
         verify { observer.onChanged(State.Message(R.string.disabled_description)) }
     }
 
@@ -151,7 +157,7 @@ class MainViewModelTest : ViewModelTest() {
 
         viewModel.setMode(Mode.ENABLED)
 
-        assertEquals(mockResponseInterceptor.mode, Mode.ENABLED)
+        assertEquals(clientMode, Mode.ENABLED)
         verify { observer.onChanged(State.Message(R.string.enabled_description)) }
     }
 
@@ -162,7 +168,7 @@ class MainViewModelTest : ViewModelTest() {
 
         viewModel.setMode(Mode.MIXED)
 
-        assertEquals(mockResponseInterceptor.mode, Mode.MIXED)
+        assertEquals(clientMode, Mode.MIXED)
         verify { observer.onChanged(State.Message(R.string.mixed_description)) }
     }
 
@@ -173,7 +179,7 @@ class MainViewModelTest : ViewModelTest() {
 
         viewModel.setMode(Mode.RECORD)
 
-        assertEquals(mockResponseInterceptor.mode, Mode.RECORD)
+        assertEquals(clientMode, Mode.RECORD)
         verify { observer.onChanged(State.Permission) }
         verify { observer.onChanged(State.Message(R.string.record_description)) }
     }

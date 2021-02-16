@@ -18,6 +18,7 @@ plugins {
     id 'com.android.application'
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.android.extensions"
+    id "org.jetbrains.kotlin.plugin.serialization"
 }
 
 android {
@@ -100,7 +101,8 @@ dependencies {
     ktorImplementation "io.ktor:ktor-client-cio:$ktor_version"
     ktorImplementation "io.ktor:ktor-client-android:$ktor_version"
     ktorImplementation "io.ktor:ktor-client-json:$ktor_version"
-    ktorImplementation "io.ktor:ktor-client-jackson:$ktor_version"
+    ktorImplementation "io.ktor:ktor-client-serialization:$ktor_version"
+    ktorImplementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
     testImplementation "junit:junit:4.13.1"
     testImplementation "io.mockk:mockk:1.10.2"

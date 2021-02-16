@@ -97,9 +97,9 @@ class InterceptorBuilder {
     /**
      * Defines how the interceptor should initially behave (can be enabled, disable, record
      * requests...)
-     * @param status The interceptor mode
+     * @param mode The interceptor mode
      */
-    fun setStatus(status: Mode): InterceptorBuilder = apply { configBuilder.setStatus(status) }
+    fun setMode(mode: Mode): InterceptorBuilder = apply { configBuilder.setMode(mode) }
 
     /**
      * Builds the interceptor.
@@ -110,10 +110,10 @@ class InterceptorBuilder {
             requestWriter,
             simulatedDelay
         ).apply {
-            if (status == Mode.RECORD && configBuilder.recorder?.rootFolder == null) {
+            if (this@with.mode == Mode.RECORD && configBuilder.recorder?.rootFolder == null) {
                 error(NO_ROOT_FOLDER_ERROR)
             }
-            mode = status
+            mode = this@with.mode
         }
     }
 }

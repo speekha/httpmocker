@@ -16,8 +16,6 @@
 
 package fr.speekha.httpmocker.custom.parser
 
-import java.util.*
-
 internal class SimpleTypeParser(
     private val handler: StringReader
 ) {
@@ -49,7 +47,7 @@ internal class SimpleTypeParser(
         .replace("\\\"", "\"")
         .replace("\\\\", "\\")
 
-    private fun parseBoolean(value: String): Boolean = when (value.toLowerCase(Locale.ROOT)) {
+    private fun parseBoolean(value: String): Boolean = when (value.toLowerCase()) {
         "true" -> true
         "false" -> false
         else -> error(INVALID_BOOLEAN_ERROR)

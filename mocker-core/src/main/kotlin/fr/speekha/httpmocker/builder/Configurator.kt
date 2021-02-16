@@ -80,7 +80,7 @@ interface Configurator {
      * requests...)
      * @param status The interceptor mode
      */
-    fun setStatus(status: Mode)
+    fun setMode(status: Mode)
 
     /**
      * Builds final config to be used in mock engine.
