@@ -99,7 +99,7 @@ class InterceptorBuilder {
      * requests...)
      * @param status The interceptor mode
      */
-    fun setInterceptorStatus(status: Mode): InterceptorBuilder = apply { configBuilder.setInterceptorStatus(status) }
+    fun setStatus(status: Mode): InterceptorBuilder = apply { configBuilder.setStatus(status) }
 
     /**
      * Builds the interceptor.

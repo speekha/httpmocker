@@ -29,7 +29,7 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -58,7 +58,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
 
     override fun setupDynamicConf(vararg callbacks: RequestCallback, status: Mode): OkHttpClient = buildClient {
         mockInterceptor {
-            setInterceptorStatus(status)
+            setStatus(status)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
@@ -80,7 +80,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                 loadFileWith(loadingLambda)
                 parseScenariosWith(mapper)
                 delay?.let { addFakeNetworkDelay(it) }
-                setInterceptorStatus(mode)
+                setStatus(mode)
             }
         }
     }
@@ -103,7 +103,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                 parseScenariosWith(mapper)
                 recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
                 failOnRecordingError(failOnError)
-                setInterceptorStatus(Mode.RECORD)
+                setStatus(Mode.RECORD)
             }
         }
     }
@@ -117,7 +117,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                     recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER) with it
                 } ?: recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER)
                 failOnRecordingError(true)
-                setInterceptorStatus(Mode.RECORD)
+                setStatus(Mode.RECORD)
             }
         }
     }

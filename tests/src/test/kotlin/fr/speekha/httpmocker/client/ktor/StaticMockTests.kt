@@ -22,12 +22,12 @@ import fr.speekha.httpmocker.client.StaticMockTests
 import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -64,7 +64,7 @@ class StaticMockTests :
                     decodeScenarioPathWith(filingPolicy)
                     loadFileWith(loadingLambda)
                     parseScenariosWith(mapper)
-                    setInterceptorStatus(Mode.DISABLED)
+                    setStatus(Mode.DISABLED)
                 }
                 install(JsonFeature) {
                     serializer = KotlinxSerializer()

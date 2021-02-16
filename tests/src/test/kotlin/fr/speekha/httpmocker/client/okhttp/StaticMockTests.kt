@@ -69,7 +69,7 @@ class StaticMockTests :
                             request.path == "/inMemory" && request.method == HTTP_METHOD_GET
                         }
                     }
-                    setInterceptorStatus(Mode.MIXED)
+                    setStatus(Mode.MIXED)
                 }
 
             val fileBasedInterceptor =
@@ -77,7 +77,7 @@ class StaticMockTests :
                     decodeScenarioPathWith(filingPolicy)
                     loadFileWith(loadingLambda)
                     parseScenariosWith(mapper)
-                    setInterceptorStatus(Mode.MIXED)
+                    setStatus(Mode.MIXED)
                 }
 
             client = OkHttpClient.Builder()

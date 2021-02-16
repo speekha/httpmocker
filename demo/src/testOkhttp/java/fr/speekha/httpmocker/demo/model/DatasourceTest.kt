@@ -67,7 +67,7 @@ class DatasourceTest {
             decodeScenarioPathWith(policy)
             loadFileWith { javaClass.classLoader?.getResourceAsStream(it)?.asReader() }
             parseScenariosWith(JacksonMapper())
-            setInterceptorStatus(Mode.ENABLED)
+            setStatus(Mode.ENABLED)
         }
 
     private fun setupClient(interceptor: MockResponseInterceptor): OkHttpClient =

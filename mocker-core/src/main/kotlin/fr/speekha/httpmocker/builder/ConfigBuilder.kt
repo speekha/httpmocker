@@ -94,7 +94,7 @@ class ConfigBuilder internal constructor(
     /**
      * {@inheritdoc}.
      */
-    override fun setInterceptorStatus(status: Mode) {
+    override fun setStatus(status: Mode) {
         config.status = status
     }
 

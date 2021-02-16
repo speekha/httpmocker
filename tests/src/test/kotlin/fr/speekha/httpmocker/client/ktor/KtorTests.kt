@@ -28,11 +28,15 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.headers
+import io.ktor.client.request.request
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readText
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -55,7 +59,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
         status: Mode
     ): HttpClient = mockableHttpClient(CIO) {
         mock {
-            setInterceptorStatus(status)
+            setStatus(status)
             callbacks.forEach {
                 useDynamicMocks(it)
             }
@@ -79,7 +83,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 loadFileWith(loadingLambda)
                 parseScenariosWith(mapper)
                 delay?.let { addFakeNetworkDelay(it) }
-                setInterceptorStatus(mode)
+                setStatus(mode)
             }
             expectSuccess = false
             followRedirects = false
@@ -104,7 +108,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 parseScenariosWith(mapper)
                 recordScenariosIn(rootFolder) with MirrorPathPolicy(fileType)
                 failOnRecordingError(failOnError)
-                setInterceptorStatus(Mode.RECORD)
+                setStatus(Mode.RECORD)
             }
         }
     }
@@ -118,7 +122,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                     recordScenariosIn(SAVE_FOLDER) with it
                 } ?: recordScenariosIn(SAVE_FOLDER)
                 failOnRecordingError(true)
-                setInterceptorStatus(Mode.RECORD)
+                setStatus(Mode.RECORD)
             }
         }
     }
