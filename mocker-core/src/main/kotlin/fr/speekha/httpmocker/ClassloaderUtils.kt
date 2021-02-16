@@ -19,7 +19,7 @@ package fr.speekha.httpmocker
 import fr.speekha.httpmocker.io.readAsStringList
 import fr.speekha.httpmocker.model.NetworkError
 
-class ClassloaderUtils {
+object ClassloaderUtils {
 
     @Suppress("UnsafeCast")
     fun createException(error: NetworkError): Throwable {

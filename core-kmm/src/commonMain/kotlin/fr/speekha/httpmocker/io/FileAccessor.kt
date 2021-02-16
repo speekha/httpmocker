@@ -23,7 +23,7 @@ expect class FileAccessor(path: String) {
 
     val name: String
 
-    val parentFile: FileAccessor
+    val parentFile: FileAccessor?
 
     val absolutePath: String
 

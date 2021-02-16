@@ -16,19 +16,6 @@
 
 package fr.speekha.httpmocker.client.okhttp;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-
 import fr.speekha.httpmocker.Mode;
 import fr.speekha.httpmocker.client.RecordTestsKt;
 import fr.speekha.httpmocker.io.HttpRequest;
@@ -41,6 +28,14 @@ import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 @DisplayName("Java API")
 class JavaApiTest extends OkHttpTests {
@@ -64,7 +59,7 @@ class JavaApiTest extends OkHttpTests {
             MockPolicy filingPolicy = getFilingPolicy();
             initInterceptor(filingPolicy);
             executeRequestSync("/static");
-            HttpRequest request = new HttpRequest("GET", "http", "127.0.0.1", getServer().getPort(), "/static");
+            HttpRequest request = new HttpRequest("GET", "http", "127.0.0.1", getServer().getPort(), "/static", new ArrayList<>(), new ArrayList<>(), null);
             Assertions.assertEquals(request, filingPolicy.arg);
         }
 

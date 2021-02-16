@@ -126,7 +126,7 @@ class RequestWriter(
         }
     }
 
-    private fun loadExtensionMap(): Map<String, String> = ClassloaderUtils().loadExtensionMap()
+    private fun loadExtensionMap(): Map<String, String> = ClassloaderUtils.loadExtensionMap()
 
     private fun MediaType.getExtension() = extensionMappings["$type/$subtype"] ?: ".txt"
 
