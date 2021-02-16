@@ -26,7 +26,6 @@ import fr.speekha.httpmocker.io.StreamReader
 fun interface FileLoader {
     /**
      * The method to load scenario files.
-     * TODO : should convert FileNotFoundException to IOException on JVM
      */
     fun load(file: String): StreamReader?
 }

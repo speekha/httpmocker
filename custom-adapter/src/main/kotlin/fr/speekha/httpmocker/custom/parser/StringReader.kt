@@ -78,7 +78,7 @@ internal class StringReader(
         index = tokens
             .map { next(it) }
             .filter { it >= index && it < json.length }
-            .min() ?: parseError(error)
+            .minOrNull() ?: parseError(error)
     }
 
     private fun next(c: Char) = json.indexOf(c, index)

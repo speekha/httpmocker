@@ -41,7 +41,7 @@ abstract class DynamicMockTests<Response : Any, Client : Any> : HttpClientTester
         @Test
         @DisplayName("When a request is made, then the interceptor should not interfere with it")
         fun `should not interfere with requests when disabled`() = runBlocking {
-            setupDynamicConf({ null }, status = DISABLED)
+            setupDynamicConf({ null }, mode = DISABLED)
             enqueueServerResponse(REQUEST_OK_CODE, "body")
 
             val response = executeRequest("/")
