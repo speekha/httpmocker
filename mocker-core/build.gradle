@@ -57,4 +57,4 @@ kotlin {
 }
 
 apply from: '../gradle/dokka.gradle'
-//apply from: '../gradle/publish-kmm.gradle'
+apply from: '../gradle/publish-kmm.gradle'

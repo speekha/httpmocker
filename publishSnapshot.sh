@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-./gradlew --no-daemon mocker-core:artifactoryPublish mocker-okhttp:artifactoryPublish mocker-ktor:artifactoryPublish jackson-adapter:artifactoryPublish gson-adapter:artifactoryPublish moshi-adapter:artifactoryPublish custom-adapter:artifactoryPublish kotlinx-adapter:artifactoryPublish sax-adapter:artifactoryPublish -Dsnapshot=true -Dbintray.user=$1 -Dbintray.key=$2 --stacktrace
+./gradlew --no-daemon mocker-core:uploadArchives mocker-okhttp:uploadArchives mocker-ktor:uploadArchives jackson-adapter:uploadArchives gson-adapter:uploadArchives moshi-adapter:uploadArchives custom-adapter:uploadArchives kotlinx-adapter:uploadArchives sax-adapter:uploadArchives -Dsnapshot=true -DNEXUS_USERNAME=$1 -DNEXUS_USERNAME=$2 --stacktrace
