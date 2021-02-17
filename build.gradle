@@ -47,11 +47,12 @@ allprojects {
     version "$httpmock_version" + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 
     repositories {
-        google()
         mavenCentral()
+        google()
         maven { url "https://kotlin.bintray.com/kotlinx" }
         maven { url "https://dl.bintray.com/kotlin/kotlinx/" }
-        //jcenter()
+//        maven { url "https://dl.bintray.com/kotlin/dokka" }
+        jcenter()
     }
 
     apply plugin:"org.jlleitschuh.gradle.ktlint"

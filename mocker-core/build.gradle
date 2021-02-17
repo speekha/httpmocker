@@ -18,10 +18,6 @@ plugins {
     id 'org.jetbrains.kotlin.multiplatform'
 }
 
-repositories {
-    mavenCentral()
-}
-
 kotlin {
 
     jvm {
@@ -61,4 +57,4 @@ kotlin {
 }
 
 apply from: '../gradle/dokka.gradle'
-//apply from: '../gradle/publish.gradle'
+//apply from: '../gradle/publish-kmm.gradle'

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url "https://dl.bintray.com/kotlin/dokka" }
+    }
+}
+
 include ':mocker-core', ':mocker-okhttp', ':mocker-ktor', ':jackson-adapter', ':moshi-adapter', ':gson-adapter', ':custom-adapter', ':kotlinx-adapter', ':sax-adapter', ':tests', ':demo'
