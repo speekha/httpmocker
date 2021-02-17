@@ -25,7 +25,7 @@ actual object ClassloaderUtils {
     actual fun createException(error: NetworkError): Throwable {
         val exceptionType = Class.forName(error.exceptionType)
         return if (error.message == null) {
-            exceptionType.getConstructor().newInstance(error.message)
+            exceptionType.getConstructor().newInstance()
         } else {
             exceptionType.getConstructor(String::class.java).newInstance(error.message)
         } as Throwable
