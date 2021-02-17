@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-./gradlew --no-daemon mocker-core:bintrayUpload mocker-okhttp:bintrayUpload mocker-ktor:bintrayUpload jackson-adapter:bintrayUpload gson-adapter:bintrayUpload moshi-adapter:bintrayUpload custom-adapter:bintrayUpload kotlinx-adapter:bintrayUpload sax-adapter:bintrayUpload -Dbintray.user=$1 -Dbintray.key=$2 --stacktrace
+./gradlew --no-daemon mocker-core:uploadArchives mocker-okhttp:uploadArchives mocker-ktor:uploadArchives jackson-adapter:uploadArchives gson-adapter:uploadArchives moshi-adapter:uploadArchives custom-adapter:uploadArchives kotlinx-adapter:uploadArchives sax-adapter:uploadArchives -DNEXUS_USERNAME=$1 -DNEXUS_PASSWORD=$2 --stacktrace

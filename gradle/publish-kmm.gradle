@@ -18,14 +18,8 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 //apply plugin: 'signing'
 
-// custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
 artifacts {
-    archives sourcesJar, dokkaJar
+    archives jvmSourcesJar, dokkaJar
 }
 
 def pomConfig = {
@@ -88,8 +82,8 @@ afterEvaluate { project ->
 
         publications {
             mavenPublication(MavenPublication) {
-                from components.java
-                artifact sourcesJar
+                from components.kotlin
+                artifact jvmSourcesJar
                 artifact dokkaJar
                 pom.withXml {
                     def root = asNode()

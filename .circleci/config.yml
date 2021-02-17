@@ -41,7 +41,7 @@ commands:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -110,7 +110,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble mocker-core:jvmSourcesJar --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble mocker-core:jvmSourcesJar mocker-core:dokkaJar --stacktrace
       - save_cache:
           key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -257,7 +257,7 @@ jobs:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Publish
-          command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
+          command: ./publishSnapshot.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD}
   publish_release:
     <<: *container_config
     steps:
@@ -267,7 +267,7 @@ jobs:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Publish
-          command: ./publish.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
+          command: ./publish.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD}
 
 workflows:
   version: 2
