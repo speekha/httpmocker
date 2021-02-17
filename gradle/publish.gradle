@@ -26,7 +26,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 artifacts {
-    archives sourcesJar, dokkaJar
+    archives sourcesJar//, dokkaJar
 }
 
 def pomConfig = {
@@ -55,7 +55,7 @@ publishing {
         mavenPublication(MavenPublication) {
             from components.java
             artifact sourcesJar
-            artifact dokkaJar
+//            artifact dokkaJar
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'A simple mocking lib for OkHttp')

@@ -41,7 +41,7 @@ commands:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -110,7 +110,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble mocker-core:jvmSourcesJar mocker-core:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble mocker-core:jvmSourcesJar --stacktrace
       - save_cache:
           key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:

@@ -26,7 +26,7 @@ ext {
     okhttp_version = '4.9.0'
     ktor_version = '1.5.0'
     retrofit_version = '2.9.0'
-    dokka_version = '0.9.18'
+    dokka_version = '1.4.20'
     bintray_version = '1.8.5'
     artifactory_version = '4.17.2'
     slf4j_version = '1.7.30'
