@@ -14,15 +14,18 @@
  *  limitations under the License.
  */
 
-apply plugin: 'org.jetbrains.dokka'
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
-    reportUndocumented = true
-}
-
-//dokkaJar.failOnError = false
-task dokkaJar(type: Jar) {
-    classifier = 'javadoc'
-    from dokka
-}
+//apply plugin: 'org.jetbrains.dokka'
+//
+//dokkaJavadoc {
+//    outputFormat = 'html'
+//    outputDirectory = File("$buildDir/javadoc")
+//    reportUndocumented = true
+//}
+//tasks.named("dokkaJavadoc") {
+//    outputDirectory.set(buildDir.resolve("dokka"))
+//}
+//
+////dokkaJar.failOnError = false
+//task dokkaJar(type: Jar) {
+//    from dokkaJavadoc
+//}
