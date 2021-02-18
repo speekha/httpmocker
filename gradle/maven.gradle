@@ -25,27 +25,6 @@ artifacts {
     archives sourcesArtifact, dokkaJar
 }
 
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            id "speekha"
-            name "David Blanc"
-            email "david.e.blanc@gmail.com"
-        }
-    }
-
-    scm {
-        url "https://github.com/speekha/httpmocker.git"
-    }
-}
-
 def isSnapshotBuild() {
     return Boolean.valueOf(System.getProperty("snapshot"))
 }
@@ -88,12 +67,31 @@ afterEvaluate { project ->
                 from pubComponent
                 artifact sourcesArtifact
                 artifact dokkaJar
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', 'A simple mocking lib for OkHttp')
-                    root.appendNode('name', 'HTTP Mocker')
-                    root.appendNode('url', 'https://github.com/speekha/httpmocker.git')
-                    root.children().last() + pomConfig
+                pom {
+                    name = POM_NAME
+                    description = POM_DESCRIPTION
+                    url = POM_URL
+                    inceptionYear = POM_INCEPTION_YEAR
+                    licenses {
+                        license {
+                            name = POM_LICENCE_NAME
+                            url = POM_LICENCE_URL
+                            distribution = POM_LICENCE_DIST
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = POM_DEVELOPER_ID
+                            name = POM_DEVELOPER_NAME
+                            email = POM_DEVELOPER_EMAIL
+                            url = POM_DEVELOPER_URL
+                        }
+                    }
+                    scm {
+                        url = POM_SCM_URL
+                        connection = POM_SCM_CONNECTION
+                        developerConnection = POM_SCM_DEV_CONNECTION
+                    }
                 }
             }
         }
