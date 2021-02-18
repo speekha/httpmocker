@@ -1,7 +1,7 @@
 apply plugin: 'org.jetbrains.dokka'
 
-////dokkaJar.failOnError = false
+//dokkaJar.failOnError = false
 task dokkaJar(type: Jar) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from dokkaJavadoc
 }

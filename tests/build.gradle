@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-apply plugin: 'kotlin'
-apply plugin: 'kotlinx-serialization'
+plugins {
+    id 'kotlin'
+    id 'kotlinx-serialization'
+}
 
 test {
     options {
