@@ -18,8 +18,11 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 //apply plugin: 'signing'
 
+def pubComponent = (PLATFORM == "kmm") ? components.kotlin : components.java
+def sourcesArtifact = (PLATFORM == "kmm") ? jvmSourcesJar : sourcesJar
+
 artifacts {
-    archives jvmSourcesJar, dokkaJar
+    archives sourcesArtifact, dokkaJar
 }
 
 def pomConfig = {
@@ -82,8 +85,8 @@ afterEvaluate { project ->
 
         publications {
             mavenPublication(MavenPublication) {
-                from components.kotlin
-                artifact jvmSourcesJar
+                from pubComponent
+                artifact sourcesArtifact
                 artifact dokkaJar
                 pom.withXml {
                     def root = asNode()
