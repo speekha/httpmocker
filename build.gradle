@@ -41,38 +41,21 @@ plugins {
     id "org.jlleitschuh.gradle.ktlint" version "8.2.0"
 }
 
-allprojects {
+subprojects {
 
-    group 'fr.speekha.httpmocker'
-    version "$httpmock_version" + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+    group GROUP
+    version VERSION_NAME + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 
     repositories {
         mavenCentral()
         google()
         maven { url "https://kotlin.bintray.com/kotlinx" }
         maven { url "https://dl.bintray.com/kotlin/kotlinx/" }
-//        maven { url "https://dl.bintray.com/kotlin/dokka" }
+        maven { url "https://dl.bintray.com/kotlin/dokka" }
         jcenter()
     }
 
-    apply plugin:"org.jlleitschuh.gradle.ktlint"
-
-    // Ktlint configuration for sub-projects
-    ktlint {
-        version = "0.39.0"
-        verbose = true
-        android = false
-        reporters {
-            reporter "plain"
-            reporter "checkstyle"
-        }
-        additionalEditorconfigFile = file("../.editorconfig")
-
-        filter {
-            exclude("**/generated/**")
-            include("**/kotlin/**")
-        }
-    }
+    apply from: '../gradle/ktlint.gradle'
 }
 
 task clean(type: Delete) {
