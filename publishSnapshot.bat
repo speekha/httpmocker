@@ -1,0 +1,2 @@
+@echo off
+gradlew.bat --no-daemon --no-parallel mocker-core:publish mocker-okhttp:publish mocker-ktor:publish jackson-adapter:publish gson-adapter:publish moshi-adapter:publish custom-adapter:publish kotlinx-adapter:publish sax-adapter:publish -Dsnapshot=true --stacktrace

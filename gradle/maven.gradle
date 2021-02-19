@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 def pubComponent = (PLATFORM == "kmm") ? components.kotlin : components.java
 def sourcesArtifact = (PLATFORM == "kmm") ? jvmSourcesJar : sourcesJar
-def implementations =  (PLATFORM == "kmm") ? project.configurations.jvmImplementation : project.configurations.implementation
+def implementations = (PLATFORM == "kmm") ? project.configurations.jvmImplementation : project.configurations.implementation
 
 artifacts {
     archives sourcesArtifact, dokkaJar
@@ -45,12 +44,12 @@ if (secretPropsFile.exists()) {
         ext[name] = value
     }
 } else {
-    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
-    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
-    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
-    ext["ossrhUsername"] = System.getenv('NEXUS_USERNAME')
-    ext["ossrhPassword"] = System.getenv('NEXUS_PASSWORD')
-    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+    ext["signing.keyId"] = System.getProperty('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getProperty('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = "../" + System.getProperty('SIGNING_SECRET_KEY_RING_FILE')
+    ext["ossrhUsername"] = System.getProperty('NEXUS_USERNAME')
+    ext["ossrhPassword"] = System.getProperty('NEXUS_PASSWORD')
+//    ext["sonatypeStagingProfileId"] = System.getProperty('SONATYPE_STAGING_PROFILE_ID')
 }
 
 def isSnapshotBuild() {

@@ -22,7 +22,7 @@ ext {
 
 jacoco {
     toolVersion = "0.8.4"
-    reportsDir = file("$buildDir/reports/jacoco")
+    reportsDirectory = file("$buildDir/reports/jacoco")
 }
 
 jacocoTestReport {
