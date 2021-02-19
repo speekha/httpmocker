@@ -275,8 +275,11 @@ jobs:
       - restore_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
+          name: Retrieve signing key
+          command: echo ${SIGNING_KEYRING} | base64 -d > ${SIGNING_SECRET_KEY_RING_FILE}
+      - run:
           name: Publish
-          command: ./publishSnapshot.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD}
+          command: ./publishSnapshot.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_SECRET_KEY_RING_FILE}
   publish_release:
     <<: *container_config
     steps:
@@ -285,8 +288,11 @@ jobs:
       - restore_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
+          name: Retrieve signing key
+          command: echo ${SIGNING_KEYRING} | base64 -d > ${SIGNING_SECRET_KEY_RING_FILE}
+      - run:
           name: Publish
-          command: ./publish.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD}
+          command: ./publish.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_SECRET_KEY_RING_FILE}
 
 workflows:
   version: 2

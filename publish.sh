@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-./gradlew --no-daemon --no-parallel mocker-core:uploadArchives mocker-okhttp:uploadArchives mocker-ktor:uploadArchives jackson-adapter:uploadArchives gson-adapter:uploadArchives moshi-adapter:uploadArchives custom-adapter:uploadArchives kotlinx-adapter:uploadArchives sax-adapter:uploadArchives -DNEXUS_USERNAME=$1 -DNEXUS_PASSWORD=$2 --stacktrace
+./gradlew --no-daemon --no-parallel mocker-core:publish mocker-okhttp:publish mocker-ktor:publish jackson-adapter:publish gson-adapter:publish moshi-adapter:publish custom-adapter:publish kotlinx-adapter:publish sax-adapter:publish -DNEXUS_USERNAME=$1 -DNEXUS_PASSWORD=$2 -DSIGNING_KEY_ID=$3 -DSIGNING_PASSWORD=$4 -DSIGNING_SECRET_KEY_RING_FILE=$5 --stacktrace
