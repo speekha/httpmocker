@@ -140,7 +140,7 @@ jobs:
   build_ktor:
     <<: *container_config
     steps:
-      - build_module:
+      - build_kmm_module:
           module: "mocker-ktor"
   build_jackson:
     <<: *container_config
@@ -180,7 +180,9 @@ jobs:
           keys:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
             - build-mocker-okhttp-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-ktor-{{ .Branch }}-{{ .Revision }}
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
           command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testOkhttpReleaseUnitTest demo:testKtorReleaseUnitTest demo:lint --stacktrace

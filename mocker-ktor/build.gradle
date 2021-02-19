@@ -15,22 +15,31 @@
  */
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = '1.8'
+        }
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "io.ktor:ktor-client-core:$ktor_version"
+                api project(':mocker-core')
+            }
+        }
+        jvmMain {
+            dependencies {
+            }
+        }
     }
 }
 
-dependencies {
-    implementation "io.ktor:ktor-client-core:$ktor_version"
-    implementation "io.ktor:ktor-client-cio:$ktor_version"
-    api project(':mocker-core')
-}
-
 apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/sources.gradle'
 apply from: '../gradle/maven.gradle'

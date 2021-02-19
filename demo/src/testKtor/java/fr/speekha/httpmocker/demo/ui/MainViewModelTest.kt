@@ -37,7 +37,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import java.io.File
 import java.io.IOException
 
 @ExperimentalCoroutinesApi
@@ -53,7 +52,7 @@ class MainViewModelTest : ViewModelTest() {
     private val mockClient = mockableHttpClient(CIO) {
         mock {
             parseScenariosWith(KotlinxMapper())
-            recordScenariosIn(File(""))
+            recordScenariosIn("")
         }
     }
 

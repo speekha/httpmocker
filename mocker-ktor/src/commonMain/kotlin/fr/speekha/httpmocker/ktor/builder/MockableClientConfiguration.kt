@@ -26,7 +26,6 @@ import io.ktor.client.features.HttpClientFeature
 import io.ktor.client.features.HttpRedirect
 import io.ktor.client.features.defaultTransformers
 import io.ktor.http.ContentType
-import java.io.File
 
 class MockableClientConfiguration<T : HttpClientEngineConfig> {
 
@@ -59,11 +58,11 @@ class MockableClientConfiguration<T : HttpClientEngineConfig> {
         mockConfiguration = block
     }
 
-    fun MockEngineConfig.recordScenariosIn(folder: File): RecorderBuilder =
-        RecorderBuilder(FileAccessor(folder)).also { configBuilder.recorder = it }
+    fun MockEngineConfig.recordScenariosIn(folder: FileAccessor): RecorderBuilder =
+        RecorderBuilder(folder).also { configBuilder.recorder = it }
 
     fun MockEngineConfig.recordScenariosIn(folder: String): RecorderBuilder =
-        recordScenariosIn(File(folder))
+        recordScenariosIn(FileAccessor(folder))
 
     /**
      * Applies all the installed features and customInterceptors from this configuration

@@ -16,14 +16,10 @@
 
 package fr.speekha.httpmocker.ktor.builder
 
-import fr.speekha.httpmocker.builder.Configurator
-import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockClient
-import fr.speekha.httpmocker.policies.FilingPolicy
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
-import java.io.File
 
 fun <T : HttpClientEngineConfig> mockableHttpClient(
     factory: HttpClientEngineFactory<T>,
@@ -38,5 +34,3 @@ fun <T : HttpClientEngineConfig> mockableHttpClient(
         }
     }
 }
-
-fun Configurator.saveScenarios(folder: File, policy: FilingPolicy?) = saveScenarios(FileAccessor(folder), policy)
