@@ -46,13 +46,13 @@ dependencies {
 
     // Local projects
     implementation project(':mocker-okhttp')
+    implementation project(':mocker-ktor')
     implementation project(':jackson-adapter')
     implementation project(':gson-adapter')
     implementation project(':moshi-adapter')
     implementation project(':kotlinx-adapter')
     implementation project(':custom-adapter')
     implementation project(':sax-adapter')
-    implementation project(':mocker-ktor')
 
     // OkHttp
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
