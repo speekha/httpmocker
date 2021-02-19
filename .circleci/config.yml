@@ -46,6 +46,23 @@ commands:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
             - << parameters.module >>/build
+  build_kmm_module:
+    description: "Builds a specific module"
+    parameters:
+      module:
+        type: string
+    steps:
+      - restore_sources_and_gradle
+      - restore_cache:
+          keys:
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Build
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:jvmSourcesJar << parameters.module >>:dokkaJar --stacktrace
+      - save_cache:
+          key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - << parameters.module >>/build
   restore_all_caches:
     description: "Restores previous build steps state"
     steps:
@@ -143,7 +160,7 @@ jobs:
   build_custom:
     <<: *container_config
     steps:
-      - build_module:
+      - build_kmm_module:
           module: "custom-adapter"
   build_kotlinx:
     <<: *container_config

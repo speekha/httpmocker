@@ -15,19 +15,30 @@
  */
 
 plugins {
-    id "org.jetbrains.kotlin.jvm"
+    id 'org.jetbrains.kotlin.multiplatform'
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = '1.8'
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnit()
+        }
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                api project(':mocker-core')
+            }
+        }
+        jvmMain {
+        }
     }
 }
 
-dependencies {
-    api project(':mocker-core')
-}
-
 apply from: '../gradle/dokka.gradle'
-apply from: '../gradle/sources.gradle'
 apply from: '../gradle/maven.gradle'
