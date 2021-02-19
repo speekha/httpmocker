@@ -165,7 +165,7 @@ jobs:
   build_kotlinx:
     <<: *container_config
     steps:
-      - build_module:
+      - build_kmm_module:
           module: "kotlinx-adapter"
   build_sax:
     <<: *container_config
