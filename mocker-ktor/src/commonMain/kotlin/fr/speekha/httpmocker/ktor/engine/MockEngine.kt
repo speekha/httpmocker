@@ -23,13 +23,13 @@ import fr.speekha.httpmocker.builder.Config
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.io.MockResponder
 import fr.speekha.httpmocker.ktor.io.Recorder
+import fr.speekha.httpmocker.ktor.io.dispatcherIO
 import fr.speekha.httpmocker.ktor.io.mapRequest
 import fr.speekha.httpmocker.ktor.io.toKtorRequest
 import io.ktor.client.engine.HttpClientEngineBase
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
 import io.ktor.util.InternalAPI
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
@@ -40,7 +40,7 @@ class MockEngine(
 
     private val job = Job()
 
-    override val dispatcher = Dispatchers.IO
+    override val dispatcher = dispatcherIO
 
     override val coroutineContext: CoroutineContext = job + dispatcher
 

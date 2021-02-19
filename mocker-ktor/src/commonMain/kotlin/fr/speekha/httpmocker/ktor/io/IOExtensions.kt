@@ -35,10 +35,12 @@ import io.ktor.http.Url
 import io.ktor.http.headersOf
 import io.ktor.util.date.GMTDate
 import io.ktor.utils.io.ByteReadChannel
-import kotlinx.coroutines.Dispatchers
+import io.ktor.utils.io.core.toByteArray
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
+
+internal expect val dispatcherIO: CoroutineDispatcher
 
 internal fun HttpResponseData.toDescriptor(url: Url) = ResponseDescriptor(
     code = statusCode.value,
@@ -66,7 +68,7 @@ internal fun ResponseDescriptor.toKtorRequest() = HttpResponseData(
     headers = buildHeaders(),
     version = HttpProtocolVersion.HTTP_2_0,
     body = ByteReadChannel(body),
-    callContext = Job() + Dispatchers.IO
+    callContext = Job() + dispatcherIO
 )
 
 private fun ResponseDescriptor.buildHeaders() = headersOf(*buildHeaderList().toTypedArray())
@@ -114,24 +116,21 @@ internal suspend fun HttpResponseData.readBody(): ByteArray = when (val content 
 
 private const val READ_CHANNEL_CHUNKS = 1024
 
-suspend fun ByteReadChannel.readBytes(): ByteArray = ByteArrayOutputStream()
-    .also { output -> transferContent(output) }
-    .toByteArray()
-
-private suspend fun ByteReadChannel.transferContent(output: ByteArrayOutputStream) {
-    val buffer = ByteArray(READ_CHANNEL_CHUNKS)
+internal suspend fun ByteReadChannel.readBytes(): ByteArray {
+    val data = mutableListOf<ByteArray>()
     while (!isClosedForRead) {
-        transferChunk(buffer, output)
+        transferChunk()?.let { data += it }
+    }
+    return ByteArray(data.sumBy { it.size }) {
+        data[it / READ_CHANNEL_CHUNKS][it % READ_CHANNEL_CHUNKS]
     }
 }
 
-private suspend fun ByteReadChannel.transferChunk(
-    buffer: ByteArray,
-    output: ByteArrayOutputStream
-) =
-    withContext(Dispatchers.IO) {
-        val length = readAvailable(buffer, 0, READ_CHANNEL_CHUNKS)
-        if (length >= 0) {
-            output.write(buffer, 0, length)
-        }
+private suspend fun ByteReadChannel.transferChunk(): ByteArray? = withContext(dispatcherIO) {
+    val buffer = ByteArray(READ_CHANNEL_CHUNKS)
+    when (val length = readAvailable(buffer, 0, READ_CHANNEL_CHUNKS)) {
+        READ_CHANNEL_CHUNKS -> buffer
+        0 -> null
+        else -> buffer.copyOfRange(0, length)
     }
+}
