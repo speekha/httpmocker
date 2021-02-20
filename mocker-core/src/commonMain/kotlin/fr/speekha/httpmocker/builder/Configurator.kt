@@ -58,7 +58,7 @@ interface Configurator {
      * @param folder the root folder where saved scenarios should be saved
      * @param policy the naming policy to use for scenario files
      */
-    fun saveScenarios(folder: FileAccessor, policy: FilingPolicy?)
+    fun recordScenariosIn(folder: FileAccessor, policy: FilingPolicy?)
 
     /**
      * Allows to return an error if saving fails when recording.

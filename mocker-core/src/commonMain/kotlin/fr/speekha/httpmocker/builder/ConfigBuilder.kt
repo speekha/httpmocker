@@ -73,7 +73,7 @@ class ConfigBuilder internal constructor(
     /**
      * {@inheritdoc}.
      */
-    override fun saveScenarios(folder: FileAccessor, policy: FilingPolicy?) {
+    override fun recordScenariosIn(folder: FileAccessor, policy: FilingPolicy?) {
         recorder = RecorderBuilder(folder, policy)
     }
 

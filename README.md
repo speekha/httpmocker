@@ -188,7 +188,7 @@ an example for an Android app using static mocks, with a few more options:
                 context.assets.open(it) 
             }
             setInterceptorStatus(ENABLED)
-            saveScenariosIn(File(rootFolder))
+            recordScenariosIn(File(rootFolder))
             addFakeNetworkDelay(50L)
         }
 ```

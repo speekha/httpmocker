@@ -37,7 +37,7 @@ val engineInjection: Module = module {
             decodeScenarioPathWith(get())
             loadFileWith { get<Context>().assets.open(it).asReader() }
             parseScenariosWith(JacksonMapper())
-            saveScenarios(
+            recordScenariosIn(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 get()
             )

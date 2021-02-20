@@ -21,4 +21,5 @@ import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import java.io.File
 
-fun Configurator.saveScenarios(folder: File, policy: FilingPolicy?) = saveScenarios(FileAccessor(folder), policy)
+fun Configurator.recordScenariosIn(folder: File, policy: FilingPolicy? = null) =
+    recordScenariosIn(FileAccessor(folder), policy)

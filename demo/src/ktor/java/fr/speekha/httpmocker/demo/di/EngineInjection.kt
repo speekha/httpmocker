@@ -24,7 +24,7 @@ import fr.speekha.httpmocker.demo.ui.MockerWrapper
 import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
-import fr.speekha.httpmocker.ktor.builder.saveScenarios
+import fr.speekha.httpmocker.ktor.builder.recordScenariosIn
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
@@ -40,7 +40,7 @@ val engineInjection: Module = module {
                 decodeScenarioPathWith(get())
                 loadFileWith { get<Context>().assets.open(it).asReader() }
                 parseScenariosWith(KotlinxMapper())
-                saveScenarios(
+                recordScenariosIn(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                     get()
                 )
