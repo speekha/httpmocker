@@ -20,6 +20,7 @@ import fr.speekha.httpmocker.HTTP_METHOD_GET
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.builder.FileLoader
 import fr.speekha.httpmocker.client.HttpClientTester
+import fr.speekha.httpmocker.client.SAVE_FOLDER
 import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
@@ -114,8 +115,8 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
                 readPolicy?.let { decodeScenarioPathWith(it) }
                 parseScenariosWith(mapper)
                 writePolicy?.let {
-                    recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER) with it
-                } ?: recordScenariosIn(fr.speekha.httpmocker.client.SAVE_FOLDER)
+                    recordScenariosIn(SAVE_FOLDER) with it
+                } ?: recordScenariosIn(SAVE_FOLDER)
                 failOnRecordingError(true)
                 setMode(Mode.RECORD)
             }

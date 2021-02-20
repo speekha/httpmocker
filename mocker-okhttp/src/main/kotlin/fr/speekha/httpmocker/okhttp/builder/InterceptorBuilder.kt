@@ -73,8 +73,8 @@ class InterceptorBuilder {
      * @param folder the root folder where saved scenarios should be saved
      * @param policy the naming policy to use for scenario files
      */
-    fun saveScenarios(folder: File, policy: FilingPolicy?): InterceptorBuilder = apply {
-        configBuilder.saveScenarios(FileAccessor(folder), policy)
+    fun recordScenariosIn(folder: File, policy: FilingPolicy?): InterceptorBuilder = apply {
+        configBuilder.recordScenariosIn(FileAccessor(folder), policy)
     }
 
     /**

@@ -87,7 +87,7 @@ class JavaApiTest extends OkHttpTests {
                     .loadFileWith(this::loadResource)
                     .parseScenariosWith(mapper)
                     .setMode(Mode.ENABLED)
-                    .saveScenarios(new File(RecordTestsKt.SAVE_FOLDER), policy)
+                    .recordScenariosIn(new File(RecordTestsKt.SAVE_FOLDER), policy)
                     .build();
             client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
         }
