@@ -52,6 +52,9 @@ kotlin {
                 implementation "org.slf4j:slf4j-simple:$slf4j_version"
             }
         }
+        iosMain {
+            dependencies {}
+        }
     }
 }
 
