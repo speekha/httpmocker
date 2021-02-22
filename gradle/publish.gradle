@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2020 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ afterEvaluate { project ->
                 def releasesRepoUrl = RELEASE_REPOSITORY_URL
                 def snapshotsRepoUrl = SNAPSHOT_REPOSITORY_URL
                 url = isSnapshotBuild() ? snapshotsRepoUrl : releasesRepoUrl
+
+                // TODO add build number to snapshots? all? (cf. artifactory conf)
 
                 credentials(PasswordCredentials) {
                     username = ossrhUsername
