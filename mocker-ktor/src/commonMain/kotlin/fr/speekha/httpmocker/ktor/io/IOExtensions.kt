@@ -130,7 +130,7 @@ private suspend fun ByteReadChannel.transferChunk(): ByteArray? = withContext(di
     val buffer = ByteArray(READ_CHANNEL_CHUNKS)
     when (val length = readAvailable(buffer, 0, READ_CHANNEL_CHUNKS)) {
         READ_CHANNEL_CHUNKS -> buffer
-        0 -> null
-        else -> buffer.copyOfRange(0, length)
+        in 1 until READ_CHANNEL_CHUNKS -> buffer.copyOfRange(0, length)
+        else -> null
     }
 }
