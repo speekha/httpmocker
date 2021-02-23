@@ -174,10 +174,6 @@ private fun writeCData(
 
 private fun indent(spaces: Int) = " ".repeat(spaces * SPACE_PER_TAB)
 
-private operator fun StringBuilder.plusAssign(obj: Any) {
-    append(obj)
-}
-
 private fun String?.orEmpty() = this ?: ""
 
 private const val XML_PREFACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
