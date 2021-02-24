@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.io
+package fr.speekha.httpmocker.builder
 
-import java.io.InputStream
+import fr.speekha.httpmocker.io.IOException
 
-/**
- * Reads the content of an input stream and returns it as a list of strings.
- * @return the data as a list, line by line
- */
-fun InputStream.readAsStringList(): List<String> =
-    bufferedReader().use { reader -> reader.readLines() }
-
-/**
- * Reads the content of an input stream and returns it as a string.
- * @return the data as a single String
- */
-fun InputStream.readAsString(): String = bufferedReader().use { reader -> reader.readText() }
+internal actual fun wrapLoadingExceptions(loader: FileLoader): FileLoader = FileLoader { path ->
+    try {
+        loader.load(path)
+    } catch (e: Throwable) {
+        throw IOException(e.message, e)
+    }
+}
