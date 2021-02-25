@@ -368,4 +368,4 @@ workflows:
             - quality
           filters:
             branches:
-              only: master
+              only: main
