@@ -90,9 +90,7 @@ internal class StaticMockProvider(
         segment != ".." && (index == size - 1 || get(index + 1) != "..")
     }
 
-    private fun throwError(error: NetworkError): Nothing {
-        throw ClassloaderUtils.createException(error)
-    }
+    private fun throwError(error: NetworkError): Nothing = throw ClassloaderUtils.createException(error)
 
     override fun toString(): String = "static mock configuration"
 }
