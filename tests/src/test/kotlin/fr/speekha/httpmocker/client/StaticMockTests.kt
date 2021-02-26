@@ -395,14 +395,14 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         )
         fun `should allow to delay all responses`(title: String, mapper: Mapper, type: String) =
             runBlocking {
-                setUpInterceptor(ENABLED, mapper, type, 50)
+                val threshold = 50L
+                setUpInterceptor(ENABLED, mapper, type, threshold)
 
-                val delay = measureTimeMillis {
+                val executionTime = measureTimeMillis {
                     executeRequest(URL_SIMPLE_REQUEST)
                 }
 
-                val threshold = 50
-                assertTrue(delay >= threshold, "Time was $delay (< $threshold ms)")
+                assertTrue(executionTime >= threshold, "Execution time was $executionTime (< $threshold ms)")
             }
 
         @ParameterizedTest(name = "Mapper: {0}")

@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.io
 
-import fr.speekha.httpmocker.ClassloaderUtils
+import fr.speekha.httpmocker.MimeTypeResolver
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
@@ -35,8 +35,6 @@ class RequestWriter(
 ) {
 
     private val logger = getLogger()
-
-    private val extensionMappings: Map<String, String> by lazy { loadExtensionMap() }
 
     @Suppress("TooGenericExceptionCaught")
     fun saveFiles(record: CallRecord) {
@@ -127,9 +125,7 @@ class RequestWriter(
         }
     }
 
-    private fun loadExtensionMap(): Map<String, String> = ClassloaderUtils.loadExtensionMap()
-
-    private fun MediaType.getExtension() = extensionMappings["$type/$subtype"] ?: ".txt"
+    private fun MediaType.getExtension() = MimeTypeResolver["$type/$subtype"] ?: ".txt"
 
     class CallRecord(
         val request: HttpRequest,

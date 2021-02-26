@@ -16,7 +16,6 @@
 
 package fr.speekha.httpmocker
 
-import fr.speekha.httpmocker.io.readAsStringList
 import fr.speekha.httpmocker.model.NetworkError
 
 actual object ClassloaderUtils {
@@ -30,12 +29,4 @@ actual object ClassloaderUtils {
             exceptionType.getConstructor(String::class.java).newInstance(error.message)
         } as Throwable
     }
-
-    actual fun loadExtensionMap(): Map<String, String> =
-        javaClass.classLoader.getResourceAsStream("fr/speekha/httpmocker/resources/mimetypes")
-            ?.readAsStringList()
-            ?.associate {
-                val (extension, mimeType) = it.split("=")
-                mimeType to extension
-            } ?: mapOf()
 }
