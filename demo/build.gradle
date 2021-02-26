@@ -67,7 +67,7 @@ android {
 
 repositories {
     // For snapshots versions
-//    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
+    //    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     // Still needed for koin
     jcenter()
 }
@@ -88,14 +88,14 @@ dependencies {
     implementation "org.koin:koin-androidx-viewmodel:2.0.1"
     implementation "org.slf4j:slf4j-android:$slf4j_version"
 
-    //okhttpImplementation "fr.speekha.httpmocker:mocker-okhttp:$httpmock_version"
-    //okhttpImplementation "fr.speekha.httpmocker:jackson-adapter:$httpmock_version"
+//    okhttpImplementation "fr.speekha.httpmocker:mocker-okhttp:$VERSION_NAME"
+//    okhttpImplementation "fr.speekha.httpmocker:jackson-adapter:$VERSION_NAME"
     okhttpImplementation project(':mocker-okhttp')
     okhttpImplementation project(':jackson-adapter')
     okhttpImplementation "com.squareup.retrofit2:converter-jackson:$retrofit_version"
 
-    //ktorImplementation "fr.speekha.httpmocker:mocker-ktor:$httpmock_version"
-    //ktorImplementation "fr.speekha.httpmocker:kotlinx-adapter:$httpmock_version"
+//    ktorImplementation "fr.speekha.httpmocker:mocker-ktor-jvm:$VERSION_NAME"
+//    ktorImplementation "fr.speekha.httpmocker:kotlinx-adapter-jvm:$VERSION_NAME"
     ktorImplementation project(':mocker-ktor')
     ktorImplementation project(':kotlinx-adapter')
     ktorImplementation "io.ktor:ktor-client-cio:$ktor_version"
