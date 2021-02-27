@@ -18,7 +18,7 @@ apply plugin:"org.jlleitschuh.gradle.ktlint"
 
 // Ktlint configuration for sub-projects
 ktlint {
-    version = "0.39.0"
+    version = "0.40.0"
     verbose = true
     android = false
     reporters {

@@ -22,7 +22,7 @@ ext {
     moshi_version = '1.11.0'
     kotlinx_serialization_version = '1.0.1'
     okhttp_version = '4.9.1'
-    ktor_version = '1.5.1'
+    ktor_version = '1.5.2'
     retrofit_version = '2.9.0'
     dokka_version = '1.4.20'
     slf4j_version = '1.7.30'
