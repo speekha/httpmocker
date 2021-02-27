@@ -1,6 +1,6 @@
 # HttpMocker
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.speekha.httpmocker/mocker/badge.svg?color=blue)](https://search.maven.org/search?q=fr.speekha.httpmocker)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.speekha.httpmocker/mocker-core/badge.svg?color=blue)](https://search.maven.org/search?q=fr.speekha.httpmocker)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.4.31-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![HacktoberFest](https://badgen.net/badge/hacktoberfest/friendly)](https://hacktoberfest.digitalocean.com/)
