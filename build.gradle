@@ -44,8 +44,7 @@ allprojects {
         mavenCentral()
         google()
         maven { url "https://kotlin.bintray.com/kotlinx" }
-        maven { url "https://dl.bintray.com/kotlin/kotlinx/" }
-        maven { url "https://dl.bintray.com/kotlin/dokka" }
+        maven { url "https://kotlin.bintray.com/dokka" }
         jcenter()
     }
 }
