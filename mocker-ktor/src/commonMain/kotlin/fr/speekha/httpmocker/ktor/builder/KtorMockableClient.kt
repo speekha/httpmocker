@@ -25,7 +25,7 @@ fun <T : HttpClientEngineConfig> mockableHttpClient(
     factory: HttpClientEngineFactory<T>,
     block: MockableClientConfiguration<T>.() -> Unit = {}
 ): HttpClient {
-    val conf = MockableClientConfiguration<T>().apply(block)
+    val conf = initConfiguration<T>().apply(block)
     return HttpClient(MockClient) {
         conf.applyConfiguration(this)
         engine {

@@ -27,7 +27,7 @@ import io.ktor.client.features.HttpRedirect
 import io.ktor.client.features.defaultTransformers
 import io.ktor.http.ContentType
 
-class MockableClientConfiguration<T : HttpClientEngineConfig> {
+open class MockableClientConfiguration<T : HttpClientEngineConfig> {
 
     private val config = HttpClientConfig<MockEngineConfig>()
 
@@ -58,9 +58,17 @@ class MockableClientConfiguration<T : HttpClientEngineConfig> {
         mockConfiguration = block
     }
 
+    /**
+     * Defines the folder where and how scenarios should be stored when recording.
+     * @param folder the root folder where saved scenarios should be saved
+     */
     fun MockEngineConfig.recordScenariosIn(folder: FileAccessor): RecorderBuilder =
         RecorderBuilder(folder).also { configBuilder.recorder = it }
 
+    /**
+     * Defines the folder where and how scenarios should be stored when recording.
+     * @param folder the root folder where saved scenarios should be saved
+     */
     fun MockEngineConfig.recordScenariosIn(folder: String): RecorderBuilder =
         recordScenariosIn(FileAccessor(folder))
 
@@ -94,3 +102,5 @@ class MockableClientConfiguration<T : HttpClientEngineConfig> {
         conf += config
     }
 }
+
+expect fun <T : HttpClientEngineConfig> initConfiguration(): MockableClientConfiguration<T>
