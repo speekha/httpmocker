@@ -52,7 +52,7 @@ class RequestWriter(
     }
 
     private fun getRequestFilePath(record: CallRecord): FileAccessor =
-        rootFolder.getFile(filingPolicy.getPath(record.request)).also {
+        rootFolder.getChild(filingPolicy.getPath(record.request)).also {
             logger.debug("Saving scenario file $it")
         }
 
@@ -95,7 +95,7 @@ class RequestWriter(
         record: CallRecord
     ) =
         matchers.last().response?.bodyFile?.let { responseFile ->
-            val storeFile = (requestFile.parentFile ?: rootFolder).getFile(responseFile)
+            val storeFile = (requestFile.parentFile ?: rootFolder).getChild(responseFile)
             record.body?.let { array ->
                 saveBodyFile(storeFile, array)
             }

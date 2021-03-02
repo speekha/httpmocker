@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,16 @@
 
 package fr.speekha.httpmocker.io
 
-import java.io.InputStream
-import java.io.OutputStream
 
-actual class StreamReader(
-    private val inputStream: InputStream
-) {
-    actual fun readAsString(): String = inputStream.readAsString()
+actual class StreamReader() {
+    actual fun readAsString(): String = TODO()
 }
 
-fun InputStream.asReader() = StreamReader(this)
-
 actual class StreamWriter(
-    private val outputStream: OutputStream
 ) {
     actual fun write(array: ByteArray) {
-        outputStream.write(array)
+        TODO()
     }
 
-    actual fun <R : Any> use(block: (StreamWriter) -> R): R = outputStream.use {
-        block(this)
-    }
+    actual fun <R : Any> use(block: (StreamWriter) -> R): R = TODO()
 }

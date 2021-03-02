@@ -29,6 +29,14 @@ kotlin {
         }
     }
 
+    ios {
+        binaries {
+            framework {
+                baseName = "mocker-core"
+            }
+        }
+    }
+
     sourceSets {
         commonMain {
             dependencies {
@@ -53,7 +61,9 @@ kotlin {
             }
         }
         iosMain {
-            dependencies {}
+            dependencies {
+                api "org.jetbrains.kotlinx:kotlinx-io-native:$kotlinx_io_version"
+            }
         }
     }
 }

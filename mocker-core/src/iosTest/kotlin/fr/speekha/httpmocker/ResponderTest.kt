@@ -14,26 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.io
+package fr.speekha.httpmocker
 
-/**
- * Utility class to manipulate files on different platforms.
- */
-expect class FileAccessor(path: String) {
-
-    val name: String
-
-    val parentFile: FileAccessor?
-
-    val absolutePath: String
-
-    fun getChild(fileName: String): FileAccessor
-
-    fun exists(): Boolean
-
-    fun mkdir()
-
-    fun getWriter(): StreamWriter
-
-    fun getReader(): StreamReader
+class ResponderTest {
 }

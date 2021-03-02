@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,33 @@
 
 package fr.speekha.httpmocker.io
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-
 actual class FileAccessor(
-    private val fileHandle: File
+    private val filePath: String,
+    private val fileDescriptor: Int
 ) {
 
-    actual constructor(path: String) : this(File(path))
+    actual constructor(path: String) : this(path, 0)
 
     actual val name: String
-        get() = fileHandle.name
+        get() = filePath.drop(filePath.lastIndexOf('/'))
 
     actual val parentFile: FileAccessor?
-        get() = fileHandle.parentFile?.let { FileAccessor(it) }
+        get() = TODO()
 
     actual val absolutePath: String
-        get() = fileHandle.absolutePath
+        get() = TODO()
 
-    actual fun getFile(fileName: String): FileAccessor = FileAccessor(File(fileHandle, fileName))
+    actual fun getChild(fileName: String): FileAccessor = TODO()
 
-    actual fun exists(): Boolean = fileHandle.exists()
+    actual fun exists(): Boolean = TODO()
 
     actual fun mkdir() {
-        fileHandle.mkdir()
+        TODO()
     }
 
-    actual fun getReader(): StreamReader = StreamReader(FileInputStream(fileHandle))
+    actual fun getReader(): StreamReader = TODO()
 
-    actual fun getWriter(): StreamWriter = StreamWriter(FileOutputStream(fileHandle))
+    actual fun getWriter(): StreamWriter = TODO()
 //
 //    func getJsonContent(file: String) -> String {
 //        guard

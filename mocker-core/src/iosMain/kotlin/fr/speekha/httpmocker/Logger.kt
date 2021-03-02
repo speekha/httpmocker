@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,9 @@ actual class Logger actual constructor(clazz: KClass<*>) {
     }
 
     private fun printMessage(message: String, exception: Throwable? = null) {
-        TODO()
+        println(message)
+        if (exception != null) {
+            println("Exception: $exception")
+        }
     }
 }
