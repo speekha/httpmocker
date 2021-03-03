@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-ext {
-    kotlin_version = '1.4.31'
-    coroutines_version = '1.4.3'
-    jackson_version = '2.12.1'
-    gson_version = '2.8.6'
-    moshi_version = '1.11.0'
-    kotlinx_serialization_version = '1.0.1'
-    okhttp_version = '4.9.1'
-    ktor_version = '1.5.2'
-    kotlinx_io_version = '0.1.8-alpha-4'
-    retrofit_version = '2.9.0'
-    dokka_version = '1.4.20'
-    slf4j_version = '1.7.30'
-    junit_version = '5.7.1'
-    detekt_version = '1.16.0-RC1'
-    ktlint_version = '10.0.0'
+package fr.speekha.httpmocker.io
+
+import kotlinx.coroutines.runBlocking
+
+fun runTest(test: suspend () -> Unit) = runBlocking {
+    test()
 }

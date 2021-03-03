@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker
+package fr.speekha.httpmocker.io
 
-class ResponderTest {
+import kotlinx.coroutines.runBlocking
+
+fun runTest(test: suspend () -> Unit) = runBlocking {
+    test()
 }
