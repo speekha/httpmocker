@@ -197,6 +197,17 @@ HttpMocker supports four modes:
 * Mixed
 * Record
 
+You can set that mode when initializing your mocker object (if not, it is disabled by default), but you 
+can also change its value dynamically later on.
+
+```kotlin
+    // For OkHttp, you can change the mode directly in your interceptor: 
+    interceptor.mode = ENABLED
+
+    // For Ktor, you will need to access the engine configuration:
+    (client.engine as MockEngine).mode = ENABLED
+```
+
 If your mocker is `disabled`, it will not interfere with actual network calls. If it is `enabled`, 
 it will need to find scenarios to mock the HTTP calls. Dynamic mocks imply that you have to 
 provide the response for each request programmatically, which allows you to define stateful 
