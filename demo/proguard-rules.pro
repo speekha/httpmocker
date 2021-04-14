@@ -24,10 +24,10 @@
 
 # For Jackson adapter
 -keep class kotlin.Metadata { *; }
--keep class fr.speekha.httpmocker.jackson.** { *; }
+-keepclassmembers,allowobfuscation class fr.speekha.httpmocker.jackson.** { *; }
 
 # For GSON adapter
--keep class fr.speekha.httpmocker.gson.** { *; }
+-keepclassmembers,allowobfuscation class fr.speekha.httpmocker.gson.** { *; }
 
 # For Kotlinx serialization
 -keepattributes *Annotation*, InnerClasses
@@ -43,9 +43,9 @@
 
 # Change here com.yourcompany.yourpackage
 -keep,includedescriptorclasses class fr.speekha.httpmocker.kotlinx.**$$serializer { *; } # <-- change package name to your app's
--keepclassmembers class fr.speekha.httpmocker.kotlinx.** { # <-- change package name to your app's
+-keepclassmembers class fr.speekha.httpmocker.kotlinx.** {
     *** Companion;
 }
--keepclasseswithmembers fr.speekha.httpmocker.kotlinx.** { # <-- change package name to your app's
+-keepclasseswithmembers fr.speekha.httpmocker.kotlinx.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
