@@ -31,6 +31,9 @@ or computed dynamically instead. The mocker also allows recording scenarios that
 httpmocker_version = '2.0.0-alpha'
 ```
 
+Current version is stable for Android/JVM builds. It still has Alpha status because we would like to add support for iOS. 
+Any help with implemention and deployment for iOS is welcome.
+
 ## Gradle 
 
 ### Maven Central
