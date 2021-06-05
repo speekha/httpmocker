@@ -62,14 +62,12 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
-    buildToolsVersion '29.0.3'
+    buildToolsVersion '30.0.3'
 }
 
 repositories {
     // For snapshots versions
     //    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    // Still needed for koin
-    jcenter()
 }
 
 dependencies {
@@ -85,7 +83,7 @@ dependencies {
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
 
-    implementation "org.koin:koin-androidx-viewmodel:2.0.1"
+    implementation "io.insert-koin:koin-android:3.0.2"
     implementation "org.slf4j:slf4j-android:$slf4j_version"
 
 //    okhttpImplementation "fr.speekha.httpmocker:mocker-okhttp:$VERSION_NAME"
