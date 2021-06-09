@@ -47,7 +47,7 @@ internal class SimpleTypeParser(
         .replace("\\\"", "\"")
         .replace("\\\\", "\\")
 
-    private fun parseBoolean(value: String): Boolean = when (value.toLowerCase()) {
+    private fun parseBoolean(value: String): Boolean = when (value.lowercase()) {
         "true" -> true
         "false" -> false
         else -> error(INVALID_BOOLEAN_ERROR)

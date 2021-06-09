@@ -121,7 +121,7 @@ internal suspend fun ByteReadChannel.readBytes(): ByteArray {
     while (!isClosedForRead) {
         transferChunk()?.let { data += it }
     }
-    return ByteArray(data.sumBy { it.size }) {
+    return ByteArray(data.sumOf { it.size }) {
         data[it / READ_CHANNEL_CHUNKS][it % READ_CHANNEL_CHUNKS]
     }
 }
