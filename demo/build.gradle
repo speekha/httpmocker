@@ -62,30 +62,28 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
-    buildToolsVersion '29.0.3'
+    buildToolsVersion '30.0.3'
 }
 
 repositories {
     // For snapshots versions
     //    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    // Still needed for koin
-    jcenter()
 }
 
 dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
-    implementation "androidx.appcompat:appcompat:1.2.0"
-    implementation "androidx.core:core-ktx:1.3.2"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0"
+    implementation "androidx.appcompat:appcompat:1.3.0"
+    implementation "androidx.core:core-ktx:1.5.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.google.android.material:material:1.3.0'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
 
-    implementation "org.koin:koin-androidx-viewmodel:2.0.1"
+    implementation "io.insert-koin:koin-android:3.0.2"
     implementation "org.slf4j:slf4j-android:$slf4j_version"
 
 //    okhttpImplementation "fr.speekha.httpmocker:mocker-okhttp:$VERSION_NAME"
@@ -104,7 +102,7 @@ dependencies {
     ktorImplementation "io.ktor:ktor-client-serialization:$ktor_version"
     ktorImplementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
-    testImplementation "junit:junit:4.13.1"
+    testImplementation "junit:junit:4.13.2"
     testImplementation "io.mockk:mockk:1.10.2"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
