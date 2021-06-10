@@ -174,7 +174,7 @@ calls. The syntax to create this client is very similar to the one for the stand
 the mock configuration inside a `mock` section. Here is an example that shows how the mock configuration is added to a 
 regular Ktor client (with a CIO engine and JSON parsing with Kotlinx Serialization):
 ```kotlin
-    val client = mockablHttpClient(CIO) {
+    val client = mockableHttpClient(CIO) {
         // This part defines the mock configuration to use
         mock {
             useDynamicMocks {
