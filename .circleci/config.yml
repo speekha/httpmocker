@@ -181,7 +181,7 @@ jobs:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testOkhttpReleaseUnitTest demo:testKtorReleaseUnitTest demo:lint --stacktrace
+          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:lint --stacktrace
       - store_test_results:
           path: demo/build/test-results
       - store_artifacts:
@@ -206,7 +206,7 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew --no-daemon tests:test tests:jacocoTestReport --stacktrace
+          command: ./gradlew --no-daemon tests:test demo:testOkhttpReleaseUnitTest demo:testKtorReleaseUnitTest tests:jacocoTestReport --stacktrace
       - coverage-reporter/send_report:
           coverage-reports: tests/build/reports/jacoco/test/jacocoTestReport.xml
           project-token: $CODACY_PROJECT_TOKEN
