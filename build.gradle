@@ -44,6 +44,7 @@ allprojects {
         mavenCentral()
         google()
         maven { url "https://kotlin.bintray.com/dokka" }
+        jcenter()
     }
 }
 
