@@ -75,6 +75,14 @@ open class TestWithServer {
 
     companion object {
 
+        const val REQUEST_OK_CODE = 200
+        const val REQUEST_OK_MESSAGE = "OK"
+        const val NOT_FOUND_CODE = 404
+        const val URL_SIMPLE_REQUEST = "/request"
+        const val URL_HEADERS = "/headers"
+        const val URL_METHOD = "/method"
+        const val REQUEST_SIMPLE_BODY = "simple body"
+
         @JvmStatic
         @Suppress("unused")
         fun mappers(): Stream<Arguments> = Stream.concat(jsonMappers(), xmlMappers())
@@ -98,13 +106,5 @@ open class TestWithServer {
         fun xmlMappers(): Stream<Arguments> = Stream.of(
             Arguments.of("XML mapper", SaxMapper(), "xml")
         )
-
-        const val REQUEST_OK_CODE = 200
-        const val REQUEST_OK_MESSAGE = "OK"
-        const val NOT_FOUND_CODE = 404
-        const val URL_SIMPLE_REQUEST = "/request"
-        const val URL_HEADERS = "/headers"
-        const val URL_METHOD = "/method"
-        const val REQUEST_SIMPLE_BODY = "simple body"
     }
 }

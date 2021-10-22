@@ -27,6 +27,6 @@ ext {
     dokka_version = '1.5.31'
     slf4j_version = '1.7.32'
     junit_version = '5.8.1'
-    detekt_version = '1.16.0'
+    detekt_version = '1.18.1'
     ktlint_version = '10.2.0'
 }
