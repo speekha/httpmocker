@@ -93,6 +93,8 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
     @DisplayName("Given a mock interceptor")
     inner class PolicyTest : RecorderTestSuite {
 
+        private val requestBodyFile = "$SAVE_FOLDER/request_body_0.txt"
+
         @ParameterizedTest(name = "Mapper: {0}")
         @MethodSource("fr.speekha.httpmocker.client.TestWithServer#mappers")
         @DisplayName("When a recording policy is set, then it should be used")
@@ -165,8 +167,6 @@ abstract class RecordTests<Response : Any, Client : Any> : HttpClientTester<Resp
             setupRecordPolicyConf(mapper, readPolicy, writePolicy)
             executeRequest(REQUEST_URL)
         }
-
-        private val requestBodyFile = "$SAVE_FOLDER/request_body_0.txt"
     }
 
     @Nested

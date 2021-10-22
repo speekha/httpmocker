@@ -46,6 +46,22 @@ import java.util.stream.Stream
 @DisplayName("Custom JSON parser")
 class JsonParserTest {
 
+    private val mapAdapter = object :
+        ObjectAdapter<Map<String, String?>> {
+        override fun fromJson(parser: JsonParser): Map<String, String?> {
+            val map = mutableMapOf<String, String?>()
+            parser.beginObject()
+            while (parser.hasNext()) {
+                val field = parser.readFieldName()
+                val value = parser.readString()
+                parser.next()
+                map += field to value
+            }
+            parser.endObject()
+            return map
+        }
+    }
+
     @Nested
     @DisplayName("Given an empty input")
     inner class EmptyInput {
@@ -458,22 +474,6 @@ class JsonParserTest {
     @DisplayName("Given a String to truncate")
     fun truncateTests(input: String, output: String) {
         assertEquals(output, input.truncate(10))
-    }
-
-    private val mapAdapter = object :
-        ObjectAdapter<Map<String, String?>> {
-        override fun fromJson(parser: JsonParser): Map<String, String?> {
-            val map = mutableMapOf<String, String?>()
-            parser.beginObject()
-            while (parser.hasNext()) {
-                val field = parser.readFieldName()
-                val value = parser.readString()
-                parser.next()
-                map += field to value
-            }
-            parser.endObject()
-            return map
-        }
     }
 
     companion object {

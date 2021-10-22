@@ -44,18 +44,6 @@ class JsonFormatConverterTest {
 
     companion object {
 
-        @JvmStatic
-        fun dataImport(): Stream<Arguments> = testTitles.zip(
-            commonFormat zip kotlinxFormat
-        ) { a, (b, c) -> Arguments.of(a, b, c) }
-            .stream()
-
-        @JvmStatic
-        fun dataExport(): Stream<Arguments> = testTitles.zip(
-            kotlinxFormat zip commonFormat
-        ) { a, (b, c) -> Arguments.of(a, b, c) }
-            .stream()
-
         private val testTitles =
             listOf(
                 "is a minimal JSON",
@@ -237,5 +225,17 @@ class JsonFormatConverterTest {
             ]
             """.trimIndent()
         )
+
+        @JvmStatic
+        fun dataImport(): Stream<Arguments> = testTitles.zip(
+            commonFormat zip kotlinxFormat
+        ) { a, (b, c) -> Arguments.of(a, b, c) }
+            .stream()
+
+        @JvmStatic
+        fun dataExport(): Stream<Arguments> = testTitles.zip(
+            kotlinxFormat zip commonFormat
+        ) { a, (b, c) -> Arguments.of(a, b, c) }
+            .stream()
     }
 }
