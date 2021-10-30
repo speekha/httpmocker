@@ -46,6 +46,6 @@
 -keepclassmembers class fr.speekha.httpmocker.kotlinx.** {
     *** Companion;
 }
--keepclasseswithmembers fr.speekha.httpmocker.kotlinx.** {
+-keepclasseswithmembers class fr.speekha.httpmocker.kotlinx.** {
     kotlinx.serialization.KSerializer serializer(...);
 }

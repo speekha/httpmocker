@@ -210,7 +210,7 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew --no-daemon tests:test demo:testOkhttpReleaseUnitTest demo:testKtorReleaseUnitTest tests:jacocoTestReport tests:sendCoverageToCodacy --stacktrace
+          command: ./gradlew --no-daemon tests:test demo:testOkhttpReleaseUnitTest demo:testKtorReleaseUnitTest tests:jacocoTestReport sendCoverageToCodacy --stacktrace
       - store_artifacts:
           path: tests/build/reports
           destination: reports
