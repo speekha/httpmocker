@@ -25,6 +25,7 @@ import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.*
 
+@SuppressWarnings("ComplexInterface")
 interface HttpClientTester<Response : Any, Client : Any> {
 
     var client: Client
@@ -36,6 +37,7 @@ interface HttpClientTester<Response : Any, Client : Any> {
         mode: Mode = Mode.ENABLED
     ): Client
 
+    @SuppressWarnings("LongParameterList")
     fun setupStaticConf(
         mode: Mode,
         loadingLambda: FileLoader,
