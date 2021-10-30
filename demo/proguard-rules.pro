@@ -46,6 +46,13 @@
 -keepclassmembers class fr.speekha.httpmocker.kotlinx.** {
     *** Companion;
 }
--keepclasseswithmembers fr.speekha.httpmocker.kotlinx.** {
+-keepclasseswithmembers class fr.speekha.httpmocker.kotlinx.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# OkHttp optional dependencies - these are loaded conditionally at runtime
+# and may not be present in the classpath
+-dontwarn org.bouncycastle.jsse.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**
+-dontwarn org.conscrypt.Conscrypt**
