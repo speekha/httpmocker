@@ -18,9 +18,6 @@ package fr.speekha.httpmocker.demo.ui
 
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
@@ -29,6 +26,10 @@ import fr.speekha.httpmocker.demo.model.onFailure
 import fr.speekha.httpmocker.demo.model.onSuccess
 import fr.speekha.httpmocker.demo.model.resultOf
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
+import fr.speekha.httpmocker.getLogger
+import io.uniflow.android.AndroidDataFlow
+import io.uniflow.core.flow.data.UIEvent
+import io.uniflow.core.flow.data.UIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,44 +37,67 @@ import kotlinx.coroutines.withContext
 class MainViewModel(
     private val apiService: GithubApiEndpoints,
     private val mocker: MockerWrapper
-) : ViewModel() {
+) : AndroidDataFlow(
+    defaultState = State(
+        message = R.string.disabled_description,
+        Mode.DISABLED,
+        Data.Empty
+    )
+) {
 
-    private val data = MutableLiveData<Data>()
-    private val state = MutableLiveData<State>()
+    private val logger = getLogger()
 
-    fun getData(): LiveData<Data> = data
-    fun getState(): LiveData<State> = state
+    private var selectedMode = 0
+
+    override fun getState(): State = super.getState() as State
 
     fun callService() = viewModelScope.launch {
-        data.postValue(Data.Loading)
+        setState(getState().copy(data = Data.Loading))
         resultOf {
+            logger.debug("Loading repos")
             loadRepos("kotlin")
         } onSuccess { repos ->
+            logger.debug("Loaded repos: $repos")
             repos?.map { repo ->
                 val contributor =
                     loadTopContributor("kotlin", repo.name).getOrNull()?.firstOrNull()
                 repo.copy(topContributor = contributor?.run { "$login - $contributions contributions" })
             }?.also {
-                data.postValue(Data.Success(it))
+                setState(getState().copy(data = Data.Success(it)))
             }
-        } onFailure {
-            data.postValue(Data.Error(it.message))
+        } onFailure { error ->
+            logger.error("Error loadeing repos", error)
+            setState(getState().copy(data = Data.Error(error.message)))
         }
     }
 
-    fun setMode(mode: Mode) {
+    fun setMode(selectedId: Int) {
+        selectedMode = selectedId
+        val mode = when (selectedId) {
+            R.string.state_enabled -> Mode.ENABLED
+            R.string.state_mixed -> Mode.MIXED
+            R.string.state_record -> Mode.RECORD
+            else -> Mode.DISABLED
+        }
+        setMode(mode)
+    }
+
+
+    fun setMode(mode: Mode) = viewModelScope.launch {
         mocker.mode = mode
         if (mocker.mode == Mode.RECORD) {
-            state.postValue(State.Permission)
+            sendEvent(Permission)
         }
-        state.postValue(
-            State.Message(
-                when (mocker.mode) {
+        setState(
+            State(
+                message = when (mocker.mode) {
                     Mode.DISABLED -> R.string.disabled_description
                     Mode.ENABLED -> R.string.enabled_description
                     Mode.MIXED -> R.string.mixed_description
                     Mode.RECORD -> R.string.record_description
-                }
+                },
+                mode = mode,
+                data = Data.Empty
             )
         )
     }
@@ -93,12 +117,16 @@ class MainViewModel(
 }
 
 sealed class Data {
+    object Empty : Data()
     object Loading : Data()
     data class Success(val repos: List<Repo>) : Data()
     data class Error(val message: String?) : Data()
 }
 
-sealed class State {
-    data class Message(@StringRes val message: Int) : State()
-    object Permission : State()
-}
+data class State(
+    @StringRes val message: Int,
+    val mode: Mode,
+    val data: Data
+) : UIState()
+
+object Permission : UIEvent()

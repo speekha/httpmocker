@@ -19,20 +19,24 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.android.extensions"
     id "org.jetbrains.kotlin.plugin.serialization"
+    id 'kotlin-android'
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     sourceSets {
         main.kotlin.srcDirs += 'src/main/kotlin'
     }
     defaultConfig {
         applicationId "fr.speekha.httpmocker.demo"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
     flavorDimensions "engine"
 
@@ -57,7 +61,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
+        useIR = true
     }
     testOptions {
         unitTests.returnDefaultValues = true
@@ -74,17 +79,23 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
-    implementation "androidx.appcompat:appcompat:1.3.1"
-    implementation "androidx.core:core-ktx:1.6.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation "androidx.appcompat:appcompat:1.4.0"
+    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.google.android.material:material:1.4.0'
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
 
-    implementation "io.insert-koin:koin-android:3.0.2"
+    implementation "io.insert-koin:koin-android:3.1.2"
     implementation "org.slf4j:slf4j-android:$slf4j_version"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+
+    implementation "org.uniflow-kt:uniflow-core:$uniflow_version"
+    testImplementation "org.uniflow-kt:uniflow-test:$uniflow_version"
+    implementation "org.uniflow-kt:uniflow-android:$uniflow_version"
+    testImplementation "org.uniflow-kt:uniflow-android-test:$uniflow_version"
 
 //    okhttpImplementation "fr.speekha.httpmocker:mocker-okhttp:$VERSION_NAME"
 //    okhttpImplementation "fr.speekha.httpmocker:jackson-adapter:$VERSION_NAME"

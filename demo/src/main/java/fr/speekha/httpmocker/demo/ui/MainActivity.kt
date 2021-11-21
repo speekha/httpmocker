@@ -31,6 +31,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
+import io.uniflow.android.livedata.onEvents
+import io.uniflow.android.livedata.onStates
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -47,8 +49,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initObservers() {
-        observeDataLoading()
-        observeState()
+
+        onStates(viewModel) { state ->
+            if (state is State) {
+                updateDescriptionLabel(state.message)
+                when (val data = state.data) {
+                    is Data.Loading -> showLoading(true)
+                    is Data.Success -> setResult(data.repos)
+                    is Data.Error -> setError(data.message)
+                    is Data.Empty -> setEmptyList()
+                }
+            }
+        }
+        onEvents(viewModel) { uiEvent ->
+            if (uiEvent is Permission) {
+                checkPermission()
+            }
+        }
     }
 
     private fun initViews() {
@@ -78,33 +95,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeState() {
-        observe(viewModel.getState()) { state ->
-            when (state) {
-                is State.Permission -> checkPermission()
-                is State.Message -> updateDescriptionLabel(state.message)
-            }
-        }
-    }
-
-    private fun observeDataLoading() {
-        observe(viewModel.getData()) { data ->
-            when (data) {
-                is Data.Loading -> showLoading(true)
-                is Data.Success -> setResult(data.repos)
-                is Data.Error -> setError(data.message)
-            }
-        }
-    }
-
     private fun showLoading(visible: Boolean) {
         results.isVisible = !visible
         loader.isVisible = visible
     }
 
-    private fun setResult(result: List<Repo>) {
+    private fun setResult(result: List<Repo>?) {
         showLoading(false)
         adapter.repos = result
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun setEmptyList() {
+        showLoading(false)
+        adapter.repos = null
         adapter.notifyDataSetChanged()
     }
 
