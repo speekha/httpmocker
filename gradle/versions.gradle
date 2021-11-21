@@ -29,4 +29,5 @@ ext {
     junit_version = '5.8.1'
     detekt_version = '1.18.1'
     ktlint_version = '10.2.0'
+    uniflow_version = '1.0.10'
 }

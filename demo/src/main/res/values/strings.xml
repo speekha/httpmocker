@@ -26,4 +26,5 @@
     <string name="mixed_description">Interceptor is in mixed mode. List call with titles is mocked (shortened list), details are retrieved from a real call.</string>
     <string name="record_description">Calls are recorded in the device\'s Download directory</string>
     <string name="call_service_button">Call service</string>
+    <string name="title_activity_compose">ComposeActivity</string>
 </resources>
