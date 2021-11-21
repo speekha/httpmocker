@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui
+package fr.speekha.httpmocker.demo.ui.legacy
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
@@ -31,6 +31,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
+import fr.speekha.httpmocker.demo.ui.Data
+import fr.speekha.httpmocker.demo.ui.MainViewModel
+import fr.speekha.httpmocker.demo.ui.Permission
+import fr.speekha.httpmocker.demo.ui.State
 import io.uniflow.android.livedata.onEvents
 import io.uniflow.android.livedata.onStates
 import kotlinx.android.synthetic.main.activity_main.*

@@ -68,6 +68,18 @@ android {
         unitTests.returnDefaultValues = true
     }
     buildToolsVersion '30.0.3'
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerVersion '1.5.31'
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
 }
 
 repositories {
@@ -90,7 +102,16 @@ dependencies {
 
     implementation "io.insert-koin:koin-android:3.1.2"
     implementation "org.slf4j:slf4j-android:$slf4j_version"
+    implementation "androidx.activity:activity-compose:1.4.0"
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    implementation "androidx.compose.runtime:runtime:$compose_version"
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+    debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
 
     implementation "org.uniflow-kt:uniflow-core:$uniflow_version"
     testImplementation "org.uniflow-kt:uniflow-test:$uniflow_version"

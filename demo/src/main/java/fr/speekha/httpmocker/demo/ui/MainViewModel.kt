@@ -49,6 +49,18 @@ class MainViewModel(
 
     private var selectedMode = 0
 
+    fun initState() {
+        action {
+            setState(
+                State(
+                    message = R.string.disabled_description,
+                    Mode.DISABLED,
+                    Data.Empty
+                )
+            )
+        }
+    }
+
     override fun getState(): State = super.getState() as State
 
     fun callService() = viewModelScope.launch {
@@ -81,7 +93,6 @@ class MainViewModel(
         }
         setMode(mode)
     }
-
 
     fun setMode(mode: Mode) = viewModelScope.launch {
         mocker.mode = mode
