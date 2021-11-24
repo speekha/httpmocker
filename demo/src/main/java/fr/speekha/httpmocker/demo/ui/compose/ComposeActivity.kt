@@ -31,11 +31,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.demo.ui.State
-import fr.speekha.httpmocker.demo.ui.compose.theme.Httpmocker_githubTheme
+import fr.speekha.httpmocker.demo.ui.compose.theme.DemoTheme
+import fr.speekha.httpmocker.demo.ui.compose.theme.mediumPadding
 import fr.speekha.httpmocker.getLogger
 import io.uniflow.android.livedata.states
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -48,7 +48,7 @@ class ComposeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Httpmocker_githubTheme {
+            DemoTheme {
                 Content()
             }
         }
@@ -57,7 +57,6 @@ class ComposeActivity : ComponentActivity() {
 
     @Composable
     private fun Content() {
-        val padding = 8.dp
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -68,11 +67,11 @@ class ComposeActivity : ComponentActivity() {
             logger.debug("Rendering layout")
             (viewModel.states.observeAsState().value as? State)?.let { state ->
                 Column(
-                    modifier = Modifier.padding(padding)
+                    modifier = Modifier.padding(mediumPadding)
                 ) {
                     Text(
                         text = stringResource(id = R.string.mocking_state),
-                        modifier = Modifier.padding(padding)
+                        modifier = Modifier.padding(mediumPadding)
                     )
                     ToggleGroup(
                         items = listOf(
@@ -86,11 +85,11 @@ class ComposeActivity : ComponentActivity() {
                     )
                     Text(
                         text = stringResource(id = state.message),
-                        modifier = Modifier.padding(padding)
+                        modifier = Modifier.padding(mediumPadding)
                     )
                     Button(
                         onClick = { viewModel.callService() },
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = mediumPadding)
                     ) {
                         Text(
                             text = getString(R.string.call_service_button),
@@ -98,7 +97,7 @@ class ComposeActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth(1f)
                         )
                     }
-                    RepoList(state, padding)
+                    RepoList(state)
                 }
             }
         }

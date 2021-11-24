@@ -44,7 +44,7 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun Httpmocker_githubTheme(
+fun DemoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {

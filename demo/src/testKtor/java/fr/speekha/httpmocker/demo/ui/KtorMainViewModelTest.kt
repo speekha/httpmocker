@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.ktor.engine.MockEngine
-import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.cio.CIO
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
