@@ -29,23 +29,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.ui.Data
 import fr.speekha.httpmocker.demo.ui.State
+import fr.speekha.httpmocker.demo.ui.compose.theme.mediumPadding
 
 @Composable
 fun RepoList(
-    state: State,
-    padding: Dp
+    state: State
 ) = LazyColumn {
     when (val data = state.data) {
         is Data.Loading -> item {
             Loading()
         }
         is Data.Success -> items(data.repos) { repo ->
-            RepoEntry(repo, padding)
+            RepoEntry(repo)
         }
         is Data.Error -> item {
             DisplayMessage(data.message ?: "No result to display")
@@ -58,19 +57,18 @@ fun RepoList(
 
 @Composable
 private fun RepoEntry(
-    repo: Repo,
-    padding: Dp
+    repo: Repo
 ) {
     Text(
         text = repo.name,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(padding)
+        modifier = Modifier.padding(mediumPadding)
     )
     Text(
         text = repo.topContributor ?: "Error retrieving contributor",
         textAlign = TextAlign.End,
         modifier = Modifier
-            .padding(padding)
+            .padding(mediumPadding)
             .fillMaxWidth(1f)
     )
 }

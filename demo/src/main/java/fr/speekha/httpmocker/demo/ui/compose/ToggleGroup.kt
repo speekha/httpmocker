@@ -20,7 +20,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
@@ -30,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 
@@ -38,15 +36,10 @@ import androidx.compose.ui.zIndex
 fun ToggleGroup(
     items: List<Int>,
     selected: Int,
-    padding: Dp = 0.dp,
     onClick: (Int) -> Unit
 ) {
     val cornerRadius = 8.dp
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(padding)
-    ) {
+    Row(modifier = Modifier.fillMaxWidth()) {
         items.forEachIndexed { index, item ->
             OutlinedButton(
                 modifier = Modifier
@@ -91,7 +84,6 @@ fun ToggleGroup(
                     text = stringResource(item),
                     color = if (selected == index) MaterialTheme.colors.primary
                     else Color.DarkGray.copy(alpha = 0.9f),
-                    modifier = Modifier.padding(padding)
                 )
             }
         }

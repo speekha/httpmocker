@@ -25,3 +25,5 @@ val Shapes = Shapes(
     medium = RoundedCornerShape(4.dp),
     large = RoundedCornerShape(0.dp)
 )
+
+val mediumPadding = 8.dp
