@@ -40,6 +40,7 @@ import io.ktor.http.contentType
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.io.File
 
 class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
 
@@ -119,8 +120,8 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 readPolicy?.let { decodeScenarioPathWith(it) }
                 parseScenariosWith(mapper)
                 writePolicy?.let {
-                    recordScenariosIn(SAVE_FOLDER) with it
-                } ?: recordScenariosIn(SAVE_FOLDER)
+                    recordScenariosIn(File(SAVE_FOLDER)) with it
+                } ?: recordScenariosIn(File(SAVE_FOLDER))
                 failOnRecordingError(true)
                 setMode(Mode.RECORD)
             }
