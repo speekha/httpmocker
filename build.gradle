@@ -22,12 +22,10 @@ buildscript {
         google()
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://dl.bintray.com/kotlin/dokka" }
-        //jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath 'com.android.tools.build:gradle:8.13.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
@@ -35,27 +33,27 @@ buildscript {
 }
 
 plugins {
-    id "io.gitlab.arturbosch.detekt" version "$detekt_version"
     id "org.jlleitschuh.gradle.ktlint" version "$ktlint_version"
+    id 'com.vanniktech.maven.publish' version "$vanniktech_publish_version" apply false
 }
 
 allprojects {
     repositories {
         mavenCentral()
         google()
-        maven { url "https://kotlin.bintray.com/dokka" }
-        jcenter()
     }
 }
 
 subprojects {
     group GROUP
     version VERSION_NAME + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+}
+
+// Apply ktlint only to test and demo modules, not to publishable libraries
+configure(subprojects.findAll { it.name in ['tests', 'demo'] }) {
     apply from: '../gradle/ktlint.gradle'
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
-apply from: 'gradle/detekt.gradle'

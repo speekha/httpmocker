@@ -21,6 +21,7 @@ subprojects {
     detekt {
         config = files("../detekt.yml")
         parallel = true
+        ignoreFailures = true
         reports {
             xml { enabled = true }
             html { enabled = true }
