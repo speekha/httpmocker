@@ -3,7 +3,7 @@ version: 2.1
 references:
   container_config: &container_config
     docker:
-      - image: circleci/android:api-30
+      - image: cimg/android:2026.03
 
     working_directory: ~/data
 
@@ -41,7 +41,7 @@ commands:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -58,7 +58,7 @@ commands:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:jvmSourcesJar << parameters.module >>:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -127,7 +127,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble mocker-core:jvmSourcesJar mocker-core:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble --stacktrace
       - save_cache:
           key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -229,7 +229,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Check quality
-          command: ./gradlew --no-daemon detekt ktlintCheck --stacktrace
+          command: ./gradlew --no-daemon ktlintCheck --stacktrace
       - store_artifacts:
           path: mocker-core/build/reports
           destination: reports/mocker-core
