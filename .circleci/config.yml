@@ -265,6 +265,8 @@ jobs:
             - "."
   publish_snapshot:
     <<: *container_config
+    environment:
+      SIGNING_KEYRING_FILE_PATH: /home/circleci/data/.signing.gpg
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -272,12 +274,14 @@ jobs:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Retrieve signing key
-          command: echo ${SIGNING_KEYRING} | base64 -d > ${SIGNING_SECRET_KEY_RING_FILE}
+          command: echo ${SIGNING_KEYRING} | base64 -d > ${SIGNING_KEYRING_FILE_PATH}
       - run:
           name: Publish
-          command: ./publishSnapshot.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_SECRET_KEY_RING_FILE}
+          command: ./publishSnapshot.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_KEYRING_FILE_PATH}
   publish_release:
     <<: *container_config
+    environment:
+      SIGNING_KEYRING_FILE_PATH: /home/circleci/data/.signing.gpg
     steps:
       - restore_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
@@ -285,10 +289,10 @@ jobs:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Retrieve signing key
-          command: echo ${SIGNING_KEYRING} | base64 -d > ${SIGNING_SECRET_KEY_RING_FILE}
+          command: echo ${SIGNING_KEYRING} | base64 -d > ${SIGNING_KEYRING_FILE_PATH}
       - run:
           name: Publish
-          command: ./publish.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_SECRET_KEY_RING_FILE}
+          command: ./publish.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_KEYRING_FILE_PATH}
 
 workflows:
   version: 2
@@ -352,7 +356,7 @@ workflows:
             - quality
           filters:
             branches:
-              only: develop
+              only: update_publish
       - publish_release:
           requires:
             - test
