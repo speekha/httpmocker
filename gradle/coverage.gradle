@@ -21,7 +21,7 @@ ext {
 }
 
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.14"
     reportsDirectory = file("$buildDir/reports/jacoco")
 }
 
@@ -53,7 +53,7 @@ jacocoTestReport {
 configurations { codacy }
 
 dependencies {
-    codacy 'com.codacy:codacy-coverage-reporter:6.0.4'
+    codacy 'com.codacy:codacy-coverage-reporter:13.9.7'
 }
 
 task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
