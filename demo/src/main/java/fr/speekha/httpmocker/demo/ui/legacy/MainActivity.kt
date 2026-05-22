@@ -30,6 +30,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
+import fr.speekha.httpmocker.demo.databinding.ActivityMainBinding
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.ui.Data
 import fr.speekha.httpmocker.demo.ui.MainViewModel
@@ -42,12 +43,14 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     private val viewModel by viewModel<MainViewModel>()
     private val adapter = RepoAdapter(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initObservers()
         initViews()
     }
@@ -73,13 +76,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        results.adapter = adapter
-        results.layoutManager = LinearLayoutManager(this)
+        binding.results.adapter = adapter
+        binding.results.layoutManager = LinearLayoutManager(this)
         setupListeners()
     }
 
     private fun setupListeners() {
-        radioState.addOnButtonCheckedListener { _, checkedId, isChecked ->
+        binding.radioState.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 viewModel.setMode(
                     when (checkedId) {
@@ -90,18 +93,18 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             } else {
-                if (-1 == radioState.checkedButtonId) radioState.check(R.id.stateDisabled)
+                if (-1 == binding.radioState.checkedButtonId) binding.radioState.check(R.id.stateDisabled)
             }
         }
 
-        btnCall.setOnClickListener {
+        binding.btnCall.setOnClickListener {
             viewModel.callService()
         }
     }
 
     private fun showLoading(visible: Boolean) {
-        results.isVisible = !visible
-        loader.isVisible = visible
+        binding.results.isVisible = !visible
+        binding.loader.isVisible = visible
     }
 
     private fun setResult(result: List<Repo>?) {
@@ -132,7 +135,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateDescriptionLabel(@StringRes resId: Int) {
-        tvMessage.setText(resId)
+        binding.tvMessage.setText(resId)
     }
 }
 
