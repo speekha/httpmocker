@@ -20,7 +20,6 @@ import fr.speekha.httpmocker.custom.CustomMapper
 import fr.speekha.httpmocker.gson.GsonMapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
-import fr.speekha.httpmocker.moshi.MoshiMapper
 import fr.speekha.httpmocker.sax.SaxMapper
 import fr.speekha.httpmocker.serialization.JsonFormatConverter
 import fr.speekha.httpmocker.withFile
@@ -92,7 +91,6 @@ open class TestWithServer {
         fun jsonMappers(): Stream<Arguments> = Stream.of(
             Arguments.of("Jackson", JacksonMapper(), "json"),
             Arguments.of("Gson", GsonMapper(), "json"),
-            Arguments.of("Moshi", MoshiMapper(), "json"),
             Arguments.of("Custom mapper", CustomMapper(), "json"),
             Arguments.of(
                 "Kotlinx serialization",

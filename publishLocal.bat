@@ -1,2 +1,2 @@
 @echo off
-gradlew.bat --no-parallel clean mocker-core:publishToMavenLocal mocker-okhttp:publishToMavenLocal mocker-ktor:publishToMavenLocal jackson-adapter:publishToMavenLocal gson-adapter:publishToMavenLocal moshi-adapter:publishToMavenLocal custom-adapter:publishToMavenLocal kotlinx-adapter:publishToMavenLocal sax-adapter:publishToMavenLocal
+gradlew.bat --no-parallel clean mocker-core:publishToMavenLocal mocker-okhttp:publishToMavenLocal mocker-ktor:publishToMavenLocal jackson-adapter:publishToMavenLocal gson-adapter:publishToMavenLocal custom-adapter:publishToMavenLocal kotlinx-adapter:publishToMavenLocal sax-adapter:publishToMavenLocal

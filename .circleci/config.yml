@@ -152,11 +152,6 @@ jobs:
     steps:
       - build_module:
           module: "gson-adapter"
-  build_moshi:
-    <<: *container_config
-    steps:
-      - build_module:
-          module: "moshi-adapter"
   build_custom:
     <<: *container_config
     steps:
@@ -255,9 +250,6 @@ jobs:
           path: sax-adapter/build/reports
           destination: reports/sax-adapter
       - store_artifacts:
-          path: moshi-adapter/build/reports
-          destination: reports/moshi-adapter
-      - store_artifacts:
           path: tests/build/reports
           destination: reports/tests
       - store_artifacts:
@@ -314,9 +306,6 @@ workflows:
       - build_gson:
           requires:
             - build_core
-      - build_moshi:
-          requires:
-            - build_core
       - build_custom:
           requires:
             - build_core
@@ -338,7 +327,6 @@ workflows:
             - build_ktor
             - build_jackson
             - build_gson
-            - build_moshi
             - build_custom
             - build_kotlinx
             - build_sax
@@ -348,7 +336,6 @@ workflows:
             - build_ktor
             - build_jackson
             - build_gson
-            - build_moshi
             - build_custom
             - build_kotlinx
             - build_sax
