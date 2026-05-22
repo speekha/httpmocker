@@ -65,7 +65,7 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11
-        useIR = true
+//        useIR = true
     }
     testOptions {
         unitTests.returnDefaultValues = true
