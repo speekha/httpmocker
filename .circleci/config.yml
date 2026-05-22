@@ -356,7 +356,7 @@ workflows:
             - quality
           filters:
             branches:
-              only: update_publish
+              only: develop
       - publish_release:
           requires:
             - test

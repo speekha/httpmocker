@@ -35,7 +35,6 @@ if (secretPropsFile.exists()) {
     ext["signing.secretKeyRingFile"] = System.getProperty('SIGNING_SECRET_KEY_RING_FILE')
 }
 
-// Common Maven publishing configuration for all modules
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
