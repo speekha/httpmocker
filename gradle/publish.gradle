@@ -34,3 +34,36 @@ if (secretPropsFile.exists()) {
     ext["signing.password"] = System.getProperty('SIGNING_PASSWORD')
     ext["signing.secretKeyRingFile"] = System.getProperty('SIGNING_SECRET_KEY_RING_FILE')
 }
+
+// Common Maven publishing configuration for all modules
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    pom {
+        name = POM_NAME
+        description = POM_DESCRIPTION
+        url = POM_URL
+        inceptionYear = POM_INCEPTION_YEAR
+        licenses {
+            license {
+                name = POM_LICENCE_NAME
+                url = POM_LICENCE_URL
+                distribution = POM_LICENCE_DIST
+            }
+        }
+        developers {
+            developer {
+                id = POM_DEVELOPER_ID
+                name = POM_DEVELOPER_NAME
+                email = POM_DEVELOPER_EMAIL
+                url = POM_DEVELOPER_URL
+            }
+        }
+        scm {
+            url = POM_SCM_URL
+            connection = POM_SCM_CONNECTION
+            developerConnection = POM_SCM_DEV_CONNECTION
+        }
+    }
+}
