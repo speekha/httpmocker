@@ -29,6 +29,4 @@ ext {
     detekt_version = '1.18.1'
     ktlint_version = '10.2.0'
     vanniktech_publish_version = '0.29.0'
-    compose_version = '1.7.5'
-    uniflow_version = '1.0.10'
 }

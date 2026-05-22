@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui.legacy
+package fr.speekha.httpmocker.demo.ui
 
 import android.content.Context
 import android.view.LayoutInflater
