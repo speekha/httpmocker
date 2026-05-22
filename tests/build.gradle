@@ -49,7 +49,6 @@ dependencies {
     implementation project(':mocker-ktor')
     implementation project(':jackson-adapter')
     implementation project(':gson-adapter')
-    implementation project(':moshi-adapter')
     implementation project(':kotlinx-adapter')
     implementation project(':custom-adapter')
     implementation project(':sax-adapter')
