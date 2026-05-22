@@ -49,21 +49,3 @@ jacocoTestReport {
     classDirectories.from = allClasses
     executionData.from = files("$buildDir/jacoco/test.exec")
 }
-
-configurations { codacy }
-
-dependencies {
-    codacy 'com.codacy:codacy-coverage-reporter:13.9.7'
-}
-
-task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
-    main = "com.codacy.CodacyCoverageReporter"
-    classpath = configurations.codacy
-    args = [
-            "report",
-            "-l",
-            "Kotlin",
-            "-r",
-            "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
-    ]
-}
