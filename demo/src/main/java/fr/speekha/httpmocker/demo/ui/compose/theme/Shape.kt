@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-ext {
-    kotlin_version = '2.3.21'
-    coroutines_version = '1.9.0'
-    jackson_version = '2.13.0'
-    gson_version = '2.8.8'
-    moshi_version = '1.15.2'
-    kotlinx_serialization_version = '1.3.0'
-    okhttp_version = '4.9.2'
-    ktor_version = '2.3.12'
-    retrofit_version = '3.0.0'
-    slf4j_version = '1.7.36'
-    junit_version = '5.8.1'
-    mockk_version = '1.14.9'
-    detekt_version = '1.18.1'
-    ktlint_version = '10.2.0'
-    vanniktech_publish_version = '0.33.0'
-    compose_bom_version = '2026.05.00'
-    uniflow_version = '1.1.2'
-}
+package fr.speekha.httpmocker.demo.ui.compose.theme
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
+
+val Shapes = Shapes(
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(4.dp),
+    large = RoundedCornerShape(0.dp)
+)
+
+val mediumPadding = 8.dp

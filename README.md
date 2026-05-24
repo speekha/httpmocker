@@ -2,11 +2,11 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.speekha.httpmocker/mocker-core/badge.svg?color=blue)](https://search.maven.org/search?q=fr.speekha.httpmocker)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.5.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![HacktoberFest](https://badgen.net/badge/hacktoberfest/friendly)](https://hacktoberfest.digitalocean.com/)
 
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
-[![codebeat badge](https://codebeat.co/badges/a361e616-a1a0-4e85-b6a7-2bc82f31f7ac)](https://codebeat.co/projects/github-com-speekha-httpmocker-develop)
+
 [![CodeFactor](https://www.codefactor.io/repository/github/speekha/httpmocker/badge)](https://www.codefactor.io/repository/github/speekha/httpmocker)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
