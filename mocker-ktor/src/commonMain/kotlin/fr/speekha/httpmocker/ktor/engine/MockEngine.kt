@@ -26,23 +26,16 @@ import fr.speekha.httpmocker.ktor.io.Recorder
 import fr.speekha.httpmocker.ktor.io.dispatcherIO
 import fr.speekha.httpmocker.ktor.io.mapRequest
 import fr.speekha.httpmocker.ktor.io.toKtorRequest
-import io.ktor.client.engine.HttpClientEngineBase
-import io.ktor.client.request.HttpRequestData
-import io.ktor.client.request.HttpResponseData
-import io.ktor.util.InternalAPI
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
+import io.ktor.client.engine.*
+import io.ktor.client.request.*
+import io.ktor.util.*
 
 class MockEngine(
     override val config: MockEngineConfig,
     private val executor: suspend (HttpRequestData) -> HttpResponseData
 ) : HttpClientEngineBase("Mock Engine") {
 
-    private val job = Job()
-
     override val dispatcher = dispatcherIO
-
-    override val coroutineContext: CoroutineContext = job + dispatcher
 
     private val logger = getLogger()
 
@@ -71,7 +64,7 @@ class MockEngine(
             }
         }
 
-    @InternalAPI
+    @OptIn(InternalAPI::class)
     override suspend fun execute(data: HttpRequestData): HttpResponseData {
         logger.info("Intercepted request $data: Interceptor is ${internalConf.mode}")
         return respondToRequest(data)

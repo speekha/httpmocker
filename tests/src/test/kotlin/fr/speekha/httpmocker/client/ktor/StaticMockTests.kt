@@ -92,8 +92,10 @@ class StaticMockTests :
                 followRedirects = false
             }
 
-            val result: JsonObject = client.get(completeLocalUrl("/")).body()
-            Assertions.assertEquals(JsonObject("value"), result)
+            runBlocking {
+                val result: JsonObject = client.get(completeLocalUrl("/")).body()
+                Assertions.assertEquals(JsonObject("value"), result)
+            }
         }
     }
 

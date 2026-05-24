@@ -24,18 +24,19 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
 import io.ktor.client.utils.EmptyContent
-import io.ktor.content.ByteArrayContent
-import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpProtocolVersion
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
+import io.ktor.http.content.ByteArrayContent
+import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import io.ktor.util.date.GMTDate
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.toByteArray
+import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
@@ -101,7 +102,7 @@ internal fun HttpResponseData.withBody(body: ByteArray?) = HttpResponseData(
     headers = headers,
     version = version,
     body = body?.let { ByteReadChannel(it, 0, it.size) } ?: ByteReadChannel.Empty,
-    callContext = callContext
+    callContext = Job() + dispatcherIO
 )
 
 internal fun HttpResponseData.getMediaType(): MediaType? {
@@ -110,13 +111,13 @@ internal fun HttpResponseData.getMediaType(): MediaType? {
 }
 
 internal suspend fun HttpResponseData.readBody(): ByteArray = when (val content = body) {
-    is ByteReadChannel -> content.readBytes()
+    is ByteReadChannel -> content.readAllBytes()
     else -> content.toString().toByteArray()
 }
 
 private const val READ_CHANNEL_CHUNKS = 1024
 
-internal suspend fun ByteReadChannel.readBytes(): ByteArray {
+internal suspend fun ByteReadChannel.readAllBytes(): ByteArray {
     val data = mutableListOf<ByteArray>()
     while (!isClosedForRead) {
         transferChunk()?.let { data += it }

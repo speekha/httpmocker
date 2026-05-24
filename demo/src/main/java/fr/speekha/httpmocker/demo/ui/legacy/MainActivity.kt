@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui
+package fr.speekha.httpmocker.demo.ui.legacy
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.databinding.ActivityMainBinding
 import fr.speekha.httpmocker.demo.model.Repo
+import fr.speekha.httpmocker.demo.ui.Data
+import fr.speekha.httpmocker.demo.ui.MainViewModel
+import fr.speekha.httpmocker.demo.ui.Permission
+import fr.speekha.httpmocker.demo.ui.State
+import io.uniflow.android.livedata.onEvents
+import io.uniflow.android.livedata.onStates
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
@@ -49,8 +51,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initObservers() {
-        observeDataLoading()
-        observeState()
+
+        onStates(viewModel) { state ->
+            if (state is State) {
+                updateDescriptionLabel(state.message)
+                when (val data = state.data) {
+                    is Data.Loading -> showLoading(true)
+                    is Data.Success -> setResult(data.repos)
+                    is Data.Error -> setError(data.message)
+                    is Data.Empty -> setEmptyList()
+                }
+            }
+        }
+        onEvents(viewModel) { uiEvent ->
+            if (uiEvent is Permission) {
+                checkPermission()
+            }
+        }
     }
 
     private fun initViews() {
@@ -80,35 +97,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeState() {
-        observe(viewModel.getState()) { state ->
-            when (state) {
-                is State.Permission -> checkPermission()
-                is State.Message -> updateDescriptionLabel(state.message)
-                null -> {}
-            }
-        }
-    }
-
-    private fun observeDataLoading() {
-        observe(viewModel.getData()) { data ->
-            when (data) {
-                is Data.Loading -> showLoading(true)
-                is Data.Success -> setResult(data.repos)
-                is Data.Error -> setError(data.message)
-                null -> {}
-            }
-        }
-    }
-
     private fun showLoading(visible: Boolean) {
         binding.results.isVisible = !visible
         binding.loader.isVisible = visible
     }
 
-    private fun setResult(result: List<Repo>) {
+    private fun setResult(result: List<Repo>?) {
         showLoading(false)
         adapter.repos = result
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun setEmptyList() {
+        showLoading(false)
+        adapter.repos = null
         adapter.notifyDataSetChanged()
     }
 
@@ -120,9 +122,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
         }
     }
@@ -130,8 +130,4 @@ class MainActivity : AppCompatActivity() {
     private fun updateDescriptionLabel(@StringRes resId: Int) {
         binding.tvMessage.setText(resId)
     }
-}
-
-fun <T : Any, L : LiveData<T>> LifecycleOwner.observe(liveData: L, body: (T?) -> Unit) {
-    liveData.observe(this, Observer(body))
 }

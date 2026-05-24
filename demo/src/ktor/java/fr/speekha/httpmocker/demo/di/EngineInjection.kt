@@ -25,9 +25,9 @@ import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.ktor.builder.recordScenariosIn
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.dsl.module
