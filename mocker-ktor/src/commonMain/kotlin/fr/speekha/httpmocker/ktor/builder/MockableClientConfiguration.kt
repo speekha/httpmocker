@@ -19,13 +19,10 @@ package fr.speekha.httpmocker.ktor.builder
 import fr.speekha.httpmocker.builder.RecorderBuilder
 import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockEngineConfig
-import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.HttpClientEngineConfig
-import io.ktor.client.features.HttpClientFeature
-import io.ktor.client.features.HttpRedirect
-import io.ktor.client.features.defaultTransformers
-import io.ktor.http.ContentType
+import io.ktor.client.*
+import io.ktor.client.engine.*
+import io.ktor.client.features.*
+import io.ktor.http.*
 
 open class MockableClientConfiguration<T : HttpClientEngineConfig> {
 

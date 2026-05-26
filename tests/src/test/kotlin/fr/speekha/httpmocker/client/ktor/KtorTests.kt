@@ -21,6 +21,7 @@ import fr.speekha.httpmocker.builder.FileLoader
 import fr.speekha.httpmocker.client.HttpClientTester
 import fr.speekha.httpmocker.client.SAVE_FOLDER
 import fr.speekha.httpmocker.client.TestWithServer
+import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.ktor.engine.MockEngine
 import fr.speekha.httpmocker.model.NamedParameter
@@ -28,15 +29,11 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.request.headers
-import io.ktor.client.request.request
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.readText
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -120,8 +117,8 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 readPolicy?.let { decodeScenarioPathWith(it) }
                 parseScenariosWith(mapper)
                 writePolicy?.let {
-                    recordScenariosIn(File(SAVE_FOLDER)) with it
-                } ?: recordScenariosIn(File(SAVE_FOLDER))
+                    recordScenariosIn(FileAccessor(File(SAVE_FOLDER))) with it
+                } ?: recordScenariosIn(FileAccessor(File(SAVE_FOLDER)))
                 failOnRecordingError(true)
                 setMode(Mode.RECORD)
             }
