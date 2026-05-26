@@ -21,7 +21,7 @@ import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockEngineConfig
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.http.*
 
 open class MockableClientConfiguration<T : HttpClientEngineConfig> {
@@ -29,7 +29,7 @@ open class MockableClientConfiguration<T : HttpClientEngineConfig> {
     private val config = HttpClientConfig<MockEngineConfig>()
 
     /**
-     * Use [HttpRedirect] feature to automatically follow redirects.
+     * Use [HttpRedirect] plugin to automatically follow redirects.
      */
     var followRedirects: Boolean by config::followRedirects
 
@@ -70,7 +70,7 @@ open class MockableClientConfiguration<T : HttpClientEngineConfig> {
         recordScenariosIn(FileAccessor(folder))
 
     /**
-     * Applies all the installed features and customInterceptors from this configuration
+     * Applies all the installed plugins and customInterceptors from this configuration
      * into the specified [client].
      */
     fun install(client: HttpClient) {
@@ -78,21 +78,13 @@ open class MockableClientConfiguration<T : HttpClientEngineConfig> {
     }
 
     /**
-     * Installs a specific [feature] and optionally [configure] it.
+     * Installs a specific [plugin] and optionally [configure] it.
      */
-    fun <TBuilder : Any, TFeature : Any> install(
-        feature: HttpClientFeature<TBuilder, TFeature>,
+    fun <TBuilder : Any, TPlugin : Any> install(
+        plugin: HttpClientPlugin<TBuilder, TPlugin>,
         configure: TBuilder.() -> Unit = {}
     ) {
-        config.install(feature, configure)
-    }
-
-    /**
-     * Installs an interceptor defined by [block].
-     * The [key] parameter is used as a unique name, that also prevents installing duplicated interceptors.
-     */
-    fun install(key: String, block: HttpClient.() -> Unit) {
-        config.install(key, block)
+        config.install(plugin, configure)
     }
 
     fun applyConfiguration(conf: HttpClientConfig<MockEngineConfig>) {

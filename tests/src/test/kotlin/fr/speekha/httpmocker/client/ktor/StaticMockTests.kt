@@ -22,15 +22,19 @@ import fr.speekha.httpmocker.client.StaticMockTests
 import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.serialization.kotlinx.json.*
+import io.mockk.clearAllMocks
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -42,6 +46,11 @@ import org.junit.jupiter.params.provider.MethodSource
 class StaticMockTests :
     StaticMockTests<HttpResponse, HttpClient>(),
     HttpClientTester<HttpResponse, HttpClient> by KtorTests() {
+
+    @AfterEach
+    fun cleanupMocks() {
+        clearAllMocks()
+    }
 
     @Nested
     @DisplayName("Given a disabled mock interceptor")
@@ -59,6 +68,12 @@ class StaticMockTests :
             type: String
         ) = runBlocking {
             initFilingPolicy(type)
+            enqueueServerResponse(
+                TestWithServer.REQUEST_OK_CODE,
+                "{ \"field\":\"value\"}",
+                contentType = "application/json"
+            )
+
             client = mockableHttpClient(CIO) {
                 mock {
                     decodeScenarioPathWith(filingPolicy)
@@ -66,19 +81,18 @@ class StaticMockTests :
                     parseScenariosWith(mapper)
                     setMode(Mode.DISABLED)
                 }
-                install(JsonFeature) {
-                    serializer = KotlinxSerializer()
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        }
+                    )
                 }
                 expectSuccess = false
                 followRedirects = false
             }
-            enqueueServerResponse(
-                TestWithServer.REQUEST_OK_CODE,
-                "{ \"field\":\"value\"}",
-                contentType = "application/json"
-            )
 
-            val result: JsonObject = client.get(completeLocalUrl("/"))
+            val result: JsonObject = client.get(completeLocalUrl("/")).body()
             Assertions.assertEquals(JsonObject("value"), result)
         }
     }

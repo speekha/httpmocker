@@ -64,7 +64,7 @@ class MainViewModelTest : ViewModelTest() {
     @Before
     fun setup() {
         mockService = mockk()
-        viewModel = MainViewModel(mockService, MockerWrapper(mockClient))
+        viewModel = MainViewModel(mockService, MockerWrapper(mockClient), coroutinesTestRule.testDispatcher)
     }
 
     @Test
@@ -78,7 +78,8 @@ class MainViewModelTest : ViewModelTest() {
             coEvery { mockService.listContributorsForRepository(org, repo) } returns
                 listOf(User(login = contributor, contributions = contributions))
 
-            viewModel.callService().join()
+            viewModel.callService()
+            coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
         }
 
         coVerifyOrder {
@@ -106,7 +107,8 @@ class MainViewModelTest : ViewModelTest() {
                 mockService.listContributorsForRepository(org, repo)
             } throws IOException("Test exception")
 
-            viewModel.callService().join()
+            viewModel.callService()
+            coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
         }
 
         coVerifyOrder {
@@ -127,7 +129,8 @@ class MainViewModelTest : ViewModelTest() {
                 mockService.listRepositoriesForOrganisation(org)
             } throws IOException(errorMessage)
 
-            viewModel.callService().join()
+            viewModel.callService()
+            coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
         }
 
         coVerifyOrder {

@@ -29,13 +29,15 @@ import fr.speekha.httpmocker.demo.model.onFailure
 import fr.speekha.httpmocker.demo.model.onSuccess
 import fr.speekha.httpmocker.demo.model.resultOf
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainViewModel(
     private val apiService: GithubApiEndpoints,
-    private val mocker: MockerWrapper
+    private val mocker: MockerWrapper,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val data = MutableLiveData<Data>()
@@ -78,12 +80,12 @@ class MainViewModel(
         )
     }
 
-    private suspend fun loadRepos(org: String) = withContext(Dispatchers.IO) {
+    private suspend fun loadRepos(org: String) = withContext(ioDispatcher) {
         apiService.listRepositoriesForOrganisation(org)
     }
 
     private suspend fun loadTopContributor(org: String, repo: String) =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             resultOf {
                 apiService.listContributorsForRepository(org, repo)
             } onFailure {

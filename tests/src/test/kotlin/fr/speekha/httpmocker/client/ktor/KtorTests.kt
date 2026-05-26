@@ -30,10 +30,12 @@ import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.util.*
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -125,6 +127,7 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
         }
     }
 
+    @OptIn(InternalAPI::class)
     override suspend fun executeRequest(
         url: String,
         method: String,
@@ -151,16 +154,16 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
     ) {
         val response = executeRequest(url, method, body, headers)
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(expected, response.readText())
+        assertEquals(expected, response.body<String>())
     }
 
     override suspend fun assertResponseBody(expected: String, response: HttpResponse) {
-        assertEquals(expected, response.readText())
+        assertEquals(expected, response.body<String>())
     }
 
     override suspend fun assertResponseBodyStartsWith(expected: String, response: HttpResponse) {
         MatcherAssert.assertThat(
-            response.readText(),
+            response.body<String>(),
             StringStartsWith(
                 expected
             )

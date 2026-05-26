@@ -107,12 +107,12 @@ dependencies {
     ktorImplementation project(':kotlinx-adapter')
     ktorImplementation "io.ktor:ktor-client-cio:$ktor_version"
     ktorImplementation "io.ktor:ktor-client-android:$ktor_version"
-    ktorImplementation "io.ktor:ktor-client-json:$ktor_version"
-    ktorImplementation "io.ktor:ktor-client-serialization:$ktor_version"
+    ktorImplementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
+    ktorImplementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     ktorImplementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
     testImplementation "junit:junit:4.13.2"
-    testImplementation "io.mockk:mockk:1.10.2"
+    testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "org.slf4j:slf4j-simple:$slf4j_version"

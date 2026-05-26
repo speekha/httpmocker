@@ -24,9 +24,11 @@ import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import fr.speekha.httpmocker.serialization.Mapper
+import io.mockk.clearAllMocks
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -38,6 +40,11 @@ import org.junit.jupiter.params.provider.MethodSource
 class StaticMockTests :
     StaticMockTests<Response, OkHttpClient>(),
     HttpClientTester<Response, OkHttpClient> by OkHttpTests() {
+
+    @AfterEach
+    fun cleanupMocks() {
+        clearAllMocks()
+    }
 
     @Nested
     @DisplayName("Given a mock interceptor in mixed mode")
