@@ -24,7 +24,7 @@ ext {
     okhttp_version = '4.9.2'
     ktor_version = '1.6.4'
     retrofit_version = '2.9.0'
-    slf4j_version = '1.7.32'
+    slf4j_version = '1.7.36'
     junit_version = '5.8.1'
     detekt_version = '1.18.1'
     ktlint_version = '10.2.0'
