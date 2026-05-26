@@ -182,8 +182,6 @@ jobs:
       - run:
           name: Build
           command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:lint --stacktrace
-      - store_test_results:
-          path: demo/build/test-results
       - store_artifacts:
           path: demo/build/outputs/apk/
           destination: apks
@@ -216,8 +214,15 @@ jobs:
       - store_test_results:
           path: tests/build/test-results
           format: junit
+      - store_test_results:
+          path: demo/build/test-results
+      - store_test_results:
+          path: demo/build/test-results
+          format: junit
       - codecov/upload:
           file: tests/build/reports/jacoco/test/jacocoTestReport.xml
+      - codecov/upload:
+          file: demo/build/reports/jacoco/test/jacocoTestReport.xml
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:

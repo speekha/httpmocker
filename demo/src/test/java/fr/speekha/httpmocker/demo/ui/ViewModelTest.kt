@@ -17,12 +17,10 @@
 package fr.speekha.httpmocker.demo.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 
-@ExperimentalCoroutinesApi
 open class ViewModelTest {
 
     @get:Rule
@@ -30,6 +28,7 @@ open class ViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    fun runBlockingTest(block: suspend TestCoroutineScope.() -> Unit) =
-        runBlockingTest(coroutinesTestRule.testDispatcher, block)
+    fun runBlockingTest(block: suspend CoroutineScope.() -> Unit) {
+        runBlocking(coroutinesTestRule.testDispatcher, block)
+    }
 }

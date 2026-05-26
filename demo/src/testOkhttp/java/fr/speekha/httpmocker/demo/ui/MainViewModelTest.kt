@@ -25,12 +25,7 @@ import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import fr.speekha.httpmocker.okhttp.builder.recordScenariosIn
-import io.mockk.coEvery
-import io.mockk.coVerifyOrder
-import io.mockk.confirmVerified
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -59,7 +54,8 @@ class MainViewModelTest : ViewModelTest() {
     @Before
     fun setup() {
         mockService = mockk()
-        viewModel = MainViewModel(mockService, MockerWrapper(mockResponseInterceptor))
+        viewModel =
+            MainViewModel(mockService, MockerWrapper(mockResponseInterceptor), coroutinesTestRule.testDispatcher)
     }
 
     @Test
@@ -73,7 +69,8 @@ class MainViewModelTest : ViewModelTest() {
             coEvery { mockService.listContributorsForRepository(org, repo) } returns
                 listOf(User(login = contributor, contributions = contributions))
 
-            viewModel.callService().join()
+            viewModel.callService()
+            coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
         }
 
         coVerifyOrder {
@@ -101,7 +98,8 @@ class MainViewModelTest : ViewModelTest() {
                 mockService.listContributorsForRepository(org, repo)
             } throws IOException("Test exception")
 
-            viewModel.callService().join()
+            viewModel.callService()
+            coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
         }
 
         coVerifyOrder {
@@ -122,7 +120,8 @@ class MainViewModelTest : ViewModelTest() {
                 mockService.listRepositoriesForOrganisation(org)
             } throws IOException(errorMessage)
 
-            viewModel.callService().join()
+            viewModel.callService()
+            coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
         }
 
         coVerifyOrder {

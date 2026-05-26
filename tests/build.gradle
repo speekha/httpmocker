@@ -60,8 +60,8 @@ dependencies {
     implementation "io.ktor:ktor-client-cio:$ktor_version"
 //    testImplementation "io.ktor:ktor-client-android:$ktor_version"
 //    testImplementation "io.ktor:ktor-client-core:$ktor_version"
-    testImplementation "io.ktor:ktor-client-json:$ktor_version"
-    testImplementation "io.ktor:ktor-client-serialization:$ktor_version"
+    testImplementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
+    testImplementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
     // Jackson
@@ -76,7 +76,7 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
 
     // Mocks for Kotlin tests
-    testImplementation "io.mockk:mockk:1.10.2"
+    testImplementation "io.mockk:mockk:$mockk_version"
 
     // Mock web server
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"

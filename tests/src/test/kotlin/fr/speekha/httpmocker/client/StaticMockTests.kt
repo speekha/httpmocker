@@ -16,13 +16,9 @@
 
 package fr.speekha.httpmocker.client
 
-import fr.speekha.httpmocker.HTTP_METHOD_DELETE
-import fr.speekha.httpmocker.HTTP_METHOD_POST
-import fr.speekha.httpmocker.HTTP_METHOD_PUT
-import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.*
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
-import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_SIMPLE_BODY
 import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_HEADERS
@@ -35,13 +31,10 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.HttpStatusCode
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.ktor.http.*
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -59,6 +52,11 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         { javaClass.classLoader.getResourceAsStream(it)?.asReader() }
 
     protected lateinit var filingPolicy: FilingPolicy
+
+    @AfterEach
+    fun cleanup() {
+        clearAllMocks()
+    }
 
     @Nested
     @DisplayName("Given an enabled mock interceptor with static scenarios")
@@ -521,10 +519,10 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
         private lateinit var policy2: FilingPolicy
 
         private fun setupInterceptor(mapper: Mapper, type: String) {
-            policy1 = mockk {
+            policy1 = mockk(relaxed = true) {
                 every { getPath(any()) } returns "incorrect"
             }
-            policy2 = mockk {
+            policy2 = mockk(relaxed = true) {
                 every { getPath(any()) } returns "incorrect"
             }
 
@@ -748,7 +746,7 @@ abstract class StaticMockTests<Response : Any, Client : Any> : HttpClientTester<
     }
 
     protected fun initFilingPolicy(fileType: String) {
-        filingPolicy = mockk {
+        filingPolicy = mockk(relaxed = true) {
             every { getPath(any()) } answers {
                 val path = firstArg<HttpRequest>().path
                 ("$path.$fileType").drop(1)
