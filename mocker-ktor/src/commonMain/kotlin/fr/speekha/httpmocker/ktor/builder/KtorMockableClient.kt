@@ -17,9 +17,8 @@
 package fr.speekha.httpmocker.ktor.builder
 
 import fr.speekha.httpmocker.ktor.engine.MockClient
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.HttpClientEngineConfig
-import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.*
+import io.ktor.client.engine.*
 
 fun <T : HttpClientEngineConfig> mockableHttpClient(
     factory: HttpClientEngineFactory<T>,
