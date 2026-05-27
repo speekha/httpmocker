@@ -34,6 +34,7 @@ buildscript {
 plugins {
     id "org.jlleitschuh.gradle.ktlint" version "$ktlint_version"
     id 'com.vanniktech.maven.publish' version "$vanniktech_publish_version" apply false
+    id 'com.google.devtools.ksp' version '2.3.4' apply false
 }
 
 allprojects {
