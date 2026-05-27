@@ -92,9 +92,9 @@ class StaticMockTests :
                 .addInterceptor(fileBasedInterceptor)
                 .build()
 
-            Assertions.assertEquals("in memory response", executeRequest("inMemory").body?.string())
-            Assertions.assertEquals("file response", executeRequest("fileMatch").body?.string())
-            Assertions.assertEquals("server response", executeRequest("serverMatch").body?.string())
+            Assertions.assertEquals("in memory response", executeRequest("inMemory").body.string())
+            Assertions.assertEquals("file response", executeRequest("fileMatch").body.string())
+            Assertions.assertEquals("server response", executeRequest("serverMatch").body.string())
         }
     }
 }

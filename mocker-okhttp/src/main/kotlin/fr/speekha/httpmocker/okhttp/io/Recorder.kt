@@ -43,11 +43,11 @@ internal class Recorder(
     }
 
     private fun convertCallResult(request: Request, response: Response): CallRecord {
-        val body = response.body?.bytes()
+        val body = response.body.bytes()
         return CallRecord(request.toGenericModel(), response.toDescriptor(), body, response.getMediaType())
     }
 
-    private fun Response.getMediaType(): MediaType? = body?.contentType()?.run { MediaType(type, subtype) }
+    private fun Response.getMediaType(): MediaType? = body.contentType()?.run { MediaType(type, subtype) }
 
     private fun proceedWithCallResult(record: CallRecord, response: Response?): Response =
         record.error?.let { throw it }
