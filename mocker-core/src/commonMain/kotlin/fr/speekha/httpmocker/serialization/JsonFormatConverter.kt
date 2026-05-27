@@ -103,20 +103,20 @@ class JsonFormatConverter {
     private fun StringBuilder.exportHeaderBlock(json: String, matcher: MatchResult, startAt: Int) {
         val openingBracket = json.indexOf("[", matcher.range.first)
         append(json.substring(startAt until openingBracket))
-        val headers =
-            mapOutputHeaders(json.substring(openingBracket + 1 until matcher.range.last))
+        val headers = mapOutputHeaders(json.substring(openingBracket + 1 until matcher.range.last))
         append("{$headers}")
     }
 
     private fun mapOutputHeaders(headers: String) = headers
-        .replace(Regex("\\{\\p{Space}*\"name\"\\p{Space}*:\\p{Space}*"), "")
-        .replace(Regex(",\\p{Space}*\"value\""), "")
-        .replace(Regex("\\p{Space}*}\\p{Blank}*"), "")
+        .replace(Regex("\\{\\s*\"name\"\\s*:\\s*"), "")
+        .replace(Regex(",\\s*\"value\""), "")
+        .replace(Regex("\\s*}[ \\t]*"), "")
 
     private fun StringBuilder.importHeaderBlock(json: String, matcher: MatchResult, startAt: Int) {
         val openingBrace = json.indexOf("{", matcher.range.first)
+        val closingBrace = json.indexOf("}", openingBrace + 1)
         append(json.substring(startAt until openingBrace))
-        append(mapInputHeaders(json.substring(openingBrace + 1 until matcher.range.last - 1)))
+        append(mapInputHeaders(json.substring(openingBrace + 1 until (matcher.range.last - 1).coerceAtLeast(closingBrace))))
     }
 
     private fun mapInputHeaders(headers: String): String =
@@ -140,13 +140,13 @@ class JsonFormatConverter {
 
     companion object {
         private val outputHeaderPattern =
-            Regex("\"headers\"\\p{Space}*:\\p{Space}*\\[[^]]*]")
+            Regex("\"headers\"\\s*:\\s*\\[[^]]*]")
         private val inputHeaderPattern =
-            Regex("\"headers\"\\p{Space}*:\\p{Space}*\\{[^}]*}")
+            Regex("\"headers\"\\s*:\\s*\\{[^}]*}")
         private val outputParameterPattern =
-            Regex("\"params\"\\p{Space}*:\\p{Space}*\\[[^]]*]")
+            Regex("\"params\"\\s*:\\s*\\[[^]]*]")
         private val inputParameterPattern =
-            Regex("\"params\"\\p{Space}*:\\p{Space}*\\{[^}]*}")
-        private val separatorPattern = Regex("\"\\p{Space}*:\\p{Space}*")
+            Regex("\"params\"\\s*:\\s*\\{[^}]*}")
+        private val separatorPattern = Regex("\"\\s*:\\s*")
     }
 }

@@ -53,7 +53,7 @@ class KotlinxMapper(
         prettyPrintIndent = " "
         useArrayPolymorphism = false
         classDiscriminator = "type"
-        serializersModule = EmptySerializersModule
+        serializersModule = EmptySerializersModule()
     }
 
     override fun deserialize(payload: String): List<Matcher> =
