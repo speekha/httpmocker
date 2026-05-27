@@ -84,5 +84,5 @@ internal fun Interceptor.Chain.execute() = proceed(request())
  * @return the copy of the original response
  */
 internal fun Response.copyResponse(body: ByteArray?): Response = newBuilder()
-    .body((body ?: byteArrayOf()).toResponseBody(this.body?.contentType()))
+    .body((body ?: byteArrayOf()).toResponseBody(this.body.contentType()))
     .build()

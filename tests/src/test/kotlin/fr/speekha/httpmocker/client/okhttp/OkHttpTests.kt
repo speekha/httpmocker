@@ -30,14 +30,17 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import okhttp3.*
+import okhttp3.Call
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -188,7 +191,7 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
     }
 
     private suspend fun Response.readText() = withContext(Dispatchers.IO) {
-        body?.string()
+        body.string()
     }
 
     override fun assertResponseCode(resultCode: HttpStatusCode, response: Response) {
@@ -201,8 +204,8 @@ open class OkHttpTests : TestWithServer(), HttpClientTester<Response, OkHttpClie
     }
 
     override fun assertContentType(type: String, subtype: String, response: Response) {
-        assertEquals("application", response.body?.contentType()?.type)
-        assertEquals("json", response.body?.contentType()?.subtype)
+        assertEquals("application", response.body.contentType()?.type)
+        assertEquals("json", response.body.contentType()?.subtype)
         assertEquals("application/json", response.header("Content-type"))
     }
 }
