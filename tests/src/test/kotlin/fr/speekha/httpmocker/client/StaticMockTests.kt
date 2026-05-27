@@ -16,9 +16,13 @@
 
 package fr.speekha.httpmocker.client
 
-import fr.speekha.httpmocker.*
+import fr.speekha.httpmocker.HTTP_METHOD_DELETE
+import fr.speekha.httpmocker.HTTP_METHOD_POST
+import fr.speekha.httpmocker.HTTP_METHOD_PUT
+import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.Mode.ENABLED
 import fr.speekha.httpmocker.Mode.MIXED
+import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_SIMPLE_BODY
 import fr.speekha.httpmocker.client.TestWithServer.Companion.URL_HEADERS
@@ -31,11 +35,18 @@ import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.*
-import io.mockk.*
+import io.ktor.http.HttpStatusCode
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest

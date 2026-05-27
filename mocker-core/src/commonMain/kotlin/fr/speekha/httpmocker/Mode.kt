@@ -31,7 +31,9 @@ enum class Mode(private val status: String) {
     MIXED("in mixed mode"),
 
     /** allows to record actual requests and responses for future use as mock scenarios */
-    RECORD("recording");
+    RECORD("recording")
+
+    ;
 
     override fun toString(): String = status
 }

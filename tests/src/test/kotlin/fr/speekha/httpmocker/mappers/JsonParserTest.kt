@@ -34,7 +34,10 @@ import fr.speekha.httpmocker.custom.serializer.truncate
 import fr.speekha.httpmocker.model.NamedParameter
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.StringStartsWith
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

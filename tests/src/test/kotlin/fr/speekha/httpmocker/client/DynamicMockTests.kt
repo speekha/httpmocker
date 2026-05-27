@@ -20,7 +20,7 @@ import fr.speekha.httpmocker.Mode.DISABLED
 import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.client.TestWithServer.Companion.REQUEST_OK_CODE
 import fr.speekha.httpmocker.model.ResponseDescriptor
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

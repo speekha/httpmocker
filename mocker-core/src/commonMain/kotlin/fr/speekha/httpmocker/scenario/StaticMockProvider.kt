@@ -51,7 +51,7 @@ internal class StaticMockProvider(
         logger.info("Loading scenarios from $path")
         loadAndMatchResponse(path, request)
     } catch (e: IOException) {
-        logger.error("Scenario file could not be loaded. Returning null.")
+        logger.error("Scenario file could not be loaded. Returning null.", e)
         null
     } catch (e: Exception) {
         logger.error("Scenario file could not be loaded", e)

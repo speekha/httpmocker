@@ -16,7 +16,15 @@
 
 package fr.speekha.httpmocker.kotlinx.model
 
-import fr.speekha.httpmocker.serialization.*
+import fr.speekha.httpmocker.serialization.BODY
+import fr.speekha.httpmocker.serialization.EXACT_MATCH
+import fr.speekha.httpmocker.serialization.HEADERS
+import fr.speekha.httpmocker.serialization.HOST
+import fr.speekha.httpmocker.serialization.METHOD
+import fr.speekha.httpmocker.serialization.PARAMS
+import fr.speekha.httpmocker.serialization.PATH
+import fr.speekha.httpmocker.serialization.PORT
+import fr.speekha.httpmocker.serialization.PROTOCOL
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import fr.speekha.httpmocker.model.RequestTemplate as Model

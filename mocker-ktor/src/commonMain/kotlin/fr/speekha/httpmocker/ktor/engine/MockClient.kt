@@ -18,8 +18,9 @@ package fr.speekha.httpmocker.ktor.engine
 
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.NO_ROOT_FOLDER_ERROR
-import io.ktor.client.engine.*
-import io.ktor.util.*
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.util.InternalAPI
 
 object MockClient : HttpClientEngineFactory<MockEngineConfig> {
 

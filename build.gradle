@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 buildscript {
 
     apply from: 'gradle/versions.gradle'
@@ -32,6 +31,7 @@ buildscript {
 }
 
 plugins {
+    id "io.gitlab.arturbosch.detekt" version("$detekt_version")
     id "org.jlleitschuh.gradle.ktlint" version "$ktlint_version"
     id 'com.vanniktech.maven.publish' version "$vanniktech_publish_version" apply false
     id 'com.google.devtools.ksp' version '2.3.4' apply false
@@ -54,6 +54,8 @@ configure(subprojects.findAll { it.name in ['tests', 'demo'] }) {
     apply from: '../gradle/ktlint.gradle'
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
+
+apply from: 'gradle/detekt.gradle'
