@@ -25,7 +25,7 @@ ext {
     ktor_version = '2.3.12'
     retrofit_version = '3.0.0'
     slf4j_version = '1.7.36'
-    junit_version = '5.8.1'
+    junit_version = '5.10.2'
     mockk_version = '1.14.9'
     detekt_version = '1.18.1'
     ktlint_version = '10.2.0'
