@@ -16,15 +16,30 @@
 
 
 subprojects {
-    apply plugin: "io.gitlab.arturbosch.detekt"
-
+    apply(plugin: "io.gitlab.arturbosch.detekt")
+    dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8")
+    }
     detekt {
-        config = files("../detekt.yml")
-        parallel = true
-        ignoreFailures = true
+        config = files("${rootDir}/detekt.yml")
+        buildUponDefaultConfig = false
+        source = files(
+                "src/main/kotlin",
+                "src/main/java",
+                "src/test/kotlin",
+                "src/test/java"
+        )
+    }
+
+    tasks.matching { it.class.name == "io.gitlab.arturbosch.detekt.Detekt" || it.class.superclass?.name == "io.gitlab.arturbosch.detekt.Detekt" }.configureEach {
+        autoCorrect = project.findProperty("detektAutoCorrect") != "false"
         reports {
-            xml { enabled = true }
-            html { enabled = true }
+            xml.required = true
+            xml.outputLocation = layout.buildDirectory.file("reports/detekt/detekt.xml")
+            html.required = true
+            html.outputLocation = layout.buildDirectory.file("reports/detekt/detekt.html")
+            txt.required = false
+            sarif.required = false
         }
     }
 }

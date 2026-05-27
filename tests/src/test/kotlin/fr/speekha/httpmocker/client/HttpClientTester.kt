@@ -23,7 +23,7 @@ import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.scenario.RequestCallback
 import fr.speekha.httpmocker.serialization.Mapper
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 
 @SuppressWarnings("ComplexInterface")
 interface HttpClientTester<Response : Any, Client : Any> {

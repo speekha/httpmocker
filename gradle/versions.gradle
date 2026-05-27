@@ -27,7 +27,7 @@ ext {
     slf4j_version = '1.7.36'
     junit_version = '5.10.2'
     mockk_version = '1.14.9'
-    detekt_version = '1.18.1'
+    detekt_version = '1.23.8'
     ktlint_version = '10.2.0'
     vanniktech_publish_version = '0.33.0'
     compose_bom_version = '2026.05.00'

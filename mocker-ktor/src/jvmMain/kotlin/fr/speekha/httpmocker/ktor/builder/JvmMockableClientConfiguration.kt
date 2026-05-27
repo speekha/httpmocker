@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.ktor.builder
 import fr.speekha.httpmocker.builder.RecorderBuilder
 import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockEngineConfig
-import io.ktor.client.engine.*
+import io.ktor.client.engine.HttpClientEngineConfig
 import java.io.File
 
 /**

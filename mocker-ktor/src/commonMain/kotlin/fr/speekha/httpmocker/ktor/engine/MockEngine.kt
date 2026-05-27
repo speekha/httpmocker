@@ -26,9 +26,10 @@ import fr.speekha.httpmocker.ktor.io.Recorder
 import fr.speekha.httpmocker.ktor.io.dispatcherIO
 import fr.speekha.httpmocker.ktor.io.mapRequest
 import fr.speekha.httpmocker.ktor.io.toKtorRequest
-import io.ktor.client.engine.*
-import io.ktor.client.request.*
-import io.ktor.util.*
+import io.ktor.client.engine.HttpClientEngineBase
+import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.HttpResponseData
+import io.ktor.util.InternalAPI
 
 class MockEngine(
     override val config: MockEngineConfig,
