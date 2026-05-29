@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform'
-    id 'org.jetbrains.kotlin.plugin.serialization'
+    id("org.jetbrains.kotlin.jvm")
 }
 
-kotlin {
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
-    jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = '11'
-        }
-    }
-
-    sourceSets {
-        commonMain {
-            dependencies {
-                implementation "io.ktor:ktor-client-core:$ktor_version"
-                api project(':mocker-core')
-            }
-        }
-        jvmMain {
-            dependencies {
-            }
-        }
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
-apply from: '../gradle/publish.gradle'
+val gson_version: String by rootProject.extra
+
+dependencies {
+    api(project(":mocker-core"))
+
+    api("com.google.code.gson:gson:$gson_version")
+}
+
+apply(from = "../gradle/publish.gradle")

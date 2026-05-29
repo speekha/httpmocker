@@ -14,26 +14,30 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
+    id("org.jetbrains.kotlin.multiplatform")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
+val kotlinx_serialization_version: String by rootProject.extra
 
-tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
+kotlin {
+    jvm {
+        testRuns["test"].executionTask.configure {
+            useJUnit()
+        }
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
+
+                api(project(":mocker-core"))
+            }
+        }
+        jvmMain {}
     }
 }
 
-dependencies {
-    api project(':mocker-core')
-}
-
-apply from: '../gradle/publish.gradle'
+apply(from = "../gradle/publish.gradle")

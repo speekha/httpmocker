@@ -16,26 +16,28 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
+    id("org.jetbrains.kotlin.jvm")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
-tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
+val okhttp_version: String by rootProject.extra
+val coroutines_version: String by rootProject.extra
+
 dependencies {
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    api project(':mocker-core')
+    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
+    api(project(":mocker-core"))
 }
 
-apply from: '../gradle/publish.gradle'
+apply(from = "../gradle/publish.gradle")

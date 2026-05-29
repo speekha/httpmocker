@@ -15,15 +15,11 @@
  */
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform'
+    id("org.jetbrains.kotlin.multiplatform")
 }
 
 kotlin {
-
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = '11'
-        }
         testRuns["test"].executionTask.configure {
             useJUnit()
         }
@@ -32,27 +28,12 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-            }
-        }
-        commonTest {
-            dependencies {
-                implementation kotlin('test-common')
-                implementation kotlin('test-annotations-common')
+                api(project(":mocker-core"))
             }
         }
         jvmMain {
-            dependencies {
-                api "org.slf4j:slf4j-api:$slf4j_version"
-            }
-        }
-        jvmTest {
-            dependencies {
-                implementation kotlin('test-junit')
-                implementation "org.slf4j:slf4j-simple:$slf4j_version"
-            }
         }
     }
 }
 
-apply from: '../gradle/publish.gradle'
+apply(from = "../gradle/publish.gradle")

@@ -16,33 +16,34 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
-    id 'com.google.devtools.ksp'
+    id("org.jetbrains.kotlin.jvm")
+    id("com.google.devtools.ksp")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
-tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
 repositories {
     // For snapshots versions
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
+
+val moshi_version: String by rootProject.extra
 
 dependencies {
-    api project(':mocker-core')
+    api(project(":mocker-core"))
 
-    api "com.squareup.moshi:moshi:$moshi_version"
-    ksp "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
+    api("com.squareup.moshi:moshi:$moshi_version")
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshi_version")
 }
 
-apply from: '../gradle/publish.gradle'
+apply(from = "../gradle/publish.gradle")
