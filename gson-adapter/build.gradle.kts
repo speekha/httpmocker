@@ -31,12 +31,10 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-val gson_version: String by rootProject.extra
-
 dependencies {
     api(project(":mocker-core"))
 
-    api("com.google.code.gson:gson:$gson_version")
+    api(libs.gson)
 }
 
 apply(from = "../gradle/publish.gradle")

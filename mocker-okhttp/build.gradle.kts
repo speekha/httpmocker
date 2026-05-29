@@ -31,12 +31,9 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-val okhttp_version: String by rootProject.extra
-val coroutines_version: String by rootProject.extra
-
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
+    implementation(libs.okhttp)
+    implementation(libs.coroutines.core)
     api(project(":mocker-core"))
 }
 
