@@ -15,4 +15,10 @@
 # limitations under the License.
 #
 
+export ORG_GRADLE_PROJECT_mavenCentralUsername=$1
+export ORG_GRADLE_PROJECT_mavenCentralPassword=$2
+export ORG_GRADLE_PROJECT_signingInMemoryKeyId=$3
+export ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=$4
+export ORG_GRADLE_PROJECT_signingInMemoryKey=$5
+
 ./gradlew --no-daemon --no-parallel mocker-core:publish mocker-okhttp:publish mocker-ktor:publish jackson-adapter:publish gson-adapter:publish moshi-adapter:publish custom-adapter:publish kotlinx-adapter:publish sax-adapter:publish -Dsnapshot=true -DmavenCentralUsername=$1 -DmavenCentralPassword=$2 -DSIGNING_KEY_ID=$3 -DSIGNING_PASSWORD=$4 -DSIGNING_SECRET_KEY_RING_FILE=$5 --stacktrace

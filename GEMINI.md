@@ -12,7 +12,7 @@ integration tests, and offline/demo modes.
 - **Build System:** Gradle with multiplatform configuration
 - **License:** Apache License 2.0
 - **Current Version:** 2.0.0-alpha
-- **Java Target:** JVM 11+
+- **Java Target:** JVM 21+
 - **Publication:** Maven Central (Stable releases) and Sonatype snapshots
 
 ### Core Modules
@@ -28,17 +28,17 @@ integration tests, and offline/demo modes.
 The project is a Gradle multimodule build with the following structure:
 
 - **Root**: Configuration and publishing setup via shared `gradle/` scripts
-- **Core Logic**: `mocker-core/` (multiplatform Kotlin, JVM 11)
+- **Core Logic**: `mocker-core/` (multiplatform Kotlin, JVM 21)
 - **HTTP Client Integration**: `mocker-okhttp/`, `mocker-ktor/`
 - **Serialization Adapters**: One module per supported parser (Jackson, Gson, Moshi, KotlinX, custom JSON, SAX/XML)
 - **Test Harness**: `tests/` module integrating all adapters and engines with JUnit 5
-- **Demo Apps**: `demo/` and `demo2/` for Android and JVM showcases
+- **Demo App**: `demo/` for Android and JVM showcases
 
 ## Building and Running
 
 ### Prerequisites
 
-- JDK 11+ (configured in gradle.properties: `kotlin.jvmargs=-Xmx1536m`)
+- JDK 21+
 - Gradle (wrapper included: `gradlew`/`gradlew.bat`)
 
 ### Key Build Commands
@@ -109,7 +109,7 @@ Key configuration in `gradle.properties`:
 - **Language**: Kotlin with official code style
 - **Linting**: KtLint (applied only to test and demo modules via `gradle/ktlint.gradle`)
 - **Static Analysis**: Detekt with custom configuration (`detekt.yml`)
-- **JVM Target**: 11 (specified per-module in build.gradle files)
+- **JVM Target**: 21 (specified per-module in build.gradle.kts files)
 
 ### Module Structure
 
@@ -133,28 +133,30 @@ module-name/
 
 - **Kotlin Version**: 2.3.21
 - **Multiplatform Targets**:
-    - `jvm`: JVM 11 with JUnit test framework
+    - `jvm`: JVM 21 with JUnit test framework
     - `ios`: iOS target (in mocker-ktor, development status)
-- **Coroutines**: `kotlinx-coroutines-core` 1.5.2 (commonMain dependency)
+- **Coroutines**: `kotlinx-coroutines-core` 1.11.0 (commonMain dependency)
 
 ### Testing Standards
 
-- **Test Framework**: JUnit 5 (Jupiter) 1.8.1
-- **Mocking Library**: MockK 1.10.2
+- **Test Framework**: JUnit 5 (Jupiter) 5.10.2
+- **Mocking Library**: MockK 1.14.9
 - **Test Runner Config**: `useJUnitPlatform()` in tests module
 - **Mock Web Server**: OkHttp MockWebServer for HTTP testing
 - **Test Execution**: All tests in `tests/` module integrate all adapters and HTTP engines
 
 ### Dependency Management
 
-All versions centralized in `gradle/versions.gradle`:
+All versions centralized in `gradle/libs.versions.toml`:
 
 - Kotlin: 2.3.21
-- Coroutines: 1.5.2
-- OkHttp: 4.9.2
-- Ktor: 1.6.4
-- Jackson, Gson, Moshi, KotlinX Serialization (with specific versions)
-- SLF4J: 1.7.32 (logging API)
+- Coroutines: 1.11.0
+- OkHttp: 5.3.2
+- Ktor: 2.3.13
+- Jackson: 2.21.4, Gson: 2.14.0, Moshi: 1.15.2, KotlinX Serialization: 1.11.0
+- SLF4J: 1.7.36 (logging API)
+- Detekt: 1.23.8
+- KtLint: 10.2.0
 
 ### Publishing & Release
 
@@ -182,13 +184,12 @@ All versions centralized in `gradle/versions.gradle`:
 - **`.circleci/`**: CI/CD pipeline configuration
 - **`.github/ISSUE_TEMPLATE/`**: Bug report and feature request templates
 - **`gradle/`**: Shared gradle scripts:
-    - `versions.gradle`: Centralized dependency versions
+    - `libs.versions.toml`: Centralized dependency versions
+    - `versions.gradle.kts`: Gradle version extensions
     - `publish.gradle`: Publishing configuration for all modules
-    - `coverage.gradle`: Code coverage settings
+    - `coverage.gradle.kts`: Code coverage settings
     - `detekt.gradle`: Static analysis configuration
     - `ktlint.gradle`: Kotlin linting configuration
-    - `dokka.gradle`: Kotlin documentation generation
-    - `sources.gradle`: Source artifact generation
 
 ## Common Workflows
 
@@ -223,10 +224,9 @@ Scenarios are static mock definitions stored as JSON or XML:
 - **Organization**: Managed by `FilingPolicy` (e.g., `MirrorPathPolicy` for URL-based folder structure)
 - **Examples**: See README.md for JSON and XML schema with request/response/error cases
 
-### Local Testing with Demo Apps
+### Local Testing with Demo App
 
 - **demo/**: Android app with OkHttp and Ktor integration examples
-- **demo2/**: Additional Android test app
 - Use `./gradlew :demo:build` for apk generation
 - Proguard rules in `demo/proguard-rules.pro` required for obfuscated builds
 
@@ -251,9 +251,9 @@ Scenarios are static mock definitions stored as JSON or XML:
 
 ### Breaking Changes (2.0.0)
 
-- Upgraded to OkHttp 4 API (from OkHttp 3 in v1.x)
+- Upgraded to OkHttp 5 API (from OkHttp 3 in v1.x)
 - Kotlin 2.3.21 (significant language evolution)
-- Ktor 1.6.4 compatibility
+- Ktor 2.3.13 compatibility
 
 ## File Locations Quick Reference
 

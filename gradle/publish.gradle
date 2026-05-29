@@ -26,13 +26,6 @@ if (secretPropsFile.exists()) {
     p.each { name, value ->
         ext[name] = value
     }
-} else {
-    // Fallback to system properties (set via -D flags or environment variables like ORG_GRADLE_PROJECT_*)
-    ext["mavenCentralUsername"] = System.getProperty('mavenCentralUsername')
-    ext["mavenCentralPassword"] = System.getProperty('mavenCentralPassword')
-    ext["signing.keyId"] = System.getProperty('SIGNING_KEY_ID')
-    ext["signing.password"] = System.getProperty('SIGNING_PASSWORD')
-    ext["signing.secretKeyRingFile"] = System.getProperty('SIGNING_SECRET_KEY_RING_FILE')
 }
 
 mavenPublishing {
