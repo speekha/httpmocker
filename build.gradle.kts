@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-apply(from = "gradle/versions.gradle.kts")
-
 buildscript {
     repositories {
         google()
@@ -31,10 +29,10 @@ buildscript {
 }
 
 plugins {
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
-    id("com.vanniktech.maven.publish") version "0.33.0" apply false
-    id("com.google.devtools.ksp") version "2.3.4" apply false
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.vanniktechPublish) apply false
+    alias(libs.plugins.ksp) apply false
 }
 
 allprojects {
