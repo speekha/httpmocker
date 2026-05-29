@@ -37,13 +37,11 @@ repositories {
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
-val moshi_version: String by rootProject.extra
-
 dependencies {
     api(project(":mocker-core"))
 
-    api("com.squareup.moshi:moshi:$moshi_version")
-    ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshi_version")
+    api(libs.moshi)
+    ksp(libs.moshi.codegen)
 }
 
 apply(from = "../gradle/publish.gradle")

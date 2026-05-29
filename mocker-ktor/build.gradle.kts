@@ -19,15 +19,13 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-val ktor_version: String by rootProject.extra
-
 kotlin {
     jvm {}
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.ktor:ktor-client-core:$ktor_version")
+                implementation(libs.ktor.client.core)
                 api(project(":mocker-core"))
             }
         }

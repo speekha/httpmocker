@@ -18,9 +18,6 @@ plugins {
     id("org.jetbrains.kotlin.multiplatform")
 }
 
-val coroutines_version: String by rootProject.extra
-val slf4j_version: String by rootProject.extra
-
 kotlin {
     jvm {
         testRuns["test"].executionTask.configure {
@@ -31,7 +28,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
+                implementation(libs.coroutines.core)
             }
         }
         commonTest {
@@ -42,13 +39,13 @@ kotlin {
         }
         jvmMain {
             dependencies {
-                api("org.slf4j:slf4j-api:$slf4j_version")
+                api(libs.slf4j.api)
             }
         }
         jvmTest {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("org.slf4j:slf4j-simple:$slf4j_version")
+                implementation(libs.slf4j.simple)
             }
         }
     }

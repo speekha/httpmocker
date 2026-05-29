@@ -31,18 +31,12 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-val kotlin_version: String by rootProject.extra
-val jackson_version: String by rootProject.extra
-
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+    implementation(libs.kotlin.reflect)
 
     api(project(":mocker-core"))
 
-    api("com.fasterxml.jackson.core:jackson-core:$jackson_version")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
-    api("com.fasterxml.jackson.core:jackson-annotations:$jackson_version")
-    api("com.fasterxml.jackson.core:jackson-databind:$jackson_version")
+    api(libs.bundles.jackson)
 }
 
 apply(from = "../gradle/publish.gradle")

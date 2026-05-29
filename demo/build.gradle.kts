@@ -23,15 +23,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.21"
 }
 
-val coroutines_version: String by rootProject.extra
-val compose_bom_version: String by rootProject.extra
-val uniflow_version: String by rootProject.extra
-val retrofit_version: String by rootProject.extra
-val slf4j_version: String by rootProject.extra
-val ktor_version: String by rootProject.extra
-val kotlinx_serialization_version: String by rootProject.extra
-val mockk_version: String by rootProject.extra
-
 fun release(version: Int): Int = version
 
 android {
@@ -105,71 +96,53 @@ repositories {
 
 dependencies {
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
 
     // AndroidX
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("com.google.android.material:material:1.14.0")
+    implementation(libs.bundles.androidx)
 
     // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+    implementation(libs.bundles.androidx.lifecycle)
 
     // UniFlow
-    implementation("org.uniflow-kt:uniflow-core:$uniflow_version")
-    testImplementation("org.uniflow-kt:uniflow-test:$uniflow_version")
-    implementation("org.uniflow-kt:uniflow-android:$uniflow_version")
-    testImplementation("org.uniflow-kt:uniflow-android-test:$uniflow_version")
+    implementation(libs.bundles.uniflow)
+    testImplementation(libs.bundles.uniflow.test)
 
     // Jetpack Compose
-    val composeBom = platform("androidx.compose:compose-bom:$compose_bom_version")
-    implementation(composeBom)
+    implementation(libs.bundles.androidx.compose)
+    implementation(platform(libs.compose.bom))
 
-    implementation("androidx.compose.runtime:runtime-livedata:1.11.2")
-    implementation("androidx.activity:activity-compose:1.13.0")
-    implementation(platform("androidx.compose:compose-bom:$compose_bom_version"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
+    implementation(libs.retrofit)
 
     // Koin
-    implementation("io.insert-koin:koin-android:4.2.1")
+    implementation(libs.koin.android)
 
     // Logging
-    implementation("org.slf4j:slf4j-android:$slf4j_version")
+    implementation(libs.slf4j.android)
 
     // OkHttp flavor
     "okhttpImplementation"(project(":mocker-okhttp"))
     "okhttpImplementation"(project(":jackson-adapter"))
-    "okhttpImplementation"("com.squareup.retrofit2:converter-jackson:$retrofit_version")
+    "okhttpImplementation"(libs.retrofit.jackson)
 
     // Ktor flavor
     "ktorImplementation"(project(":mocker-ktor"))
     "ktorImplementation"(project(":kotlinx-adapter"))
-    "ktorImplementation"("io.ktor:ktor-client-cio:$ktor_version")
-    "ktorImplementation"("io.ktor:ktor-client-android:$ktor_version")
-    "ktorImplementation"("io.ktor:ktor-client-content-negotiation:$ktor_version")
-    "ktorImplementation"("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
-    "ktorImplementation"("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
+    "ktorImplementation"(libs.ktor.client.android)
+    "ktorImplementation"(libs.bundles.ktor)
+    "ktorImplementation"(libs.kotlinx.serialization)
 
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:$mockk_version")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
-    testImplementation("org.slf4j:slf4j-simple:$slf4j_version")
+    testImplementation(libs.junit4)
+    testImplementation(libs.mockk)
+    testImplementation(libs.androidx.arch.core)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.slf4j.simple)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

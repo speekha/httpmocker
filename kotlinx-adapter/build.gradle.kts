@@ -19,8 +19,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-val kotlinx_serialization_version: String by rootProject.extra
-
 kotlin {
     jvm {
         testRuns["test"].executionTask.configure {
@@ -31,7 +29,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
+                implementation(libs.kotlinx.serialization)
 
                 api(project(":mocker-core"))
             }
