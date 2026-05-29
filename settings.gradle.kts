@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
-// custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        google()
+    }
 }
+
+include(
+    ":mocker-core",
+    ":mocker-okhttp",
+    ":mocker-ktor",
+    ":jackson-adapter",
+    ":moshi-adapter",
+    ":gson-adapter",
+    ":custom-adapter",
+    ":kotlinx-adapter",
+    ":sax-adapter",
+    ":tests",
+    ":demo"
+)

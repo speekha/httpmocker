@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform'
+    id("org.jetbrains.kotlin.jvm")
 }
 
-kotlin {
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
-    jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = '11'
-        }
-        testRuns["test"].executionTask.configure {
-            useJUnit()
-        }
-    }
-
-    sourceSets {
-        commonMain {
-            dependencies {
-                api project(':mocker-core')
-            }
-        }
-        jvmMain {
-        }
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
-apply from: '../gradle/publish.gradle'
+dependencies {
+    api(project(":mocker-core"))
+}
+
+apply(from = "../gradle/publish.gradle")

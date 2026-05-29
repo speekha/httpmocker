@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-ext {
-    kotlin_version = '2.3.21'
-    coroutines_version = '1.9.0'
-    jackson_version = '2.13.0'
-    gson_version = '2.14.0'
-    moshi_version = '1.15.2'
-    kotlinx_serialization_version = '1.11.0'
-    okhttp_version = '5.3.0'
-    ktor_version = '2.3.13'
-    retrofit_version = '3.0.0'
-    slf4j_version = '1.7.36'
-    junit_version = '5.10.2'
-    mockk_version = '1.14.9'
-    detekt_version = '1.23.8'
-    ktlint_version = '10.2.0'
-    vanniktech_publish_version = '0.33.0'
-    compose_bom_version = '2026.05.00'
-    uniflow_version = '1.1.2'
+plugins {
+    id("org.jetbrains.kotlin.multiplatform")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
+
+val ktor_version: String by rootProject.extra
+
+kotlin {
+    jvm {}
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("io.ktor:ktor-client-core:$ktor_version")
+                api(project(":mocker-core"))
+            }
+        }
+        jvmMain {
+            dependencies {
+            }
+        }
+    }
+}
+
+apply(from = "../gradle/publish.gradle")
