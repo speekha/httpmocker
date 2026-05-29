@@ -16,16 +16,17 @@
 
 apply plugin: 'com.vanniktech.maven.publish'
 
-// Load credentials from local.properties if it exists; otherwise use system properties/env vars
-File secretPropsFile = project.rootProject.file('local.properties')
-if (secretPropsFile.exists()) {
-    Properties p = new Properties()
-    new FileInputStream(secretPropsFile).withCloseable { is ->
-        p.load(is)
+tasks.register('logPublishVersion') {
+    doFirst {
+        logger.warn("========================================")
+        logger.warn("Publishing ${project.name} version: ${project.version}")
+        logger.warn("========================================")
     }
-    p.each { name, value ->
-        ext[name] = value
-    }
+}
+
+// Ensure version is logged before any publish task runs
+tasks.withType(PublishToMavenRepository).configureEach {
+    dependsOn('logPublishVersion')
 }
 
 mavenPublishing {
@@ -33,6 +34,7 @@ mavenPublishing {
     signAllPublications()
 
     pom {
+
         name = POM_NAME
         description = POM_DESCRIPTION
         url = POM_URL
