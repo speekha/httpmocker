@@ -8,11 +8,12 @@ integration tests, and offline/demo modes.
 
 ### Key Characteristics
 
-- **Language:** Kotlin (multiplatform: JVM, Android, iOS in development)
+- **Language:** Kotlin (multiplatform: JVM, Android, iOS)
 - **Build System:** Gradle with multiplatform configuration
 - **License:** Apache License 2.0
 - **Current Version:** 2.0.0-alpha
 - **Java Target:** JVM 21+
+- **iOS Targets:** iosArm64, iosSimulatorArm64, iosX64
 - **Publication:** Maven Central (Stable releases) and Sonatype snapshots
 
 ### Core Modules
@@ -29,9 +30,10 @@ The project is a Gradle multimodule build with the following structure:
 
 - **Root**: Configuration and publishing setup via shared `gradle/` scripts
 - **Core Logic**: `mocker-core/` (multiplatform Kotlin, JVM 21)
-- **HTTP Client Integration**: `mocker-okhttp/`, `mocker-ktor/`
+- **HTTP Client Integration**: `mocker-okhttp/`, `mocker-ktor/` (ktor supports iOS)
 - **Serialization Adapters**: One module per supported parser (Jackson, Gson, Moshi, KotlinX, custom JSON, SAX/XML)
-- **Test Harness**: `tests/` module integrating all adapters and engines with JUnit 5
+- **Test Harness**: `tests/` module integrating all adapters and engines with JUnit 5 (JVM)
+- **iOS Test Harness**: `tests-ios/` module integrating ktor with KotlinX and custom adapters for iOS targets
 - **Demo App**: `demo/` for Android and JVM showcases
 
 ## Building and Running
@@ -60,6 +62,7 @@ The project is a Gradle multimodule build with the following structure:
 ```bash
 ./gradlew :mocker-core:test
 ./gradlew :tests:test
+./gradlew :tests-ios:iosSimulatorArm64Test  # iOS simulator tests
 ```
 
 #### Code Quality Checks
@@ -134,16 +137,19 @@ module-name/
 - **Kotlin Version**: 2.3.21
 - **Multiplatform Targets**:
     - `jvm`: JVM 21 with JUnit test framework
-    - `ios`: iOS target (in mocker-ktor, development status)
+    - `ios`: iOS targets (iosArm64, iosSimulatorArm64, iosX64) in mocker-core and mocker-ktor
+- **iOS Support**: Framework binaries generated for iOS targets (baseline name: `httpmocker`)
 - **Coroutines**: `kotlinx-coroutines-core` 1.11.0 (commonMain dependency)
 
 ### Testing Standards
 
-- **Test Framework**: JUnit 5 (Jupiter) 5.10.2
-- **Mocking Library**: MockK 1.14.9
-- **Test Runner Config**: `useJUnitPlatform()` in tests module
-- **Mock Web Server**: OkHttp MockWebServer for HTTP testing
-- **Test Execution**: All tests in `tests/` module integrate all adapters and HTTP engines
+- **Test Framework**: JUnit 5 (Jupiter) 5.10.2 (JVM), Kotlin Test (iOS)
+- **Mocking Library**: MockK 1.14.9 (JVM only)
+- **Test Runner Config**: `useJUnitPlatform()` in tests module; kotlin-test framework for iOS
+- **Mock Web Server**: OkHttp MockWebServer for HTTP testing (JVM)
+- **Test Execution**: 
+    - JVM/Android: All tests in `tests/` module integrate all adapters and HTTP engines
+    - iOS: Integration tests in `tests-ios/` module (ktor + KotlinX/custom adapters)
 
 ### Dependency Management
 
@@ -235,7 +241,7 @@ Scenarios are static mock definitions stored as JSON or XML:
 ### Multiplatform Status
 
 - JVM/Android: Stable (production-ready)
-- iOS: Alpha status - contributions welcome for implementation and deployment
+- iOS: Supported with Ktor client integration (iosArm64, iosSimulatorArm64, iosX64 targets)
 
 ### Dependency Strategy
 
@@ -258,12 +264,14 @@ Scenarios are static mock definitions stored as JSON or XML:
 ## File Locations Quick Reference
 
 | Purpose                | Location                                                      |
-|------------------------|---------------------------------------------------------------|
-| Core Mocking Logic     | `mocker-core/src/commonMain/kotlin/`                          |
-| OkHttp Integration     | `mocker-okhttp/src/main/kotlin/`                              |
-| Ktor Integration       | `mocker-ktor/src/commonMain/kotlin/`                          |
+| Purpose                | Location                                                      |
+|------------------------|---------------------------------------------------------------|\n| Core Mocking Logic     | `mocker-core/src/commonMain/kotlin/` (multiplatform)          |
+| OkHttp Integration     | `mocker-okhttp/src/main/kotlin/` (JVM/Android)                |
+| Ktor Integration       | `mocker-ktor/src/commonMain/kotlin/` (multiplatform iOS+JVM)  |
+| iOS-Specific Code      | `mocker-core/src/iosMain/` and `mocker-ktor/src/iosMain/`     |
 | Serialization Adapters | `{jackson,gson,moshi,kotlinx,custom,sax}-adapter/src/`        |
-| Integration Tests      | `tests/src/test/kotlin/`                                      |
+| Integration Tests      | `tests/src/test/kotlin/` (JVM/Android)                        |
+| iOS Integration Tests  | `tests-ios/src/iosTest/kotlin/` (iOS targets)                 |
 | Test Resources         | `tests/src/test/resources/` and `demo/src/test/resources/`    |
 | Documentation          | `README.md` (primary), `.github/ISSUE_TEMPLATE/` (templates)  |
 | Gradle Config          | `build.gradle`, `settings.gradle`, `gradle/` (shared scripts) |

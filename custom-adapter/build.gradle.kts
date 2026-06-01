@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,24 @@ kotlin {
     jvm {
         testRuns["test"].executionTask.configure {
             useJUnit()
+        }
+    }
+
+    iosArm64 {
+        binaries.framework {
+            baseName = "httpmocker_custom"
+        }
+    }
+
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = "httpmocker_custom"
+        }
+    }
+
+    iosX64 {
+        binaries.framework {
+            baseName = "httpmocker_custom"
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker
 
-@SuppressWarnings("LargeClass")
+@Suppress("LargeClass")
 object MimeTypeResolver : Map<String, String> by mapOf(
     "application/vnd.hzn-3d-crossword" to ".x3d",
     "video/3gpp" to ".3gp",

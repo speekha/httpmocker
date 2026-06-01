@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.13.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:2.3.21")
+        classpath(libs.gradle)
+        classpath(libs.kotlin.gradle)
+        classpath(libs.kotlin.serialization)
     }
 }
 
