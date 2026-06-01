@@ -173,6 +173,7 @@ abstract class DynamicMockTests<Response : Any, Client : Any> : HttpClientTester
 
             runBlocking {
                 responses.indices.forEach { i ->
+                    @Suppress("UNCHECKED_CAST")
                     val response = responses[i] as? Response
                     assertResponseBody("body$i", response ?: fail("Response is null"))
                 }

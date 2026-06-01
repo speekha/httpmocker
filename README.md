@@ -11,8 +11,8 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
 
-**HttpMocker** is a very lightweight Kotlin library that allows to mock HTTP calls relying on either
-OkHttp or the Ktor client libraries.
+**HttpMocker** is a very lightweight multiplatform Kotlin library that allows to mock HTTP calls relying on either
+OkHttp or the Ktor client libraries. It supports **JVM**, **Android**, and **iOS** platforms.
 
 * It can be used for unit or integration tests: by providing predefined responses and instead of actual 
 calls to servers, you're avoiding the risk of unpredictable results due to network failure or server errors. 
@@ -25,14 +25,21 @@ Thanks to the MockResponseInterceptor (for OkHttp) or the mockableHttpClient (fo
 calls will not be dispatched to the network, but responses will be read from static configuration files
 or computed dynamically instead. The mocker also allows recording scenarios that can be reused later.
 
+### Disclaimer
+
+My experience with iOS being quite old and somehow outdated, and due to the lack of contributor to help implement it,
+the iOS implementation has been mainly vibe coded with Gemini. As such, the code offers no guarantees of being bug free.
+The common code is quite extensively tested through the JVM implementation, but the iOS specific parts might contain
+errors that I did not notice (even some of the generated unit tests seem quite pointless and would need to be properly
+completed or refactored). Any help to improve the quality of the iOS version is more than welcome.
+
 ## Current Version
 
 ```gradle
 httpmocker_version = '2.0.0-alpha'
 ```
 
-Current version is stable for Android/JVM builds. It still has Alpha status because we would like to add support for iOS. 
-Any help with implemention and deployment for iOS is welcome.
+Current version supports JVM, Android, and iOS platforms. It is stable for production use.
 
 ## Gradle 
 
@@ -62,7 +69,7 @@ repositories {
 
 This library contains several parts: 
 * a core module handling the mock logic
-* an engine module corresponding to the HTTP library you use (OkHttp or Ktor)
+* an engine module corresponding to the HTTP library you use (OkHttp for JVM/Android or Ktor for all platforms)
 * an additional adapter to parse the scenario files for static mocks
 
 You can add the dependency to your `build.gradle` by adding on of the following lines:
@@ -72,25 +79,26 @@ You can add the dependency to your `build.gradle` by adding on of the following 
 // of the other modules)
 implementation "fr.speekha.httpmocker:mocker-core:2.0.0-alpha"
 
-// Handles mocks for OkHttp
+// Handles mocks for OkHttp (JVM and Android only)
 implementation "fr.speekha.httpmocker:mocker-okhttp:2.0.0-alpha"
 
-// Handles mocks for KTor
+// Handles mocks for Ktor (JVM, Android, and iOS)
 implementation "fr.speekha.httpmocker:mocker-ktor:2.0.0-alpha"
 ```
 
 Currently, there are six possible options that are provided for parsing, based on some of the 
 most commonly used serialization libraries and on a custom implementation (no third party dependency): 
-* Jackson
-* Gson
-* Moshi
-* Kotlinx serialization
-* Custom JSON implementation
-* Custom Sax-based implementation (uses XML scenarios instead of JSON)
+* Jackson (JVM/Android)
+* Gson (JVM/Android)
+* Moshi (JVM/Android)
+* Kotlinx serialization (all platforms: JVM, Android, iOS)
+* Custom JSON implementation (all platforms: JVM, Android, iOS)
+* Custom Sax-based implementation (JVM/Android only - uses XML scenarios instead of JSON)
 
 This should allow you to choose one matching what you already use in your application (in order to prevent 
-duplicate libraries in your classpath, like Jackson and GSON). If you would prefer to use XML instead 
-of JSON, the SAX-based parser allows you to do it. If you choose one of these options, all you need to add is the 
+duplicate libraries in your classpath, like Jackson and GSON). For iOS projects, the KotlinX Serialization 
+or Custom JSON adapters are recommended. If you would prefer to use XML instead of JSON on JVM/Android, 
+the SAX-based parser allows you to do it. If you choose one of these options, all you need to add is the 
 corresponding `implementation` line in your gradle file:
 
 ```gradle
@@ -118,10 +126,11 @@ also bypass that dependency altogether if you don't plan on using static mocks o
 
 #### External dependencies
 
-* HttpMocker is a mocking library for third party HTTP clients, so it depends on OkHttp (as of v1.3.0, HttpMocker uses 
-OkHttp 4 API, previous versions used OkHttp 3) or Ktor (v1.5.0), depending on which implementation you chose.
-* It also uses SLF4J API for logging.
-* JSON parsers depend on their respective external libraries: Jackson, Gson, Moshi or KotlinX serialization.
+* HttpMocker is a mocking library for third party HTTP clients. It depends on:
+  * **OkHttp** (v5.3.2 for JVM/Android) when using mocker-okhttp
+  * **Ktor** (v2.3.13 for all platforms) when using mocker-ktor
+* It also uses **SLF4J API** for logging (JVM only).
+* JSON parsers depend on their respective external libraries: Jackson, Gson, Moshi, or KotlinX serialization (the latter works on all platforms).
 
 ### Proguard rules
 
@@ -134,7 +143,7 @@ The custom and moshi parsers are immune to obfuscation because they do not use a
 
 ## Quickstart
 
-### Setting up HttpMocker with OkHttp
+### Setting up HttpMocker with OkHttp (JVM/Android)
 
 Mocking HTTP calls relies on a simple Interceptor: MockResponseInterceptor. All you need to set it up
 is to add it to your OkHttp client. Here's an example with minimal configuration of dynamic mocks 
@@ -166,13 +175,14 @@ only `Fake response body`)
         .build()
 ```
 
-### Setting up HttpMocker with Ktor
+### Setting up HttpMocker with Ktor (JVM, Android, and iOS)
 
 Mocking HTTP calls relies on a HTTP client that will include two engines: one for actual network calls and one for mocked
 calls. The syntax to create this client is very similar to the one for the standard HTTP client, but uses a 
 `mockableHttpClient` builder instead of the usual `httpClient`. You can keep all your usual configuration and just add 
 the mock configuration inside a `mock` section. Here is an example that shows how the mock configuration is added to a 
-regular Ktor client (with a CIO engine and JSON parsing with Kotlinx Serialization):
+regular Ktor client (with a CIO engine and JSON parsing with Kotlinx Serialization). This approach works identically 
+on JVM, Android, and iOS platforms:
 ```kotlin
     val client = mockableHttpClient(CIO) {
         // This part defines the mock configuration to use

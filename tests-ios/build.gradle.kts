@@ -16,44 +16,45 @@
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    kotlin("plugin.serialization")
 }
 
 kotlin {
-    jvm {
-        testRuns["test"].executionTask.configure {
-            useJUnit()
-        }
-    }
 
     iosArm64 {
         binaries.framework {
-            baseName = "httpmocker_kotlinx"
+            baseName = "httpmocker_tests"
         }
     }
 
     iosSimulatorArm64 {
         binaries.framework {
-            baseName = "httpmocker_kotlinx"
+            baseName = "httpmocker_tests"
         }
     }
 
     iosX64 {
         binaries.framework {
-            baseName = "httpmocker_kotlinx"
+            baseName = "httpmocker_tests"
         }
     }
 
     sourceSets {
-        commonMain {
+        iosTest {
             dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.coroutines.core)
+
+                // Ktor
+                implementation(libs.bundles.ktor)
                 implementation(libs.kotlinx.serialization)
 
-                api(project(":mocker-core"))
+                // Local projects - multiplatform modules only
+                implementation(project(":mocker-core"))
+                implementation(project(":mocker-ktor"))
+                implementation(project(":kotlinx-adapter"))
+                implementation(project(":custom-adapter"))
             }
         }
-        jvmMain {}
     }
 }
-
-apply(from = "../gradle/publish.gradle")

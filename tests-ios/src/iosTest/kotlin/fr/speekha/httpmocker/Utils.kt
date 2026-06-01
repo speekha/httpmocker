@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,6 @@
  * limitations under the License.
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        mavenCentral()
-        google()
-    }
-}
+package fr.speekha.httpmocker
 
-include(
-    ":mocker-core",
-    ":mocker-okhttp",
-    ":mocker-ktor",
-    ":jackson-adapter",
-    ":moshi-adapter",
-    ":gson-adapter",
-    ":custom-adapter",
-    ":kotlinx-adapter",
-    ":sax-adapter",
-    ":tests",
-    ":tests-ios",
-    ":demo"
-)
+const val HTTP_METHOD_POST = "POST"

@@ -16,6 +16,15 @@
 
 package fr.speekha.httpmocker.client.okhttp;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+
 import fr.speekha.httpmocker.Mode;
 import fr.speekha.httpmocker.client.RecordTestsKt;
 import fr.speekha.httpmocker.io.HttpRequest;
@@ -28,14 +37,6 @@ import fr.speekha.httpmocker.serialization.Mapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 
 @DisplayName("Java API")
 class JavaApiTest extends OkHttpTests {

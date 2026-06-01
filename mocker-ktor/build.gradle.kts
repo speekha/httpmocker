@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,24 @@ plugins {
 
 kotlin {
     jvm {}
+
+    iosArm64 {
+        binaries.framework {
+            baseName = "httpmocker_ktor"
+        }
+    }
+
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = "httpmocker_ktor"
+        }
+    }
+
+    iosX64 {
+        binaries.framework {
+            baseName = "httpmocker_ktor"
+        }
+    }
 
     sourceSets {
         commonMain {
