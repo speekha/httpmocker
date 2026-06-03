@@ -106,7 +106,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Download Dependencies
-          command: ./gradlew --no-daemon androidDependencies --stacktrace
+          command: ./gradlew --no-daemon downloadDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
@@ -209,7 +209,7 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew --no-daemon tests:test demo:testOkhttpReleaseUnitTest demo:testKtorReleaseUnitTest tests:jacocoTestReport --stacktrace
+          command: ./gradlew --no-daemon tests:test demo:test tests:jacocoTestReport --stacktrace
       - coverage-reporter/send_report:
           coverage-reports: tests/build/reports/jacoco/test/jacocoTestReport.xml
           project-token: $CODACY_PROJECT_TOKEN

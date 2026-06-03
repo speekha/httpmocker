@@ -57,4 +57,21 @@ tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }
 
+tasks.register("downloadDependencies") {
+    doLast {
+        val configs = listOf(
+            "debugCompileClasspath",
+            "debugRuntimeClasspath",
+            "releaseCompileClasspath",
+            "releaseRuntimeClasspath"
+        )
+
+        allprojects.forEach { project ->
+            configs.forEach { name ->
+                project.configurations.findByName(name)?.resolve()
+            }
+        }
+    }
+}
+
 apply(from = "gradle/detekt.gradle")
