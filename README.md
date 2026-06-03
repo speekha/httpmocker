@@ -1,15 +1,14 @@
 # HttpMocker
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.speekha.httpmocker/mocker-core/badge.svg?color=blue)](https://search.maven.org/search?q=fr.speekha.httpmocker)
+![Maven Central Version](https://img.shields.io/maven-central/v/fr.speekha.httpmocker/mocker-core)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![HacktoberFest](https://badgen.net/badge/hacktoberfest/friendly)](https://hacktoberfest.digitalocean.com/)
 
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
-
 [![CodeFactor](https://www.codefactor.io/repository/github/speekha/httpmocker/badge)](https://www.codefactor.io/repository/github/speekha/httpmocker)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://www.codacy.com/app/speekha/httpmocker)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://app.codacy.com/gh/speekha/httpmocker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://app.codacy.com/gh/speekha/httpmocker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
 **HttpMocker** is a very lightweight multiplatform Kotlin library that allows to mock HTTP calls relying on either
 OkHttp or the Ktor client libraries. It supports **JVM**, **Android**, and **iOS** platforms.
@@ -36,7 +35,7 @@ completed or refactored). Any help to improve the quality of the iOS version is 
 ## Current Version
 
 ```gradle
-httpmocker_version = '2.0.0-alpha'
+httpmocker_version = '2.0.0'
 ```
 
 Current version supports JVM, Android, and iOS platforms. It is stable for production use.
@@ -77,13 +76,13 @@ You can add the dependency to your `build.gradle` by adding on of the following 
 ```gradle
 // Core module: you don't need to add it explicitly to your gradle (it will be included as a transitive dependency 
 // of the other modules)
-implementation "fr.speekha.httpmocker:mocker-core:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:mocker-core:2.0.0"
 
 // Handles mocks for OkHttp (JVM and Android only)
-implementation "fr.speekha.httpmocker:mocker-okhttp:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:mocker-okhttp:2.0.0"
 
 // Handles mocks for Ktor (JVM, Android, and iOS)
-implementation "fr.speekha.httpmocker:mocker-ktor:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:mocker-ktor:2.0.0"
 ```
 
 Currently, there are six possible options that are provided for parsing, based on some of the 
@@ -103,22 +102,22 @@ corresponding `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:jackson-adapter:2.0.0"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:gson-adapter:2.0.0"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:moshi-adapter:2.0.0"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:2.0.0"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:custom-adapter:2.0.0"
 
 // Parses XML scenarios using a custom SAX parser
-implementation "fr.speekha.httpmocker:sax-adapter:2.0.0-alpha"
+implementation "fr.speekha.httpmocker:sax-adapter:2.0.0"
 ```
 
 If none of those options suit your needs, you can also provide your own implementation of the `Mapper` class. You can 
