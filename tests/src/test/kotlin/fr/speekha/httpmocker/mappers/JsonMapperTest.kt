@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package fr.speekha.httpmocker.mappers
 
-import fr.speekha.httpmocker.model.Header
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.Mapper
@@ -36,17 +37,17 @@ class JsonMapperTest {
     inner class ParseJson {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When input is a comprehensive file, then a fully populated object should be returned`(
             title: String,
             mapper: Mapper
         ) {
-            val result = mapper.readMatches(getCompleteJsonInput())
+            val result = mapper.readMatches(getCompleteJsonInput().asReader())
             assertEquals(completeData, result)
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When input is a partial scenario, then default values should be used`(
             title: String,
             mapper: Mapper
@@ -56,7 +57,7 @@ class JsonMapperTest {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When input is a partial scenario with error, then default values should be used`(
             title: String,
             mapper: Mapper
@@ -66,7 +67,7 @@ class JsonMapperTest {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When headers contain colons, then their value should be properly parsed`(
             title: String,
             mapper: Mapper
@@ -86,17 +87,17 @@ class JsonMapperTest {
                     Matcher(
                         response = ResponseDescriptor(
                             headers = listOf(
-                                Header("Location", "http://www.google.com")
+                                NamedParameter("Location", "http://www.google.com")
                             )
                         )
                     )
                 ),
-                mapper.readMatches(json.byteInputStream())
+                mapper.readMatches(json.byteInputStream().asReader())
             )
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When headers contain quotes, then their value should be properly parsed`(
             title: String,
             mapper: Mapper
@@ -116,12 +117,12 @@ class JsonMapperTest {
                     Matcher(
                         response = ResponseDescriptor(
                             headers = listOf(
-                                Header("Set-Cookie", "\"cookie\"=\"value\"")
+                                NamedParameter("Set-Cookie", "\"cookie\"=\"value\"")
                             )
                         )
                     )
                 ),
-                mapper.readMatches(json.byteInputStream())
+                mapper.readMatches(json.byteInputStream().asReader())
             )
         }
     }
@@ -131,7 +132,7 @@ class JsonMapperTest {
     inner class WriteJson {
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When input is minimal, then null fields should be omitted`(
             title: String,
             mapper: Mapper
@@ -149,7 +150,7 @@ class JsonMapperTest {
         }
 
         @ParameterizedTest(name = "Mapper: {0}")
-        @MethodSource("fr.speekha.httpmocker.interceptor.TestWithServer#jsonMappers")
+        @MethodSource("fr.speekha.httpmocker.client.TestWithServer#jsonMappers")
         fun `When input is a complete object, the all fields should be properly written`(
             title: String,
             mapper: Mapper

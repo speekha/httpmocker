@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ sealed class Result<T : Any> {
     abstract fun getOrNull(): T?
 }
 
-class Success<T : Any>(val value: T) : Result<T>() {
+class Success<T : Any>(val value: T?) : Result<T>() {
     override fun getOrNull(): T? = value
 }
 
@@ -28,7 +28,7 @@ class Failure<T : Any>(val error: Throwable) : Result<T>() {
     override fun getOrNull(): T? = null
 }
 
-@SuppressWarnings("TooGenericExceptionCaught")
+@Suppress("TooGenericExceptionCaught")
 inline fun <T : Any> resultOf(block: () -> T): Result<T> = try {
     Success(block())
 } catch (e: Throwable) {

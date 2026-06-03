@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package fr.speekha.httpmocker.sax.builders
 
-import fr.speekha.httpmocker.model.Header
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.NamedParameter
+import fr.speekha.httpmocker.model.RequestTemplate
 import org.xml.sax.Attributes
 
 class RequestBuilder(
@@ -27,7 +27,7 @@ class RequestBuilder(
     NodeWithHeaders,
     NodeWithBody {
 
-    override var headers = mutableListOf<Header>()
+    override var headers = mutableListOf<NamedParameter>()
 
     override var body: String? = null
 
@@ -35,7 +35,7 @@ class RequestBuilder(
         get() = error("Body file not supported in requests")
         set(_) = error("Body file not supported in requests")
 
-    private var params = mutableMapOf<String, String?>()
+    private var params = mutableListOf<NamedParameter>()
 
     private val exactMatch = attributes?.getValue("exact-match")?.toBoolean() ?: false
 
@@ -51,7 +51,7 @@ class RequestBuilder(
 
     override fun build() {
         parent.setRequest(
-            RequestDescriptor(
+            RequestTemplate(
                 exactMatch = exactMatch,
                 protocol = protocol,
                 method = method,
@@ -80,6 +80,6 @@ class RequestBuilder(
     }
 
     fun addQueryParam(key: String, value: String?) {
-        params[key] = value
+        params.add(NamedParameter(key, value))
     }
 }

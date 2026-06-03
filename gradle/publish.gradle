@@ -1,10 +1,5 @@
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.jfrog.artifactory'
-
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,92 +14,50 @@ apply plugin: 'com.jfrog.artifactory'
  * limitations under the License.
  */
 
-// custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+apply plugin: 'com.vanniktech.maven.publish'
 
-artifacts {
-    archives sourcesJar, dokkaJar
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            id "speekha"
-            name "David Blanc"
-            email "david.e.blanc@gmail.com"
-        }
-    }
-
-    scm {
-        url "https://github.com/speekha/httpmocker.git"
+tasks.register('logPublishVersion') {
+    doFirst {
+        logger.warn("========================================")
+        logger.warn("Publishing ${project.name} version: ${project.version}")
+        logger.warn("========================================")
     }
 }
 
-publishing {
-    publications {
-        mavenPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact dokkaJar
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'A simple mocking lib for OkHttp')
-                root.appendNode('name', 'HTTP Mocker')
-                root.appendNode('url', 'https://github.com/speekha/httpmocker.git')
-                root.children().last() + pomConfig
+// Ensure version is logged before any publish task runs
+tasks.withType(PublishToMavenRepository).configureEach {
+    dependsOn('logPublishVersion')
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    pom {
+
+        name = POM_NAME
+        description = POM_DESCRIPTION
+        url = POM_URL
+        inceptionYear = POM_INCEPTION_YEAR
+        licenses {
+            license {
+                name = POM_LICENCE_NAME
+                url = POM_LICENCE_URL
+                distribution = POM_LICENCE_DIST
             }
         }
-    }
-}
-
-bintray {
-    user = System.getProperty('bintray.user')
-    key = System.getProperty('bintray.key')
-    publications = ['mavenPublication']
-
-    configurations = ['archives']
-
-    publish = true
-    override = true
-    pkg {
-        repo = 'httpmocker'
-        name = archivesBaseName
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/speekha/httpmocker.git'
-        version {
-            name = "$httpmock_version"
-            desc = "$httpmock_version"
-            released = new Date()
+        developers {
+            developer {
+                id = POM_DEVELOPER_ID
+                name = POM_DEVELOPER_NAME
+                email = POM_DEVELOPER_EMAIL
+                url = POM_DEVELOPER_URL
+            }
+        }
+        scm {
+            url = POM_SCM_URL
+            connection = POM_SCM_CONNECTION
+            developerConnection = POM_SCM_DEV_CONNECTION
         }
     }
-}
-
-artifactory {
-    contextUrl = 'http://oss.jfrog.org'
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local'
-            username = System.getProperty('bintray.user')
-            password = System.getProperty('bintray.key')
-        }
-        defaults {
-            publications('mavenPublication')
-            publishArtifacts = true
-            publishPom = true
-        }
-    }
-    resolve {
-        repoKey = 'jcenter'
-    }
-    clientConfig.info.setBuildNumber(System.getProperty('build.number'))
 }

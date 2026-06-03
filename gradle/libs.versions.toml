@@ -1,0 +1,155 @@
+# Copyright 2019-2021 David Blanc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[versions]
+gradle = "9.1.1"
+kotlin = "2.3.21"
+agp = "8.13.2"
+koinAndroid = "4.2.1"
+kotlinGradlePlugin = "2.3.21"
+ksp = "2.3.4"
+coroutines = "1.11.0"
+jackson = "2.21.4"
+jackson-annotations = "2.21"
+gson = "2.14.0"
+moshi = "1.15.2"
+kotlinxSerialization = "1.11.0"
+okhttp = "5.3.2"
+ktor = "2.3.13"
+retrofit = "3.0.0"
+slf4j = "1.7.36"
+junit5 = "5.10.2"
+junit4 = "4.13.2"
+junitPlatofmrLauncher = "1.10.2"
+mockk = "1.14.9"
+detekt = "1.23.8"
+ktlint = "10.2.0"
+vanniktechPublish = "0.36.0"
+composeBom = "2026.05.01"
+appcompat = "1.7.1"
+uniflow = "1.1.2"
+androidx-core = "1.18.0"
+androidx-constraintlayout = "2.2.1"
+androidx-recyclerview = "1.4.0"
+androidx-material = "1.14.0"
+androidx-lifecycle = "2.10.0"
+androidx-compose-runtime = "1.11.2"
+androidx-activity = "1.13.0"
+androidx-arch-core = "2.2.0"
+
+[libraries]
+# Coroutines
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# Kotlin
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+
+# Koin
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
+
+# Jackson
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson-annotations" }
+
+# Gson
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+# Moshi
+kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
+moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
+
+# KotlinX Serialization
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+# OkHttp
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+
+# Ktor
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+# Retrofit
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-jackson = { module = "com.squareup.retrofit2:converter-jackson", version.ref = "retrofit" }
+
+# SLF4J
+slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4j" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+
+# JUnit
+junit4 = { module = "junit:junit", version.ref = "junit4" }
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatofmrLauncher" }
+
+# MockK
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+# Compose
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+
+# Android
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx-constraintlayout" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "androidx-recyclerview" }
+androidx-material = { module = "com.google.android.material:material", version.ref = "androidx-material" }
+androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "androidx-compose-runtime" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-arch-core = { module = "androidx.arch.core:core-testing", version.ref = "androidx-arch-core" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+
+# UniFlow
+uniflow-core = { module = "org.uniflow-kt:uniflow-core", version.ref = "uniflow" }
+uniflow-test = { module = "org.uniflow-kt:uniflow-test", version.ref = "uniflow" }
+uniflow-android = { module = "org.uniflow-kt:uniflow-android", version.ref = "uniflow" }
+uniflow-android-test = { module = "org.uniflow-kt:uniflow-android-test", version.ref = "uniflow" }
+
+[bundles]
+jackson = ["jackson-core", "jackson-kotlin", "jackson-annotations", "jackson-databind"]
+ktor = ["ktor-client-cio", "ktor-content-negotiation", "ktor-serialization-json"]
+junit = ["junit-api", "junit-params", "junit-engine"]
+androidx = ["appcompat", "androidx-core", "androidx-constraintlayout", "androidx-recyclerview", "androidx-material"]
+androidx-lifecycle = ["androidx-lifecycle-runtime", "androidx-lifecycle-viewmodel-compose", "androidx-lifecycle-viewmodel"]
+androidx-compose = ["androidx-compose-runtime", "androidx-activity-compose", "androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-ui-tooling-preview", "androidx-compose-material3"]
+uniflow = ["uniflow-core", "uniflow-android"]
+uniflow-test = ["uniflow-test", "uniflow-android-test"]
+
+[plugins]
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+vanniktechPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechPublish" }

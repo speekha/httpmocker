@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package fr.speekha.httpmocker.policies
 
-import fr.speekha.httpmocker.buildRequest
+import fr.speekha.httpmocker.HTTP_METHOD_POST
+import fr.speekha.httpmocker.io.HttpRequest
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.XML_FORMAT
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,11 +37,12 @@ class MirrorPathPolicyTest {
         @Test
         @DisplayName("When processing a URL, then file path should be kept from the URL")
         fun `should mirror URL`() {
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path",
+                method = HTTP_METHOD_POST,
+                body = "body",
+                headers = listOf(NamedParameter("header", "value")),
             )
             assertEquals("test/with/path.json", policy.getPath(request))
         }
@@ -50,11 +53,12 @@ class MirrorPathPolicyTest {
                 "then index.json should be added in the last empty segment"
         )
         fun `should add index to path`() {
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path/",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path/",
+                method = HTTP_METHOD_POST,
+                body = "body",
+                headers = listOf(NamedParameter("header", "value")),
             )
             assertEquals("test/with/path/index.json", policy.getPath(request))
         }
@@ -67,11 +71,12 @@ class MirrorPathPolicyTest {
         fun `should use proper extensions`() {
             val xmlPolicy: FilingPolicy = MirrorPathPolicy(XML_FORMAT)
 
-            val request = buildRequest(
-                "http://www.somestuff.com/test/with/path/",
-                listOf("header" to "value"),
-                "POST",
-                "body"
+            val request = HttpRequest(
+                host = "www.somestuff.com",
+                path = "/test/with/path/",
+                method = HTTP_METHOD_POST,
+                body = "body",
+                headers = listOf(NamedParameter("header", "value")),
             )
             assertEquals("test/with/path/index.xml", xmlPolicy.getPath(request))
         }

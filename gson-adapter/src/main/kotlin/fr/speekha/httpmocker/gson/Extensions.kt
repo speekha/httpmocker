@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package fr.speekha.httpmocker.gson
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
+import fr.speekha.httpmocker.model.NamedParameter
 
 internal fun JsonReader.readStringOrNull(): String? = if (peek() == JsonToken.NULL) {
     nextNull()
@@ -37,7 +38,7 @@ internal fun <T> JsonReader.readList(list: MutableList<T>, initObject: (String, 
 
 internal fun <T> JsonWriter.writeList(
     params: List<T>?,
-    transform: (T) -> Pair<String, String?>
+    transform: (T) -> NamedParameter
 ) {
     beginObject()
     serializeNulls = true

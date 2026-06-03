@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.io.StreamReader
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.io.readAsStringList
-import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.InputStream
 
 internal val completeData = listOf(
     Matcher(
-        RequestDescriptor(
+        RequestTemplate(
             exactMatch = true,
             protocol = "https",
             method = "post",
@@ -35,13 +37,17 @@ internal val completeData = listOf(
             port = 15926,
             path = "/path",
             headers = listOf(
-                Header("reqHeader1", "1"),
-                Header("reqHeader1", "2"),
-                Header("reqHeader2", "3"),
-                Header("reqHeader3", null),
-                Header("Set-Cookie", "\"cookie\"=\"value\"")
+                NamedParameter("reqHeader1", "1"),
+                NamedParameter("reqHeader1", "2"),
+                NamedParameter("reqHeader2", "3"),
+                NamedParameter("reqHeader3", null),
+                NamedParameter("Set-Cookie", "\"cookie\"=\"value\"")
             ),
-            params = mapOf("param1" to "1", "param2" to "2", "param3" to null),
+            params = listOf(
+                NamedParameter("param1", "1"),
+                NamedParameter("param2", "2"),
+                NamedParameter("param3", null)
+            ),
             body = ".*<1>.*"
         ),
         ResponseDescriptor(
@@ -49,9 +55,9 @@ internal val completeData = listOf(
             code = 201,
             mediaType = "application/json",
             headers = listOf(
-                Header("resHeader1", "4"),
-                Header("resHeader1", "5"),
-                Header("resHeader2", "6")
+                NamedParameter("resHeader1", "4"),
+                NamedParameter("resHeader1", "5"),
+                NamedParameter("resHeader2", "6")
             ),
             body = "<simple body />",
             bodyFile = "body_content.txt"
@@ -64,31 +70,30 @@ internal val completeData = listOf(
 )
 
 internal val partialData = listOf(
-    Matcher(RequestDescriptor(), ResponseDescriptor()),
-    Matcher(RequestDescriptor(), ResponseDescriptor())
+    Matcher(RequestTemplate(), ResponseDescriptor()),
+    Matcher(RequestTemplate(), ResponseDescriptor())
 )
 
 internal val partialDataError = listOf(
     Matcher(error = NetworkError("SomeExceptionType"))
 )
 
-internal fun getCompleteJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.json") ?: "".byteInputStream()
+internal fun getCompleteJsonInput(): InputStream = loadAsStream("complete_input.json")
 
-internal fun getCompleteXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("complete_input.xml") ?: "".byteInputStream()
+internal fun getCompleteXmlInput(): InputStream = loadAsStream("complete_input.xml")
 
-internal fun getPartialJsonInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.json") ?: "".byteInputStream()
+internal fun getPartialJsonInput(): StreamReader = loadAsReader("partial_input.json")
 
-internal fun getPartialXmlInput(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_input.xml") ?: "".byteInputStream()
+internal fun getPartialXmlInput(): StreamReader = loadAsReader("partial_input.xml")
 
-internal fun getPartialJsonInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_with_error.json") ?: "".byteInputStream()
+internal fun getPartialJsonInputWithError(): StreamReader = loadAsReader("partial_with_error.json")
 
-internal fun getPartialXmlInputWithError(): InputStream = ClassLoader.getSystemClassLoader()
-    .getResourceAsStream("partial_with_error.xml") ?: "".byteInputStream()
+internal fun getPartialXmlInputWithError(): StreamReader = loadAsReader("partial_with_error.xml")
+
+private fun loadAsReader(fileName: String) = loadAsStream(fileName).asReader()
+
+private fun loadAsStream(fileName: String) =
+    ClassLoader.getSystemClassLoader().getResourceAsStream(fileName) ?: "".byteInputStream()
 
 internal fun getExpectedJsonOutput() = getCompleteJsonInput().readAsStringList()
     .map {

@@ -1,7 +1,7 @@
 [
   {
     "request": {
-      "exact-match" : true,
+      "exact-match": true,
       "headers": {
         "header1": "1"
       }
@@ -12,9 +12,37 @@
   },
   {
     "request": {
-      "exact-match" : true,
+      "exact-match": true,
+      "headers": {
+        "header1": "1",
+        "Accept-Charset": "UTF-8",
+        "Accept": "*/*"
+      }
+    },
+    "response": {
+      "body": "Exact headers"
+    }
+  },
+  {
+    "request": {
+      "exact-match": true,
       "params": {
         "param1": "1"
+      }
+    },
+    "response": {
+      "body": "Exact params"
+    }
+  },
+  {
+    "request": {
+      "exact-match": true,
+      "params": {
+        "param1": "1"
+      },
+      "headers": {
+        "Accept-Charset": "UTF-8",
+        "Accept": "*/*"
       }
     },
     "response": {

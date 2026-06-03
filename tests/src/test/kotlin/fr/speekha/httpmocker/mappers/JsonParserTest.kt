@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.assertThrows
 import fr.speekha.httpmocker.custom.parser.INCORRECT_FIELD
 import fr.speekha.httpmocker.custom.parser.INVALID_BOOLEAN_ERROR
 import fr.speekha.httpmocker.custom.parser.INVALID_NUMBER_ERROR
@@ -30,13 +31,16 @@ import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_OBJECT_ERROR
 import fr.speekha.httpmocker.custom.parser.WRONG_START_OF_STRING_FIELD_ERROR
 import fr.speekha.httpmocker.custom.parser.adapters.ObjectAdapter
 import fr.speekha.httpmocker.custom.serializer.truncate
+import fr.speekha.httpmocker.model.NamedParameter
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.StringStartsWith
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -44,6 +48,22 @@ import java.util.stream.Stream
 
 @DisplayName("Custom JSON parser")
 class JsonParserTest {
+
+    private val mapAdapter = object :
+        ObjectAdapter<Map<String, String?>> {
+        override fun fromJson(parser: JsonParser): Map<String, String?> {
+            val map = mutableMapOf<String, String?>()
+            parser.beginObject()
+            while (parser.hasNext()) {
+                val field = parser.readFieldName()
+                val value = parser.readString()
+                parser.next()
+                map += field to value
+            }
+            parser.endObject()
+            return map
+        }
+    }
 
     @Nested
     @DisplayName("Given an empty input")
@@ -267,15 +287,18 @@ class JsonParserTest {
         @Test
         fun `When parsing the object, then fields should be iterable`() {
             with(reader) {
-                val list = mutableListOf<Pair<String, String?>>()
+                val list = mutableListOf<NamedParameter>()
                 beginObject()
                 while (hasNext()) {
                     val field = readFieldName()
                     val value = readString()
                     next()
-                    list += field to value
+                    list += NamedParameter(field, value)
                 }
-                assertEquals(listOf("field1" to "1", "field2" to "2"), list)
+                assertEquals(
+                    listOf(NamedParameter("field1", "1"), NamedParameter("field2", "2")),
+                    list
+                )
             }
         }
 
@@ -456,22 +479,6 @@ class JsonParserTest {
         assertEquals(output, input.truncate(10))
     }
 
-    private val mapAdapter = object :
-        ObjectAdapter<Map<String, String?>> {
-        override fun fromJson(parser: JsonParser): Map<String, String?> {
-            val map = mutableMapOf<String, String?>()
-            parser.beginObject()
-            while (parser.hasNext()) {
-                val field = parser.readFieldName()
-                val value = parser.readString()
-                parser.next()
-                map += field to value
-            }
-            parser.endObject()
-            return map
-        }
-    }
-
     companion object {
         val simpleObject = """
         {
@@ -520,7 +527,7 @@ class JsonParserTest {
             message: String,
             noinline block: () -> Unit
         ) {
-            val exception = assertThrows<E>(block)
+            val exception = assertThrows<E>(block = block)
             exception.printStackTrace()
             assertThat(exception.message, StringStartsWith(message))
         }

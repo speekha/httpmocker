@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class JacksonMapper : Mapper {
     private val matcherTypeRef = jacksonTypeRef<List<JsonMatcher>>()
 
     override fun deserialize(payload: String): List<Matcher> =
-        mapper.readValue<List<JsonMatcher>>(payload, matcherTypeRef).toModel()
+        mapper.readValue(payload, matcherTypeRef).toModel()
 
     override fun serialize(matchers: List<Matcher>): String =
         mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matchers.map { it.fromModel() })

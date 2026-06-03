@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ internal data class ResponseDescriptor(
     val mediaType: String = DEFAULT_MEDIA_TYPE,
 
     @field:Json(name = HEADERS)
-    val headers: List<Header> = emptyList(),
+    val headers: List<KeyValue> = emptyList(),
 
     @field:Json(name = BODY)
     val body: String = "",

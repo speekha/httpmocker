@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package fr.speekha.httpmocker.gson
 
-import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.gson.model.Header as JsonHeader
 import fr.speekha.httpmocker.gson.model.Matcher as JsonMatcher
@@ -28,14 +28,14 @@ import fr.speekha.httpmocker.gson.model.RequestDescriptor as JsonRequestDescript
 import fr.speekha.httpmocker.gson.model.ResponseDescriptor as JsonResponseDescriptor
 
 internal fun JsonMatcher.toModel() =
-    Matcher(request?.toModel() ?: RequestDescriptor(), response?.toModel(), error?.toModel())
+    Matcher(request?.toModel() ?: RequestTemplate(), response?.toModel(), error?.toModel())
 
-private fun JsonRequestDescriptor.toModel() = RequestDescriptor(
+private fun JsonRequestDescriptor.toModel() = RequestTemplate(
     exactMatch ?: false, protocol, method, host, port, path,
-    headers.toModel(), params.associate { it }, body
+    headers.toModel(), params, body
 )
 
-private fun JsonHeader.toModel() = Header(name, value)
+private fun JsonHeader.toModel() = NamedParameter(name, value)
 
 private fun HeaderAdapter.HeaderList?.toModel() = this?.map { it.toModel() } ?: emptyList()
 
@@ -48,15 +48,15 @@ private fun JsonNetworkError.toModel() = NetworkError(exceptionType, message)
 internal fun Matcher.fromModel() =
     JsonMatcher(request.fromModel(), response?.fromModel(), error?.fromModel())
 
-private fun RequestDescriptor.fromModel() = JsonRequestDescriptor(
+private fun RequestTemplate.fromModel() = JsonRequestDescriptor(
     exactMatch.takeIf { it }, protocol, method, host, port, path,
     getHeaders(), ParamsAdapter.ParamList(params), body
 )
 
-private fun RequestDescriptor.getHeaders() =
+private fun RequestTemplate.getHeaders() =
     HeaderAdapter.HeaderList(headers.map { it.fromModel() })
 
-private fun Header.fromModel() = JsonHeader(name, value)
+private fun NamedParameter.fromModel() = JsonHeader(name, value)
 
 private fun ResponseDescriptor.fromModel() = JsonResponseDescriptor(
     delay,

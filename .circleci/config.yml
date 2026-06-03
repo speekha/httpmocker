@@ -3,7 +3,7 @@ version: 2.1
 references:
   container_config: &container_config
     docker:
-      - image: circleci/android:api-30
+      - image: cimg/android:2026.03
 
     working_directory: ~/data
 
@@ -22,11 +22,12 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-
-            - jars-{{ checksum "build.gradle" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-
             - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
   build_module:
     description: "Builds a specific module"
@@ -37,10 +38,27 @@ commands:
       - restore_sources_and_gradle
       - restore_cache:
           keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble << parameters.module >>:sourcesJar << parameters.module >>:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble --stacktrace
+      - save_cache:
+          key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - << parameters.module >>/build
+  build_kmm_module:
+    description: "Builds a specific module"
+    parameters:
+      module:
+        type: string
+    steps:
+      - restore_sources_and_gradle
+      - restore_cache:
+          keys:
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Build
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -51,7 +69,13 @@ commands:
       - restore_sources_and_gradle
       - restore_cache:
           keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-mocker-okhttp-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-mocker-ktor-{{ .Branch }}-{{ .Revision }}
       - restore_cache:
           keys:
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
@@ -73,6 +97,7 @@ commands:
 
 orbs:
   codecov: codecov/codecov@1.0.2
+  coverage-reporter: codacy/coverage-reporter@14.1.3
 
 jobs:
   init_workspace:
@@ -81,11 +106,11 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Download Dependencies
-          command: ./gradlew --no-daemon androidDependencies --stacktrace
+          command: ./gradlew --no-daemon downloadDependencies --stacktrace
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/versions.gradle" }}-{{ checksum "mocker/build.gradle" }}-{{ checksum "jackson-adapter/build.gradle" }}-{{ checksum "gson-adapter/build.gradle" }}-{{ checksum "moshi-adapter/build.gradle" }}-{{ checksum "custom-adapter/build.gradle" }}-{{ checksum "kotlinx-adapter/build.gradle" }}-{{ checksum "sax-adapter/build.gradle" }}-{{ checksum "demo/build.gradle" }}
+          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
       - save_cache:
           paths:
             - ~/.gradle/wrapper
@@ -103,11 +128,21 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker:clean mocker:assemble mocker:sourcesJar mocker:dokkaJar --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble --stacktrace
       - save_cache:
-          key: build-mocker-{{ .Branch }}-{{ .Revision }}
+          key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:
-            - mocker/build
+            - mocker-core/build
+  build_okhttp:
+    <<: *container_config
+    steps:
+      - build_module:
+          module: "mocker-okhttp"
+  build_ktor:
+    <<: *container_config
+    steps:
+      - build_kmm_module:
+          module: "mocker-ktor"
   build_jackson:
     <<: *container_config
     steps:
@@ -126,12 +161,12 @@ jobs:
   build_custom:
     <<: *container_config
     steps:
-      - build_module:
+      - build_kmm_module:
           module: "custom-adapter"
   build_kotlinx:
     <<: *container_config
     steps:
-      - build_module:
+      - build_kmm_module:
           module: "kotlinx-adapter"
   build_sax:
     <<: *container_config
@@ -144,15 +179,14 @@ jobs:
       - restore_sources_and_gradle
       - restore_cache:
           keys:
-            - build-mocker-{{ .Branch }}-{{ .Revision }}
-      - restore_cache:
-          keys:
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-okhttp-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-ktor-{{ .Branch }}-{{ .Revision }}
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
+            - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:testReleaseUnitTest demo:lint --stacktrace
-      - store_test_results:
-          path: demo/build/test-results
+          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:lint --stacktrace
       - store_artifacts:
           path: demo/build/outputs/apk/
           destination: apks
@@ -175,15 +209,25 @@ jobs:
       - restore_all_caches
       - run:
           name: Tests
-          command: ./gradlew --no-daemon tests:test tests:jacocoTestReport test:sendCoverageToCodacy --stacktrace
+          command: ./gradlew --no-daemon tests:test demo:test tests:jacocoTestReport --stacktrace
+      - coverage-reporter/send_report:
+          coverage-reports: tests/build/reports/jacoco/test/jacocoTestReport.xml
+          project-token: $CODACY_PROJECT_TOKEN
       - store_artifacts:
           path: tests/build/reports
           destination: reports
       - store_test_results:
           path: tests/build/test-results
           format: junit
+      - store_test_results:
+          path: demo/build/test-results
+      - store_test_results:
+          path: demo/build/test-results
+          format: junit
       - codecov/upload:
           file: tests/build/reports/jacoco/test/jacocoTestReport.xml
+      - codecov/upload:
+          file: demo/build/reports/jacoco/test/jacocoTestReport.xml
       - save_cache:
           key: build-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -196,8 +240,14 @@ jobs:
           name: Check quality
           command: ./gradlew --no-daemon detekt ktlintCheck --stacktrace
       - store_artifacts:
-          path: mocker/build/reports
-          destination: reports/mocker
+          path: mocker-core/build/reports
+          destination: reports/mocker-core
+      - store_artifacts:
+          path: mocker-okhttp/build/reports
+          destination: reports/mocker-okhttp
+      - store_artifacts:
+          path: mocker-ktor/build/reports
+          destination: reports/mocker-ktor
       - store_artifacts:
           path: custom-adapter/build/reports
           destination: reports/custom-adapter
@@ -235,7 +285,7 @@ jobs:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Publish
-          command: ./publishSnapshot.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
+          command: ./publishSnapshot.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_KEYRING}
   publish_release:
     <<: *container_config
     steps:
@@ -245,7 +295,7 @@ jobs:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Publish
-          command: ./publish.sh ${BINTRAY_USER} ${BINTRAY_APIKEY}
+          command: ./publish.sh ${SONATYPE_USERNAME} ${SONATYPE_PASSWORD} ${SIGNING_KEY_ID} ${SIGNING_KEY_PASSPHRASE} ${SIGNING_KEYRING}
 
 workflows:
   version: 2
@@ -255,6 +305,12 @@ workflows:
       - build_core:
           requires:
             - init_workspace
+      - build_okhttp:
+          requires:
+            - build_core
+      - build_ktor:
+          requires:
+            - build_core
       - build_jackson:
           requires:
             - build_core
@@ -275,9 +331,14 @@ workflows:
             - build_core
       - build_demo:
           requires:
+            - build_okhttp
+            - build_ktor
             - build_jackson
+            - build_kotlinx
       - store_artifacts:
           requires:
+            - build_okhttp
+            - build_ktor
             - build_jackson
             - build_gson
             - build_moshi
@@ -286,6 +347,8 @@ workflows:
             - build_sax
       - test:
           requires:
+            - build_okhttp
+            - build_ktor
             - build_jackson
             - build_gson
             - build_moshi
@@ -308,4 +371,4 @@ workflows:
             - quality
           filters:
             branches:
-              only: master
+              only: main

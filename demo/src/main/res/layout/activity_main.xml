@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 David Blanc
+  ~ Copyright 2019-2021 David Blanc
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@
 
     <TextView
         android:id="@+id/tvMessage"
-        style="?textAppearanceSubtitle1"
+            style="?android:textAppearanceLarge"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -52,7 +52,7 @@
 
     <TextView
         android:id="@+id/tvState"
-        style="?textAppearanceSubtitle1"
+            style="?android:textAppearanceLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

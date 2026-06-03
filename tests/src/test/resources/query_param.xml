@@ -4,6 +4,17 @@
         <request>
             <url>
                 <param name="param">1</param>
+                <param name="param">2</param>
+            </url>
+        </request>
+        <response delay="0" code="200" media-type="text/plain">
+            <body>param C</body>
+        </response>
+    </case>
+    <case>
+        <request>
+            <url>
+                <param name="param">1</param>
             </url>
         </request>
         <response delay="0" code="200" media-type="text/plain">

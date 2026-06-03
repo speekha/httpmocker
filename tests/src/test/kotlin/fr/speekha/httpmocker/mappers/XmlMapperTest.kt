@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package fr.speekha.httpmocker.mappers
 
+import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.model.NetworkError
 import fr.speekha.httpmocker.model.ResponseDescriptor
@@ -37,7 +38,7 @@ class XmlMapperTest {
 
         @Test
         fun `When input is a comprehensive file, then a fully populated object should be returned`() {
-            val result = mapper.readMatches(getCompleteXmlInput())
+            val result = mapper.readMatches(getCompleteXmlInput().asReader())
             assertEquals(completeData, result)
         }
 

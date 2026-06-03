@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,19 @@
 
 package fr.speekha.httpmocker.demo.ui
 
-import androidx.lifecycle.Observer
 import fr.speekha.httpmocker.Mode
-import fr.speekha.httpmocker.builder.mockInterceptor
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.model.Repo
 import fr.speekha.httpmocker.demo.model.User
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
-import fr.speekha.httpmocker.jackson.JacksonMapper
 import io.mockk.coEvery
-import io.mockk.coVerifyOrder
-import io.mockk.confirmVerified
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.uniflow.android.test.createTestObserver
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 
 @ExperimentalCoroutinesApi
-class MainViewModelTest : ViewModelTest() {
+abstract class MainViewModelTest : ViewModelTest() {
 
     private val org = "kotlin"
     private val repo = "repo"
@@ -46,140 +36,129 @@ class MainViewModelTest : ViewModelTest() {
     private val contributions = 1
     private val id = 0L
 
-    private lateinit var mockService: GithubApiEndpoints
-    private val mockResponseInterceptor =
-        mockInterceptor {
-            parseScenariosWith(JacksonMapper())
-        }
+    protected lateinit var mockService: GithubApiEndpoints
 
-    private lateinit var viewModel: MainViewModel
+    protected lateinit var viewModel: MainViewModel
 
-    @Before
-    fun setup() {
-        mockService = mockk()
-        viewModel = MainViewModel(mockService, mockResponseInterceptor)
-    }
+    abstract fun assertInterceptorMode(mode: Mode)
 
     @Test
     fun `should succeed repos and top contributors calls`() {
-        val observer = spyk<Observer<Data>>()
-        runBlocking {
-            viewModel.getData().observeForever(observer)
+        val observer = viewModel.createTestObserver()
 
-            coEvery { mockService.listRepositoriesForOrganisation(org) } returns
-                listOf(Repo(id, repo, topContributor = contributor))
-            coEvery { mockService.listContributorsForRepository(org, repo) } returns
-                listOf(User(login = contributor, contributions = contributions))
+        coEvery { mockService.listRepositoriesForOrganisation(org) } returns
+            listOf(Repo(id, repo, topContributor = contributor))
+        coEvery { mockService.listContributorsForRepository(org, repo) } returns
+            listOf(User(login = contributor, contributions = contributions))
 
-            viewModel.callService().join()
-        }
+        viewModel.callService()
+        coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerifyOrder {
-            observer.onChanged(Data.Loading)
-            observer.onChanged(
-                Data.Success(
-                    listOf(
-                        Repo(
-                            id,
-                            repo,
-                            topContributor = "$contributor - $contributions contributions"
-                        )
-                    )
-                )
+        observer.verifySequence(
+            State(R.string.disabled_description, Mode.DISABLED, Data.Empty),
+            State(R.string.disabled_description, Mode.DISABLED, Data.Loading),
+            State(
+                R.string.disabled_description,
+                Mode.DISABLED,
+                Data.Success(listOf(Repo(id, repo, "$contributor - $contributions contributions")))
             )
-        }
-        confirmVerified(observer)
-        viewModel.getData().removeObserver(observer)
+        )
     }
 
     @Test
     fun `should succeed repos call and fail top contributors call`() {
-        val observer = spyk<Observer<Data>>()
-        runBlocking {
-            viewModel.getData().observeForever(observer)
-            coEvery { mockService.listRepositoriesForOrganisation(org) } returns
-                listOf(Repo(id, repo, topContributor = contributor))
-            coEvery {
-                mockService.listContributorsForRepository(
-                    org,
-                    repo
-                )
-            } throws IOException("Test exception")
+        val observer = viewModel.createTestObserver()
+        coEvery { mockService.listRepositoriesForOrganisation(org) } returns
+            listOf(Repo(id, repo, topContributor = contributor))
+        coEvery {
+            mockService.listContributorsForRepository(org, repo)
+        } throws IOException("Test exception")
 
-            viewModel.callService().join()
-        }
+        viewModel.callService()
+        coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerifyOrder {
-            observer.onChanged(Data.Loading)
-            observer.onChanged(Data.Success(listOf(Repo(id, repo))))
-        }
-        confirmVerified(observer)
-        viewModel.getData().removeObserver(observer)
+        observer.verifySequence(
+            State(R.string.disabled_description, Mode.DISABLED, Data.Empty),
+            State(R.string.disabled_description, Mode.DISABLED, Data.Loading),
+            State(R.string.disabled_description, Mode.DISABLED, Data.Success(listOf(Repo(id, repo))))
+        )
     }
 
     @Test
     fun `should fail repos call`() {
         val errorMessage = "error"
-        val observer = spyk<Observer<Data>>()
-        runBlocking {
-            viewModel.getData().observeForever(observer)
-            coEvery { mockService.listRepositoriesForOrganisation(org) } throws IOException(
-                errorMessage
-            )
+        val observer = viewModel.createTestObserver()
 
-            viewModel.callService().join()
-        }
+        coEvery {
+            mockService.listRepositoriesForOrganisation(org)
+        } throws IOException(errorMessage)
 
-        coVerifyOrder {
-            observer.onChanged(Data.Loading)
-            observer.onChanged(Data.Error(errorMessage))
-        }
-        confirmVerified(observer)
-        viewModel.getData().removeObserver(observer)
+        viewModel.callService()
+        coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
+
+        observer.verifySequence(
+            State(R.string.disabled_description, Mode.DISABLED, Data.Empty),
+            State(R.string.disabled_description, Mode.DISABLED, Data.Loading),
+            State(R.string.disabled_description, Mode.DISABLED, Data.Error(errorMessage))
+        )
     }
 
     @Test
     fun `should update state according to disabled mode`() {
-        val observer = spyk<Observer<State>>()
-        viewModel.getState().observeForever(observer)
+        val observer = viewModel.createTestObserver()
 
         viewModel.setMode(Mode.DISABLED)
 
-        assertEquals(mockResponseInterceptor.mode, Mode.DISABLED)
-        verify { observer.onChanged(State.Message(R.string.disabled_description)) }
+        assertInterceptorMode(Mode.DISABLED)
+        observer.verifySequence(State(R.string.disabled_description, Mode.DISABLED, Data.Empty))
     }
 
     @Test
     fun `should update state according to enabled mode`() {
-        val observer = spyk<Observer<State>>()
-        viewModel.getState().observeForever(observer)
+        val observer = viewModel.createTestObserver()
 
-        viewModel.setMode(Mode.ENABLED)
+        coroutinesTestRule.testDispatcher.scheduler.let {
+            viewModel.setMode(Mode.ENABLED)
+            it.advanceUntilIdle()
+        }
 
-        assertEquals(mockResponseInterceptor.mode, Mode.ENABLED)
-        verify { observer.onChanged(State.Message(R.string.enabled_description)) }
+        assertInterceptorMode(Mode.ENABLED)
+        observer.verifySequence(
+            State(R.string.disabled_description, Mode.DISABLED, Data.Empty),
+            State(R.string.enabled_description, Mode.ENABLED, Data.Empty)
+        )
     }
 
     @Test
     fun `should update state according to mixed mode`() {
-        val observer = spyk<Observer<State>>()
-        viewModel.getState().observeForever(observer)
+        val observer = viewModel.createTestObserver()
 
-        viewModel.setMode(Mode.MIXED)
+        coroutinesTestRule.testDispatcher.scheduler.let {
+            viewModel.setMode(Mode.MIXED)
+            it.advanceUntilIdle()
+        }
 
-        assertEquals(mockResponseInterceptor.mode, Mode.MIXED)
-        verify { observer.onChanged(State.Message(R.string.mixed_description)) }
+        assertInterceptorMode(Mode.MIXED)
+        observer.verifySequence(
+            State(R.string.disabled_description, Mode.DISABLED, Data.Empty),
+            State(R.string.mixed_description, Mode.MIXED, Data.Empty)
+        )
     }
 
     @Test
     fun `should check permission and update state according to record mode`() {
-        val observer = spyk<Observer<State>>()
-        viewModel.getState().observeForever(observer)
+        val observer = viewModel.createTestObserver()
 
-        viewModel.setMode(Mode.RECORD)
+        coroutinesTestRule.testDispatcher.scheduler.let {
+            viewModel.setMode(Mode.RECORD)
+            it.advanceUntilIdle()
+        }
 
-        assertEquals(mockResponseInterceptor.mode, Mode.RECORD)
-        verify { observer.onChanged(State.Permission) }
-        verify { observer.onChanged(State.Message(R.string.record_description)) }
+        assertInterceptorMode(Mode.RECORD)
+        observer.verifySequence(
+            State(R.string.disabled_description, Mode.DISABLED, Data.Empty),
+            Permission,
+            State(R.string.record_description, Mode.RECORD, Data.Empty)
+        )
     }
 }

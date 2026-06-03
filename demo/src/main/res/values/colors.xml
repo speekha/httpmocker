@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2019 David Blanc
+  ~ Copyright 2019-2021 David Blanc
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryLight">#00A895</color>
+    <color name="colorPrimaryVariant">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 </resources>

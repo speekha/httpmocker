@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.demo
 
 import android.app.Application
+import fr.speekha.httpmocker.demo.di.engineInjection
 import fr.speekha.httpmocker.demo.di.injectionModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -27,6 +28,7 @@ class DemoApplication : Application() {
         startKoin {
             androidContext(this@DemoApplication)
             modules(injectionModule)
+            modules(engineInjection)
         }
     }
 }

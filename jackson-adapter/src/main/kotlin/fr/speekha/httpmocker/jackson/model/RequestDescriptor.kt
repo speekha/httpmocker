@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import fr.speekha.httpmocker.jackson.serialization.HeadersDeserializer
-import fr.speekha.httpmocker.jackson.serialization.HeadersSerializer
+import fr.speekha.httpmocker.jackson.serialization.KeyValueDeserializer
+import fr.speekha.httpmocker.jackson.serialization.KeyValueSerializer
 import fr.speekha.httpmocker.serialization.BODY
 import fr.speekha.httpmocker.serialization.EXACT_MATCH
 import fr.speekha.httpmocker.serialization.HEADERS
@@ -57,13 +57,15 @@ constructor(
     val path: String? = null,
 
     @JsonProperty(HEADERS)
-    @JsonDeserialize(using = HeadersDeserializer::class)
-    @JsonSerialize(using = HeadersSerializer::class)
-    val headers: List<Header> = emptyList(),
+    @JsonDeserialize(using = KeyValueDeserializer::class)
+    @JsonSerialize(using = KeyValueSerializer::class)
+    val headers: List<KeyValue> = emptyList(),
 
     @JsonProperty(PARAMS)
     @JsonInclude(JsonInclude.Include.ALWAYS)
-    val params: Map<String, String?> = emptyMap(),
+    @JsonDeserialize(using = KeyValueDeserializer::class)
+    @JsonSerialize(using = KeyValueSerializer::class)
+    val params: List<KeyValue> = emptyList(),
 
     @JsonProperty(BODY)
     val body: String? = null

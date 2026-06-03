@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package fr.speekha.httpmocker.sax
 
-import fr.speekha.httpmocker.model.Header
 import fr.speekha.httpmocker.model.Matcher
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.model.NetworkError
-import fr.speekha.httpmocker.model.RequestDescriptor
+import fr.speekha.httpmocker.model.RequestTemplate
 import fr.speekha.httpmocker.model.ResponseDescriptor
 import fr.speekha.httpmocker.serialization.BODY
 import fr.speekha.httpmocker.serialization.CODE
@@ -52,7 +52,7 @@ private fun Matcher.toXml(indent: Int): String = writeTags("case", indent) {
     )
 }
 
-private fun RequestDescriptor.toXml(indentation: Int): String =
+private fun RequestTemplate.toXml(indentation: Int): String =
     writeTags(REQUEST, indentation, exactMatchAttribute()) {
         val subIndentation = indentation + 1
         writeTagList(
@@ -62,7 +62,7 @@ private fun RequestDescriptor.toXml(indentation: Int): String =
         )
     }
 
-private fun RequestDescriptor.getUrlAttributes(): List<Pair<String, Any?>> = listOf(
+private fun RequestTemplate.getUrlAttributes(): List<Pair<String, Any?>> = listOf(
     PROTOCOL to protocol,
     METHOD to method,
     HOST to host,
@@ -70,7 +70,7 @@ private fun RequestDescriptor.getUrlAttributes(): List<Pair<String, Any?>> = lis
     PATH to path
 )
 
-private fun RequestDescriptor.exactMatchAttribute() =
+private fun RequestTemplate.exactMatchAttribute() =
     listOf(EXACT_MATCH to true).takeIf { exactMatch } ?: emptyList()
 
 private fun ResponseDescriptor.toXml(indentation: Int): String = writeTags(
@@ -94,7 +94,7 @@ private fun NetworkError.toXml(indent: Int): String = writeCData(
 
 private fun writeUrl(
     attributes: List<Pair<String, Any?>>,
-    params: Map<String, String?>,
+    params: List<NamedParameter>,
     indent: Int
 ): String = if (attributes.any { it.second != null } || params.isNotEmpty()) {
     writeTags(URL, indent, attributes) { params.toXml(indent + 1) }
@@ -102,17 +102,17 @@ private fun writeUrl(
     ""
 }
 
-private fun writeHeaders(headers: List<Header>, indent: Int): String = if (headers.isEmpty()) {
+private fun writeHeaders(headers: List<NamedParameter>, indent: Int): String = if (headers.isEmpty()) {
     ""
 } else {
     headers.toXml { it.toXml(indent) }
 }
 
-private fun Header.toXml(indent: Int): String =
+private fun NamedParameter.toXml(indent: Int): String =
     writeCData(HEADER, indent, listOf("name" to name), value)
 
-private fun Map<String, String?>.toXml(indent: Int): String = entries.toXml {
-    writeCData(PARAM, indent, listOf("name" to it.key), it.value)
+private fun List<NamedParameter>.toXml(indent: Int): String = toXml {
+    writeCData(PARAM, indent, listOf("name" to it.name), it.value)
 }
 
 private fun writeTags(
@@ -173,10 +173,6 @@ private fun writeCData(
 }
 
 private fun indent(spaces: Int) = " ".repeat(spaces * SPACE_PER_TAB)
-
-private operator fun StringBuilder.plusAssign(obj: Any) {
-    append(obj)
-}
 
 private fun String?.orEmpty() = this ?: ""
 

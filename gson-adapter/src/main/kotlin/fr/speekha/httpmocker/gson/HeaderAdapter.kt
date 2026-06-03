@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David Blanc
+ * Copyright 2019-2021 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package fr.speekha.httpmocker.gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import fr.speekha.httpmocker.model.NamedParameter
 import fr.speekha.httpmocker.gson.model.Header as JsonHeader
 
 internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
@@ -26,7 +27,7 @@ internal class HeaderAdapter : TypeAdapter<HeaderAdapter.HeaderList>() {
     internal class HeaderList(list: List<JsonHeader> = emptyList()) : ArrayList<JsonHeader>(list)
 
     override fun write(writer: JsonWriter?, headers: HeaderList?) {
-        writer?.writeList(headers) { it.name to it.value }
+        writer?.writeList(headers) { NamedParameter(it.name, it.value) }
     }
 
     override fun read(reader: JsonReader?): HeaderList = HeaderList().also {
