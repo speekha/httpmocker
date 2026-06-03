@@ -63,6 +63,7 @@ dependencies {
 
     // Junit
     testImplementation(libs.bundles.junit)
+    testRuntimeOnly(libs.junit.launcher)
 
     // Mocks for Kotlin tests
     testImplementation(libs.mockk)
