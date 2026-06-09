@@ -68,9 +68,6 @@ The project is a Gradle multimodule build with the following structure:
 #### Code Quality Checks
 
 ```bash
-# KtLint (Kotlin linting) - applied to tests and demo only
-./gradlew ktlintCheck ktlintFormat
-
 # Detekt (static analysis)
 ./gradlew detekt
 ```
@@ -110,7 +107,6 @@ Key configuration in `gradle.properties`:
 ### Language & Style
 
 - **Language**: Kotlin with official code style
-- **Linting**: KtLint (applied only to test and demo modules via `gradle/ktlint.gradle`)
 - **Static Analysis**: Detekt with custom configuration (`detekt.yml`)
 - **JVM Target**: 21 (specified per-module in build.gradle.kts files)
 
@@ -162,7 +158,6 @@ All versions centralized in `gradle/libs.versions.toml`:
 - Jackson: 2.21.4, Gson: 2.14.0, Moshi: 1.15.2, KotlinX Serialization: 1.11.0
 - SLF4J: 1.7.36 (logging API)
 - Detekt: 1.23.8
-- KtLint: 10.2.0
 
 ### Publishing & Release
 
@@ -195,7 +190,6 @@ All versions centralized in `gradle/libs.versions.toml`:
     - `publish.gradle`: Publishing configuration for all modules
     - `coverage.gradle.kts`: Code coverage settings
     - `detekt.gradle`: Static analysis configuration
-    - `ktlint.gradle`: Kotlin linting configuration
 
 ## Common Workflows
 
@@ -211,7 +205,7 @@ All versions centralized in `gradle/libs.versions.toml`:
 ### Running All Checks Locally
 
 ```bash
-./gradlew clean build detekt ktlintCheck
+./gradlew clean build detekt
 ```
 
 ### Debugging Tests
