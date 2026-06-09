@@ -16,12 +16,12 @@
 
 package fr.speekha.httpmocker.demo.di
 
-import fr.speekha.httpmocker.demo.ui.MainViewModel
+import fr.speekha.httpmocker.demo.ui.main.MainViewModel
 import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.MirrorPathPolicy
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val injectionModule: Module = module {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui
+package fr.speekha.httpmocker.demo.ui.main
 
 import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.demo.ui.MockerWrapper
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
 import fr.speekha.httpmocker.okhttp.builder.recordScenariosIn
 import io.mockk.mockk
-import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase
 import org.junit.Before
 import java.io.File
 
@@ -42,5 +43,5 @@ class OkHttpMainViewModelTest : MainViewModelTest() {
         )
     }
 
-    override fun assertInterceptorMode(mode: Mode) = assertEquals(mode, mockResponseInterceptor.mode)
+    override fun assertInterceptorMode(mode: Mode) = TestCase.assertEquals(mode, mockResponseInterceptor.mode)
 }

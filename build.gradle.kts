@@ -54,7 +54,7 @@ configure(subprojects.filter { it.name in listOf("tests", "demo") }) {
 }
 
 tasks.register<Delete>("clean") {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }
 
 tasks.register("downloadDependencies") {

@@ -29,7 +29,7 @@ android {
     compileSdk = release(37)
 
     sourceSets {
-        getByName("main").kotlin.srcDirs("src/main/kotlin")
+        getByName("main").kotlin.directories.add("src/main/kotlin")
     }
 
     defaultConfig {
@@ -41,7 +41,7 @@ android {
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
     }
 
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = "36.0.0"
 
     flavorDimensions += "engine"
 
@@ -60,6 +60,7 @@ android {
         }
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

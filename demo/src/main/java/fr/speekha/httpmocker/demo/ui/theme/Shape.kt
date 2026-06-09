@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-@file:SuppressWarnings("MagicNumber")
+package fr.speekha.httpmocker.demo.ui.theme
 
-package fr.speekha.httpmocker.demo.ui.compose.theme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
 
-import androidx.compose.ui.graphics.Color
+val Shapes = Shapes(
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(4.dp),
+    large = RoundedCornerShape(0.dp)
+)
 
-val PrimaryDark = Color(0xFF00574B)
-val PrimaryLight = Color(0xFF00A895)
-val PrimaryVariant = Color(0xFF008577)
-val Secondary = Color(0xFFD81B60)
+val mediumPadding = 8.dp
