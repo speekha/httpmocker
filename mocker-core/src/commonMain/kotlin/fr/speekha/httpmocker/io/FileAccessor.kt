@@ -19,7 +19,7 @@ package fr.speekha.httpmocker.io
 /**
  * Utility class to manipulate files on different platforms.
  */
-expect class FileAccessor(path: String) {
+interface FileAccessor {
 
     val name: String
 
@@ -37,3 +37,5 @@ expect class FileAccessor(path: String) {
 
     fun getReader(): StreamReader
 }
+
+expect fun createFileAccessor(path: String) : FileAccessor

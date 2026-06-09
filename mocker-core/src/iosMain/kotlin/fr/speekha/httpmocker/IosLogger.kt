@@ -18,23 +18,25 @@ package fr.speekha.httpmocker
 
 import kotlin.reflect.KClass
 
-actual class Logger actual constructor(clazz: KClass<*>) {
+actual fun buildLogger(clazz: KClass<*>): Logger = IosLogger(clazz)
+
+class IosLogger(clazz: KClass<*>) : Logger {
 
     private val className = clazz.simpleName ?: "Unknown"
 
-    actual fun debug(message: String) {
+    override fun debug(message: String) {
         println("[DEBUG] $className: $message")
     }
 
-    actual fun info(message: String) {
+    override fun info(message: String) {
         println("[INFO] $className: $message")
     }
 
-    actual fun warn(message: String) {
+    override fun warn(message: String) {
         println("[WARN] $className: $message")
     }
 
-    actual fun error(message: String, exception: Throwable?) {
+    override fun error(message: String, exception: Throwable?) {
         if (exception != null) {
             println("[ERROR] $className: $message - ${exception.message}")
         } else {

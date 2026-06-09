@@ -16,7 +16,7 @@
 
 package fr.speekha.httpmocker.scenario
 
-import fr.speekha.httpmocker.ClassloaderUtils
+import fr.speekha.httpmocker.createException
 import fr.speekha.httpmocker.getLogger
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.io.IOException
@@ -90,7 +90,7 @@ internal class StaticMockProvider(
         segment != ".." && (index == size - 1 || get(index + 1) != "..")
     }
 
-    private fun throwError(error: NetworkError): Nothing = throw ClassloaderUtils.createException(error)
+    private fun throwError(error: NetworkError): Nothing = throw createException(error)
 
     override fun toString(): String = "static mock configuration"
 }

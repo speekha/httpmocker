@@ -38,10 +38,12 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.toByteArray
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 
-internal expect val dispatcherIO: CoroutineDispatcher
+internal val dispatcherIO: CoroutineDispatcher = Dispatchers.IO
 
 internal fun HttpResponseData.toDescriptor(url: Url) = ResponseDescriptor(
     code = statusCode.value,

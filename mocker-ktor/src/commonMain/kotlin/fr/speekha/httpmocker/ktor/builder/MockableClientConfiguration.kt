@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.ktor.builder
 
 import fr.speekha.httpmocker.builder.RecorderBuilder
 import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.createFileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockEngineConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -70,7 +71,7 @@ open class MockableClientConfiguration<T : HttpClientEngineConfig> {
      * @param folder the root folder where saved scenarios should be saved
      */
     fun MockEngineConfig.recordScenariosIn(folder: String): RecorderBuilder =
-        recordScenariosIn(FileAccessor(folder))
+        recordScenariosIn(createFileAccessor(folder))
 
     /**
      * Applies all the installed plugins and customInterceptors from this configuration

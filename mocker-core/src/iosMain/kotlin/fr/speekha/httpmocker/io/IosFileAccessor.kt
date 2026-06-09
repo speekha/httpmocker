@@ -20,33 +20,31 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 
-@OptIn(ExperimentalForeignApi::class)
-actual class FileAccessor actual constructor(
-    path: String
-) {
+actual fun createFileAccessor(path: String) : FileAccessor = IosFileAccessor(path)
+
+class IosFileAccessor(path: String) : FileAccessor {
 
     private val fileManager = NSFileManager.defaultManager()
     private val url = NSURL(fileURLWithPath = path)
 
-    actual val name: String
+    override val name: String
         get() = url.lastPathComponent ?: ""
 
-    actual val parentFile: FileAccessor?
-        get() = url.URLByDeletingLastPathComponent?.path?.let { FileAccessor(it) }
+    override val parentFile: IosFileAccessor?
+        get() = url.URLByDeletingLastPathComponent?.path?.let { IosFileAccessor(it) }
 
-    actual val absolutePath: String
+    override val absolutePath: String
         get() = url.path ?: ""
 
-    actual fun getFile(fileName: String): FileAccessor {
+    override fun getFile(fileName: String): IosFileAccessor {
         val childUrl = url.URLByAppendingPathComponent(fileName)
-        return FileAccessor(childUrl?.path ?: "")
+        return IosFileAccessor(childUrl?.path ?: "")
     }
 
-    actual fun exists(): Boolean {
-        return fileManager.fileExistsAtPath(absolutePath)
-    }
+    override fun exists(): Boolean = fileManager.fileExistsAtPath(absolutePath)
 
-    actual fun mkdir() {
+    override fun mkdir() {
+        @OptIn(ExperimentalForeignApi::class)
         fileManager.createDirectoryAtPath(
             absolutePath,
             withIntermediateDirectories = true,
@@ -55,13 +53,11 @@ actual class FileAccessor actual constructor(
         )
     }
 
-    actual fun getReader(): StreamReader {
+    override fun getReader(): StreamReader {
         val data = fileManager.contentsAtPath(absolutePath)
             ?: throw IOException("Unable to read file: $absolutePath")
-        return StreamReader(data)
+        return IosStreamReader(data)
     }
 
-    actual fun getWriter(): StreamWriter {
-        return StreamWriter(absolutePath)
-    }
+    override fun getWriter(): IosStreamWriter = IosStreamWriter(absolutePath)
 }

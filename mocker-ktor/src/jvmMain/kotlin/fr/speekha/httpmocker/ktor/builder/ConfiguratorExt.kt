@@ -18,8 +18,10 @@ package fr.speekha.httpmocker.ktor.builder
 
 import fr.speekha.httpmocker.builder.Configurator
 import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.JvmFileAccessor
+import fr.speekha.httpmocker.io.createFileAccessor
 import fr.speekha.httpmocker.policies.FilingPolicy
 import java.io.File
 
 fun Configurator.recordScenariosIn(folder: File, policy: FilingPolicy? = null) =
-    recordScenariosIn(FileAccessor(folder), policy)
+    recordScenariosIn(createFileAccessor(folder), policy)

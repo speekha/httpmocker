@@ -19,23 +19,25 @@ package fr.speekha.httpmocker
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
-actual class Logger actual constructor(clazz: KClass<*>) {
+actual fun buildLogger(clazz: KClass<*>): Logger = JvmLogger(clazz)
+
+class JvmLogger(clazz: KClass<*>) : Logger {
 
     private val logger = LoggerFactory.getLogger(clazz.java)
 
-    actual fun debug(message: String) {
+    override fun debug(message: String) {
         logger.debug(message)
     }
 
-    actual fun info(message: String) {
+    override fun info(message: String) {
         logger.info(message)
     }
 
-    actual fun warn(message: String) {
+    override fun warn(message: String) {
         logger.warn(message)
     }
 
-    actual fun error(message: String, exception: Throwable?) {
+    override fun error(message: String, exception: Throwable?) {
         if (exception != null) {
             logger.error(message, exception)
         } else {
