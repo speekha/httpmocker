@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui.compose.theme
+package fr.speekha.httpmocker.demo.ui.main
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Shapes
-import androidx.compose.ui.unit.dp
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 
-val Shapes = Shapes(
-    small = RoundedCornerShape(4.dp),
-    medium = RoundedCornerShape(4.dp),
-    large = RoundedCornerShape(0.dp)
-)
+open class ViewModelTest {
 
-val mediumPadding = 8.dp
+    @get:Rule
+    var coroutinesTestRule = CoroutinesTestRule()
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+}

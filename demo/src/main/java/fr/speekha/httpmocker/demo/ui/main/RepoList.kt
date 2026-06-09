@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui.compose
+package fr.speekha.httpmocker.demo.ui.main
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,9 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import fr.speekha.httpmocker.demo.model.Repo
-import fr.speekha.httpmocker.demo.ui.Data
-import fr.speekha.httpmocker.demo.ui.State
-import fr.speekha.httpmocker.demo.ui.compose.theme.mediumPadding
+import fr.speekha.httpmocker.demo.ui.theme.mediumPadding
 
 @Composable
 fun RepoList(
