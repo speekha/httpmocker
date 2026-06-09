@@ -32,6 +32,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import fr.speekha.httpmocker.demo.R
 import fr.speekha.httpmocker.demo.ui.MainViewModel
 import fr.speekha.httpmocker.demo.ui.State
@@ -69,7 +70,9 @@ class ComposeActivity : ComponentActivity() {
             logger.debug("Rendering layout")
             (viewModel.states.observeAsState().value as? State)?.let { state ->
                 Column(
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp)
                 ) {
                     Text(
                         text = stringResource(id = R.string.mocking_state),
