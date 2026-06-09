@@ -26,7 +26,7 @@ fun release(version: Int): Int = version
 
 android {
     namespace = "fr.speekha.httpmocker.demo"
-    compileSdk = release(36)
+    compileSdk = release(37)
 
     sourceSets {
         getByName("main").kotlin.srcDirs("src/main/kotlin")
@@ -35,7 +35,7 @@ android {
     defaultConfig {
         applicationId = "fr.speekha.httpmocker.demo"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"

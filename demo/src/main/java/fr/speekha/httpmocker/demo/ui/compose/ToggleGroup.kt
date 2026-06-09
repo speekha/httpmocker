@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker.demo.ui.compose
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -46,6 +47,7 @@ fun ToggleGroup(
                     .offset((-1 * index).dp, 0.dp)
                     .zIndex(if (selected == index) 1f else 0f)
                     .weight(1f),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                 onClick = { onClick(item) },
                 shape = when (index) {
                     0 -> RoundedCornerShape(
