@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui
+@file:SuppressWarnings("MagicNumber")
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
-import org.junit.Rule
+package fr.speekha.httpmocker.demo.ui.theme
 
-open class ViewModelTest {
+import androidx.compose.ui.graphics.Color
 
-    @get:Rule
-    var coroutinesTestRule = CoroutinesTestRule()
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-
-    fun runBlockingTest(block: suspend CoroutineScope.() -> Unit) {
-        runBlocking(coroutinesTestRule.testDispatcher, block)
-    }
-}
+val PrimaryDark = Color(0xFF00574B)
+val PrimaryLight = Color(0xFF00A895)
+val PrimaryVariant = Color(0xFF008577)
+val Secondary = Color(0xFFD81B60)

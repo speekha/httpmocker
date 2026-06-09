@@ -15,7 +15,6 @@
 [versions]
 gradle = "9.1.1"
 kotlin = "2.4.0"
-agp = "8.13.2"
 koinAndroid = "4.2.1"
 ksp = "2.3.4"
 coroutines = "1.11.0"
@@ -27,7 +26,8 @@ kotlinxSerialization = "1.11.0"
 okhttp = "5.3.2"
 ktor = "2.3.13"
 retrofit = "3.0.0"
-slf4j = "1.7.36"
+slf4j = "2.0.18"
+slf4j-android = "1.7.36"
 junit5 = "6.1.0"
 junit4 = "4.13.2"
 junitPlatofmrLauncher = "6.1.0"
@@ -94,9 +94,9 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit-jackson = { module = "com.squareup.retrofit2:converter-jackson", version.ref = "retrofit" }
 
 # SLF4J
-slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4j" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4j-android" }
 
 # JUnit
 junit4 = { module = "junit:junit", version.ref = "junit4" }

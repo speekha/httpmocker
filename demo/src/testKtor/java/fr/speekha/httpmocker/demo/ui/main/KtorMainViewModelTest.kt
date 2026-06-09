@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package fr.speekha.httpmocker.demo.ui
+package fr.speekha.httpmocker.demo.ui.main
 
 import fr.speekha.httpmocker.Mode
+import fr.speekha.httpmocker.demo.ui.MockerWrapper
 import fr.speekha.httpmocker.kotlinx.KotlinxMapper
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.ktor.engine.MockEngine
@@ -24,7 +25,7 @@ import io.ktor.client.engine.cio.CIO
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.serialization.ExperimentalSerializationApi
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Before
 
 @ExperimentalCoroutinesApi
@@ -51,5 +52,5 @@ class KtorMainViewModelTest : MainViewModelTest() {
         )
     }
 
-    override fun assertInterceptorMode(mode: Mode) = assertEquals(mode, clientMode)
+    override fun assertInterceptorMode(mode: Mode) = Assert.assertEquals(mode, clientMode)
 }
