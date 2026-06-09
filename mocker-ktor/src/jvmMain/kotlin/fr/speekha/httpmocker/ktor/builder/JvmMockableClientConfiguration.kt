@@ -18,6 +18,8 @@ package fr.speekha.httpmocker.ktor.builder
 
 import fr.speekha.httpmocker.builder.RecorderBuilder
 import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.JvmFileAccessor
+import fr.speekha.httpmocker.io.createFileAccessor
 import fr.speekha.httpmocker.ktor.engine.MockEngineConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import java.io.File
@@ -31,7 +33,7 @@ class JvmMockableClientConfiguration<T : HttpClientEngineConfig> : MockableClien
      * @param folder the root folder where saved scenarios should be saved
      */
     fun MockEngineConfig.recordScenariosIn(folder: File): RecorderBuilder =
-        RecorderBuilder(FileAccessor(folder)).also { configBuilder.recorder = it }
+        RecorderBuilder(createFileAccessor(folder)).also { configBuilder.recorder = it }
 }
 
 actual fun <T : HttpClientEngineConfig> initConfiguration(): MockableClientConfiguration<T> =

@@ -22,6 +22,7 @@ import fr.speekha.httpmocker.client.HttpClientTester
 import fr.speekha.httpmocker.client.SAVE_FOLDER
 import fr.speekha.httpmocker.client.TestWithServer
 import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.createFileAccessor
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.ktor.engine.MockEngine
 import fr.speekha.httpmocker.model.NamedParameter
@@ -122,8 +123,8 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
                 readPolicy?.let { decodeScenarioPathWith(it) }
                 parseScenariosWith(mapper)
                 writePolicy?.let {
-                    recordScenariosIn(FileAccessor(File(SAVE_FOLDER))) with it
-                } ?: recordScenariosIn(FileAccessor(File(SAVE_FOLDER)))
+                    recordScenariosIn(createFileAccessor(File(SAVE_FOLDER))) with it
+                } ?: recordScenariosIn(createFileAccessor(File(SAVE_FOLDER)))
                 failOnRecordingError(true)
                 setMode(Mode.RECORD)
             }

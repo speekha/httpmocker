@@ -25,10 +25,10 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.dataWithBytes
 
 @OptIn(ExperimentalForeignApi::class)
-actual class StreamReader(
+class IosStreamReader(
     private val data: NSData
-) {
-    actual fun readAsString(): String {
+) : StreamReader {
+    override fun readAsString(): String {
         if (data.length == 0UL) return ""
         val bytes = data.bytes?.readBytes(data.length.toInt())
             ?: throw IOException("Failed to read data bytes")
@@ -37,10 +37,10 @@ actual class StreamReader(
 }
 
 @OptIn(ExperimentalForeignApi::class)
-actual class StreamWriter(
+class IosStreamWriter(
     private val filePath: String
-) {
-    actual fun write(array: ByteArray) {
+) : StreamWriter {
+    override fun write(array: ByteArray) {
         val nsData = array.usePinned { pinned ->
             NSData.dataWithBytes(pinned.addressOf(0), array.size.toULong())
         }
@@ -51,5 +51,5 @@ actual class StreamWriter(
         }
     }
 
-    actual fun <R : Any> use(block: (StreamWriter) -> R): R = block(this)
+    override fun <R : Any> use(block: (StreamWriter) -> R): R = block(this)
 }

@@ -19,22 +19,24 @@ package fr.speekha.httpmocker.io
 import java.io.InputStream
 import java.io.OutputStream
 
-actual class StreamReader(
+class JvmStreamReader(
     private val inputStream: InputStream
-) {
-    actual fun readAsString(): String = inputStream.readAsString()
+) : StreamReader {
+    override fun readAsString(): String = inputStream.readAsString()
 }
 
-fun InputStream.asReader() = StreamReader(this)
+fun InputStream.asReader() = JvmStreamReader(this)
 
-actual class StreamWriter(
+class JvmStreamWriter(
     private val outputStream: OutputStream
-) {
-    actual fun write(array: ByteArray) {
+) : StreamWriter{
+    override fun write(array: ByteArray) {
         outputStream.write(array)
     }
 
-    actual fun <R : Any> use(block: (StreamWriter) -> R): R = outputStream.use {
+    override fun <R : Any> use(block: (StreamWriter) -> R): R = outputStream.use {
         block(this)
     }
 }
+
+fun OutputStream.asWriter() = JvmStreamWriter(this)

@@ -18,11 +18,13 @@ package fr.speekha.httpmocker
 
 import kotlin.reflect.KClass
 
-expect class Logger(clazz: KClass<*>) {
+interface Logger {
     fun debug(message: String)
     fun info(message: String)
     fun warn(message: String)
     fun error(message: String, exception: Throwable? = null)
 }
 
-inline fun <reified T : Any> T.getLogger(): Logger = Logger(this::class)
+expect fun buildLogger(clazz: KClass<*>): Logger
+
+inline fun <reified T : Any> T.getLogger(): Logger = buildLogger(this::class)

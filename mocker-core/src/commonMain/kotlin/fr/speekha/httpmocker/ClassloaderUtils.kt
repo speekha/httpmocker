@@ -18,6 +18,4 @@ package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.NetworkError
 
-expect object ClassloaderUtils {
-    fun createException(error: NetworkError): Throwable
-}
+expect fun createException(error: NetworkError): Throwable

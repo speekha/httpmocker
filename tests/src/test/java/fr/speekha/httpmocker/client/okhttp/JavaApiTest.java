@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import fr.speekha.httpmocker.Mode;
 import fr.speekha.httpmocker.client.RecordTestsKt;
 import fr.speekha.httpmocker.io.HttpRequest;
+import fr.speekha.httpmocker.io.JvmStreamReader;
 import fr.speekha.httpmocker.io.StreamReader;
 import fr.speekha.httpmocker.jackson.JacksonMapper;
 import fr.speekha.httpmocker.model.ResponseDescriptor;
@@ -95,7 +96,7 @@ class JavaApiTest extends OkHttpTests {
 
         private StreamReader loadResource(String file) {
             InputStream stream = getClass().getClassLoader().getResourceAsStream(file);
-            return stream != null ? new StreamReader(stream) : null;
+            return stream != null ? new JvmStreamReader(stream) : null;
         }
 
         @Nullable

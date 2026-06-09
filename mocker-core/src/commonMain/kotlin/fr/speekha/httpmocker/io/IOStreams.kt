@@ -19,11 +19,11 @@ package fr.speekha.httpmocker.io
 /**
  * Platform specific implementation of data streams.
  */
-expect class StreamReader {
+interface StreamReader {
     fun readAsString(): String
 }
 
-expect class StreamWriter {
+interface StreamWriter {
     fun write(array: ByteArray)
     fun <R : Any> use(block: (StreamWriter) -> R): R
 }
