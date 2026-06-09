@@ -36,7 +36,6 @@ import fr.speekha.httpmocker.kotlinx.model.Matcher as JsonMatcher
  * @param formatInput transformation function to apply when reading JSON
  * @param formatOutput transformation function to apply when writing JSON
  */
-@ExperimentalSerializationApi
 class KotlinxMapper(
     private val formatInput: (String) -> String = { it },
     private val formatOutput: (String) -> String = { it }

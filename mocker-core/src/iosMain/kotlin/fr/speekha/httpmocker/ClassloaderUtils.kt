@@ -18,39 +18,5 @@ package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.NetworkError
 
-actual object ClassloaderUtils {
-
-    // Registry of exception factory functions (populated during app initialization)
-    // Maps exception type name to a factory function that creates the exception
-    private val exceptionRegistry: MutableMap<String, (String?) -> Throwable> = mutableMapOf()
-
-    @Suppress("TooGenericExceptionCaught")
-    actual fun createException(error: NetworkError): Throwable {
-        val factory = exceptionRegistry[error.exceptionType]
-        return if (factory != null) {
-            try {
-                factory(error.message)
-            } catch (e: Throwable) {
-                RuntimeException(error.message, e)
-            }
-        } else {
-            RuntimeException("${error.exceptionType}: ${error.message}")
-        }
-    }
-
-    /**
-     * Register an exception factory for use in createException.
-     * Must be called during app initialization to support dynamic exception creation.
-     * 
-     * Example:
-     * ```
-     * ClassloaderUtils.registerException(
-     *     "java.io.IOException", 
-     *     { message -> IOException(message) }
-     * )
-     * ```
-     */
-    fun registerException(typeName: String, factory: (String?) -> Throwable) {
-        exceptionRegistry[typeName] = factory
-    }
-}
+@Suppress("TooGenericExceptionCaught")
+actual fun createException(error: NetworkError): Throwable = RuntimeException("${error.exceptionType}: ${error.message}")

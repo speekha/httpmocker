@@ -18,15 +18,12 @@ package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.model.NetworkError
 
-actual object ClassloaderUtils {
-
-    @Suppress("UnsafeCast")
-    actual fun createException(error: NetworkError): Throwable {
-        val exceptionType = Class.forName(error.exceptionType)
-        return if (error.message == null) {
-            exceptionType.getConstructor().newInstance()
-        } else {
-            exceptionType.getConstructor(String::class.java).newInstance(error.message)
-        } as Throwable
-    }
+@Suppress("UnsafeCast")
+actual fun createException(error: NetworkError): Throwable {
+    val exceptionType = Class.forName(error.exceptionType)
+    return if (error.message == null) {
+        exceptionType.getConstructor().newInstance()
+    } else {
+        exceptionType.getConstructor(String::class.java).newInstance(error.message)
+    } as Throwable
 }

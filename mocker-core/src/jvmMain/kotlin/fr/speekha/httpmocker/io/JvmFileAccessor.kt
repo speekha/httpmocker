@@ -20,30 +20,34 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-actual class FileAccessor(
+actual fun createFileAccessor(path: String): FileAccessor = JvmFileAccessor(path)
+
+fun createFileAccessor(fileHandle: File): FileAccessor = JvmFileAccessor(fileHandle)
+
+class JvmFileAccessor(
     private val fileHandle: File
-) {
+) : FileAccessor {
 
-    actual constructor(path: String) : this(File(path))
+    constructor(path: String) : this(File(path))
 
-    actual val name: String
+    override val name: String
         get() = fileHandle.name
 
-    actual val parentFile: FileAccessor?
-        get() = fileHandle.parentFile?.let { FileAccessor(it) }
+    override val parentFile: FileAccessor?
+        get() = fileHandle.parentFile?.let { JvmFileAccessor(it) }
 
-    actual val absolutePath: String
+    override val absolutePath: String
         get() = fileHandle.absolutePath
 
-    actual fun getFile(fileName: String): FileAccessor = FileAccessor(File(fileHandle, fileName))
+    override fun getFile(fileName: String): FileAccessor = JvmFileAccessor(File(fileHandle, fileName))
 
-    actual fun exists(): Boolean = fileHandle.exists()
+    override fun exists(): Boolean = fileHandle.exists()
 
-    actual fun mkdir() {
+    override fun mkdir() {
         fileHandle.mkdir()
     }
 
-    actual fun getReader(): StreamReader = StreamReader(FileInputStream(fileHandle))
+    override fun getReader(): StreamReader = FileInputStream(fileHandle).asReader()
 
-    actual fun getWriter(): StreamWriter = StreamWriter(FileOutputStream(fileHandle))
+    override fun getWriter(): StreamWriter = FileOutputStream(fileHandle).asWriter()
 }

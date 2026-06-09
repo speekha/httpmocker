@@ -21,7 +21,7 @@ import io.ktor.client.engine.HttpClientEngineConfig
 /**
  * iOS-specific configuration. Recording to a path-based folder is available via the
  * [MockableClientConfiguration.recordScenariosIn] overload that accepts a [String] or
- * [fr.speekha.httpmocker.io.FileAccessor], both defined in commonMain.
+ * [fr.speekha.httpmocker.io.IosFileAccessor], both defined in commonMain.
  */
 class IosMockableClientConfiguration<T : HttpClientEngineConfig> : MockableClientConfiguration<T>()
 

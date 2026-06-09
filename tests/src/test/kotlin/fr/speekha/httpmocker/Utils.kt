@@ -17,6 +17,7 @@
 package fr.speekha.httpmocker
 
 import fr.speekha.httpmocker.io.FileAccessor
+import fr.speekha.httpmocker.io.createFileAccessor
 import org.junit.jupiter.api.Assertions
 
 const val HTTP_METHOD_GET = "GET"
@@ -36,4 +37,4 @@ inline fun <reified T : Throwable> assertThrows(message: String? = null, block: 
 
 fun FileAccessor.readAsString() = getReader().readAsString()
 
-fun <T : Any?> withFile(path: String, block: (FileAccessor) -> T) = block(FileAccessor(path))
+fun <T : Any?> withFile(path: String, block: (FileAccessor) -> T) = block(createFileAccessor(path))
