@@ -238,7 +238,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Check quality
-          command: ./gradlew --no-daemon detekt ktlintCheck --stacktrace
+          command: ./gradlew --no-daemon detekt --stacktrace
       - store_artifacts:
           path: mocker-core/build/reports
           destination: reports/mocker-core

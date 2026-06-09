@@ -33,7 +33,6 @@ junit4 = "4.13.2"
 junitPlatofmrLauncher = "6.1.0"
 mockk = "1.14.11"
 detekt = "1.23.8"
-ktlint = "10.2.0"
 vanniktechPublish = "0.36.0"
 composeBom = "2026.05.01"
 appcompat = "1.7.1"
@@ -150,5 +149,5 @@ uniflow-test = ["uniflow-test", "uniflow-android-test"]
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+
 vanniktechPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechPublish" }

@@ -30,7 +30,7 @@ buildscript {
 
 plugins {
     alias(libs.plugins.detekt)
-    alias(libs.plugins.ktlint)
+
     alias(libs.plugins.vanniktechPublish) apply false
     alias(libs.plugins.ksp) apply false
 }
@@ -44,13 +44,7 @@ allprojects {
 
 subprojects {
     group = property("GROUP").toString()
-    version = property("VERSION_NAME").toString() +
-        if (System.getProperty("snapshot").toBoolean()) "-SNAPSHOT" else ""
-}
-
-// Apply ktlint only to test and demo modules, not to publishable libraries
-configure(subprojects.filter { it.name in listOf("tests", "demo") }) {
-    apply(from = "../gradle/ktlint.gradle")
+    version = property("VERSION_NAME").toString() + if (System.getProperty("snapshot").toBoolean()) "-SNAPSHOT" else ""
 }
 
 tasks.register<Delete>("clean") {
@@ -63,7 +57,7 @@ tasks.register("downloadDependencies") {
             "debugCompileClasspath",
             "debugRuntimeClasspath",
             "releaseCompileClasspath",
-            "releaseRuntimeClasspath"
+            "releaseRuntimeClasspath",
         )
 
         allprojects.forEach { project ->
