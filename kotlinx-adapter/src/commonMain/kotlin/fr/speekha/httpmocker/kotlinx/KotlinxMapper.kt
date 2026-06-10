@@ -19,7 +19,6 @@ package fr.speekha.httpmocker.kotlinx
 import fr.speekha.httpmocker.model.Matcher
 import fr.speekha.httpmocker.serialization.JSON_FORMAT
 import fr.speekha.httpmocker.serialization.Mapper
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
