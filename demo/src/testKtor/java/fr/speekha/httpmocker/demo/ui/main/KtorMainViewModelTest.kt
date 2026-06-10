@@ -28,10 +28,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import org.junit.Assert
 import org.junit.Before
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class KtorMainViewModelTest : MainViewModelTest() {
 
-    @OptIn(ExperimentalSerializationApi::class)
     private val mockClient = mockableHttpClient(CIO) {
         mock {
             parseScenariosWith(KotlinxMapper())
