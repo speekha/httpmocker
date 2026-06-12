@@ -21,7 +21,6 @@ import fr.speekha.httpmocker.builder.FileLoader
 import fr.speekha.httpmocker.client.HttpClientTester
 import fr.speekha.httpmocker.client.SAVE_FOLDER
 import fr.speekha.httpmocker.client.TestWithServer
-import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.io.createFileAccessor
 import fr.speekha.httpmocker.ktor.builder.mockableHttpClient
 import fr.speekha.httpmocker.ktor.engine.MockEngine
@@ -39,7 +38,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.util.InternalAPI
+import io.ktor.utils.io.InternalAPI
 import org.hamcrest.MatcherAssert
 import org.hamcrest.core.StringStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,7 +49,6 @@ class KtorTests : TestWithServer(), HttpClientTester<HttpResponse, HttpClient> {
     override lateinit var client: HttpClient
 
     override val extraHeaders: List<NamedParameter> = listOf(
-        NamedParameter("Accept-Charset", "UTF-8"),
         NamedParameter("Accept", "*/*")
     )
 
