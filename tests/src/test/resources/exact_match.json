@@ -15,7 +15,6 @@
       "exact-match": true,
       "headers": {
         "header1": "1",
-        "Accept-Charset": "UTF-8",
         "Accept": "*/*"
       }
     },
@@ -41,7 +40,6 @@
         "param1": "1"
       },
       "headers": {
-        "Accept-Charset": "UTF-8",
         "Accept": "*/*"
       }
     },

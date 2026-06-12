@@ -29,7 +29,7 @@ import fr.speekha.httpmocker.ktor.io.toKtorRequest
 import io.ktor.client.engine.HttpClientEngineBase
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
-import io.ktor.util.InternalAPI
+import io.ktor.utils.io.InternalAPI
 
 class MockEngine(
     override val config: MockEngineConfig,
@@ -65,7 +65,7 @@ class MockEngine(
             }
         }
 
-    @OptIn(InternalAPI::class)
+    @InternalAPI
     override suspend fun execute(data: HttpRequestData): HttpResponseData {
         logger.info("Intercepted request $data: Interceptor is ${internalConf.mode}")
         return respondToRequest(data)

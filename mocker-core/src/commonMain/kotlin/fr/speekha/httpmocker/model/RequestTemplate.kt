@@ -67,8 +67,17 @@ data class RequestTemplate(
      * Request body
      */
     val body: String? = null
-
-)
+) {
+    override fun equals(other: Any?): Boolean = other is RequestTemplate &&
+            exactMatch == other.exactMatch &&
+            protocol == other.protocol &&
+            method == other.method &&
+            host == other.host &&
+            port == other.port &&
+            path == other.path &&
+            headers.sortedBy { it.name } == other.headers.sortedBy { it.name } &&
+            params.sortedBy { it.name } == other.params.sortedBy { it.name }
+}
 
 /**
  * Converts an OkHttp Request to a template
