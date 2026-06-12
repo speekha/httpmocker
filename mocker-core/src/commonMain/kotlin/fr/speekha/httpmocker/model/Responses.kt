@@ -52,7 +52,16 @@ data class ResponseDescriptor(
      * File to use to load the response body (only used for static scenarios)
      */
     val bodyFile: String? = null
-) : RequestResult()
+) : RequestResult() {
+
+    override fun equals(other: Any?): Boolean = other is ResponseDescriptor &&
+            delay == other.delay &&
+            code == other.code &&
+            mediaType == other.mediaType &&
+            headers.sortedBy { it.name } == other.headers.sortedBy { it.name } &&
+            body == other.body &&
+            bodyFile == other.bodyFile
+}
 
 /**
  * Describes a mocked error happening while answering a request.

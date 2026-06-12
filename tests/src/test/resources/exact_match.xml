@@ -11,7 +11,6 @@
     <case>
         <request exact-match="true">
             <header name="header1">1</header>
-            <header name="Accept-Charset">UTF-8</header>
             <header name="Accept">*/*</header>
         </request>
         <response delay="0" code="200" media-type="text/plain">
@@ -30,7 +29,6 @@
     </case>
     <case>
         <request exact-match="true">
-            <header name="Accept-Charset">UTF-8</header>
             <header name="Accept">*/*</header>
             <url>
                 <param name="param1">1</param>

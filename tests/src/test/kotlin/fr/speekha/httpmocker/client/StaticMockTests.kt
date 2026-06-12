@@ -36,6 +36,7 @@ import fr.speekha.httpmocker.policies.FilingPolicy
 import fr.speekha.httpmocker.policies.SingleFilePolicy
 import fr.speekha.httpmocker.serialization.Mapper
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.headers
 import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
