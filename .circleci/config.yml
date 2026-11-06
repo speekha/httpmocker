@@ -22,8 +22,8 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
-            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "mocker-webview/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
+            - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "mocker-webview/build.gradle.kts" }}-
             - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-
             - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}
             - jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-
@@ -94,6 +94,9 @@ commands:
       - restore_cache:
           keys:
             - build-sax-adapter-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-mocker-webview-{{ .Branch }}-{{ .Revision }}
 
 orbs:
   codecov: codecov/codecov@1.0.2
@@ -110,7 +113,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
+          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle/libs.versions.toml" }}-{{ checksum "mocker-core/build.gradle.kts" }}-{{ checksum "mocker-okhttp/build.gradle.kts" }}-{{ checksum "mocker-ktor/build.gradle.kts" }}-{{ checksum "jackson-adapter/build.gradle.kts" }}-{{ checksum "gson-adapter/build.gradle.kts" }}-{{ checksum "moshi-adapter/build.gradle.kts" }}-{{ checksum "custom-adapter/build.gradle.kts" }}-{{ checksum "kotlinx-adapter/build.gradle.kts" }}-{{ checksum "sax-adapter/build.gradle.kts" }}-{{ checksum "mocker-webview/build.gradle.kts" }}-{{ checksum "demo/build.gradle.kts" }}
       - save_cache:
           paths:
             - ~/.gradle/wrapper
@@ -173,6 +176,23 @@ jobs:
     steps:
       - build_module:
           module: "sax-adapter"
+  build_webview:
+    <<: *container_config
+    steps:
+      - restore_sources_and_gradle
+      - restore_cache:
+          keys:
+            - build-mocker-core-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-mocker-okhttp-{{ .Branch }}-{{ .Revision }}
+      - run:
+          name: Build
+          command: ./gradlew --no-daemon mocker-webview:clean mocker-webview:assemble --stacktrace
+      - save_cache:
+          key: build-mocker-webview-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - mocker-webview/build
   build_demo:
     <<: *container_config
     steps:
@@ -184,6 +204,7 @@ jobs:
             - build-mocker-ktor-{{ .Branch }}-{{ .Revision }}
             - build-jackson-adapter-{{ .Branch }}-{{ .Revision }}
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
+            - build-mocker-webview-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
           command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:lint --stacktrace
@@ -267,6 +288,9 @@ jobs:
           path: moshi-adapter/build/reports
           destination: reports/moshi-adapter
       - store_artifacts:
+          path: mocker-webview/build/reports
+          destination: reports/mocker-webview
+      - store_artifacts:
           path: tests/build/reports
           destination: reports/tests
       - store_artifacts:
@@ -329,12 +353,16 @@ workflows:
       - build_sax:
           requires:
             - build_core
+      - build_webview:
+          requires:
+            - build_okhttp
       - build_demo:
           requires:
             - build_okhttp
             - build_ktor
             - build_jackson
             - build_kotlinx
+            - build_webview
       - store_artifacts:
           requires:
             - build_okhttp
@@ -345,6 +373,7 @@ workflows:
             - build_custom
             - build_kotlinx
             - build_sax
+            - build_webview
       - test:
           requires:
             - build_okhttp
@@ -355,6 +384,7 @@ workflows:
             - build_custom
             - build_kotlinx
             - build_sax
+            - build_webview
       - quality:
           requires:
             - init_workspace
