@@ -36,7 +36,7 @@ completed or refactored). Any help to improve the quality of the iOS version is 
 ## Current Version
 
 ```gradle
-httpmocker_version = '2.0.0'
+httpmocker_version = '2.1.0'
 ```
 
 Current version supports JVM, Android, and iOS platforms. It is stable for production use.
@@ -78,16 +78,16 @@ You can add the dependency to your `build.gradle` by adding on of the following 
 ```gradle
 // Core module: you don't need to add it explicitly to your gradle (it will be included as a transitive dependency 
 // of the other modules)
-implementation "fr.speekha.httpmocker:mocker-core:2.0.0"
+implementation "fr.speekha.httpmocker:mocker-core:2.1.0"
 
 // Handles mocks for OkHttp (JVM and Android only)
-implementation "fr.speekha.httpmocker:mocker-okhttp:2.0.0"
+implementation "fr.speekha.httpmocker:mocker-okhttp:2.1.0"
 
 // Handles mocks for Ktor (JVM, Android, and iOS)
-implementation "fr.speekha.httpmocker:mocker-ktor:2.0.0"
+implementation "fr.speekha.httpmocker:mocker-ktor:2.1.0"
 
 // Handles mocks for Android WebView (Android only, requires mocker-okhttp)
-implementation "fr.speekha.httpmocker:mocker-webview:2.0.0"
+implementation "fr.speekha.httpmocker:mocker-webview:2.1.0"
 ```
 
 Currently, there are six possible options that are provided for parsing, based on some of the 
@@ -107,22 +107,22 @@ corresponding `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:2.0.0"
+implementation "fr.speekha.httpmocker:jackson-adapter:2.1.0"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:2.0.0"
+implementation "fr.speekha.httpmocker:gson-adapter:2.1.0"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:2.0.0"
+implementation "fr.speekha.httpmocker:moshi-adapter:2.1.0"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:2.0.0"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:2.1.0"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:2.0.0"
+implementation "fr.speekha.httpmocker:custom-adapter:2.1.0"
 
 // Parses XML scenarios using a custom SAX parser
-implementation "fr.speekha.httpmocker:sax-adapter:2.0.0"
+implementation "fr.speekha.httpmocker:sax-adapter:2.1.0"
 ```
 
 If none of those options suit your needs, you can also provide your own implementation of the `Mapper` class. You can 
@@ -502,7 +502,7 @@ In that case, the mocker will try to instantiate an exception matching the type 
 
 [![Follow me](https://avatars.githubusercontent.com/u/17544216?s=60)](https://twitter.com/speekha)
 
-[![Follow me](https://img.shields.io/twitter/follow/speekha?style=social)](https://twitter.com/speekha)
+[![Follow me](https://img.shields.io/bluesky/posts/speekha.bsky.social)](https://bsky.app/profile/speekha.bsky.social)
 
 ## Publications
 
