@@ -26,4 +26,5 @@
     <string name="mixed_description">Interceptor is in mixed mode.\n\nRepo list is mocked (shortened list), details are retrieved from a real call.</string>
     <string name="record_description">Interceptor is recording.\n\nCalls are executed and saved in the device\'s Download directory.</string>
     <string name="call_service_button">Call service</string>
+    <string name="open_webview_button">Open WebView (github.com/kotlin)</string>
 </resources>
