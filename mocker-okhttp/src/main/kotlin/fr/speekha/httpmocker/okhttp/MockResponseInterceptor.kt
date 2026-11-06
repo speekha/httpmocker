@@ -38,9 +38,9 @@ import okhttp3.Response
  */
 class MockResponseInterceptor
 internal constructor(
-    providers: List<ScenarioProvider>,
+    val providers: List<ScenarioProvider>,
     requestWriter: RequestWriter?,
-    delay: Long = 0
+    val delay: Long = 0
 ) : Interceptor {
 
     private val forbidRecord = requestWriter == null

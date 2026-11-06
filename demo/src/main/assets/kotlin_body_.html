@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotlin – Mocked Page</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h1 { color: #7f52ff; font-size: 2em; margin-bottom: 0.25em; }
+        p  { font-size: 1.1em; line-height: 1.6; max-width: 480px; }
+        .badge {
+            margin-top: 32px;
+            background: #7f52ff;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            letter-spacing: 0.05em;
+        }
+        button {
+            margin-top: 28px;
+            background: #7f52ff;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 24px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        button:active { opacity: 0.8; }
+        #xhr-status {
+            margin-top: 16px;
+            font-size: 0.9em;
+            color: #aaa;
+            min-height: 1.4em;
+        }
+        #repo-list {
+            margin-top: 16px;
+            width: 100%;
+            max-width: 480px;
+            text-align: left;
+        }
+        .repo-card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+        .repo-name { color: #7f52ff; font-weight: bold; font-size: 1em; }
+        .repo-desc { font-size: 0.85em; color: #bbb; margin-top: 4px; }
+        .repo-meta { font-size: 0.8em; color: #888; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <h1>Kotlin</h1>
+    <p>This page is served by <strong>HttpMocker</strong>.<br>
+       The real <a href="https://github.com/kotlin" style="color:#7f52ff;">github.com/kotlin</a>
+       page is intercepted and replaced with this offline mock.</p>
+    <div class="badge">Mocked by HttpMocker</div>
+
+    <button onclick="loadRepos()">Load Kotlin repos via XHR</button>
+    <div id="xhr-status"></div>
+    <div id="repo-list"></div>
+
+    <script>
+        function loadRepos() {
+            var status = document.getElementById('xhr-status');
+            var list   = document.getElementById('repo-list');
+            status.textContent = 'Sending XHR to https://github.com/orgs/kotlin/repos …';
+            list.innerHTML = '';
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://github.com/orgs/kotlin/repos', true);
+            xhr.setRequestHeader('Accept', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState !== 4) return;
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    status.textContent = 'XHR intercepted — response status ' + xhr.status + ' (mocked)';
+                    try {
+                        var repos = JSON.parse(xhr.responseText);
+                        repos.forEach(function (repo) {
+                            var card = document.createElement('div');
+                            card.className = 'repo-card';
+                            card.innerHTML =
+                                '<div class="repo-name">' + repo.name + '</div>' +
+                                '<div class="repo-desc">' + (repo.description || '') + '</div>' +
+                                '<div class="repo-meta">&#9733; ' + repo.stargazers_count +
+                                ' &nbsp; Forks: ' + repo.forks_count + '</div>';
+                            list.appendChild(card);
+                        });
+                    } catch (e) {
+                        list.textContent = 'Could not parse response: ' + e.message;
+                    }
+                } else {
+                    status.textContent = 'XHR failed with status ' + xhr.status;
+                }
+            };
+
+            xhr.onerror = function () {
+                status.textContent = 'XHR network error';
+            };
+
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

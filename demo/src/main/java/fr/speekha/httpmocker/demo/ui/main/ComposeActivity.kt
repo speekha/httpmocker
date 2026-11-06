@@ -18,6 +18,7 @@ package fr.speekha.httpmocker.demo.ui.main
 
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
@@ -55,12 +56,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.android.ext.android.getKoin
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ComposeActivity : ComponentActivity() {
 
     private val viewModel by viewModel<MainViewModel>()
     private val logger = getLogger()
+    private val webViewClient: WebViewClient? by lazy { getKoin().getOrNull() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,11 +120,13 @@ class ComposeActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth(1f)
                         )
                     }
+                    WebViewButton(state.mode, webViewClient != null)
                     RepoList(state)
                 }
             }
         }
     }
+
 }
 
 class MainViewModel(
