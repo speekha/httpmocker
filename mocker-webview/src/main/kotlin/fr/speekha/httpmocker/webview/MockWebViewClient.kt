@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class MockWebViewClient(interceptor: MockResponseInterceptor) : WebViewClient() 
         interceptor.providers,
         interceptor.delay,
         { it.toGenericModel() },
-        { _, descriptor -> descriptor?.toWebResourceResponse() }
+        { _, descriptor -> descriptor.toWebResourceResponse() }
     )
 
     override fun shouldInterceptRequest(
@@ -60,8 +60,7 @@ class MockWebViewClient(interceptor: MockResponseInterceptor) : WebViewClient() 
         return when (mode) {
             Mode.DISABLED -> super.shouldInterceptRequest(view, request)
             Mode.ENABLED -> runBlocking { responder.mockResponse(request) }
-            Mode.MIXED -> runBlocking { responder.mockResponseOrNull(request) }
-                ?: super.shouldInterceptRequest(view, request)
+            Mode.MIXED -> runBlocking { responder.mockResponseOrNull(request) } ?: super.shouldInterceptRequest(view, request)
             Mode.RECORD -> super.shouldInterceptRequest(view, request)
         }
     }

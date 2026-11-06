@@ -11,7 +11,8 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://app.codacy.com/gh/speekha/httpmocker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
 **HttpMocker** is a very lightweight multiplatform Kotlin library that allows to mock HTTP calls relying on either
-OkHttp or the Ktor client libraries. It supports **JVM**, **Android**, and **iOS** platforms.
+OkHttp or the Ktor client libraries. It supports **JVM**, **Android**, and **iOS** platforms. On Android, it also
+provides a `MockWebViewClient` to intercept and mock requests made by a `WebView`.
 
 * It can be used for unit or integration tests: by providing predefined responses and instead of actual 
 calls to servers, you're avoiding the risk of unpredictable results due to network failure or server errors. 
@@ -69,6 +70,7 @@ repositories {
 This library contains several parts: 
 * a core module handling the mock logic
 * an engine module corresponding to the HTTP library you use (OkHttp for JVM/Android or Ktor for all platforms)
+* an optional WebView module to mock requests made inside an Android `WebView` (OkHttp only)
 * an additional adapter to parse the scenario files for static mocks
 
 You can add the dependency to your `build.gradle` by adding on of the following lines:
@@ -83,6 +85,9 @@ implementation "fr.speekha.httpmocker:mocker-okhttp:2.0.0"
 
 // Handles mocks for Ktor (JVM, Android, and iOS)
 implementation "fr.speekha.httpmocker:mocker-ktor:2.0.0"
+
+// Handles mocks for Android WebView (Android only, requires mocker-okhttp)
+implementation "fr.speekha.httpmocker:mocker-webview:2.0.0"
 ```
 
 Currently, there are six possible options that are provided for parsing, based on some of the 
@@ -173,6 +178,74 @@ only `Fake response body`)
         .addInterceptor(interceptor)
         .build()
 ```
+
+### Setting up HttpMocker with Android WebView (Android only)
+
+The `mocker-webview` module provides a `MockWebViewClient` that intercepts requests made by an Android
+`WebView` and answers them with the same scenarios used by the OkHttp `MockResponseInterceptor`. Both
+share the same configuration, so the same set of scenario files covers both OkHttp and WebView calls.
+
+Create a `MockWebViewClient` from an existing interceptor using the DSL extension, then assign it to
+your `WebView`:
+
+```kotlin
+val interceptor = mockInterceptor {
+    decodeScenarioPathWith(MirrorPathPolicy("json"))
+    loadFileWith { context.assets.open(it).asReader() }
+    parseScenariosWith(JacksonMapper())
+    setMode(ENABLED)
+}
+val client = OkHttpClient.Builder()
+    .addInterceptor(interceptor)
+    .build()
+
+// Create a MockWebViewClient sharing the same interceptor configuration
+val webViewClient = interceptor.mockWebViewClient(mode = ENABLED)
+
+webView.settings.javaScriptEnabled = true
+webView.webViewClient = webViewClient
+webView.loadUrl("https://example.com")
+```
+
+The `MockWebViewClient` supports the same four modes as the interceptor (`DISABLED`, `ENABLED`, `MIXED`,
+`RECORD`) and its mode can be changed at runtime:
+
+```kotlin
+webViewClient.mode = MIXED
+```
+
+If you already have a custom `WebViewClient`, the recommended approach is to implement the delegate
+pattern yourself: keep your own client in control of all callbacks, and call
+`mockWebViewClient.shouldInterceptRequest()` explicitly inside your own
+`shouldInterceptRequest` override instead of calling `super`:
+
+```kotlin
+class CustomWebViewClient(
+  private val delegate: WebViewClient
+): WebViewClient() {
+
+    override fun shouldInterceptRequest(
+        view: WebView,
+        request: WebResourceRequest
+    ): WebResourceResponse? {
+        // Add you own business logic
+        // ...
+        
+        // in cases where you're calling the URL resource, use the delegate
+        delegate.shouldInterceptRequest(view, request)
+  }
+  
+}
+```
+
+This keeps your client in full control of every callback while delegating resource loading to
+`MockWebViewClient`.
+
+In order to avoid deploying the `MockWebViewClient` in your release builds, use your DI to inject either the mock version or an empty implementation (`object : WebViewClient()`) according to the build type.
+
+> **Note:** XHR requests made from JavaScript are only intercepted when they are same-origin with
+> respect to the page loaded in the `WebView`. Cross-origin XHR triggers a CORS preflight that
+> Android's `WebViewClient` never sees, so the mock will not apply.
 
 ### Setting up HttpMocker with Ktor (JVM, Android, and iOS)
 
