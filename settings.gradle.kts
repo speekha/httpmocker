@@ -26,6 +26,7 @@ include(
     ":mocker-core",
     ":mocker-okhttp",
     ":mocker-ktor",
+    ":mocker-webview",
     ":jackson-adapter",
     ":moshi-adapter",
     ":gson-adapter",

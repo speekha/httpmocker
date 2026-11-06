@@ -127,6 +127,7 @@ dependencies {
 
     // OkHttp flavor
     "okhttpImplementation"(project(":mocker-okhttp"))
+    "okhttpImplementation"(project(":mocker-webview"))
     "okhttpImplementation"(project(":jackson-adapter"))
     "okhttpImplementation"(libs.retrofit.jackson)
 

@@ -32,7 +32,7 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 dependencies {
-    implementation(libs.okhttp)
+    api(libs.okhttp)
     implementation(libs.coroutines.core)
     api(project(":mocker-core"))
 }

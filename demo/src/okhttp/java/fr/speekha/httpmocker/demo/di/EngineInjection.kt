@@ -18,14 +18,17 @@ package fr.speekha.httpmocker.demo.di
 
 import android.content.Context
 import android.os.Environment
+import android.webkit.WebViewClient
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MockerWrapper
 import fr.speekha.httpmocker.io.asReader
 import fr.speekha.httpmocker.jackson.JacksonMapper
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import fr.speekha.httpmocker.okhttp.builder.mockInterceptor
+import fr.speekha.httpmocker.webview.builder.mockWebViewClient
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
@@ -64,4 +67,6 @@ val engineInjection: Module = module {
     }
 
     single { MockerWrapper(get()) }
+
+    single { get<MockResponseInterceptor>().mockWebViewClient() } bind WebViewClient::class
 }
