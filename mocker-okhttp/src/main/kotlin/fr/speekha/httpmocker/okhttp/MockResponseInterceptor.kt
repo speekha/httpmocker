@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,5 +79,9 @@ internal constructor(
         Mode.ENABLED -> responder.mockResponse(request)
         Mode.MIXED -> responder.mockResponseOrNull(request) ?: chain.execute()
         Mode.RECORD -> recorder?.recordCall(chain) ?: error(RECORD_NOT_SUPPORTED_ERROR)
+    }
+
+    interface OnModeChangeListener {
+        fun onModeChanged(newMode: Mode)
     }
 }

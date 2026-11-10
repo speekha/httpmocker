@@ -35,13 +35,13 @@ import kotlinx.coroutines.runBlocking
  * Shares the same scenario providers and delay as the given [interceptor], so both OkHttp calls
  * and WebView requests are mocked from a single configuration.
  */
-class MockWebViewClient(interceptor: MockResponseInterceptor) : WebViewClient() {
+class MockWebViewClient(interceptor: MockResponseInterceptor) : WebViewClient(), MockResponseInterceptor.OnModeChangeListener {
 
     /**
      * Enables to set the interception mode.
      * @see fr.speekha.httpmocker.Mode
      */
-    var mode: Mode = Mode.DISABLED
+    internal var mode: Mode by interceptor::mode
 
     private val logger = getLogger()
 
@@ -63,5 +63,9 @@ class MockWebViewClient(interceptor: MockResponseInterceptor) : WebViewClient() 
             Mode.MIXED -> runBlocking { responder.mockResponseOrNull(request) } ?: super.shouldInterceptRequest(view, request)
             Mode.RECORD -> super.shouldInterceptRequest(view, request)
         }
+    }
+
+    override fun onModeChanged(newMode: Mode) {
+        mode = newMode
     }
 }
