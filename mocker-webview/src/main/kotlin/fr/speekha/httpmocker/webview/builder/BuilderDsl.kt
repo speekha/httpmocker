@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package fr.speekha.httpmocker.webview.builder
 
-import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.okhttp.MockResponseInterceptor
 import fr.speekha.httpmocker.webview.MockWebViewClient
 
-fun MockResponseInterceptor.mockWebViewClient(mode: Mode = Mode.DISABLED): MockWebViewClient =
-    MockWebViewClient(this).apply { this.mode = mode }
+fun MockResponseInterceptor.mockWebViewClient(): MockWebViewClient = MockWebViewClient(this).also {
+    it.mode = mode
+}
