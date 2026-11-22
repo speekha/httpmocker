@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ pluginManagement {
         google()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 
 include(
     ":mocker-core",
@@ -35,5 +38,6 @@ include(
     ":sax-adapter",
     ":tests",
     ":tests-ios",
-    ":demo"
+    ":demo",
+    ":demo-ios"
 )
