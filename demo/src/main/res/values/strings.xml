@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019-2021 David Blanc
+  ~ Copyright 2019-2026 David Blanc
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -27,4 +27,16 @@
     <string name="record_description">Interceptor is recording.\n\nCalls are executed and saved in the device\'s Download directory.</string>
     <string name="call_service_button">Call service</string>
     <string name="open_webview_button">Open WebView (github.com/kotlin)</string>
+    <string name="scenario_tests_button">Tests</string>
+    <string name="scenario_tests_title">Scenario tests</string>
+    <string name="scenario_tests_empty">Tap Run to execute all HttpMocker test scenarios.</string>
+    <string name="run_scenarios_button">Run</string>
+    <string name="back_button">Back</string>
+    <string name="scenario_request">Request</string>
+    <string name="scenario_method">Method</string>
+    <string name="scenario_url">URL</string>
+    <string name="scenario_status">Status</string>
+    <string name="scenario_response_body">Response body</string>
+    <string name="scenario_empty_body">(empty)</string>
+    <string name="scenario_error">Error</string>
 </resources>
