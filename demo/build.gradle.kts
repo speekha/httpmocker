@@ -27,6 +27,7 @@ fun release(version: Int): Int = version
 android {
     namespace = "fr.speekha.httpmocker.demo"
     compileSdk = release(37)
+    compileSdkMinor = 1
 
     sourceSets {
         getByName("main").kotlin.directories.add("src/main/kotlin")
