@@ -16,54 +16,104 @@
 
 package fr.speekha.httpmocker.io
 
-import kotlinx.cinterop.ExperimentalForeignApi
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSTemporaryDirectory
-import platform.Foundation.NSUUID
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalForeignApi::class)
 class IosFileAccessorTest {
 
-    private val fileManager = NSFileManager.defaultManager()
-
     @Test
-    fun `mkdir creates nested directories and succeeds when directory already exists`() {
-        val directory = createTemporaryDirectory("nested")
-        val nested = directory.getFile("first").getFile("second")
+    fun `mkdir creates nested directories and succeeds when directory already exists`() =
+        withTemporaryFolder("nested") { folder ->
+            val nested = folder.getFile("first").getFile("second")
 
-        try {
             nested.mkdir()
             nested.mkdir()
 
             assertTrue(nested.exists())
-        } finally {
-            fileManager.removeItemAtPath(directory.absolutePath, error = null)
         }
+
+    @Test
+    fun `mkdir throws IOException when path is an existing file`() = withTemporaryFolder("file-collision") { folder ->
+        val file = folder.getFile("not-a-directory")
+        file.writeText("content")
+
+        val error = assertFailsWith<IOException> { file.mkdir() }
+
+        assertTrue(error.message?.contains(file.absolutePath) == true)
     }
 
     @Test
-    fun `mkdir throws IOException when path is an existing file`() {
-        val directory = createTemporaryDirectory("file-collision")
-        val file = directory.getFile("not-a-directory")
+    fun `getFile builds nested paths with name and parent`() = withTemporaryFolder("paths") { folder ->
+        val file = folder.getFile("first").getFile("second").getFile("file.json")
 
-        try {
-            file.getWriter().use { it.write(byteArrayOf(1)) }
-
-            val error = assertFailsWith<IOException> { file.mkdir() }
-
-            assertTrue(error.message?.contains(file.absolutePath) ?: false)
-        } finally {
-            fileManager.removeItemAtPath(directory.absolutePath, error = null)
-        }
+        assertEquals("file.json", file.name)
+        assertEquals("${folder.absolutePath}/first/second/file.json", file.absolutePath)
+        assertEquals("${folder.absolutePath}/first/second", file.parentFile?.absolutePath)
     }
 
-    private fun createTemporaryDirectory(name: String): FileAccessor {
-        val directory = createFileAccessor("${NSTemporaryDirectory()}httpmocker-$name-${NSUUID().UUIDString}")
-        fileManager.removeItemAtPath(directory.absolutePath, error = null)
-        directory.mkdir()
-        return directory
+    @Test
+    fun `getFile accepts a relative path containing separators`() = withTemporaryFolder("relative") { folder ->
+        val file = folder.getFile("first/second/file.json")
+
+        assertEquals("${folder.absolutePath}/first/second/file.json", file.absolutePath)
+    }
+
+    @Test
+    fun `written content can be read back`() = withTemporaryFolder("round-trip") { folder ->
+        val file = folder.getFile("file.txt")
+
+        file.writeText("simple content")
+
+        assertTrue(file.exists())
+        assertEquals("simple content", file.getReader().readAsString())
+    }
+
+    @Test
+    fun `multibyte UTF-8 content survives a round trip`() = withTemporaryFolder("utf8") { folder ->
+        val file = folder.getFile("file.txt")
+        val content = "Héllo wörld – 日本語 – 🚀"
+
+        file.writeText(content)
+
+        assertEquals(content, file.getReader().readAsString())
+    }
+
+    @Test
+    fun `empty file is read as an empty string`() = withTemporaryFolder("empty") { folder ->
+        val file = folder.getFile("empty.txt")
+
+        file.writeText("")
+
+        assertTrue(file.exists())
+        assertEquals("", file.getReader().readAsString())
+    }
+
+    @Test
+    fun `writing replaces previous content`() = withTemporaryFolder("overwrite") { folder ->
+        val file = folder.getFile("file.txt")
+
+        file.writeText("first and longer content")
+        file.writeText("second")
+
+        assertEquals("second", file.getReader().readAsString())
+    }
+
+    @Test
+    fun `reading a missing file throws IOException`() = withTemporaryFolder("missing") { folder ->
+        val file = folder.getFile("missing.txt")
+
+        assertFalse(file.exists())
+        assertFailsWith<IOException> { file.getReader() }
+    }
+
+    @Test
+    fun `writing into a missing folder throws IOException`() = withTemporaryFolder("missing-parent") { folder ->
+        val file = folder.getFile("missing-folder").getFile("file.txt")
+
+        assertFailsWith<IOException> { file.writeText("content") }
+        assertFalse(file.exists())
     }
 }

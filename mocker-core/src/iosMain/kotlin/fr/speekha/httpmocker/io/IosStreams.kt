@@ -41,8 +41,12 @@ class IosStreamWriter(
     private val filePath: String
 ) : StreamWriter {
     override fun write(array: ByteArray) {
-        val nsData = array.usePinned { pinned ->
-            NSData.dataWithBytes(pinned.addressOf(0), array.size.toULong())
+        val nsData = if (array.isEmpty()) {
+            NSData()
+        } else {
+            array.usePinned { pinned ->
+                NSData.dataWithBytes(pinned.addressOf(0), array.size.toULong())
+            }
         }
         val success = NSFileManager.defaultManager()
             .createFileAtPath(filePath, contents = nsData, attributes = null)
