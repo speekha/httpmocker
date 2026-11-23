@@ -4,11 +4,11 @@ Tasks identified during the iOS/Kotlin Native implementation review. Work throug
 
 ## High Priority
 
-- [ ] Report iOS directory-creation failures from `IosFileAccessor.mkdir()`.
+- [x] Report iOS directory-creation failures from `IosFileAccessor.mkdir()`.
   - Files: `mocker-core/src/iosMain/kotlin/fr/speekha/httpmocker/io/IosFileAccessor.kt`
-  - Capture the `NSFileManager.createDirectoryAtPath` result and native `NSError`.
-  - Throw `IOException` containing the failed path and useful native error details.
-  - Define and test behavior when the target already exists as a directory or as a file.
+  - `mkdir()` now checks `NSFileManager.createDirectoryAtPath` and throws `IOException` with the failed path.
+  - Added iOS tests for nested creation, repeated creation of an existing directory, and an existing-file collision.
+  - Native `NSError` details are not available through the current Kotlin/Native Foundation binding; improve diagnostics under the later logging task if the binding/API permits it.
 
 - [ ] Define the supported iOS framework distribution model.
   - Files: iOS framework configuration in `mocker-core`, `mocker-ktor`, `kotlinx-adapter`, `custom-adapter`, and publishing documentation.
