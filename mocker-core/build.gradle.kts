@@ -37,12 +37,6 @@ kotlin {
         }
     }
 
-    iosX64 {
-        binaries.framework {
-            baseName = "httpmocker"
-        }
-    }
-
     sourceSets {
         commonMain {
             dependencies {

@@ -37,13 +37,6 @@ kotlin {
         }
     }
 
-    iosX64 {
-        binaries.framework {
-            baseName = frameworkName
-            isStatic = true
-        }
-    }
-
     sourceSets {
         iosMain {
             dependencies {
@@ -70,8 +63,7 @@ val xcframeworkOutputDir = layout.buildDirectory.dir("xcframeworks/HttpMockerDem
 tasks.register<Exec>("assembleXCFramework") {
     dependsOn(
         "linkReleaseFrameworkIosArm64",
-        "linkReleaseFrameworkIosSimulatorArm64",
-        "linkReleaseFrameworkIosX64"
+        "linkReleaseFrameworkIosSimulatorArm64"
     )
 
     doFirst {

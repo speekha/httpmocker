@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,11 +87,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
-
-repositories {
-    // For snapshots versions
-    // maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 dependencies {
