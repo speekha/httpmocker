@@ -28,7 +28,7 @@ or computed dynamically instead. The mocker also allows recording scenarios that
 ### Disclaimer
 
 My experience with iOS being quite old and somehow outdated, and due to the lack of contributor to help implement it,
-the iOS implementation has been mainly vibe coded with Gemini. As such, the code offers no guarantees of being bug free.
+the iOS implementation has been mainly vibe coded. As such, the code offers no guarantees of being bug free.
 The common code is quite extensively tested through the JVM implementation, but the iOS specific parts might contain
 errors that I did not notice (even some of the generated unit tests seem quite pointless and would need to be properly
 completed or refactored). Any help to improve the quality of the iOS version is more than welcome.
