@@ -206,8 +206,14 @@ jobs:
             - build-kotlinx-adapter-{{ .Branch }}-{{ .Revision }}
             - build-mocker-webview-{{ .Branch }}-{{ .Revision }}
       - run:
-          name: Build
-          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:lint --stacktrace
+          name: Build OkHttp flavor
+          command: ./gradlew --no-daemon demo:clean demo:assembleOkhttpRelease -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=512m" --stacktrace
+      - run:
+          name: Build Ktor flavor
+          command: ./gradlew --no-daemon demo:assembleKtorRelease -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=512m" --stacktrace
+      - run:
+          name: Lint
+          command: ./gradlew --no-daemon demo:lint -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=512m" --stacktrace
       - store_artifacts:
           path: demo/build/outputs/apk/
           destination: apks

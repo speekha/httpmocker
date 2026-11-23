@@ -42,7 +42,7 @@ import kotlin.concurrent.AtomicInt
  * Every request is answered with status 200, a `text/plain` body equal to [bodyPrefix] followed by
  * the request path, and an `X-Fake-Network: true` header.
  */
-class FakeNetwork(private val bodyPrefix: String = "network:") : HttpClientEngineFactory<HttpClientEngineConfig> {
+class FakeNetworkEngine(private val bodyPrefix: String = "network:") : HttpClientEngineFactory<HttpClientEngineConfig> {
 
     private val counter = AtomicInt(0)
 

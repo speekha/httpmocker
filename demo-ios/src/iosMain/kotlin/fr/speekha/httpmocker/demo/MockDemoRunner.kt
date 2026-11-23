@@ -217,6 +217,7 @@ class MockDemoRunner {
             followRedirects = false
         }
 
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun runRequest(
         client: HttpClient,
         scenario: String,
