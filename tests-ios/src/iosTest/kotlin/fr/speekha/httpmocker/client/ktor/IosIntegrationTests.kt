@@ -17,7 +17,7 @@
 package fr.speekha.httpmocker.client.ktor
 
 import fr.speekha.httpmocker.Mode
-import fr.speekha.httpmocker.client.ktor.FakeNetwork.Companion.FAKE_NETWORK_HEADER
+import fr.speekha.httpmocker.client.ktor.FakeNetworkEngine.Companion.FAKE_NETWORK_HEADER
 import fr.speekha.httpmocker.io.FileAccessor
 import fr.speekha.httpmocker.io.HttpRequest
 import fr.speekha.httpmocker.io.IOException
@@ -44,7 +44,7 @@ private const val BASE_URL = "http://example.com"
 
 class IosIntegrationTests {
 
-    private val network = FakeNetwork()
+    private val network = FakeNetworkEngine()
 
     // -------------------------------------------------------------------------
     // Static scenarios loaded from a real folder

@@ -17,7 +17,7 @@
 import SwiftUI
 
 @main
-struct iosApp: App {
+struct IosApp: App {
     var body: some Scene {
         WindowGroup {
             MainView()
