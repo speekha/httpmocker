@@ -58,7 +58,7 @@ commands:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble -Pkotlin.commonizer.jvmArgs=-Xmx1g --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -131,7 +131,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble -Pkotlin.commonizer.jvmArgs=-Xmx1g --stacktrace
       - save_cache:
           key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:
