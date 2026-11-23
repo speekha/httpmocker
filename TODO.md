@@ -12,21 +12,19 @@ Tasks identified during the iOS/Kotlin Native implementation review. Work throug
 
 - [x] Define the supported iOS framework distribution model.
   - Decision: the supported channel is the per-target iOS klibs published to Maven. The consuming app's own shared Kotlin module depends on the modules it needs and builds the app's single framework (as `demo-ios` does). No per-combination frameworks are published.
-  - Verified: `mocker-core`, `mocker-ktor`, `kotlinx-adapter` and `custom-adapter` publish klibs for `iosArm64`, `iosSimulatorArm64` and `iosX64`; root module metadata resolves each target, and `mocker-ktor` brings in `mocker-core` transitively.
+  - Verified: `mocker-core`, `mocker-ktor`, `kotlinx-adapter` and `custom-adapter` publish klibs for each iOS target; root module metadata resolves each target, and `mocker-ktor` brings in `mocker-core` transitively.
+  - The `iosX64` target was dropped from all modules (current Xcode no longer runs on Intel Macs). Published targets are `iosArm64` and `iosSimulatorArm64`. This is a breaking change for consumers still declaring `iosX64()`: mention it in the release notes.
 
 - [ ] Follow-ups to the iOS distribution decision.
-  - Document the iOS setup in the README: a shared KMP module depending on `mocker-ktor`, an adapter and the Darwin engine, producing the app framework.
   - Optionally remove the unused `binaries.framework` blocks from `mocker-core`, `mocker-ktor`, `kotlinx-adapter` and `custom-adapter` (frameworks built per module cannot be combined in one app).
   - Add a check that a fresh project can consume the published klibs (the demo uses project dependencies).
   - Optional: one all-inclusive static XCFramework for Swift-only users, to be designed with the Swift facade task.
 
-- [ ] Add iOS integration tests for native file access, static mocks, and recording.
-  - Files: `tests-ios/src/iosTest/`, iOS file-access implementation as needed.
-  - Test `IosFileAccessor.mkdir()`, nested `getFile()` paths, reading, writing, empty files, and multibyte UTF-8 content.
-  - Test static scenario loading from a real writable iOS path.
-  - Test `RECORD` mode writing nested scenario files.
-  - Test read/write/directory-creation failures.
-  - Test actual `DISABLED` and `MIXED` pass-through behavior with a deterministic delegate rather than an external service.
+- [x] Add iOS integration tests for native file access, static mocks, and recording.
+  - `tests-ios/.../io/IosFileAccessorTest.kt`: directories, nested paths, read/write round trips, empty files, multibyte UTF-8, missing-file and missing-folder failures.
+  - `tests-ios/.../client/ktor/IosIntegrationTests.kt`: static scenarios from a temp folder (inline body, body file, 404), `DISABLED`/`MIXED`/`ENABLED` pass-through, `RECORD` writing nested files, replay of recorded files, appended records, and recording failures with `failOnRecordingError` on and off.
+  - `FakeNetworkEngine.kt` replaces the real network as delegate engine, so the tests need no connectivity.
+  - Bug found and fixed: `IosStreamWriter.write()` crashed on empty byte arrays (`addressOf(0)` on an empty pinned array), which also broke recording of empty response bodies.
 
 - [ ] Replace or clarify the cross-platform `NetworkError.exceptionType` contract.
   - Files: `mocker-core/src/commonMain/kotlin/fr/speekha/httpmocker/model/Responses.kt`, `mocker-core/src/iosMain/kotlin/fr/speekha/httpmocker/ClassloaderUtils.kt`.
@@ -79,8 +77,5 @@ Tasks identified during the iOS/Kotlin Native implementation review. Work throug
 
 ## Build And Compatibility
 
-- [ ] Include the Intel iOS Simulator slice in the demo XCFramework, or intentionally remove its build target.
-  - Files: `demo-ios/build.gradle.kts`.
-  - `assembleXCFramework` currently builds `iosX64` but does not pass that framework to `xcodebuild -create-xcframework`.
-  - Either add the `iosX64` framework argument or remove the unused target/task dependency.
-  - Verify the resulting XCFramework works on Apple Silicon and Intel simulator environments supported by the project.
+- [x] Include the Intel iOS Simulator slice in the demo XCFramework, or intentionally remove its build target.
+  - Resolved by removing the `iosX64` target from every module, including `demo-ios` and its `assembleXCFramework` task.
