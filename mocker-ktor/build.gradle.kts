@@ -22,17 +22,8 @@ plugins {
 kotlin {
     jvm {}
 
-    iosArm64 {
-        binaries.framework {
-            baseName = "httpmocker_ktor"
-        }
-    }
-
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = "httpmocker_ktor"
-        }
-    }
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         commonMain {
