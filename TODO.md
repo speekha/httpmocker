@@ -10,12 +10,15 @@ Tasks identified during the iOS/Kotlin Native implementation review. Work throug
   - Added iOS tests for nested creation, repeated creation of an existing directory, and an existing-file collision.
   - Native `NSError` details are not available through the current Kotlin/Native Foundation binding; improve diagnostics under the later logging task if the binding/API permits it.
 
-- [ ] Define the supported iOS framework distribution model.
-  - Files: iOS framework configuration in `mocker-core`, `mocker-ktor`, `kotlinx-adapter`, `custom-adapter`, and publishing documentation.
-  - Decide whether consumers receive one umbrella/static XCFramework or separately linked dynamic frameworks.
-  - If using separate frameworks, export/document transitive framework dependencies such as `mocker-core` from `mocker-ktor`.
-  - Add a consumer sample that builds against the published framework artifacts, not only the demo umbrella framework.
-  - Align the public framework linkage strategy with the static demo framework or explicitly document dynamic embedding/signing requirements.
+- [x] Define the supported iOS framework distribution model.
+  - Decision: the supported channel is the per-target iOS klibs published to Maven. The consuming app's own shared Kotlin module depends on the modules it needs and builds the app's single framework (as `demo-ios` does). No per-combination frameworks are published.
+  - Verified: `mocker-core`, `mocker-ktor`, `kotlinx-adapter` and `custom-adapter` publish klibs for `iosArm64`, `iosSimulatorArm64` and `iosX64`; root module metadata resolves each target, and `mocker-ktor` brings in `mocker-core` transitively.
+
+- [ ] Follow-ups to the iOS distribution decision.
+  - Document the iOS setup in the README: a shared KMP module depending on `mocker-ktor`, an adapter and the Darwin engine, producing the app framework.
+  - Optionally remove the unused `binaries.framework` blocks from `mocker-core`, `mocker-ktor`, `kotlinx-adapter` and `custom-adapter` (frameworks built per module cannot be combined in one app).
+  - Add a check that a fresh project can consume the published klibs (the demo uses project dependencies).
+  - Optional: one all-inclusive static XCFramework for Swift-only users, to be designed with the Swift facade task.
 
 - [ ] Add iOS integration tests for native file access, static mocks, and recording.
   - Files: `tests-ios/src/iosTest/`, iOS file-access implementation as needed.
