@@ -44,7 +44,7 @@ allprojects {
 
 subprojects {
     group = property("GROUP").toString()
-    version = property("VERSION_NAME").toString() + if (System.getProperty("snapshot").toBoolean()) "-SNAPSHOT" else ""
+    version = property("LIBRARY_VERSION").toString() + if (System.getProperty("snapshot").toBoolean()) "-SNAPSHOT" else ""
 }
 
 tasks.register<Delete>("clean") {
