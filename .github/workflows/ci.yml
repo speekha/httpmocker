@@ -1,0 +1,250 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LIBRARY_MODULES: >-
+    mocker-core mocker-okhttp mocker-ktor mocker-webview
+    jackson-adapter gson-adapter moshi-adapter custom-adapter kotlinx-adapter sax-adapter
+
+jobs:
+  build-core:
+    name: Build mocker-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+        with:
+          restore-build-cache: 'false'
+      - name: Build
+        run: ./gradlew mocker-core:assemble --stacktrace
+      - uses: ./.github/actions/save-build-cache
+        with:
+          name: mocker-core
+
+  build-okhttp:
+    name: Build mocker-okhttp
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: mocker-okhttp
+
+  build-ktor:
+    name: Build mocker-ktor
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: mocker-ktor
+
+  build-jackson:
+    name: Build jackson-adapter
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: jackson-adapter
+
+  build-gson:
+    name: Build gson-adapter
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: gson-adapter
+
+  build-moshi:
+    name: Build moshi-adapter
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: moshi-adapter
+
+  build-custom:
+    name: Build custom-adapter
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: custom-adapter
+
+  build-kotlinx:
+    name: Build kotlinx-adapter
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: kotlinx-adapter
+
+  build-sax:
+    name: Build sax-adapter
+    needs: build-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: sax-adapter
+
+  build-webview:
+    name: Build mocker-webview
+    needs: build-okhttp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-module
+        with:
+          module: mocker-webview
+
+  demo:
+    name: Build demo app
+    needs: [build-okhttp, build-ktor, build-jackson, build-kotlinx, build-webview]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+      - name: Build
+        run: ./gradlew demo:assembleDebug --stacktrace
+      - name: Lint
+        run: ./gradlew demo:lintOkhttpDebug demo:lintKtorDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo
+          path: |
+            demo/build/outputs/apk/
+            demo/build/reports/
+
+  libs:
+    name: Gather libraries
+    needs: [build-okhttp, build-ktor, build-jackson, build-gson, build-moshi, build-custom, build-kotlinx, build-sax, build-webview]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+      - name: Restore library outputs from build cache
+        run: ./gradlew $(for m in $LIBRARY_MODULES; do printf ' %s:assemble' "$m"; done) --stacktrace
+      - name: Gather libs
+        run: ./prepareArtifacts.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libs
+          path: build/libs
+
+  test:
+    name: JVM tests
+    needs: [build-okhttp, build-ktor, build-jackson, build-gson, build-moshi, build-custom, build-kotlinx, build-sax, build-webview]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+      - name: Tests
+        run: ./gradlew tests:test demo:test tests:jacocoTestReport --stacktrace
+      - uses: codacy/codacy-coverage-reporter-action@v1
+        if: github.event_name == 'push'
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: tests/build/reports/jacoco/test/jacocoTestReport.xml
+      - uses: codecov/codecov-action@v5
+        if: github.event_name == 'push'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: tests/build/reports/jacoco/test/jacocoTestReport.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: |
+            tests/build/reports/
+            tests/build/test-results/
+            demo/build/test-results/
+
+  quality:
+    name: Detekt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+        with:
+          restore-build-cache: 'false'
+      - name: Check quality
+        run: ./gradlew detekt --stacktrace
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: detekt-reports
+          path: '*/build/reports/detekt/'
+
+  ios:
+    name: iOS build and tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+        with:
+          restore-build-cache: 'false'
+      - name: iOS simulator tests
+        run: ./gradlew :tests-ios:iosSimulatorArm64Test --stacktrace
+      - name: Build iOS demo framework
+        run: ./gradlew :demo-ios:linkDebugFrameworkIosSimulatorArm64 --stacktrace
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-test-reports
+          path: tests-ios/build/reports/
+
+  publish-snapshot:
+    name: Publish snapshot
+    needs: [test, quality, ios, demo]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+      - name: Publish
+        run: ./publishSnapshot.sh "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" "$SIGNING_KEY_ID" "$SIGNING_KEY_PASSPHRASE" "$SIGNING_KEYRING"
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_KEY_PASSPHRASE: ${{ secrets.SIGNING_KEY_PASSPHRASE }}
+          SIGNING_KEYRING: ${{ secrets.SIGNING_KEYRING }}
+
+  publish-release:
+    name: Publish release
+    needs: [test, quality, ios, demo]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-build
+      - name: Publish
+        run: ./publish.sh "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" "$SIGNING_KEY_ID" "$SIGNING_KEY_PASSPHRASE" "$SIGNING_KEYRING"
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_KEY_PASSPHRASE: ${{ secrets.SIGNING_KEY_PASSPHRASE }}
+          SIGNING_KEYRING: ${{ secrets.SIGNING_KEYRING }}

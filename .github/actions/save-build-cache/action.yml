@@ -1,0 +1,29 @@
+name: Save build cache
+description: Uploads the Gradle build cache entries created by the current job so that downstream jobs of the same run can reuse them
+
+inputs:
+  name:
+    description: Unique suffix of the artifact holding the build cache entries
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Collect new build cache entries
+      shell: bash
+      run: |
+        staging="$RUNNER_TEMP/build-cache-upload"
+        mkdir -p "$staging"
+        cd ~/.gradle/caches/build-cache-1
+        find . -maxdepth 1 -type f | sed 's|^\./||' | grep -v -e '\.properties$' -e '\.lock$' | sort > "$RUNNER_TEMP/build-cache-after.txt"
+        comm -13 "$RUNNER_TEMP/build-cache-before.txt" "$RUNNER_TEMP/build-cache-after.txt" | while read -r entry; do
+          cp "$entry" "$staging/"
+        done
+        echo "$(ls "$staging" | wc -l) new build cache entries"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: build-cache-${{ inputs.name }}
+        path: ${{ runner.temp }}/build-cache-upload
+        retention-days: 1
+        if-no-files-found: ignore
+        overwrite: true

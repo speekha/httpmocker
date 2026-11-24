@@ -1,0 +1,18 @@
+name: Build module
+description: Assembles a single Gradle module, reusing the build cache entries of upstream jobs and publishing its own for downstream jobs
+
+inputs:
+  module:
+    description: Name of the Gradle module to assemble
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup-build
+    - name: Build
+      shell: bash
+      run: ./gradlew ${{ inputs.module }}:assemble --stacktrace
+    - uses: ./.github/actions/save-build-cache
+      with:
+        name: ${{ inputs.module }}

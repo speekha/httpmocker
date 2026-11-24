@@ -5,7 +5,7 @@
 [![Kotlin](https://img.shields.io/badge/kotlin-2.4.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![HacktoberFest](https://badgen.net/badge/hacktoberfest/friendly)](https://hacktoberfest.digitalocean.com/)
 
-[![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
+[![CI](https://github.com/speekha/httpmocker/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/speekha/httpmocker/actions/workflows/ci.yml?query=branch%3Adevelop)
 [![CodeFactor](https://www.codefactor.io/repository/github/speekha/httpmocker/badge)](https://www.codefactor.io/repository/github/speekha/httpmocker)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/754e2a65060a48c9bfc580a36063d206)](https://app.codacy.com/gh/speekha/httpmocker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/754e2a65060a48c9bfc580a36063d206)](https://app.codacy.com/gh/speekha/httpmocker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)

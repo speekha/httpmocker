@@ -79,7 +79,7 @@ Supports JVM, Android, and iOS platforms.
 ## Contribution Workflow
 - `develop` is the main development branch; `main` holds releases
 - Create feature branches from `develop` and open pull requests against `develop`
-- CircleCI (`.circleci/config.yml`) runs on `develop` and `main`; it must pass before merging
+- GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request, including iOS simulator tests on a macOS runner; it must pass before merging. Snapshots are published from `develop` and releases from `main`.
 - Follow the existing commit message style (see recent history)
 
 ## Important Notes

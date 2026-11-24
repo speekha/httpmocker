@@ -1,10 +1,7 @@
 # TODO
 
-- [ ] Migrate CI from CircleCI to GitHub Actions.
-  - Why: CircleCI only provides Linux machines on this plan, so the iOS simulator tests (`./gradlew :tests-ios:iosSimulatorArm64Test`) never run in CI, and iOS builds on Linux run close to the 4 GB memory limit (`commonizeNativeDistribution` was killed with exit code 137). GitHub Actions is free for public repositories, including macOS runners.
-  - Port the existing jobs from `.circleci/config.yml`: dependency download, per-module builds, demo build and lint, JVM tests with JaCoCo, detekt, coverage upload (Codecov, Codacy), snapshot publishing on `develop` and release publishing on `main`.
-  - Add a macOS job that builds the iOS targets and runs the iOS simulator tests.
-  - Move the publishing secrets (Maven Central credentials, signing key) to GitHub repository secrets.
-  - Remove the `-Pkotlin.commonizer.jvmArgs=-Xmx1g` workaround if the iOS builds move to macOS runners.
-  - Revisit the memory workarounds in the `build_demo` job (one Gradle run per flavor, in-process Kotlin compiler, `-Xmx2560m`) and `checkReleaseBuilds = false` in `demo/build.gradle.kts`, which were only needed to fit in CircleCI's 4 GB.
-  - Update the CI badge in `README.md` and the CircleCI mentions in `AGENTS.md`, then remove `.circleci/`.
+- [ ] Finish the migration from CircleCI to GitHub Actions.
+  - Done: `.github/workflows/ci.yml` replaces `.circleci/` (removed). It runs on every push and pull request with the same job graph as CircleCI (`mocker-core`, then one job per module, `mocker-webview` after `mocker-okhttp`; Gradle build cache entries are passed between jobs as artifacts via `.github/actions/`): library builds (+ `libs` artifact), demo debug build and lint, JVM tests with JaCoCo and coverage upload, detekt, iOS simulator tests and iOS demo framework on a macOS runner, snapshot publishing on `develop` and release publishing on `main`. README badge and `AGENTS.md` updated.
+  - Add the repository secrets in GitHub (Settings → Secrets and variables → Actions): `SONATYPE_USERNAME`, `SONATYPE_PASSWORD`, `SIGNING_KEY_ID`, `SIGNING_KEY_PASSPHRASE`, `SIGNING_KEYRING`, `CODACY_PROJECT_TOKEN` (same values as in the CircleCI project settings), and `CODECOV_TOKEN` (from the Codecov dashboard).
+  - Once the workflow is green, revisit the CircleCI memory workarounds, which GitHub's runners should not need: `-Pkotlin.commonizer.jvmArgs=-Xmx1g` in `publish.sh`/`publishSnapshot.sh` (and `.bat`), `checkReleaseBuilds = false` in `demo/build.gradle.kts`, and building the demo in debug only (the release build could come back to CI).
+  - Disable the project in CircleCI's dashboard once this branch is merged, so it stops reporting a missing configuration.

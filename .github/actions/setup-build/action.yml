@@ -1,0 +1,34 @@
+name: Setup build
+description: Installs Java and Gradle, enables the Gradle build cache and seeds it with the entries produced by upstream jobs of the current run
+
+inputs:
+  restore-build-cache:
+    description: Whether to download the build cache entries produced by upstream jobs of the current run
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 21
+    - uses: gradle/actions/setup-gradle@v4
+    - name: Enable Gradle build cache
+      shell: bash
+      run: |
+        mkdir -p ~/.gradle/caches/build-cache-1
+        echo "org.gradle.caching=true" >> ~/.gradle/gradle.properties
+    - name: Download upstream build cache entries
+      if: inputs.restore-build-cache == 'true'
+      uses: actions/download-artifact@v4
+      with:
+        pattern: build-cache-*
+        merge-multiple: true
+        path: ~/.gradle/caches/build-cache-1
+    - name: Record existing build cache entries
+      shell: bash
+      run: |
+        cd ~/.gradle/caches/build-cache-1
+        find . -maxdepth 1 -type f | sed 's|^\./||' | sort > "$RUNNER_TEMP/build-cache-before.txt"
