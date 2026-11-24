@@ -217,7 +217,7 @@ jobs:
 
   publish-snapshot:
     name: Publish snapshot
-    needs: [test, quality, ios, demo]
+    needs: [test, quality, ios]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
@@ -234,7 +234,7 @@ jobs:
 
   publish-release:
     name: Publish release
-    needs: [test, quality, ios, demo]
+    needs: [test, quality, ios]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

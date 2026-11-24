@@ -25,8 +25,32 @@ runs:
       uses: actions/download-artifact@v4
       with:
         pattern: build-cache-*
-        merge-multiple: true
-        path: ~/.gradle/caches/build-cache-1
+        path: ${{ runner.temp }}/build-cache-download
+    - name: Merge upstream build cache entries
+      if: inputs.restore-build-cache == 'true'
+      shell: bash
+      run: |
+        download="$RUNNER_TEMP/build-cache-download"
+        [ -d "$download" ] || exit 0
+        cache=~/.gradle/caches/build-cache-1
+        merged=0
+        skipped=0
+        for entry in "$download"/*/*; do
+          [ -f "$entry" ] || continue
+          name=$(basename "$entry")
+          if [ -e "$cache/$name" ]; then
+            continue
+          fi
+          if gzip -t "$entry" 2>/dev/null; then
+            cp "$entry" "$cache/$name"
+            merged=$((merged + 1))
+          else
+            echo "::warning::Skipping corrupted build cache entry $name from $(basename "$(dirname "$entry")")"
+            skipped=$((skipped + 1))
+          fi
+        done
+        echo "$merged build cache entries merged, $skipped corrupted entries skipped"
+        rm -rf "$download"
     - name: Record existing build cache entries
       shell: bash
       run: |
