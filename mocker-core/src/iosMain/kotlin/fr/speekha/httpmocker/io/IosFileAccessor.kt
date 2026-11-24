@@ -45,12 +45,15 @@ class IosFileAccessor(path: String) : FileAccessor {
 
     override fun mkdir() {
         @OptIn(ExperimentalForeignApi::class)
-        fileManager.createDirectoryAtPath(
-            absolutePath,
-            withIntermediateDirectories = true,
-            attributes = null,
-            error = null
-        )
+        if (!fileManager.createDirectoryAtPath(
+                absolutePath,
+                withIntermediateDirectories = true,
+                attributes = null,
+                error = null
+            )
+        ) {
+            throw IOException("Unable to create directory: $absolutePath")
+        }
     }
 
     override fun getReader(): StreamReader {
@@ -60,4 +63,5 @@ class IosFileAccessor(path: String) : FileAccessor {
     }
 
     override fun getWriter(): IosStreamWriter = IosStreamWriter(absolutePath)
+
 }

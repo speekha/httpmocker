@@ -2,7 +2,7 @@
 
 ![Maven Central Version](https://img.shields.io/maven-central/v/fr.speekha.httpmocker/mocker-core)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.3.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.4.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![HacktoberFest](https://badgen.net/badge/hacktoberfest/friendly)](https://hacktoberfest.digitalocean.com/)
 
 [![CircleCI](https://circleci.com/gh/speekha/httpmocker/tree/develop.svg?style=shield)](https://circleci.com/gh/speekha/httpmocker/tree/develop)
@@ -28,7 +28,7 @@ or computed dynamically instead. The mocker also allows recording scenarios that
 ### Disclaimer
 
 My experience with iOS being quite old and somehow outdated, and due to the lack of contributor to help implement it,
-the iOS implementation has been mainly vibe coded with Gemini. As such, the code offers no guarantees of being bug free.
+the iOS implementation has been mainly vibe coded. As such, the code offers no guarantees of being bug free.
 The common code is quite extensively tested through the JVM implementation, but the iOS specific parts might contain
 errors that I did not notice (even some of the generated unit tests seem quite pointless and would need to be properly
 completed or refactored). Any help to improve the quality of the iOS version is more than welcome.
@@ -36,7 +36,7 @@ completed or refactored). Any help to improve the quality of the iOS version is 
 ## Current Version
 
 ```gradle
-httpmocker_version = '2.1.0'
+httpmocker_version = '2.1.1'
 ```
 
 Current version supports JVM, Android, and iOS platforms. It is stable for production use.
@@ -48,18 +48,18 @@ Current version supports JVM, Android, and iOS platforms. It is stable for produ
 For stable versions, check that you have the `mavenCentral` repository.
 
 ```gradle
-// Add Jcenter to your repositories if needed
+// Add Maven Central to your repositories if needed
 repositories {
 	mavenCentral()
 }
 ```
 
-For Snapshot versions, check that you have Sonatype's snapshot repository.
+For Snapshot versions, check that you have the Maven Central snapshot repository.
 
 ```gradle
-// Add oss.sonatype.org to your repositories if needed
+// Add the Maven Central snapshot repository if needed
 repositories {
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url 'https://central.sonatype.com/repository/maven-snapshots/' }
 }
 ```
 
@@ -78,16 +78,16 @@ You can add the dependency to your `build.gradle` by adding on of the following 
 ```gradle
 // Core module: you don't need to add it explicitly to your gradle (it will be included as a transitive dependency 
 // of the other modules)
-implementation "fr.speekha.httpmocker:mocker-core:2.1.0"
+implementation "fr.speekha.httpmocker:mocker-core:2.1.1"
 
 // Handles mocks for OkHttp (JVM and Android only)
-implementation "fr.speekha.httpmocker:mocker-okhttp:2.1.0"
+implementation "fr.speekha.httpmocker:mocker-okhttp:2.1.1"
 
 // Handles mocks for Ktor (JVM, Android, and iOS)
-implementation "fr.speekha.httpmocker:mocker-ktor:2.1.0"
+implementation "fr.speekha.httpmocker:mocker-ktor:2.1.1"
 
 // Handles mocks for Android WebView (Android only, requires mocker-okhttp)
-implementation "fr.speekha.httpmocker:mocker-webview:2.1.0"
+implementation "fr.speekha.httpmocker:mocker-webview:2.1.1"
 ```
 
 Currently, there are six possible options that are provided for parsing, based on some of the 
@@ -107,22 +107,22 @@ corresponding `implementation` line in your gradle file:
 
 ```gradle
 // Parses JSON scenarios using Jackson
-implementation "fr.speekha.httpmocker:jackson-adapter:2.1.0"
+implementation "fr.speekha.httpmocker:jackson-adapter:2.1.1"
 
 // Parses JSON scenarios using Gson
-implementation "fr.speekha.httpmocker:gson-adapter:2.1.0"
+implementation "fr.speekha.httpmocker:gson-adapter:2.1.1"
 
 // Parses JSON scenarios using Moshi
-implementation "fr.speekha.httpmocker:moshi-adapter:2.1.0"
+implementation "fr.speekha.httpmocker:moshi-adapter:2.1.1"
 
 // Parses JSON scenarios using Kotlinx Serialization
-implementation "fr.speekha.httpmocker:kotlinx-adapter:2.1.0"
+implementation "fr.speekha.httpmocker:kotlinx-adapter:2.1.1"
 
 // Parses JSON scenarios using a custom JSON parser
-implementation "fr.speekha.httpmocker:custom-adapter:2.1.0"
+implementation "fr.speekha.httpmocker:custom-adapter:2.1.1"
 
 // Parses XML scenarios using a custom SAX parser
-implementation "fr.speekha.httpmocker:sax-adapter:2.1.0"
+implementation "fr.speekha.httpmocker:sax-adapter:2.1.1"
 ```
 
 If none of those options suit your needs, you can also provide your own implementation of the `Mapper` class. You can 
@@ -131,8 +131,8 @@ also bypass that dependency altogether if you don't plan on using static mocks o
 #### External dependencies
 
 * HttpMocker is a mocking library for third party HTTP clients. It depends on:
-  * **OkHttp** (v5.3.2 for JVM/Android) when using mocker-okhttp
-  * **Ktor** (v2.3.13 for all platforms) when using mocker-ktor
+  * **OkHttp** (v5.5.1 for JVM/Android) when using mocker-okhttp
+  * **Ktor** (v3.6.1 for all platforms) when using mocker-ktor
 * It also uses **SLF4J API** for logging (JVM only).
 * JSON parsers depend on their respective external libraries: Jackson, Gson, Moshi, or KotlinX serialization (the latter works on all platforms).
 
@@ -266,13 +266,72 @@ on JVM, Android, and iOS platforms:
         }
 
         // Here is the rest of your standard HTTP Configuration
-        install(JsonFeature) {
-            serializer = KotlinxSerializer()
+        install(ContentNegotiation) {
+            json()
         }
         expectSuccess = false
         followRedirects = false
     }
 ```
+
+The first parameter of `mockableHttpClient` is the engine used for actual network calls (in `DISABLED`, `MIXED` and 
+`RECORD` modes). Any Ktor engine available on your target can be used, for instance `Darwin` on iOS.
+
+### Using HttpMocker on iOS
+
+HttpMocker is published for iOS as Kotlin Multiplatform libraries (klibs for `iosArm64` and `iosSimulatorArm64`), not 
+as a prebuilt XCFramework. The intended setup is the usual one for KMP apps: your shared Kotlin module depends on the 
+HttpMocker modules it needs, and that module builds the single framework used by your Xcode project. This way, you 
+choose your adapter and engine freely, and everything ends up in one framework.
+
+*NB: The `iosX64` target (iOS Simulator on Intel Macs) is not supported, since current Xcode versions no longer run on 
+Intel Macs. If your shared module still declares `iosX64()`, remove it to be able to resolve HttpMocker.*
+
+```kotlin
+kotlin {
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation("fr.speekha.httpmocker:mocker-ktor:2.1.1")
+            implementation("fr.speekha.httpmocker:kotlinx-adapter:2.1.1")
+        }
+        iosMain.dependencies {
+            implementation("io.ktor:ktor-client-darwin:<ktor version>")
+        }
+    }
+}
+```
+
+Static scenarios can be shipped in the app bundle. In Xcode, add your scenario folder as a **folder reference** (not as a 
+group) so that its directory structure is kept, then pass its path to your shared code and load the files with 
+`createFileAccessor`. Since the app bundle is read-only, recorded scenarios need to go to a writable folder, such as 
+the app's `Documents` directory:
+
+```kotlin
+fun buildClient(scenarioFolder: String, recordFolder: String) = mockableHttpClient(Darwin) {
+    mock {
+        decodeScenarioPathWith(MirrorPathPolicy("json"))
+        loadFileWith { path ->
+            createFileAccessor("$scenarioFolder/$path").takeIf { it.exists() }?.getReader()
+        }
+        parseScenariosWith(KotlinxMapper())
+        recordScenariosIn(recordFolder)
+        setMode(ENABLED)
+    }
+}
+```
+
+```swift
+let scenarioFolder = Bundle.main.url(forResource: "mocks", withExtension: nil)!.path
+let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+let recordFolder = documents.appendingPathComponent("recorded").path
+```
+
+Note that the Kotlin builder (`mockableHttpClient` and its configuration lambdas) cannot be called directly from Swift. 
+Configure the client in your shared Kotlin code and expose whatever your app needs (for instance, a method to change 
+the mode) through a small Kotlin class. The `demo-ios` app shows an example of this with its `GithubDemo` class.
 
 ### General use
 
@@ -497,6 +556,9 @@ The corresponding XML version would go like this:
 </scenarios>
 ```
 In that case, the mocker will try to instantiate an exception matching the type declared in your scenario.
+
+*NB: On iOS, exception types cannot be instantiated from their name. Error scenarios are thrown as a 
+`RuntimeException`, whose message contains the type and message declared in the scenario.*
 
 ## Author
 

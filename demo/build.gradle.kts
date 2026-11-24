@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ fun release(version: Int): Int = version
 android {
     namespace = "fr.speekha.httpmocker.demo"
     compileSdk = release(37)
+    compileSdkMinor = 1
 
     sourceSets {
         getByName("main").kotlin.directories.add("src/main/kotlin")
@@ -82,16 +83,15 @@ android {
         compose = true
     }
 
+    lint {
+        checkReleaseBuilds = false
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
-
-repositories {
-    // For snapshots versions
-    // maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 dependencies {

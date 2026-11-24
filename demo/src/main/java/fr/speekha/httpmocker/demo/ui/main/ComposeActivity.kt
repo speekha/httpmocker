@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
@@ -45,6 +46,7 @@ import fr.speekha.httpmocker.demo.model.onSuccess
 import fr.speekha.httpmocker.demo.model.resultOf
 import fr.speekha.httpmocker.demo.service.GithubApiEndpoints
 import fr.speekha.httpmocker.demo.ui.MockerWrapper
+import fr.speekha.httpmocker.demo.ui.scenarios.ScenarioTestsActivity
 import fr.speekha.httpmocker.demo.ui.theme.DemoTheme
 import fr.speekha.httpmocker.demo.ui.theme.mediumPadding
 import fr.speekha.httpmocker.getLogger
@@ -82,6 +84,11 @@ class ComposeActivity : ComponentActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.app_name)) },
+                    actions = {
+                        TextButton(onClick = { ScenarioTestsActivity.start(this@ComposeActivity) }) {
+                            Text(stringResource(R.string.scenario_tests_button))
+                        }
+                    }
                 )
             }
         ) { paddingValues ->

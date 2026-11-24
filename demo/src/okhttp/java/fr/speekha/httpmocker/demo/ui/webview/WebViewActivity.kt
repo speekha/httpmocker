@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 David Blanc
+ * Copyright 2019-2026 David Blanc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,20 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import fr.speekha.httpmocker.Mode
 import fr.speekha.httpmocker.demo.R
-import fr.speekha.httpmocker.webview.MockWebViewClient
 import org.koin.android.ext.android.inject
 
 class WebViewActivity : AppCompatActivity() {
 
-    private val webViewClient: MockWebViewClient by inject()
+    private val webViewClient: WebViewClient by inject()
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
-
-        val mode = intent.getSerializableExtra(EXTRA_MODE) as? Mode ?: Mode.DISABLED
-        webViewClient.mode = mode
-
         findViewById<WebView>(R.id.webview).apply {
             settings.javaScriptEnabled = true
             webViewClient = this@WebViewActivity.webViewClient

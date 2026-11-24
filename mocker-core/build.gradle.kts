@@ -25,23 +25,8 @@ kotlin {
         }
     }
 
-    iosArm64 {
-        binaries.framework {
-            baseName = "httpmocker"
-        }
-    }
-
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = "httpmocker"
-        }
-    }
-
-    iosX64 {
-        binaries.framework {
-            baseName = "httpmocker"
-        }
-    }
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         commonMain {

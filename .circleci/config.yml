@@ -3,7 +3,7 @@ version: 2.1
 references:
   container_config: &container_config
     docker:
-      - image: cimg/android:2026.03
+      - image: cimg/android:2026.11
 
     working_directory: ~/data
 
@@ -58,7 +58,7 @@ commands:
             - build-mocker-core-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble --stacktrace
+          command: ./gradlew --no-daemon << parameters.module >>:clean << parameters.module >>:assemble -Pkotlin.commonizer.jvmArgs=-Xmx1g --stacktrace
       - save_cache:
           key: build-<< parameters.module >>-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -131,7 +131,7 @@ jobs:
       - restore_sources_and_gradle
       - run:
           name: Build
-          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble --stacktrace
+          command: ./gradlew --no-daemon mocker-core:clean mocker-core:assemble -Pkotlin.commonizer.jvmArgs=-Xmx1g --stacktrace
       - save_cache:
           key: build-mocker-core-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -207,7 +207,10 @@ jobs:
             - build-mocker-webview-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Build
-          command: ./gradlew --no-daemon demo:clean demo:assembleRelease demo:lint --stacktrace
+          command: ./gradlew --no-daemon demo:clean demo:assembleDebug -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=512m" --stacktrace
+      - run:
+          name: Lint
+          command: ./gradlew --no-daemon demo:lintOkhttpDebug demo:lintKtorDebug -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=512m" --stacktrace
       - store_artifacts:
           path: demo/build/outputs/apk/
           destination: apks

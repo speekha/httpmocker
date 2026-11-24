@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2019-2021 David Blanc
+# Copyright 2019-2026 David Blanc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-./gradlew clean mocker-core:publishToMavenLocal mocker-okhttp:publishToMavenLocal mocker-ktor:publishToMavenLocal jackson-adapter:publishToMavenLocal gson-adapter:publishToMavenLocal moshi-adapter:publish custom-adapter:publishToMavenLocal kotlinx-adapter:publishToMavenLocal sax-adapter:publishToMavenLocal
+./gradlew clean mocker-core:publishToMavenLocal mocker-okhttp:publishToMavenLocal mocker-ktor:publishToMavenLocal mocker-webview:publishToMavenLocal jackson-adapter:publishToMavenLocal gson-adapter:publishToMavenLocal moshi-adapter:publishToMavenLocal custom-adapter:publishToMavenLocal kotlinx-adapter:publishToMavenLocal sax-adapter:publishToMavenLocal
